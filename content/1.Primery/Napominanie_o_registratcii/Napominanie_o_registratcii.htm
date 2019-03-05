@@ -1,0 +1,67 @@
+<p>Скрипт написан для сайтов, агрессивно навязывающих регистрацию своим пользователям, в том числе, и работающим на Ucoz. С
+этим скриптом гость вашего сайта никогда не забудет зарегистрироваться или войти под своей учетной записью.</p>
+
+<p>Скрипт легко адаптируется под любую CMS. Для этого нужно передать в глобальную переменную <b>GR_ID</b> номер группы пользователя из API конкретной CMS до запуска самого скрипта.
+	<br>
+</p>
+<p>Это напоминание о регистрации будет выходить через заданный Вами промежуток времени. Окошко с напоминанием будет появляться
+	в разных местах экрана, что не позволит пользователю однообразно кликать мышью в одном и том же месте для его закрытия.</p>
+
+<p>Но, как разработчик, я настоятельно не рекомендую обращаться со своими пользователями подобным образом. А данный скрипт стоит
+	рассматривать лишь как абстрактный пример подобной реализации.
+	<br>
+</p>
+
+
+
+<div id="guest_code">
+	<script type="text/javascript">
+	'use strict';
+	var GR_ID = 0;
+
+	window.Guest = {
+		__proto__: null,
+		delay: 5,
+		message: 'Уважаемый Гость!<hr>Если вы зарегистрированы на сайте - войдите, пожалуйста, под своей учетной записью, если нет - пройдите процедуру <a href="#"><b>регистрации</b></a>.',
+
+		no: function () {
+			this.parentNode.removeChild(this); Guest.D = null;
+		},
+
+		start: function (delay) {
+			delay = delay || this.delay;
+			if (GR_ID == 0) {
+				this.Int = setInterval(Guest.init.bind(this), delay * 1000)
+			}
+		},
+
+		init: function () {
+			if (!!Guest.D) return;
+			Guest.D = document.createElement('div');
+			Guest.D.id = 'guest';
+			// Определяем любые стили блока
+			Guest.D.style.cssText = "width:250px; color:#000; background: linear-gradient(#ccc, #eee, #fff, #ddd) ; border:2px ridge #A3BAE9; position: fixed; top:20%;left:50%; padding:15px; line-height:1.2; letter-spacing: .1em; cursor:default; font-size:16px; z-index:10000";
+			Guest.D.title = "Закрыть";
+
+			// Определяем содержимое блока
+			Guest.D.innerHTML = this.message;
+			document.body.appendChild(Guest.D);
+
+			Guest.D.style.left = Math.random() * 60 + 10 + '%';
+			Guest.D.style.top = Math.random() * 60 + 10 + '%';
+
+			Guest.D.onclick = Guest.no;
+		}
+	}
+	</script>
+</div>
+
+<p>
+	<input class="button" value="Запустить" onclick="if (this.value=='Запустить') {Guest.start(3);this.value='Остановить'; } else { clearInterval(Guest.Int); Guest.no.call(Guest.D);  this.value='Запустить'; }"
+	 type="button">
+</p>
+
+<div>
+	<h5>Исходный код:</h5>
+	<pre><code for="#guest_code"></code></pre>
+</div>

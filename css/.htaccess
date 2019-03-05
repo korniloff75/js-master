@@ -1,0 +1,38 @@
+<IfModule authz_core_module>
+# Require all denied
+# Require all granted
+
+Require local
+# Require not host urib.info
+
+<RequireAll>
+    Require all granted
+    Require not host urib.info
+</RequireAll>
+
+# Require ip 127.0.0. 178.57.217. 104.27.133. 185.117.153. 94.142.141
+
+</IfModule>
+
+
+<IfModule !authz_core_module>
+order deny,allow
+deny from all
+Allow from js-master kpa-ing
+Allow from 127.0.0. 178.57.217. 185.117.153.
+</IfModule>
+
+
+
+### OLD ###
+
+# ? ???? ?hostweek
+#<FilesMatch "\.(js|php)$">
+#SetHandler application/x-httpd-php
+#</FilesMatch>
+
+# Compress code
+#AddCharset utf-8 .js
+<ifModule mod_deflate.c>
+# AddOutputFilterByType DEFLATE text/javascript application/javascript application/x-javascript
+</ifModule>

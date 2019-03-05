@@ -1,0 +1,98 @@
+<h2>Условие</h2>
+<p>Дан массив, состоящий из объектов javascript. Каждый из объектов имеет свойство <b>ll</b> типа int. Другие свойства объектов могут быть любыми и к задаче не относятся.</p>
+<p>Необходимо отсортировать обекты в массиве таким образом, чтобы их свойства <b>ll</b> располагались в порядке убывания их значений.</p>
+
+
+<h2>Решение</h2>
+
+<h3>Сортировка по числовым значениям свойств</h3>
+
+<div id="prim">
+	<div id=output class=result></div>
+	<button onclick="displayRes(table, document.getElementById('output'));">Сортировать по ll</button>
+
+	<script>
+		'use strict';
+		var table = [
+			{ ll: 5, ss: 10 },
+			{ ll: 55, ss: 10 , aa:25},
+			{ ll: 100, ss: 10, aa:{a:1,b:2} },
+			{ ll: 70, ss: 10 }
+		];
+
+		var table1= Object.assign([], table);
+
+		// Решение задачи
+		table.sort(function (a, b) {
+			return a.ll < b.ll
+		});
+		// /Решение задачи
+
+
+		// Рекурсивный листинг объекта
+		function printObj (obj) {
+			var o='<br>{ ';
+			for (var key in obj) {
+				o += key + ' : ';
+				if(obj[key] instanceof Object) {
+					o += printObj(obj[key]) ;
+					continue;
+				}
+				if (obj.hasOwnProperty(key)) {
+					o += obj[key] + ', ';
+				}
+			}
+			return o + ' }';
+		}
+
+		// Вывод результата
+		function displayRes (table, output) {
+			output.innerHTML= '';
+
+			table.forEach(function(i) {
+				output.innerHTML+= printObj(i) ;
+			});
+		}
+	</script>
+</div>
+
+
+<script>
+displayRes(table1, document.getElementById('output'));
+</script>
+
+<h4>Исходный код:</h4>
+<pre><code for="#prim"></code></pre>
+
+
+<h3>Сортировка по текстовым значениям свойств</h3>
+
+<p>В примере ниже приведен пример реализации сортировки по свойству <b>name</b>. Впрочем, с минимальной доработкой можно организовать сортировку по любому другому свойству объекта.</p>
+
+<div id="prim2">
+	<div id=output2 class=result></div>
+	<button onclick="displayRes(table2, document.getElementById('output2'));">Сортировать по name</button>
+
+	<script>
+		var table2 = [
+			{"name": "Terry", "age": 20, "city": "England"},
+			{"name": "Drogba", "age": 15, "city": "Cote Divuar"},
+			{"name": "Richard", "age": 19, "city": "Colorado"},
+			{"name": "Lampard", "age": 18, "city": "England"},
+			{"name": "Fritz", "age": 16, "city": "Doichland"},
+		];
+		var table1= Object.assign([], table2);
+
+		table2.sort(function (a, b) {
+			return a.name < b.name
+		});
+
+	</script>
+</div>
+
+<h4>Исходный код:</h4>
+<pre><code for="#prim2"></code></pre>
+
+<script>
+displayRes(table1, document.getElementById('output2'));
+</script>

@@ -1,0 +1,60 @@
+<div>
+	<button id="enableCec" class="button" onclick="Cecutient.Init();">
+		версия сайта для слабовидящих
+	</button>
+</div>
+
+<div>
+	<p>На самом деле я немного легкомысленно назвал версию, добавив к ней мажорный номер. На этой странице представлена модификация <a href="/<?=Path::parentFolder(\H::$Dir )?>Lite" title="Версия для слабовидящих LITE" target="_blank">версии LITE</a>, выложенной в этом же разделе. Версия абсолютно та же, поэтому все инструкции по установке можно посмотреть на её оригинальной странице по этой ссылке.</p>
+	<p>Данная модификация демонстрирует всю легкость перестройки функционала и адаптации дизайна скрипта практически под любые условия.</p>
+	<p>Ниже приведен пример адаптационных настроек, примененных в этой модификации скрипта. Он должен быть интересен всем, кто заказал версию LITE себе на сайт.</p>
+</div>
+
+<div id="codePanel">
+	<div id="CECpanel" hidden>
+		<div id="fontSize">
+			<span class=min700>Размер шрифта: </span>
+		</div>
+		<div class="color">
+			<span class=min700>Цветовая схема: </span><i class="c1">A</i><i class="c2">A</i><i  class="c3">A</i>
+		</div>
+		<i class="toExit">Обычная версия</i>
+	</div>
+</div>
+
+
+<h5>HTML + Javascript код:</h5>
+<h6>Блок новой панели</h6>
+<pre><code for="#codePanel">
+</code></pre>
+
+<h6>Подключаем скрипты.</h6>
+<pre><code saldom=noLib>
+	<!-- Пути изменить на свои. -->
+	<script src="/<?=\H::$Dir ?>assets/KFF_Lite.min.js" type="text/javascript" charset="utf-8" ant="no"></script>
+	<script src="/<?=\H::$Dir ?>assets/cecLite.js" type="text/javascript" charset="utf-8"></script>
+
+	<script type="text/javascript">
+	"use strict";
+	// Настройки скрипта
+	Object.assign(Cecutient, {
+		//== Путь к директории со скриптом
+		path: '/<?=\H::$Dir ?>assets/',
+		//== Определяем панель по её селектору
+		PU: _K.G('#CECpanel'),
+		//== Определяем файл стилей, находящийся в директории скрипта
+		mainStyle: 'allstyles-2.css'
+	});
+
+	//== Определяем столько вариантов размеров шрифта, сколько необходимо
+	Cecutient.v.fs= {
+		1:{fontSize:'14px',lineHeight: '30px'},
+		2:{fontSize:'18px',lineHeight: '35px'},
+		3:{fontSize:'22px',lineHeight: '40px'},
+		4:{fontSize:'26px',lineHeight: '42px'},
+		5:{fontSize:'30px',lineHeight: '45px'}
+		//== Можно продолжать...
+	}
+
+	</script>
+</code></pre>

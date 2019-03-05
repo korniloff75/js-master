@@ -1,0 +1,262 @@
+<div class="core note">
+	<p>Если не на всех примерах карты полностью загрузились - перезагрузите страницу, нажав <b>ctrl+R</b></p>
+</div>
+
+<div>
+	<p>В этой статье мы рассмотрим пример установки динамической Яндекс-карты на свой сайт с использованием библиотеки api-maps.yandex.</p>
+	<p>Как всегда, я ввел небольшие усовершенствования, выражающиеся в возможности по клику на поле карты определить точные географические координаты точки клика. На мой взгляд это очень удобно. Данную опцию можно использовать хотя бы для того, чтобы ввести координаты искомой точки в GPS-навигатор. Но в основном используется стандартное API</p>
+	<p>Также я постарался в комментариях к коду максимально расшифровать значения всех вводимых параметров.</p>
+
+	<p>Чего у меня не получилось - так это добиться динамического изменения свойства <em>balloonContentBody</em>. Поэтому большая просьба: <blockquote>если у кого-то это получилось, отпишитесь в комментариях и, по возможности, укажите способ менять содержание balloon скриптом.</blockquote></p>
+	<p>Итак, приступим к анализу кода примера.</p>
+</div>
+
+
+<h4>HTML-часть</h4>
+
+<div>
+	<p>Первым делом нужно подключить библиотеку с Яндекс-API. За это отвечает строка <code><?=htmlspecialchars('<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>');?></code>. Подобное подключение гарантирует подгрузку броузером свежайшей минорной версии беблиотеки 2.1.Х.</p>
+	<p>Стилями CSS описываем правила, на которых я не буду подробно останавливаться, поскольку для себя вы их все равно будете менять практически полностью.</p>
+	<p>Далее, в разметке сайта нужно определить блок для размещения Яндекс-карты. В моем первом примере он выглядит как <pre><code saldom><?=htmlspecialchars('<div class="Ex prim" id="mapEx_1"></div>');?></code></pre>. Идентификатор блока должен быть уникальным, то есть, <b>не повторяться</b> больше на странице нигде. К этому блоку позже будет обращаться скриптовая часть нашего кода. Поэтому, если поменяете идентификатор блока, то нужно будет корректировать и скриптовую часть примера. Поэтому в следующих примерах цифры идут по нарастающей.</p>
+</div>
+
+<div>
+	<h5>В итоге должен получиться примерно следующий код:</h5>
+	<pre><code class="css" for="#bS" saldom></code></pre>
+</div>
+
+
+<!-- ============================================ -->
+
+<h4>Javascript-часть</h4>
+
+<div>
+	<p>После размещения вышеперечисленного кода в разметке сайта мы можем теперь добавить первую карту.</p>
+</div>
+
+<h5>Создание и динамическое размещение карты</h5>
+
+<div id="bS">
+	<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+	<style type="text/css" media="screen">
+		.Ex { width: 100%; height: 400px; padding: 0; margin: 0; position:relative; border:3px solid #159; }
+
+		.Ex * {font-size: 100%; line-height: 1.5}
+
+		.Ex > div{
+			color: #147;
+			position: absolute;
+			z-index: 3;
+			background: none repeat scroll 0% 0% rgb(255, 255, 255);
+			margin: 0px;
+			top: 0px;
+		}
+		.Ex > div > p {
+			margin: 5px 0;
+		}
+
+		.Ex > div span {color: #147; background:#eee; cursor:pointer;}
+		.Ex.summ {height: 600px; border:5px solid #17a;}
+	</style>
+
+	<!-- Блок с простой динамической картой -->
+	<div id="mapEx_1" class="Ex prim" ></div>
+</div>
+
+<pre><code for="#Ex_1_js" class="js"></code></pre>
+
+<div>
+	<p>Данного кода вполне достаточно для самого простейшего размещения карты на сайте. В нем указываются географические координаты центра карты и устанавливается отображаемое увеличение.</p>
+	<p>Ниже мы рассмотрим, что можно на эту базовую карту добавить.</p>
+</div>
+<h4>Определение значений географических координат по клику на карте</h4>
+<div>
+	<p>Теперь немного усложним наш код, добавив в html-разметку блок, в котором будут выводиться координаты клика мыши по карте..</p>
+		<pre><code saldom><div id="coords" title="Координаты клика">
+			<p>широта <span title="выделить"></span></p>
+			<p>долгота <span title="выделить"></span></p>
+		</div></code></pre>
+	<p>И разместим его внутри блока с картой. В итоге его код приобретет уже следующий вид:</p>
+
+	<pre><code saldom>
+		<!-- Блок с динамической картой + блок с координатами места клика -->
+		<div id="mаpEx_2">
+			<div id="cооrds" title="Координаты клика">
+				<p>широта <span title="выделить"></span></p>
+				<p>долгота <span title="выделить"></span></p>
+			</div>
+		</div>
+	</code></pre>
+</div>
+
+<div>
+	<p>Теперь подлючим <b>javascript</b>:</p>
+	<pre><code for="#Ex_2_js"></code></pre>
+	<p>Результат выполнения кода виден ниже. Кликните левой кнопкой мыши по любому месту этой карты для определения географицеских координат этого клика.</p>
+	<p>Далее, уберём с карты лишние управляющие элементы.</p>
+</div>
+
+<div>
+	<div id="mapEx_2" class="Ex prim" >
+		<div id="cооrdsEx_2" title="Координаты клика">
+			<p>широта <span></span></p>
+			<p>долгота <span></span></p>
+		</div>
+	</div>
+
+	<div id="Ex_1_js">
+	<script type="text/javascript">
+	ymaps.ready(function () { // Дожидаемся загрузки библиотеки с API
+		var myMap = new ymaps.Map('mapEx_1', {
+			center: [45.4898, 34.2620],
+			zoom: 10
+		}, {
+			// Optional
+			// Задаем поиск по карте
+			searchControlProvider: 'yandex#search'
+		});
+	});
+	</script>
+	</div>
+
+	<div id="Ex_2_js">
+	<script type="text/javascript">
+	ymaps.ready(function () { // Дожидаемся загрузки библиотеки с API
+		// Создаем карту
+		var myMap = new ymaps.Map('mapEx_2', {
+			center: [45.4898, 34.2620],
+			zoom: 10,
+			// Управляющие элементы
+			// Можно раскоммментировать и использовать на карте в любой последовательности
+			controls: [/*
+				'geolocationControl', 'searchControl', 'fullscreenControl', 'routeButtonControl', 'routePanelControl' */
+			]
+		});
+
+		function showCoordinats () {
+			var coords= arguments[0],
+				coordFields= document.querySelectorAll('#cооrdsEx_2 span' );
+			coordFields[0].textContent= coords[0].toFixed(5);
+			coordFields[1].textContent= coords[1].toFixed(5);
+		};
+
+		//Отслеживаем событие клика по карте
+		myMap.events.add('click', function (e) {
+			showCoordinats (e.get('coords'));
+		});
+
+	});
+	</script>
+	</div>
+</div>
+
+
+<h5>Варианты добавления меток на карту</h5>
+
+<div>
+	<p>В данном примере рассмотрим два варианта добавления меток на Яндекс-карту.</p>
+	<p>В первом случае (метка defaultPlacemark) мы добавляем стандартную метку непосредственно в центр нашей карты, получая его координаты методом getCenter() объекта myMap. Также можно ввести в качестве первого аргумента 2-элементный массив с координатами нужной точки. Далее задаем текст всплывающей надписи (аналог атрибута <em>title</em>) - hintContent и текст, появляющийся при клике на метку - <em>balloonContent</em>. Свойство <em>draggable</em> третьего аргумента - булево значение, определяющее возможность перетаскивания метки по карте. По умолчанию оно <em>false</em>.</p>
+	<p>Во втором случае (метка myPlacemark) мы используем в качестве первого аргумента 2-элементный массив, определяющий географические координаты метки. Также мы используем более подробное описание бэллуна, прописывая в отдельных свойствах второго аргумента тексты шапки, тела и подвала бэллуна. В третьем аргументе, отвечающем за опции возвращаемого конструктором объекта, мы задаем соответственно шаблон, путь к нашей иконке метки, ее размеры и смещение относитьельно ее координат на карте.</p>
+	<p></p>
+	<p>По аналогии с приведенными примерамы вы сможете размещать свои объекты на Яндекс-карте, присваивая их меткам собственные изображения, тексты и прочие возможности.</p>
+</div>
+
+<div id="Ex_3_js" >
+	<div id="mapEx_3" class="Ex prim" ></div>
+	<script type="text/javascript">
+	ymaps.ready(function () { // Дожидаемся загрузки библиотеки с API
+		var myMap = new ymaps.Map('mapEx_3', { // Создаем карту
+			center: [45.41634, 34.49615],
+			zoom: 10,
+			controls: []
+		});
+		// Определяем метки
+		var defaultPlacemark = new ymaps.Placemark( // Определяем стандартную метку
+			myMap.getCenter(), // Получаем координаты центра карты
+			{hintContent: 'Стандартная метка в центре карты', balloonContent: 'Ее можно перетаскивать'},
+			{iconColor: '#ff0000', draggable: true}
+		),
+			myPlacemark = new ymaps.Placemark(	//Определяем свою метку
+				[45.50118, 34.29402], { // Задаем координаты метки
+				// Свойства
+				hintContent: 'Кликни меня - увидишь бэллун',
+				balloonContentHeader: 'Заголовок бэллуна',
+				balloonContentBody: 'Текст бэллуна',
+				balloonContentFooter: 'Подвал бэллуна'
+			}, {
+				// Опции.
+				// Меняем изображение метки
+				iconLayout: 'default#image', // тут не менять
+				// Своё изображение иконки метки.
+				iconImageHref: '/assets/images/diff/MarkerPushPin1Right.png',
+				// Размеры метки.
+				iconImageSize: [50,70],
+				// Смещение левого верхнего угла иконки
+				iconImageOffset: [-5, -65]
+		});
+		// Добавляем меток на карту
+		myMap.geoObjects
+			.add(defaultPlacemark)
+			.add(myPlacemark);
+	});
+	</script>
+
+</div>
+<pre><code for="#Ex_3_js" class="js"></code></pre>
+<h4>Сводный пример</h4>
+<div>
+	<p>Ну, и в завершении приведем пример, как объединить все перечисленные возможности на одной карте.</p>
+</div>
+<div id="Ex_full">
+	<div id="mapEx_full" class="Ex summ prim">
+		<div id="coordsEx" title="Координаты клика">
+			<p>широта <span title="выделить"></span></p>
+			<p>долгота <span title="выделить"></span></p>
+		</div>
+	</div>
+
+
+	<script type="text/javascript">
+	ymaps.ready(function () {
+		var myMap = new ymaps.Map('mapEx_full', {
+				center: [45.4898, 34.2620],
+				zoom: 8,
+				controls: []
+			}),
+
+			// Метка по центру карты
+		 defaultPlacemark = new ymaps.Placemark(
+			myMap.getCenter(),
+			{hintContent: 'Стандартная метка', balloonContent: 'Упрощенный бэллун'},
+			{iconColor: '#00ff00'}
+		);
+
+		myMap.geoObjects.add(defaultPlacemark);
+
+		//Отслеживаем событие щелчка по карте
+		myMap.events.add('click', function (e) {
+			showCoordinats (e.get('coords'));
+		});
+		var coordFields= document.querySelectorAll('#coordsEx span' );
+		function showCoordinats () {
+			var coords= arguments[0];
+			coordFields[0].innerHTML= coords[0].toFixed(5);
+			coordFields[1].innerHTML= coords[1].toFixed(5);
+		};
+
+	});
+	</script>
+</div>
+
+<pre><code for="#Ex_full"></code></pre>
+
+<script>
+	$f('.Ex').on ({
+		'click': function(e) {
+			e.stopPropagation();
+		},
+		'mouseup': function(e) {
+			e.stopPropagation();
+		}
+	});
+</script>

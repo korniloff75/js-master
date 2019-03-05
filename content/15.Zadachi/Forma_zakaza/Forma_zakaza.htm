@@ -1,0 +1,53 @@
+<h2>Задача</h2>
+
+<p>Динамически вставить полученную в ответе сервера информицию в html разметку сайта и использовать для наполнения позиций выбора товара в форме заказа.</p>
+
+
+<h2>Решение</h2>
+
+<p>Предположим, ответ сервера приходит в виде объекта JSON. Тогда в нашу задачу входит динамическое наполнения тега <em>select</em> формы заказа позициями, полученными в этом объекте. Далее предложена реализация этой задачи на нативном <em>javascript</em>.</p>
+
+<div id="prim">
+	<form name="name" action="" method="post" style="display:block;">
+		<!-- Пустое поле для выбора товара. Заполняться будет скриптом после клика на нём. -->
+		<div><select name="sale1" id="sale1" onclick="ins()" size="1" value="Открыть список">
+			<option value="">Открыть список</option>
+		</select> -  <span id="about">Кликните для получения списка товаров</span>
+		</div>
+		<!-- По клику нужно добавить запрос серверу для получения списка товаров. -->
+	</form>
+
+	<script type="text/javascript">
+		"use strict";
+		// Получаем ответ сервера в виде объекта JSON и записываем его в переменную
+		// Серверную часть пишем сами или адаптируем существующую
+
+		var answ= {
+			"Товар 1": "Описание товара 1",
+			"Товар 2": "Описание товара 2",
+			"Товар 3": "Описание товара 3"
+		}
+
+		// Перебираем объект с ответом и выводим в виде списка для выбора
+		function ins () {
+			var sel= document.getElementById('sale1');
+			if (sel.options.length > 1) return;
+			sel.innerHTML='';
+			for (var i in answ) {
+				var opt= document.createElement('option');
+				opt.textContent= opt.value= i;
+				opt.about= answ[i];
+				sel.appendChild(opt);
+			};
+			sel.onmouseover= function (e) {
+				var t= e.target;
+				t.about && (document.getElementById('about').textContent= t.about);
+			}
+		}
+
+
+	</script>
+</div>
+
+<h3>Исходный код</h3>
+<pre><code for="#prim"></code></pre>

@@ -1,0 +1,79 @@
+.b-form__grid {
+	background: #359 linear-gradient(#6ad, #358, #7ad) repeat scroll 0 0;
+	border: 1px solid #147;
+	max-width: 550px;
+	text-align: left;
+	margin: auto;
+	box-shadow: 2px 2px 5px 1px #159;
+}
+
+.b-form__grid td,
+.b-form__grid th {
+	padding: 10px;
+}
+
+.b-form__grid input[type="text"],
+.b-form__grid textarea {
+	color: #123 !important;
+	background: #eee;
+	width: 90%;
+	max-width: 300px;
+}
+
+.b-form__grid textarea {
+	height: 70px;
+}
+
+.b-widget-commercial .b-form__label {
+	font-size: 13px;
+	padding-right: 10px;
+	text-align: right;
+	width: 25%;
+}
+
+.b-form__field {
+	position: relative;
+	vertical-align: top;
+}
+
+.b-form-radio {
+	vertical-align: middle;
+}
+
+.b-form-radio_theme_greyb-form-radio__button_checked_yes::before {
+	background: rgba(0, 0, 0, 0) linear-gradient(to bottom, rgba(255, 236, 166, 0.4) 0px, rgba(255, 246, 213, 0.4) 100%) repeat scroll 0 0;
+	box-shadow: 0 1px 5px rgba(30, 23, 0, 0.7) inset;
+}
+
+.b-form__buttons input[type="submit"] {
+	background: #fd2 url("assets/YM/b-widget-button__sprite.png") repeat-x scroll 0 0;
+	border: medium none;
+	color: #000000;
+	height: 32px;
+	line-height: 31px;
+	text-shadow: 0 1px 1px rgba(255, 255, 255, 0.1);
+	padding: 0 15px;
+}
+
+.b-form__buttons input[type="submit"]:hover {
+	background-position: 0 -83px;
+	font-weight: bold;
+}
+
+input.b-form-radio__radio {
+	margin-left: 30px;
+}
+
+span#mir {
+	font: bold 20px arial;
+}
+
+.flex-wrap img {
+	border: 3px solid;
+}
+
+@media (max-width: 700px) {
+	.b-form__field {
+		width: 90%;
+	}
+}

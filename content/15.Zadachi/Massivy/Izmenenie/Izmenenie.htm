@@ -1,0 +1,35 @@
+<h2>Условие</h2>
+
+<p>Напишите функцию, которая получает в качестве параметра массив и перебирает его на предмет
+преобразования чисел из простых, в такие, у которых есть два знака после запятой., т. е., если
+в исходном массиве было число 11, то на выходе должно быть 11.00.</p>
+
+<p>В результате работы функции массив должен изменить свои значения.</p>
+
+
+<h2>Решение</h2>
+
+<p>Массив для примера:</p>
+
+<div id="arr_0" style="border:3px solid red; display:inline-block; padding:5px;">
+</div>
+
+<p>Результат:</p>
+
+<div id="arr" style="border:3px solid green; display:inline-block; padding:5px;">
+</div>
+
+<script id="prim" type="text/javascript">
+	var ish_arr = [10.5, 15, 112, 77.6],
+		randSimbol = ish_arr.map(function(i) {
+			return i.toFixed(2);
+		});
+</script>
+
+<script type="text/javascript">
+	$f('#arr_0').html(ish_arr.join(' , '));
+	$f('#arr').html(randSimbol.join(' , '));
+</script>
+
+<h3>Исходный код javascript</h3>
+<pre><code for="#prim" saldom=noLib></code></pre>

@@ -1,0 +1,25 @@
+<h2>Условие</h2>
+
+<p>Требуется написать функцию, принимающую в качестве аргументов два массива, и возвращающую массив с элементами, присутствующими в обоих принятых массивах.</p>
+
+
+<h2>Решение</h2>
+<div id="arr" style="border:3px solid red; display:inline-block; padding:5px;">
+</div>
+
+<script id="prim" type="text/javascript">
+var a = [1,6,8,10], b = [7,8,9,10,12];
+function _intersection (a,b) {
+	return a.filter(function(obj) {
+		return b.indexOf(obj) >= 0;
+	});
+}
+console.log(_intersection (a,b));
+</script>
+
+<script type="text/javascript">
+	$('#arr').html('a = ' + a.valueOf() + '<br>' + 'b = ' + b.valueOf() + '<hr>' + 'Общие элементы - ' + _intersection (a,b).valueOf() + '<br>');
+</script>
+
+<h3>Исходный код javascript</h3>
+<pre><code for="#prim"></code></pre>

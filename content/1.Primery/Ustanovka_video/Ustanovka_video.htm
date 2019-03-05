@@ -1,0 +1,129 @@
+<script type="text/javascript" src="/js/libs/afterglow.min.js"></script>
+
+<p>Когда я начал выбирать видеоплеер для одного из сайтов, то удивился их нынешнему количеству в интернете. Вот <a href="http://praegnanz.de/html5video/index.php" target="_blank" rel="nofollow">сравнительный анализ</a> далеко не всех из существующих.</p>
+
+<div class="core info">
+	<p>Все описанные ниже технологии хорошо работают при обычной http-загрузке страницы.</p>
+	<p>Поскольку навигация по этому сайту осуществляется через ajax-запросы, чтобы функционал плеера заработал, нужно перегрузить страницу - <b>ctrl+R</b>.</p>
+</div>
+
+
+<h2>Выбор плеера для сайта</h2>
+
+<p>Требования к искомому плееру были относительно не сложными: он должен быть бесплатным, максимально кроссброузерным (а иначе зачем он нужен, когда уже есть HTML5), без использования лицензионных ключей, с возможностью воспроизведения роликов с youTube, желательно наличие API, позволяющего более гибко использовать функционал.</p>
+<p>К сожалению, бОльшая часть пересмотренных плееров этим требованиям совершенно не удовлетворяла. Но один, все же, максимально близко к ним приблизился. О нем я и хочу рассказать подробнее.</p>
+
+<h3>Плеер AFTERGLOW</h3>
+<p>Начнем знакомство с этим плеером по порядку. Кстати, я не нашел в интернете по нему русскоязычной документации, что, согласитесь, странно.</p>
+
+<h4>Подключение скрипта плеера</h4>
+<p>Скрипт плеера желательно подключать внутри тегов head. Ниже я рассматриваю 2 варианта такого подключения.</p>
+
+<h5>Вариант подключения плеера со своего хостинга</h5>
+<ul>
+	<li><a href="/?module=Download&amp;file=js/libs/afterglow.min.js">Скачать архив с плеером <b>afterglow</b></a>. Этот плеер можно найти и на его <a href="http://afterglowplayer.com/" target="_blank" rel="nofollow">официальном сайте</a>.
+	</li>
+<li>Создать у себя на сервере каталог /js/Players/ и распаковать в него файл плеера.
+	</li>
+<li>Подключить скрипт записью внутри тегов head:
+		<pre><code saldom="noLib"><script type="text/javascript" src="/js/libs/afterglow.min.js"></script></code></pre>
+</li>
+</ul>
+<p>Я предпочитаю именно этот вариант, поскольку он позволяет продолжать работать с сайтом на локальном сервере даже без наличия подключения к интернету.</p>
+
+<h5>Вариант подключения плеера по технологии CDN</h5>
+<p>Подключить скрипт записью внутри тегов head:</p>
+<pre><code saldom="">&lt;script type="text/javascript" src="//cdn.jsdelivr.net/afterglow/latest/afterglow.min.js"&gt;&lt;/script&gt;</code></pre>
+
+
+<h4>Использование плеера</h4>
+
+<p>При использовании плеера с тегами <em>video</em> нужно присваивать им класс <em>class="afterglow"</em></p>
+
+<h5>Подключение своего видеофайла</h5>
+
+<p>В этом примере подключим видеофайл, расположенный на нашем хостинге.</p>
+<div id="selfFile">
+	<video class="afterglow" id="vp1" width="500px">
+		<source type="video/mp4" src="/<?=\H::$Dir ?>assets/KR_X.mp4">
+	</video>
+</div>
+
+<h6>Javascript-код:</h6>
+	<pre><code saldom=""><?=htmlspecialchars('<video class="afterglow" id="vp1" width="500px">
+		<source type="video/mp4" src="/<?=\H::$Dir ?>assets/KR_X.mp4">
+	</video>')?></code></pre>
+
+
+<h5>Подключение ролика с youTube по ссылке</h5>
+
+<p>Выложим в сайте видео с Ютуба в своём плеере. В теге <em>video</em> у нас появится новый атрибут <em>data-youtube-id</em></p>
+
+<div>
+	<video class="afterglow" id="vp2" data-youtube-id="-gf4MOEGxcE" width="500px"></video>
+	<!-- http://www.youtube.com/watch?v= -->
+</div>
+
+<h6>Javascript-код:</h6>
+
+<pre><code data-lib="afterglow"><?=htmlspecialchars('<video class="afterglow" id="vp2" data-youtube-id="-gf4MOEGxcE" width="500px"></video>')?></code></pre>
+
+
+<h4>API плеера</h4>
+
+<p>Кликая по кнопкам ниже, вы можете увидеть пример работы API в предыдущем плеере.</p>
+
+<ul id="api" class="prim">
+	<li><button>afterglow.getPlayer('vp2').play()</button></li>
+	<li><button>afterglow.getPlayer('vp2').pause()</button></li>
+	<li><button>afterglow.getPlayer('vp2').currentTime(35)</button></li>
+	<li><button>afterglow.getPlayer('vp2').requestFullscreen()</button></li>
+	<li><button>afterglow.getPlayer('vp2').exitFullscreen()</button></li>
+	<li><button>afterglow.getPlayer('vp2').volume(.5)</button></li>
+</ul>
+
+<script type="text/javascript">
+	[].forEach.call(document.querySelectorAll('#api>li>button'), function(i) {
+		i.onclick= new Function(i.textContent);
+	});
+</script>
+
+
+<h4>Настройки плеера через атрибуты</h4>
+
+<h5>Добавляем постер</h5>
+
+<p>Тегу video добавить атрибут poster с адресом изображения.</p>
+<pre><code saldom="">poster="/path/to/myposter.jpg"</code></pre>
+
+<h5>Адаптивный размер</h5>
+
+<p>Тегу video добавить атрибут data-autoresize со значением fit.</p>
+
+<pre><code saldom="">data-autoresize="fit"</code></pre>
+
+<h5>Установка уровня громкости</h5>
+
+<p>Тегу video добавить атрибут data-volume со значением в диапазоне 0...1.</p>
+
+<pre><code saldom="">data-volume=".5"</code></pre>
+
+<h5>Добавление видео в другом разрешении</h5>
+
+<p>В тег video вложить теги source.</p>
+
+<pre><code saldom="">
+	 <source type="video/mp4" src="/path/to/myvideo.mp4">
+	 <source type="video/mp4" src="/path/to/myvideo_hd.mp4" data-quality="hd">
+// etc.</code></pre>
+
+<!--<h5>Вывод плеера pop-up окном</h5>
+
+<p><a class="afterglow button" href="#vp7">Запустить плеер</a></p>
+<video class="afterglow" id="vp7" width="960" height="540" data-overscale="false">
+	<source type="video/mp4" src="http://files.js-master.ru/video/KR_X.mp4" />
+</video>
+<pre><code saldom=noLib><a class="afterglow" href="#vp6">Launch lightbox</a>
+<video class="afterglow" id="vp6">
+	<source type="video/mp4" src="http://files.js-master.ru/video/KR_X.mp4" />
+</video></code></pre>-->

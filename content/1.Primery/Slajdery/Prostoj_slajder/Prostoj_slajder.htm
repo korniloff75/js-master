@@ -1,0 +1,175 @@
+<h2>Описание слайдера</h2>
+<div>
+	<p>Данный скрипт реализует достаточно простой слайдер для изображений на сайте, однако обладающий при этом некоторыми особенностями.</p>
+	<ul>
+		<b>Особенности реализации:</b>
+		<li>Пользователь может пролистывать изображения как используя мышь и кликая по навигационным стрелкам, так и используя стрелочные клавиши на клавиатуре.</li>
+		<li>Есть возможность добавлять подписи к изображениям.</li>
+		<li>Подключение новых изображений к слайдеру осуществляется простым добавлением элементов в массиве (см. исходный код ниже).</li>
+		<li>Код слайдера настолько мал, что не помешает даже самой маленькой html-странице.</li>
+		<li>Добавлена возможность включения автолистинга (слайдшоу) с эффектом затухания перед сменой изображения.</li>
+	</ul>
+	<p>Скрипт интегрирует описанные возможности с возможностями скрипта <a href="/?Javascripts___Бесплатные_скрипты___Увеличение_изображения" target="_blank">Увеличение изображения</a>. Изображение увеличивается при клике по нему, после чего становятся доступными возможности указанного скрипта.</p>
+</div>
+
+<p>Установка скрипта очевидна из приведенного ниже примера. Однако, если Вы хотите использовать такие же навигационные стрелки, то их нужно скачать себе на хостинг и изменить к ним пути в классах <b>.but.l</b> и <b>.but.r</b>. </p>
+<p><a href="/PHP/dl_save.php?filename=images/slider_buts/">Скачать</a> архив с изображениями кнопок.</p>
+<p>Также вам необходимо <a href="/PHP/dl_save.php?filename=js/addons/Animate.js">скачать аддон</a>  для анимации при автолистинге и разместить его по пути <code>/js/addons/Animate.js</code> от корня сайта.</p>
+
+
+<h5><b>UPD 05.07.2018</b></h5>
+<p>Скрипт переписан на нативный ES-5.</p>
+
+
+<h3>Пример работы скрипта:</h3>
+
+<script>
+// Обнуляем Img.data
+/* console.log('Обнуляем Img.data - ', Object.assign((window.Img || {}), {
+	inited: 0,
+	data: []
+})); */
+</script>
+
+<div id="prim" style="text-align:center; max-width:100%;">
+	<!-- Подключаем плагин анимации -->
+	<script type="text/javascript" src="/js/addons/Animate.js"></script>
+	<style type="text/css" media="screen">
+	 div#sl{display:flex; flex-wrap: wrap; justify-content:center; width:500px; max-width:100%; border:1px ridge #aaa;}
+	 div#sl .but{display:block;width:36px; height: 77px; padding:0; margin:0; }
+	 div#sl .but.l{background:url('/images/slider_buts/arrows_back.png') no-repeat;}
+	 div#sl .but.r{background:url('/images/slider_buts/arrows_next.png') no-repeat;}
+	 div#sl .but:hover{background-position: 0 -77px;}
+	 div#sl img{margin:0;}
+	 div#sl>div {margin:5px 0;}
+	 div#sl div#com_text{overflow: auto; text-align:center; padding-top:10px; font:bold 18px cursive,Serif; color:#123;}
+	</style>
+
+	<div id="sl" style="">
+		<div style="display:flex; align-items:center;">
+			<div class="but l"  onclick="Sl_s.nextPct(Img.data.Step(-1));"></div>
+			<div id="picts" style="padding:5px 0;border:none; text-align:center; width:calc(100% - 72px);">
+
+			</div>
+			<div class="but r"  onclick="Sl_s.nextPct(Img.data.Step(1));"></div>
+		</div>
+		<div id="com_text" style="width:100%"></div>
+		<div>
+			<label><input type="checkbox" id="aL" onchange=" Sl_s.sts.pct.iter (!this.checked);"/> Автолистинг</label>
+		</div>
+	</div>
+
+	<!-- Подключаем плагин слайдера -->
+	<script src="/js/addons/Img.js"></script>
+
+	<script type="text/javascript">
+	"use strict";
+	// Img.sts.imgClass = 0;
+
+	var Sl_s= {
+		sts : {
+			path: "/images/foto/", //== Путь к папке с изображениями
+			parent: document.querySelector('#picts'),
+
+			get pct() {
+				var img;
+				if(!(img = this.parent.querySelector('img'))) {
+					img = document.createElement('img');
+					img.src = Img.data[0].src;
+					img.className = Img.data[0].className;
+					this.parent.appendChild(img);
+				}
+				return img;
+			},
+
+			txt: document.querySelector('#com_text'),
+			// img: null
+		},
+
+		pict: [
+			//== Массив с именами изображений
+			["Svad'ba1.jpg", "Юлечка в Форосе!"], //== Пример добавления фото с комментарием (оформляется во вложенный массив)
+			"Svad'ba2.jpg", //== Пример добавления фото без комментария
+			["Svad'ba3.jpg", "Голицынская тропа - Новый Свет"],
+			"Svad'ba4.jpg",
+			["Svad'ba5.jpg","Набережная - Ялта"],
+			["Svad'ba6.jpg","Тигры любят мясо! =)"],
+			"Svad'ba7.jpg",
+			["Svad'ba8.jpg","Обручалки"],
+			"Svad'ba9.jpg",
+			"Svad'ba10.jpg",
+			["Svad'ba11.jpg","Накрыло!!!"]
+		],
+
+		setImgData: function sid() {
+			// При аяксе запускаем повторно перед Img.init()
+			Img.data = Sl_s.pict.map(function(i) {
+				var img = document.createElement('img');
+				img.className = 'toBig';
+				if(i.length === 2) {
+					img.src= Sl_s.sts.path + i[0];
+					img.txt = i[1];
+				} else {
+					img.src= Sl_s.sts.path + i;
+					img.txt = '';
+				}
+				return img;
+			});
+			// console.log('setImgData - ', Img.data[0]);
+		},
+
+
+		nextPct: function (i) {
+			/*
+			* @i - HTMLImageElement
+			*/
+			Object.assign(Sl_s.sts.pct, {src:i.src});
+			// Sl_s.sts.pct.remove();
+			// Sl_s.sts.parent.appendChild(i);
+			Sl_s.sts.txt.textContent = i.txt;
+
+		},
+
+		list: function (e) {
+			if (Img.canvas) {
+				return;
+			}
+			e = e || window.event;
+
+			if (e.keyCode == 37) Sl_s.nextPct(Img.data.Step(-1));
+			if (e.keyCode == 39) Sl_s.nextPct(Img.data.Step(1));
+		}
+	}; // Sl_s
+
+
+	Sl_s.setImgData();
+
+	Img.sts.scriptArea = Sl_s.sts.parent;
+
+	// Отслеживание изменения свойства
+/* 	Img.data[0].watch('src', function (id, oldval, newval) {
+		console.log('Img.data[0].' + id + ' изменено с ' + oldval + ' на ' + newval, Img.data[0]);
+		return newval;
+	}); */
+
+
+	_K.fns.animate(Sl_s.sts.pct, {
+		fn: function(obj) {
+			obj.style.opacity -= .07;
+			return obj.style.opacity <= 0;
+		},
+		reset: function(obj) {
+			Sl_s.nextPct(Img.data.Step(1));
+			obj.style.opacity= 1;
+		}
+	});
+
+	document.addEventListener("keydown", Sl_s.list);
+
+	</script>
+</div>
+
+
+<h4>Подключение и настройки скрипта (исходный код примера)</h4>
+<!-- saldom=noLib -->
+<pre><code for="prim" noLib></code></pre>

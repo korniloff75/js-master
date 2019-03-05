@@ -1,0 +1,4 @@
+<IfModule mod_rewrite.c>
+RewriteEngine off
+RewriteRule ^(.*)$ content/$1 [L]
+</IfModule>

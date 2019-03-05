@@ -1,0 +1,60 @@
+<h2>Задача</h2>
+
+<div>
+	<p>Двумерный массив MхN содержит некоторые буквы английского алфавита, расположенные в произвольном порядке. Написать программу, проверяющую, можно ли из этих букв составить заданное слово. Каждая буква массива используется не более одного раза.</p>
+</div>
+
+<h3>Решение</h3>
+
+<div id=prim>
+	<div>
+		<div id="result" class=result style=" display:inline-block;"></div>
+		<div><input type="text" id=word value="moon"></div>
+		<button class="button" onclick="checkWord(document.getElementById('word').value);">Проверить слово</button>
+	</div>
+
+	<script type="text/javascript">
+		'use strict';
+
+		function checkWord(word) {
+			var matrix = [
+				['a', 'l', 'u', 'm', 'o'],
+				['n', 'a', 'e', 'y', 's'],
+				['x', 't', 'o', 'b', 'e']
+			], count = 0, result = document.getElementById('result'), extracted=[];
+
+			result.innerHTML = '';
+			iter();
+
+			function iter() {
+				for (var i = 0; i < matrix.length; i++) {
+					if (!matrix[i].length) continue;
+					for (var j = 0; j < matrix[i].length; j++) {
+						if (!word.length) {
+							result.innerHTML = 'Слово <b>' + document.getElementById('word').value + '</b> может быть создано из заданной матрицы.';
+							return;
+						}
+
+						if (word.indexOf(matrix[i][j]) === 0) {
+							word = word.substr(1);
+							console.log("Найдена - ", matrix[i][j] + ' _ ' + word);
+							extracted.push(matrix[i].splice(j, 1));
+							iter();
+						};
+					}
+				}
+
+				result.innerHTML = 'Слово <b>' + document.getElementById('word').value + '</b> <u>НЕ</u> может быть создано из заданной матрицы - недостаточно букв.';
+
+				count++;
+				console.log('RESULT iter ' + count + "\n=====\n" + 'word= ' + word);
+
+			}
+			console.log("extracted= " + extracted.valueOf());
+		}
+	</script>
+</div>
+
+
+<h4>Исходный код решения</h4>
+<pre><code for="#prim"></code></pre>

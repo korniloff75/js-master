@@ -1,0 +1,20 @@
+<select id="napr">
+	<option value="0">Rus->Lat</option>
+	<option value="1">Lat->Rus</option>
+</select>
+
+<textarea name="" id="" style="width: 100%; background: #eee;"></textarea>
+
+<button id="convert" class=button>Convert</button>
+
+<!-- <textarea name="" id="" style="width: 100%"></textarea> -->
+
+<script>
+$('#convert').on('click', function(e) {
+	$.post('/?module=php/modules/Self.php', {
+		self: '\H::translit(\'' + this.previousElementSibling.value + '\', ' + +$('#napr').val() + ');'
+	}).done(function(response) {
+		console.log(response);
+	})
+})
+</script>

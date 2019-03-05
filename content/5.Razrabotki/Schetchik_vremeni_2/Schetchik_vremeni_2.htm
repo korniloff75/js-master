@@ -1,0 +1,129 @@
+<p>Думаю, у многих есть в жизни памятные даты. И всегда есть желание проверить сколько времени прошло от них. Теперь это не
+	проблема, данный скрипт способен отсчитать прошедшее время от любой даты, а также - оставшееся до следующей.</p>
+<p>Это доработанная версия
+	<a href="/content/1.Primery/Schetchik_vremeni/" target="_blank" rel="follow">Счетчика времени</a>, дополненная возможностью сохранения/сброса пользовательских дат.</p>
+<p>Принимаются предложения по расширению функционала скрипта, а также по коммерческой адаптации под любой сайт, кроме CMS Joomla.</p>
+<h4>Инструкция по использованию</h4>
+<p>Даты по умолчанию приведены в качестве примера и исчезнут при добавлении первой же пользовательской даты.</p>
+<p>Пользовательские даты сохраняются
+	броузером и воспроизводятся при последующих открытиях страницы со скриптом. У каждого пользователя отображаются собственные
+	введенные даты, другие пользователи их не видят.</p>
+<ul>Ввод дат предусмотрен в двух вариантах:
+	<li>Ввод даты в формате
+		<b>DD-MM</b> (например, 12-04) - соответствует дате 12 апреля.<br></li>
+<li>Ввод даты в формате
+			<b>DD-MM-YYYY</b> (например, 12-04-1961) - соответствует дате 12 апреля 1961 года.</li>
+</ul>
+<p>Значение поля
+	<em>Название</em>, думаю, объяснять подробно не нужно. В него вводится название события, от которого производится отсчет времени.
+	Кнопка
+	<em>Добавить дату</em> добавляет указанное событие в список счетчиков. Удаление отдельных событий из общего списка скриптом не предусмотрено.</p>
+
+<p>После добавления пользовательской даты она отображается в общем списке с двумя счётчиками, отвечающими за период времени, прошедший с последней годовщины события, и оставшийся до следующей - соответственно. При введении даты с годом - первый счётчик отсчитывает время с учётом прошедших лет.<br></p>
+<p>При нажатии
+	<em>Сброс дат</em> все пользовательские даты безвозвратно удаляются (после пользовательского подтверждения), и на странице восстанавливаются даты по умолчанию.</p>
+
+
+<h4>Пример работы скрипта:</h4>
+
+<div id="prim">
+
+	<style type="text/css" media="screen">
+		ul#hollData {
+			color: #159;
+			background: #eee;
+			padding: 30px;
+		}
+
+		ul#hollData em {
+			font: bold 120% monospace;
+			white-space: pre-wrap;
+		}
+
+		ul#hollData h6 {
+			font-size: 100%;
+			margin: .7em 0 .3em;
+		}
+	</style>
+
+	<label for="gmt">Ваш часовой пояс GMT+</label><input type="number" value="3" id="gmt" style="width:50px;" class="button" onchange="Timer.sts.gmt = this.value" />
+
+	<ul id="hollData">
+		<li data-UTC="1-1"> <h6>Новый Год</h6>
+		</li>
+		<li data-UTC="17-12-1903"><h6>Первый полет Уилбура и Орвила Райт</h6>
+				</li>
+		<li data-UTC="09-5-1945"><h6>День Победы (полный отсчет)</h6>
+				</li>
+		<li data-UTC="09-5"><h6>День Победы (ближайший)</h6>
+			</li>
+</ul>
+
+	<div>
+		<h6>Добавить дату</h6>
+		<p>
+			<input placeholder="Название" value="День Космонавтики" id="addName" size="30" type="text">
+			<br>
+			<input placeholder="DD-MM[-YYYY]" value="12-04" id="addD" size="10" type="text">
+			<input onclick="addDate()" style="background: linear-gradient(rgb(85, 204, 85) 10%, rgb(187, 255, 187) 30%, rgb(85, 204, 85) 90%) repeat scroll 0% 0% transparent;" value="Добавить дату" type="button"> в формате DD-MM[-YYYY]</p>
+		<p>
+			<input id="default" class="core warning button" onclick="removeData()" value="Сброс дат" type="button" hidden="">
+		</p>
+	</div>
+	<br>
+</div>
+
+
+
+<script src="/<?=\H::$Dir ?>assets/timer.js"></script>
+
+<script>
+'use strict';
+
+var $items_node = $f('#hollData');
+$.cookie.get('date') && addDate('loading');
+
+function removeData() {
+	if (
+		$.cookie.get('date')
+		&& confirm('Все пользовательские даты будут удалены и восстановлены даты по умолчанию.\nПодтверждаете удаление? ')
+	) {
+		$.cookie.remove('date', { path: '#' });
+		console.log($.cookie.get('date'));
+
+		$('#ajax-content').reload();
+	} else return false;
+}
+
+
+function addDate(loading) {
+	var date = $.cookie.get('date') || [];
+
+	// console.dir('data1 = ', date);
+	// console.dir('date[0] = ', date[0]);
+	!loading && date.push([$('#addD').val(), $('#addName').val()]);
+
+	$items_node.html('');
+
+	date.forEach(function(i) {
+		$items_node.append('<li data-UTC="' + i[0] + '"><h6>' + i[0] + '</h6> - ' + i[1] + '</li> ');
+	});
+
+	// console.dir('data2 = ', date);
+	// console.dir('date[0] = ', date[0]);
+
+	$.cookie.set(date, {
+		json: 'date',
+		expires: 100,
+		path: '#'
+	});
+
+	Timer.init($items_node.find('li'));
+
+	$('#default')[0].hidden = 0;
+} // addDate
+
+
+// console.log();
+Timer.init($items_node.find('li'));
+</script>

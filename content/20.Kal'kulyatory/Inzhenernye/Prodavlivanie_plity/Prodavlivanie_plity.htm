@@ -1,0 +1,127 @@
+<script charset="utf-8" type="text/javascript" src="/js/modules/Ing.js"></script>
+
+<style>
+table {
+	margin: 1em auto;
+}
+table td {
+	padding: .5em 5px;
+}
+#prop td {
+	font-size: 120%;
+	border: 1px solid;
+}
+</style>
+
+<table style="border-bottom: 1px solid #aaaaaa; margin-bottom: 20px;">
+	<tbody>
+	<tr><th colspan="3">Исходные данные для расчета:</th></tr>
+	<tr>
+	<td>Габарит А=</td>
+	<td><input id="A" type="text" value="40" size="6"> см</td>
+	<td style="padding: 5px 10px; font-size: 14px;" rowspan="6"><img src="/<?=\H::$Dir ?>assets/Prodavl1.jpg" alt="" border="0"></td>
+	</tr>
+	<tr>
+	<td>Габарит В=</td>
+	<td><input id="b" type="text" value="40" size="6"> см</td>
+	</tr>
+	<tr>
+	<td>Толщина плиты H=</td>
+	<td><input id="h" type="text" value="50" size="6"> см</td>
+	</tr>
+	<tr>
+	<td>Защитный слой бетона, а=</td>
+	<td><input id="a" type="text" value="4" size="6"> см</td>
+	</tr>
+	<tr>
+	<td>Коэффициент &alpha;:
+	<ul>
+	<li>для тяжелого- 1.00</li>
+	<li>для мелкозернистого- 0.85</li>
+	<li>для легкого- 0.80</li>
+	</ul>
+	</td>
+	<td><input id="alf" type="text" value="1.00" size="6"></td>
+	</tr>
+	<tr>
+	<td>Бетон :</td>
+	<td><select id="bet" size="1">
+	<option value="B7.5|45.9|4.3">B7.5</option>
+	<option value="B10|61.2|5.7">B10</option>
+	<option value="B15|86.6|7.6">B15</option>
+	<option value="B20|117|9.2">B20</option>
+	<option value="B25|148|9.7">B25</option>
+	<option value="B30|173|11.7">B30</option>
+	<option value="B35|199|13.3">B35</option>
+	<option value="B40|224|14.3">B40</option>
+	</select></td>
+	</tr>
+	<tr>
+	<td colspan="3">
+	<h6><label><input id="pop_armCh" type="checkbox" onchange="Ing.Prod.arm = !($f('#pop_arm')[0].hidden = !this.checked);"> Поперечное армирование призмы продавливания</label></h6>
+	</td>
+	</tr>
+	</tbody>
+	<tbody id="pop_arm" hidden style="font-size: 14px;">
+	<tr>
+	<td>Арматура :</td>
+	<td colspan="2"><select id="arm" size="1">
+	<option value="A240|2.19|2.19|1.73">A240</option>
+	<option value="A300|2.75|2.75|2.19">A300</option>
+	<option value="A400|3.62|3.62|2.9">A400</option>
+	<option value="A500|4.08|4.43|3.06">A500</option>
+	<option value="B500|3.67|4.23|3.06">B500</option>
+	</select></td>
+	</tr>
+	<tr>
+	<td>Диаметр D<sub>sw</sub>=</td>
+	<td colspan="2"><input id="Darm" type="text" value="12" size="6"> мм</td>
+	</tr>
+	<tr>
+	<td>Шаг S<sub>sw</sub>=</td>
+	<td colspan="2"><input id="Ssw" onkeyup="Steps()" type="text" value="200" size="6"> x <span id="St">200</span> мм</td>
+	</tr>
+	</tbody>
+	<tbody>
+
+	<tr>
+	<td><input class="clear button" onclick="Prodavl()" type="button" value="Расчет"></td>
+	</tr>
+
+	<tr><th colspan="3">Результаты расчета:</th></tr>
+	<tr>
+	<td id="trass" colspan="2"><!-- Трассировка --></td>
+	</tr>
+	<tr>
+	<td colspan="2">Максимальная продавливающая сила, <strong>F<sub>max</sub></strong>= <input id="Fmax" onclick="this.focus();this.select();" type="text" readonly="readonly" size="6"> тс</td>
+	</tr>
+	</tbody>
+</table>
+<p><strong>Учтено расчетом:</strong></p>
+<ul>
+<li>Напряжения, воспринимаемые поперечным армированием не должны превышать напряжений, воспринимаемых бетоном расчитываемого сечения;</li>
+<li>Поперечную арматуру учитывают в расчете при F<sub>sw,ult</sub> не менее 0,25 * F<sub>b,ult</sub>.</li>
+</ul>
+<p><strong>Конструктивные требования к поперечному армированию:</strong></p>
+<ul>
+	<li>Поперечную арматуру в плитах в зоне продавливания в направлении, перпендикулярном сторонам расчетного контура, устанавливают с шагом не более h<sub>0</sub>/3 и не более 300 мм. Стержни, ближайшие к контуру грузовой площади, располагают не ближе h<sub>0</sub>/3 и не далее h<sub>0</sub>/2 от этого контура. При этом ширина зоны постановки поперечной арматуры (от контура грузовой площади) должна быть не менее 1,5 * h0.</li>
+	<li>Расстояния между стержнями поперечной арматуры в направлении, параллельном сторонам расчетного контура, принимают не более 1/4 длины соответствующей стороны расчетного контура.</li>
+	<li>Поперечная арматура в виде <strong>сварных сеток</strong> косвенного армирования при местном сжатии (смятии) должна удовлетворять следующим требованиям:<br> а) площади стержней сетки на единицу длины в одном и другом направлении не должны различаться более чем в 1,5 раза;<br> б) шаг сеток (расстояние между сетками в осях стержней одного направления) следует принимать не менее 60 и не более 150 мм;<br> в) размеры ячеек сеток в свету должны быть не менее 45 и не более 100 мм;<br> г) первая сетка располагается на расстоянии 15 - 20 мм от нагруженной поверхности элемента.</li>
+	<li>Поперечная арматура, предусмотренная для восприятия поперечных сил и крутящих моментов, должна иметь замкнутый контур с надежной анкеровкой по концам путем приварки или охвата продольной арматуры, обеспечивающую равнопрочность соединений и поперечной арматуры.</li>
+</ul>
+<div id="prim">&nbsp;</div>
+
+<script type="text/javascript">
+Ing.mat.cr('bet'); Ing.mat.cr('arm');
+function Steps() {
+	$f('#St').html(Ing.gt('#Ssw'));
+};
+
+function Prodavl() {
+	$f('#trass').html(Ing.Prod.trass());
+	$('#Fmax').val(Ing.Prod.Fmax());
+};
+
+
+$(function() {$f('#pop_armCh')[0].checked= false;})
+</script>

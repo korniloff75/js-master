@@ -1,0 +1,255 @@
+<p>Я прекрасно знаю, что многие из приведённых функций появились в нативном исполнении в версиях ES5+. Конечно, если вы программируете, используя новейший синтаксис, лучше использовать нативные варианты - они, как правило, работают быстрее. Но данная страница может послужить как полифилл для более ранних версий языка, так и в образовательных целях, для лучшего понимания их работы.</p>
+
+<p>Также php-программистам, думаю, будет удобно увидеть аналоги реализации знакомых функций.<br></p>
+
+
+
+<h3>Функция-тестировщик для функций</h3>
+
+<p>Функция-оболочка, принимающая в себя тестируемую функцию в качестве аргумента, вызывающая её заданное количество раз и возвращающая массив с результатами отработки тестируемой функции.</p>
+
+<p>Таким образом, теперь можно отследить работу разных экземпляров <a href="/<?=Path::parentFolder(\H::$Dir )?>Universal'nyj_generator/" target="_blank">Универсального генератора</a>. Для этого мы создадим кнопку, навесим на неё обработчик, в котором вызовем функцию-тестировщик и передадим ей в качестве аргумента функцию созданного экземпляра Универсального генератора.</p>
+<p>Для лучшего восприятия сделаем вывод возвращаемого тестировщиком массива не только в консоль, но и в HTML.</p>
+
+<div id="res" class="result">
+<p>Здесь будут показаны результаты</p>
+</div>
+<div id="but">
+	<button class="button" onclick="res.textContent= take(g1,5); console.log('g1()= ' + res.textContent); ">Проверить работу функции</button>
+	<button class="button" onclick="res.textContent= take(sequence(3,3), 7); ">2 Вариант</button>
+</div>
+
+<h4>Исходный код кнопок</h4>
+<pre><code for="#but"></code></pre>
+
+<script id="testir" type="text/javascript">
+	"use strict";
+	// Функция-тестировщик
+	function take (fn, calls, args) {
+		args= args || null;
+		var results= [];
+		for (var i=0; i < calls; i++) {
+			results.push(fn.apply(null, args));
+		};
+		return results;
+	}
+
+	// Универсальный генератор
+	function sequence(start, step) {
+		var it=0, count= start || 0;
+		return function () {
+			count= !it? count: count+ (step || 1);
+			it++;
+			return count;
+		}
+	}
+
+	// Создаём экземпляр генератора
+	var g1= sequence(3,3);
+</script>
+
+<h4>Исходный код javascript</h4>
+<pre><code for="#testir"></code></pre>
+
+
+
+<h3>Аналог array_map</h3>
+
+<p>Пример синтетический, на практике нужно использовать прототипный метод <i><b>Array.prototype.map</b></i>, но пока мы забываем о его существовании.<br></p>
+
+<p>Данная функция является аналогом функции <b>array_map</b> в PHP. Она также принимает в качестве первого аргумента другую функцию. Вторым аргументом задаётся массив.</p>
+<p>Логика работы функции простая: каждый элемент массива обрабатывается функцией из первого аргумента. Возвращается <u>новый</u> массив с обработанными значениями.</p>
+
+
+<h4>Пример использования</h4>
+
+<p>Итак, предположим, мы имеем какой-то массив [1,2,3,4] и хотим получить массив, содержащий квадраты его элементов. С функцией <b>map</b> это реализуется следующим образом: <code>map(function(i) {return i*i}, [1,2,3,4])</code></p>
+
+<div id="array_map">
+	<script type="text/javascript">
+	function map (fn, arr) {
+		var results= [];
+		for (var i=0, L=arr.length; i < L; i++) {
+			results.push(fn(arr[i]));
+		};
+		return results;
+	}
+</script>
+
+<p id="map" class="result">1,2,3,4</p>
+<button class="button" onclick="document.getElementById('map').textContent= map(function(i) {return i*i}, [1,2,3,4])">Обработать массив</button>
+
+</div>
+
+<h4>Исходный код</h4>
+<pre><code for="#array_map"></code></pre>
+
+
+
+<h3>Частичное применение</h3>
+
+<p>Предположим, что функции, принимающей 5 аргументов, нам нужно задавать разнымы тольько четвёртый и пятый. А первые три у нас остаются неизменными. Такие случаи называются частичным применением функции.</p>
+<p>Такое применение оправдано, когда при множественном вызове функции в качестве нескольких аргументов ей передаются какие-то константы. Тогда частичное применение вполне оправдывается сокращением количества передаваемых аргументов.</p>
+<p>Рассмотрим примеры такого применения.</p>
+
+
+<h4>Использование частичного применения функции</h4>
+
+<div id="partial" class="result">
+</div>
+
+<div id="partial_code">
+	<script type="text/javascript">
+	// Основная функция
+	// Принимает в качестве аргументов функцию для частичного применения, а также неограниченное количество аргументов, используемых в ней, как константы.
+	// Возвращает функцию с предустановленными аргументами
+	function partial (fn) {
+		fn= arguments[0];
+		var args= [].slice.call(arguments,1);
+
+		return function() {
+			var fixedArgs= [].concat.apply(args, arguments);
+			return fn.apply(null, fixedArgs);
+		}
+	}
+
+	// Создаём экземпляр функции для частичного применение
+	var p= partial(
+		function(a,b,c,d) {
+			return (a*b-c*d)
+		},3,10
+	);
+
+	// В обрабатываемой функции будут предустановлены первые 2 аргумента
+	// т.е. произведение аогументов c и d будет вычитаться из 30.
+
+	// Выполняем созданные экземпляры с дополнительными аргументами
+	document.getElementById('partial').innerHTML+='<p>30-2*10= ' + p(2,10) + '</p> ';
+	document.getElementById('partial').innerHTML+='<p>30-2*20= ' + p(2,20) + '</p> ';
+	document.getElementById('partial').innerHTML+='<p>30-2*3= ' + p(2,3) + '</p> ';
+	</script>
+</div>
+
+<h4>Исходный код</h4>
+<pre><code for="#partial_code"></code></pre>
+
+
+
+<h3>Выборка объектов по ключу из массива</h3>
+
+<p>Функция pluck берет массив объектов и возвращает массив значений определенного поля.</p>
+<p id="pluck" class="result"></p>
+<button class="button" onclick="document.getElementById('pluck').textContent= pluck(characters, 'name');">Выбрать значения</button>
+<button class="button" onclick="document.getElementById('pluck').textContent= pluck(characters, 'name');">2 Вариант</button>
+
+<div id="pluck_code">
+	<script type="text/javascript">
+	var characters = [
+		{ 'name': 'barney', 'age': 36 },
+		{ 'name': 'fred', 'age': 40 }
+	];
+
+	function pluck (arr, key) {
+		var res=[];
+		arr.forEach(function(obj) {
+			for (var i in obj) {
+				if (i==key) res.push(obj[i]);
+			};
+		})
+		return res;
+	}
+
+	// 2 Вариант - более изящное решение, IMHO
+	function pluck_2 (arr, key) {
+		return arr.filter(function(i) {
+			i[key] !== undefined;
+		})
+		.map(function(obj) {
+			return i[key];
+		})
+	}
+	</script>
+</div>
+
+<h4>Исходный код</h4>
+<pre><code for="#pluck_code"></code></pre>
+
+
+
+<h3>Фильтрование массива. Аналог <br></h3>
+
+<h3>array_filter<br></h3>
+
+<p>Синтетический пример реализации нативного Array.prototype.filter.</p>
+
+<p>Функция filter принимает функцию-предикат и массив. Возвращает она массив значений, для которых предикат вернет <em>true</em>.</p>
+
+<p id="filter" class="result"></p>
+<button class="button" onclick="document.getElementById('filter').textContent= filter(arr, isEven);">Обработать массив</button>
+
+<div id="filter_code">
+	<script type="text/javascript">
+	var arr = [0,1,2,3,4,5,6,7,8,9];
+
+	// проверяет на четность
+	function isEven(x) { return x % 2 == 0; }
+
+	function filter (arr, pred) {
+		var res=[];
+		arr.forEach(function(i) {
+			!!pred(i) && res.push(i);
+		})
+		return res;
+	}
+	</script>
+
+</div>
+<script type="text/javascript">
+	document.getElementById('filter').textContent= arr;
+</script>
+
+<h4>Исходный код</h4>
+<pre><code for="#filter_code"></code></pre>
+
+
+
+<h3>Подсчёт свойств объекта. Аналог count<br></h3>
+
+<p>Функция countPropts считает число свойств в объекте. Поскольку в <i>javascript</i> понятия объекта и ассоциативного массива не разделяются, можно считать её прямым аналогом функции <i><b>count</b></i> в php. </p>
+
+<p>Современный аналог в javascript - <em>Object.key(obj).length</em></p>
+<p id="countPropts" class="result"></p>
+<button class="button" onclick="testCount ();">Посчитать свойства</button>
+
+<div id="countPropts_code">
+	<script type="text/javascript">
+	function countPropts (obj) {
+		var count=0;
+		for (var i in obj) {
+			if(obj.hasOwnProperty(i)) count++;
+		};
+		return count;
+	}
+
+	function testCount () {
+		var a = { a: 1, b: 2 };
+		var str = '<p>{ a: 1, b: 2 } -- <strong>' + countPropts(a) + '</strong></p> '; // 2
+
+		var b = function () {};
+		str += '<p>function () {} -- <strong>' + countPropts(b) + '</strong></p> '; // 0
+
+		var c = [1, 2, 3];
+		str += '<p>[1, 2, 3] -- <strong>' + countPropts(c) + '</strong></p> '; // 3
+
+		var d = [];
+		d[100] = 1;
+		str += '<p>var d = []; d[100] = 1; -- <strong>' + countPropts(d) + '</strong></p> '; // 1
+
+		document.getElementById('countPropts').innerHTML+= str;
+	}
+	</script>
+</div>
+
+
+<h4>Исходный код</h4>
+<pre><code for="#countPropts_code"></code></pre>

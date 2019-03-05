@@ -1,0 +1,41 @@
+<h2>Задача</h2>
+
+<p>Необходимо организовать последовательный проход по пунктам списка. При нажатии кнопки должен выделяться следующий пункт. При достижении конца списка должен выделиться первый его пункт.</p>
+
+<h2>Решение</h2>
+
+<div id="prim">
+	<style type="text/css" media="screen">
+		.sel {border:3px solid red;}
+	</style>
+
+	<ol id=ol>
+		<li class=sel>пункт</li>
+		<li>пункт</li>
+		<li>пункт</li>
+		<li>пункт</li>
+		<li>пункт</li>
+	</ol>
+
+	<button class=button onclick="sel()">Следующий!</button>
+
+	<script type="text/javascript">
+	function sel () {
+		// Предположим, что выделенный пункт имеет класс sel
+		// Обращаемся к спискук и получаем псевдомассив его пунктов
+		var els= document.getElementById('ol').querySelectorAll('li'), nxt;
+
+		for (var i=0, L=els.length; i < L; i++) {
+			if(els[i].classList.contains('sel')) {
+				els[i].classList.remove('sel');
+				nxt= (L==i+1) ? 0: i+1;
+				els[nxt].classList.add('sel');
+				return;
+			}
+		};
+	}
+	</script>
+</div>
+
+<h4>Исходный код</h4>
+<pre><code for="#prim"></code></pre>

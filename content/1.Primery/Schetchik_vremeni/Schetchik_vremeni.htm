@@ -1,0 +1,136 @@
+<p>Теперь вы можете вычислить время, прошедшее или оставшееся до интересующего вас события с точностью до секунды!</p>
+<p>Скрипт очень прост в управлении. Для получения точного результата необходимо ввести поправку на ваш часовой пояс. По умолчанию используется GMT+2. Далее введите в поле под списком дат новую в формате DD.MM , например, День Космонавтики - 12.04</p>
+<p>После клика по кнопке "Добавить дату", дата будет добавлена в общий список. Если вы ввели ее в неверном формате, то увидите сообщение "Неверный формат ввода, попробуйте еще!".</p>
+<p>Далее вы можете кликнуть на любой из дат в списке для инициирования таймеров прямого и обратного отсчета времени.</p>
+<p>Если вы нашли неточность работы, либо хотите внести свои предложения, воспользуйтесь Обратной связью - (Меню - Контакты).</p>
+<hr>
+<p><b>UPD - 04.12.2017</b> Скрипт переписан на Vanilla.js (native ES-5).</p>
+
+<hr id="calcTime">
+
+
+<h4>Пример работы скрипта:</h4>
+<div id="prim" style="">
+	<style type="text/css" media="screen">
+	ul#hollData {
+		width: 200px;
+		margin: 30px;
+		background: #eee;
+		color: #333;
+	}
+	#hollData>li {cursor:pointer; color:#159;}
+	#hollData>li:hover {color:#89a;}
+	#s4et4 span {
+		font-weight: bold;
+		color: #159;
+		padding: 3px;
+	}
+	#prim p {text-align:left;}
+	#prosh, #ost {background:#eef}
+	</style>
+
+	<label for="gmt">Ваш часовой пояс GMT+</label><input value="3" id="gmt" style="width:50px;" class="button" type="number">
+
+	<ul id="hollData">
+		<b>Выберите праздник:</b><br>
+		<li date="1.1">Новый Год
+		</li>
+<li date="7.01">Рождество
+		</li>
+<li date="23.02">День ВС
+		</li>
+<li date="8.3">Международный Женский День
+	</li>
+</ul>
+
+	<div>
+		<p><input value="12.04" id="addD" size="5" type="text"> <input class="button" onclick="addDate.call(document.querySelector('#addD'))" value="Добавить дату" type="button"> в формате DD.MM</p>
+		<p>Добавленные даты будут удалены со страницы после её перезагрузки.</p>
+	</div>
+	<br>
+	<div id="s4et4">
+		<p id="proshP"></p>
+		<p id="ostP"></p>
+	</div>
+
+	<script type="text/javascript">
+	'use strict';
+
+	var dcl = ('onpageshow' in window) ? 'pageshow' : 'DOMContentLoaded';
+
+	function onaddDate() {
+		var hollData= document.querySelectorAll('#hollData li');
+		for(var i=0; i<hollData.length; i++) {
+			hollData[i].onclick= oprtime;
+			hollData[i].title= "Вычислить"
+		}
+	}; window.addEventListener(dcl, onaddDate);
+
+	var tt;
+
+	function oprtime() {
+		var date = new Date(),
+			thisDate = this.getAttribute('date').split('.'),
+			ch= thisDate[0],
+			month= thisDate[1]-1,
+			year= thisDate[2] || date.getFullYear(),
+			nazv= this.innerHTML,
+			year_pr= +(new Date(year,month,ch) <= new Date())? year:(+year - 1),
+			year_ost= year_pr + 1;
+
+		document.querySelector('#proshP').innerHTML = '<span>Прошло с '+ ch+'.'+(month+1)+'.'+year_pr+'</span>: <span id=\"prosh\"></span>';
+
+		document.querySelector('#ostP').innerHTML = '<span>Осталось до '+ ch+'.'+(month+1)+'.'+ (year_pr + 1) +'</span>: <span id=\"ost\"></span>';
+		var gmt = +document.querySelector('#gmt').value;
+
+		function zeroFix(num) {
+			return (num < 10 ? '0' : '') + num;
+		}
+
+		function getTime() {
+			if(!document.getElementById('calcTime') ) {
+				clearInterval(tt);
+				return;
+			}
+
+			var delt_ost= new Date(new Date(year_ost,month,ch)- new Date());
+			var delt_pr= new Date( new Date() - new Date(year_pr,month,parseInt(ch)+1));
+
+			function interval(delt) {
+				ost= delt.getMonth() + ' <span class="small">месяцев</span> , ';
+				ost+= delt.getDate()-1 + ' <span class="small">дней</span> , ';
+				ost+= zeroFix(delt.getHours() - gmt) + ':' + ':';
+				ost+= zeroFix(delt.getMinutes()) + ':';
+				ost+= zeroFix(delt.getSeconds());
+
+				return ost;
+			}
+
+			document.querySelector('#prosh').innerHTML = interval(delt_pr);
+			document.querySelector('#ost').innerHTML = interval(delt_ost);
+
+		}
+
+		if(tt!==undefined) clearInterval(tt);
+		tt= setInterval(getTime,1000);
+	} // oprtime
+
+
+	window.addDate= function () {
+		if (!/^\d{1,2}?(?:\.\d{1,2}?){1,2}$/.test(this.value)) {alert('Неверный формат ввода, попробуйте еще!\n'+this.value); return;}
+		var li = document.createElement('li');
+		li.setAttribute('date', this.value);
+		li.textContent = this.value;
+		document.querySelector('#hollData').appendChild(li);
+
+		onaddDate();
+	}
+	</script>
+
+</div>
+
+
+<div>
+	<h5>HTML + Javascript код:</h5>
+	<pre><code for="#prim" data-native=""></code></pre>
+</div>

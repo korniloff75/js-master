@@ -1,0 +1,50 @@
+@import url('core.less');
+
+#adm {
+	.pos_abs(100%, 15px);
+	.flex(nowrap);
+	top: 0;
+	overflow: auto;
+	z-index: 10;
+	color: #123;
+	background: #dd5;
+	border-style: solid;
+	border-width: 3px 5px 3px 15px;
+	padding: 5px 10px;
+	margin: 0;
+	white-space: pre-line;
+
+	* {
+		font-family: monospace;
+		font-size: 1.1em;
+		white-space: inherit;
+	}
+
+	h4, h5, h6, pre {
+		font-size: 1.2em;
+		font-weight: 600;
+		margin: 0;
+		line-height: 1.2em;
+	};
+
+	&:hover {
+		height: 60%;
+	}
+
+	.flex {
+		margin: 10px 0;
+
+		input {
+			flex: 1 0 500px;
+			background: #eee;
+		}
+
+		:first-child {
+			flex: 0 0 200px;
+		}
+
+	}
+
+
+} // #adm
+

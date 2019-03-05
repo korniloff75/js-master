@@ -1,0 +1,92 @@
+<section id="source_ep" class="flex-column-wrap">
+	<style>
+		#source_ep input{
+			width: 50px;
+			color: #fff;
+		}
+	</style>
+
+	<div id="ep_sts" class="prim" onchange="draw();">
+		<h4>Геометрия стержня</h4>
+
+		<ul>
+			<li>Левая консоль - <input id="L_cons" value="0" type="text"></li>
+			<li>Правая консоль - <input id="R_cons" value="0" type="text"></li>
+			<li>Основной пролёт - <input id="L_b" value="6" type="text"></li>
+		</ul>
+
+
+		<h4>Граничные условия</h4>
+		<select id="b_conds" class="button">
+			<option value="hinge">Шарнирное опирание</option>
+			<option value="consol">Консоль</option>
+		</select>
+
+		<h4>Нагрузки на стержень</h4>
+
+		<ul>
+			<li>
+					Распределённая нагрузка <b>q</b> - <input id="q" value="1" type="text">
+				<ul>
+					<li>Расстояние <b>x1</b> до q - <input id="x1_q" value="0" type="text"></li>
+					<li>Расстояние <b>x2</b> до q - <input id="x2_q" value="6" type="text"></li>
+				</ul>
+			</li>
+			<li>Сосредоточенная сила
+				<b>P</b> -
+				<input class="P" value="0" type="text"> Расстояние
+				<b>X</b> -
+				<input class="x_P" value="0" type="text">
+				<button onclick="addMore(this.parentNode);" class="button" title="Добавить"> + </button>
+			</li>
+			<li>Сосредоточенный момент <b>M</b> - <input id="M" value="0" type="text"> Расстояние <b>X</b> - <input id="x_M" value="0" type="text"></li>
+		</ul>
+
+		<p><button class="button" title="Расчёт"> Расчёт </button></p>
+	</div>
+
+	<canvas id="beam" width="750" height="700">Your browser does not support the HTML5 canvas tag.</canvas>
+
+	<h4>Реакции опор</h4>
+	<div>
+		<p>R<sub>v</sub>1 = <span id="Rv1">0</span></p>
+		<p>R<sub>v</sub>2 = <span id="Rv2">0</span></p>
+	</div>
+
+	<script type="text/javascript" src="/<?=\H::$Dir ?>assets/epure.js"></script>
+</section>
+
+
+
+<section>
+	<h2>Описание калькулятора</h2>
+
+	<p>Калькулятор <b>Эпюры</b> предназначен для вычисления изгибающих моментов и поперечных сил, возникающих в горизонтальном стержне от воздействия различных комбинаций нагрузок.</p>
+
+<p>В качестве нагрузок могут выступать сосредоточенные силы (несколько), сосредоточенный момент и (или) равномерно распределённая нагрузка.</p>
+
+<p>В качестве граничных условий можно выбрать шарнирное балочное опирание либо жёсткую консольную заделку.<br></p>
+
+<p>Для проведения расчёта требуется ввести значения нагрузок в необходимых единицах измерения, а также задать их привязку к левой опоре (левому концу консоли). При введении отрицательного значения нагрузки - направление её воздействия изменится на противоположное.<br></p>
+
+	<p><u>Все расстояния меряются от первой (левой) опоры либо левого конца консоли. Положительное направление оси - слева направо.</u></p>
+
+<p>В результате своей работы калькулятор отобразит соответствующие эпюры <b>по растянутым волокнам</b> стержня со значениями усилий в их экстремальных точках.</p>
+
+</section>
+
+
+
+<h3>Дополнительно</h3>
+
+<h4>Справочные таблицы по расчёту эпюр</h4>
+
+<div class="center">
+	<img class="toBig" src="/<?=\H::$Dir ?>assets/Epyury.png" alt="Эпюры" align="middle" style="padding: 5px; background: #eee;">
+</div>
+
+<section class="core note">
+	<p>Калькулятор был написан мной для сайта <a href="http://prostobuild.ru/onlainraschet/241-kalkulyator-balki.html" target="_blank">prostobuild</a>, где он находится в адаптированном дизайне.<br></p>
+
+	<p>Все пожелания по доработке/исправлению скрипта можно писать в <a href="#comments_header">комментариях</a> к этой странице. Заказать аналогичный скрипт с необходимым функционалом можно через <a href="/content/1000.Contacts/feedback/">Обратную связь</a></p>
+</section>

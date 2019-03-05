@@ -1,0 +1,37 @@
+<h2>Условие</h2>
+
+<p>Требуется осуществить вращение элементов, каждый из которых представляет собой DIV-блок. Траектория вращения должна представлять окружность.</p>
+<p>Вращение должно начинаться по пользовательскому клику.</p>
+<p><img src="/<?=\H::$Dir ?>img/shema.jpg" alt="Схема вращения"></p>
+
+
+<h2>Решение</h2>
+
+
+<div id="prim">
+	<style type="text/css">
+	#block {position:relative; color:#147; background:#fcc; padding: 5px; display: inline-block; cursor: pointer;}
+	</style>
+
+	<div id="block" onclick="StartRot();">Кликни меня для вращения!</div>
+
+	 <script type="text/javascript">
+	function StartRot() {
+		var block = document.getElementById('block');
+			R = 100,
+			A = 0,
+			PI2 = Math.PI * 2;
+			dA = PI2 / 120;
+		setInterval(function() {
+			block.style.left = Math.round(R * Math.cos(A)) + 'px';
+			block.style.top = Math.round(R * Math.sin(A)) + 'px';
+			A += dA;
+			if (A >= PI2) A -= PI2;
+			else if (A < 0) A += PI2;
+		}, 50);
+	};
+	</script>
+</div>
+
+<h3>Исходный код:</h3>
+<pre><code for="#prim"></code></pre>

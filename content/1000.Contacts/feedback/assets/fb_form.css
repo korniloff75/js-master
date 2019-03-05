@@ -1,0 +1,127 @@
+#form-outbox form,
+#form-outbox input,
+#form-outbox ul,
+#form-outbox li,
+#form-outbox ol,
+#form-outbox label {
+	margin:0px;
+	padding:0px;
+}
+
+#form-outbox {
+	width:100%;
+	min-height: 400px;
+	color:#555555;
+	font-size:13px;
+	background: url(img/dark_wood_texture.jpg) #282828;
+	font-family:Arial, Helvetica, sans-serif;
+	white-space:nowrap;
+}
+
+#form-outbox #response {
+	color:white;
+	text-align:center;
+	padding:10px;
+	margin-top:10px;
+}
+
+#form-outbox > #form-container{
+	max-width: 500px;
+	margin:30px auto;
+	background-color:#f5f5f5;
+	padding:15px;
+
+	-khtml-border-radius: 12px;
+	-webkit-border-radius: 12px;
+	border-radius:12px;
+	border: 7px outset #000;
+}
+
+#form-container div {
+	display: flex;
+	flex-wrap: wrap;
+	flex-basis: 100%;
+	align-items: center;
+	align-content: center;
+	margin: 15px 0;
+}
+
+#form-container div > * {
+	flex: 4 1;
+	padding: 2px 5px
+}
+
+#form-container div > *:first-child {
+	flex: 1 1 15%;
+}
+
+#form-container div > input[type=submit] {
+	flex-grow: 7;
+}
+
+#form-container a,
+#form-container a:visited {
+	color:#00BBFF;
+	text-decoration:none;
+	outline:none;
+}
+
+#form-container a:hover{
+	text-decoration:underline;
+}
+
+#form-container label{
+	text-transform:uppercase;
+	font-size:10px;
+	font-family:Tahoma,Arial,Sans-serif;
+}
+
+#form-container input,
+#form-container select,
+#form-container textarea {
+	max-width: 100%;
+	color:#444 !important;
+	font-family: Arial,Helvetica,sans-serif;
+	font-size:12px;
+	resize: vertical;
+}
+
+
+
+#response {
+	white-space: pre-line;
+	color: #fff;
+	font-size: 10px;
+	font-weight: bold;
+	margin-top: 10px;
+	padding: 10px;
+	text-transform: uppercase;
+}
+
+.success {
+	background-color: green;
+}
+
+.error {
+	background-color: #ab0000;
+}
+
+#loading{
+	position:relative;
+	bottom:9px;
+	visibility:hidden;
+}
+
+
+@media (max-width: 700px) {
+	section#comments,
+	#form-outbox > #form-container {
+		padding: 5px;
+		border: none;
+	}
+	#comments #entries * {
+		overflow-wrap: break-word;
+	/*	word-break: break-all; */
+	}
+
+}

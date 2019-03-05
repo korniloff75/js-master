@@ -1,0 +1,8 @@
+<IfModule mod_rewrite.c>
+# Бьем плагиаторов
+RewriteCond %{HTTP_REFERER} ^http://urib.info [NC]
+RewriteRule .* - [F]
+</IfModule>
+
+# Все как РНР
+# ForceType application/x-httpd-php

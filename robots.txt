@@ -1,0 +1,17 @@
+User-agent: *
+
+Allow: /templates/
+Allow: /content/
+Disallow: /?
+Disallow: /php/
+
+Sitemap: https://js-master.ru/sitemap.xml
+Sitemap: https://js-master.ru/sitemap.xml.gz  
+
+Host: https://js-master.ru   
+
+User-agent: YandexVideoParser
+Disallow: /
+
+User-agent:  YandexSearchShop
+Disallow: /

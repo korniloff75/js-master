@@ -1,0 +1,57 @@
+<h2>Условие</h2>
+<p>Необходимо обойти элементы списка с задержкой в 2 секунды с зацикливанием, при обходе меняя любое css свойство.</p>
+
+<h2>Решение</h2>
+<p>Этот скрипт после запуска проходит ко каждому элементу списка, динамически добавляя им определенный класс и стиль CSS. Интервал между итерациями - 1500 мс.</p>
+
+<div id=prim>
+	<ul id="list">
+		<li>First</li>
+		<li>Second</li>
+		<li>Third</li>
+		<li>Forth</li>
+		<li>Fiveth</li>
+	</ul>
+	<button id=startScript>Начать проход</button>
+
+	<script>
+		var list = document.querySelectorAll('#list li');
+		function toNext(i) {
+			i = i % list.length;
+			var prev = (i || list.length) - 1;
+			list[prev].classList.remove('result');
+			list[prev].style.textDecoration= 'none';
+
+			// Добавляем класс очередному элементу
+			list[i].classList.add('result');
+			// Добавляем стиль CSS
+			list[i].style.textDecoration= 'underline';
+			window.TO = setTimeout(function () {
+				toNext(++i);
+			}, 1500);
+
+		}
+
+	</script>
+</div>
+
+<script>
+	$('#startScript').on('click', function(e) {
+		if(window.TO) {
+			this.textContent = 'Начать проход';
+			TO = clearTimeout(TO);
+			list.forEach(function(i) {
+			i.classList.remove('result');
+			i.style.textDecoration= 'none';
+	})
+		} else {
+			this.textContent = 'Остановить';
+			toNext(0);
+		}
+
+	});
+
+</script>
+
+<h3>Исходный код javascript</h3>
+<pre><code for="#prim" data-lib=""></code></pre>

@@ -1,0 +1,59 @@
+<h2>Условие</h2>
+
+<p>Требуется скрыть один или несколько элементов массива из обхода циклом.</p>
+
+
+<h2>Решение</h2>
+
+<p>Напишем функцию, принимающую в качестве первого аргумента исходный массив, а остальных - индексы массива, которые требуется скрыть из обхода циклом</p>
+<p>Скрывать элементы будем посредством присвоения нужным индексам свойства enumerable.</p>
+
+<div id="arr" style="border:3px solid red; display:inline-block; padding:5px;">
+</div>
+
+
+<script id="prim" type="text/javascript">
+var sourse_arr = [1,'2',3,'Этот элемент будет скрыт','a','b','И этот тоже'];
+
+function hide_arr_ind(arr, indexes)
+{
+	if(indexes) {
+		indexes = [].slice.call(arguments);
+		indexes.splice(0, 1);
+
+		indexes.forEach(function(i) {
+			Object.defineProperty(arr, i, {
+				enumerable: false
+			});
+		})
+	}
+
+	return arr;
+}
+
+// функция для тестирования результата
+function test_arr (arr)
+{
+	var out = '';
+	Object.keys(hide_arr_ind(arr, 3, 6)).forEach(function(i, ind) {
+		out += arr[i] + '<br>';
+	});
+	return out;
+}
+</script>
+
+
+<script>
+function reset ()
+{
+	$('#arr').text ( '[ ' + sourse_arr.join() + ' ]');
+}
+reset();
+</script>
+
+<button class=button onclick="$('#arr').html(test_arr(sourse_arr, 3, 6));">Обойти массив</button>
+<button class=button onclick="reset();">Reset</button>
+
+
+<h3>Исходный код javascript</h3>
+<pre><code for="#prim"></code></pre>

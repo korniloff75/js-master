@@ -1,0 +1,37 @@
+<div>
+	<p>Простой пример передачи класса <b>active</b> элементу списка по клику на нём. Или как выделить пункт списка кликом.</p>
+	<p>Количество пунктов списка или меню может быть любым. Код при этом менять не придется.</p>
+	<p>Реализовано на нативном ES-5.</p>
+</div>
+
+<h2>Пример работы</h2>
+
+<div id="prim">
+	 <style type="text/css" media="screen">
+		#nav > li {cursor: pointer;}
+		#nav >.active {border:3px solid red;}
+	</style>
+
+	<ol id="nav">
+		<li class="active">пункт</li>
+		<li>пункт</li>
+		<li>пункт</li>
+		<li>пункт</li>
+		<li>пункт</li>
+	</ol>
+
+ <script type="text/javascript">
+	document.getElementById('nav').onclick= function(e) {
+		[].forEach.call(this.querySelectorAll('li'), function(i) {
+			i.classList.remove('active');
+		})
+		e.target.closest('li').classList.add('active');
+		e.stopPropagation();
+	}
+</script>
+</div>
+
+<div>
+	<h5>Исходный код:</h5>
+	<pre><code for="#prim"></code></pre>
+</div>

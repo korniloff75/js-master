@@ -1,0 +1,144 @@
+<link rel="stylesheet" href="/<?=\H::$Dir ?>calc_style.css">
+
+<div>
+	<p>Калькулятор производит вычисление ежемесячных платежей по двум схемам кредитов:
+		<b>дифференцированной</b> и
+		<b>аннуитетной</b>.</p>
+	<p>В качестве исходных данных для расчета необходимо ввести размер кредита, годовую процентную ставку по кредиту, согласно
+		кредитного договора, и срок кредитования. После этого введите дату получения кредита и калькулятор выдаст вам помесячную
+		раскладку ваших расходов.</p>
+</div>
+
+<div id="kr_calc">
+
+	<table id="ish_dan" class="article" align="center">
+		<!-- <caption>Кредитный калькулятор - аннуитетные платежи</caption> -->
+		<tbody>
+			<tr>
+				<td>Тип платежей
+					<select id="vid_plat" onchange="" size="1">
+						<option value="diff">Дифференцированный</option>
+						<option value="ann">Аннуитетный</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="group1">Размер кредита
+					<input id="id_credit_size" title="" value="100000" type="text"> руб.
+				</td>
+			</tr>
+			<tr>
+				<td class="group1">Процентная ставка по кредиту
+					<input id="id_credit_percent" title="" value="10" type="text"> % в год
+					<!-- <select title="Выберите периодичность начисления процентов"  id="id_credit_percent_type">
+					<option selected="selected" value="1">% в год</option>
+					<option value="2">% в мес.</option>
+				</select> -->
+
+				</td>
+			</tr>
+			<tr>
+				<td class="group1">Срок кредита
+					<input id="id_credit_term" title="" value="12" type="text"> мес.
+					<!-- <select title="Выберите единицу измерения срока кредита"  id="id_credit_term_type">
+					<option selected="selected" value="2">лет</option>
+					<option value="1">мес.</option>
+				</select> -->
+				</td>
+			</tr>
+			<tr>
+				<td class="group1">Дата начала кредитования
+					<input value="19" id="id_credit_date_d" title="" type="text">
+					<!-- <input id="" title="" type="date"> -->
+					<select title="" id="id_credit_date_m">
+						<option value="0">Январь</option>
+						<option value="1">Февраль</option>
+						<option value="2">Март</option>
+						<option value="3">Апрель</option>
+						<option value="4">Май</option>
+						<option value="5">Июнь</option>
+						<option value="6">Июль</option>
+						<option value="7">Август</option>
+						<option value="8">Сентябрь</option>
+						<option value="9">Октябрь</option>
+						<option value="10">Ноябрь</option>
+						<option value="11">Декабрь</option>
+					</select>
+					<select title="" id="date_y">
+						<option value="2014">2014</option>
+						<option value="2015">2015</option>
+						<option style="font-weight: bold;" value="2016">2016</option>
+						<option value="2017">2017</option>
+						<option value="2018">2018</option>
+						<option value="2019">2019</option>
+						<option value="2020">2020</option>
+						<option value="2021">2021</option>
+						<option value="2022">2022</option>
+						<option value="2023">2023</option>
+						<option value="2024">2024</option>
+						<option value="2025">2025</option>
+					</select>
+
+				</td>
+			</tr>
+			<tr class="end_tr">
+				<td colspan="2" style="padding-top: 10px ! important;">
+					<div class="left_bg_butt">
+						<div style="text-align:center; ">
+							<input onclick="ras4_kr()" value="Рассчитать" style=" font-size:16px; font-weight: bold;" type="button">
+						</div>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td style="padding-left:20px;">
+					<div id="f_ann" style="display:none;">
+						<h4>Коэффициент аннуитета</h4>
+						<p>Коэффициент аннуитета превращает разовый платёж сегодня в платёжный ряд. С помощью данного коэффициента определяется
+							величина периодических равных выплат по кредиту:</p>
+						<p style="text-align:center">
+							<a href="http://ru.wikipedia.org/wiki/%D0%90%D0%BD%D0%BD%D1%83%D0%B8%D1%82%D0%B5%D1%82" title="" target="_blank">
+								<img src="http://upload.wikimedia.org/math/c/1/2/c128b341cc596cf935dee507fba07460.png" border="0">
+							</a>
+						</p>
+						<p>где
+							<b>i</b> — процентная ставка за один период (всего периодов
+							<b>n</b>),
+							<b>n</b> — количество периодов на протяжении всего действия аннуитета (следует учитывать, что данная формула является
+							чисто математической, то есть на практике возможны некоторые девиации, вызванные округлением, а также неодинаковой
+							продолжительностью месяца и года; особенно это касается последнего по сроку платежа).</p>
+						<p>И тогда величина периодической выплаты
+							<b>A = K·S</b>, где
+							<b>S</b> — величина кредита.</p>
+					</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+<div>
+	<table>
+		<tbody>
+			<tr>
+				<th width="50">Номер платежа
+				</th>
+				<th width="200">Дата платежа
+				</th>
+				<th>В погашение долга
+				</th>
+				<th>В погашение процентов
+				</th>
+				<th>Всего
+				</th>
+				<th>Остаток долга после платежа
+				</th>
+			</tr>
+		</tbody>
+		<tbody id="tabRez">
+		</tbody>
+	</table>
+</div>
+
+
+
+<script src="/<?=\H::$Dir ?>kredit.js" type="text/javascript" defer="defer"></script>

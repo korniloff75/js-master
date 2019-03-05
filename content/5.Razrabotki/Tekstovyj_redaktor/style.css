@@ -1,0 +1,103 @@
+body {
+  background: #F9FAFC;
+}
+.btn-group {
+  margin-right: 0.5em;
+  display: flex;
+}
+.btn-group > a {
+  padding: 0.5em 0.6em;
+  margin: 0.2em 0;
+  background: #fff;
+  border-top: 1px solid #e8ecf4;
+  border-bottom: 1px solid #e8ecf4;
+  border-left: 1px solid #e8ecf4;
+  color: #8492A6;
+  transition: all 0.2s;
+  text-decoration: none;
+  text-align: center;
+  font-weight: bold;
+}
+.btn-group > a:first-child {
+  border-radius: 3px 0 0 3px;
+}
+.btn-group > a:last-child {
+  border-right: 1px solid #e8ecf4;
+  border-radius: 0 3px 3px 0;
+}
+.btn-group > a:hover,
+.btn-group > a:focus,
+.btn-group > a:active {
+  background: #3C4858;
+  border-color: #3C4858;
+  color: #F9FAFC;
+  text-decoration: none;
+}
+#editor {
+  color: #3C4858;
+  background: #fff;
+  max-width: 48rem;
+  min-height: 15rem;
+  margin: 0 auto;
+  padding: 2em;
+  overflow: auto;
+  resize: vertical;
+  outline: none;
+  border-radius: 4px;
+}
+.toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 2em auto;
+  max-width: 38rem;
+}
+.toolbar .color-palette-wrapper {
+  position: relative;
+}
+.toolbar .color-palette-wrapper.fore-wrapper {
+  color: #1FB6FF;
+}
+.toolbar .color-palette-wrapper.fore-wrapper:hover .fore-palette {
+  display: flex;
+}
+.toolbar .color-palette-wrapper.back-wrapper:hover .back-palette {
+  display: flex;
+}
+.toolbar .color-palette-wrapper.back-wrapper i {
+  background: #1FB6FF;
+  color: #fff;
+}
+.toolbar .color-palette-wrapper .color-palette {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  position: absolute;
+  padding: 0.5em;
+  left: -1px;
+  top: 34px;
+  min-width: 170px;
+  min-height: 50px;
+  background: #fff;
+  border: 1px solid #e8ecf4;
+}
+.toolbar .color-palette-wrapper .color-palette .palette-item {
+  border: 1px solid #d7deeb;
+  width: 1.5em;
+  height: 1.5em;
+  margin: 0.2em;
+  transition: all 0.2s;
+  transform: translateY(0);
+}
+.toolbar .color-palette-wrapper .color-palette .palette-item:hover,
+.toolbar .color-palette-wrapper .color-palette .palette-item:active,
+.toolbar .color-palette-wrapper .color-palette .palette-item:focus {
+  border-color: #a4b3d2;
+  transform: translateY(-2px);
+}
+.toolbar .color-palette-wrapper .fore-palette,
+.toolbar .color-palette-wrapper .back-palette {
+  display: none;
+}

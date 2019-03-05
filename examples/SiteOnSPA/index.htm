@@ -1,0 +1,106 @@
+<!DOCTYPE HTML>
+<html lang="ru">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>SPA</title>
+	<script type="text/javascript" src="/js/3.jquery-3.3.1.min.js" data-addons=""></script>
+	<style>
+		body {
+			display: flex;
+			flex-basis: 100%;
+			flex-wrap: wrap;
+			background: #f0f0f0;
+			box-sizing: border-box;
+		}
+
+		header {
+			flex: 1 0 100%;
+			align-content: center;
+			height: 150px;
+		}
+
+		nav {
+			flex: 0 1 250px;
+			background: #ddd;
+		}
+
+		#main {
+			flex: 1;
+			padding: 20px 5px 5px 15px;
+		}
+
+		header h1 {
+			text-align: center;
+			color: blue;
+		}
+	</style>
+</head>
+
+
+<body>
+	<header>
+		<h1>Simple SPA application</h1>
+	</header>
+
+	<nav>
+		<h3>МЕНЮ</h3>
+		<ul style="max-width:190px;">
+			<li><a href="page1.html">Страница 1</a></li>
+			<li><a href="page2.html">Страница 2</a></li>
+			<li><a href="page3.html">Страница 3</a></li>
+		</ul>
+		<!-- <a href="https://codepen.io/KorniloFF/project/editor/ABreRx#" target="_blank">Код на CodePen</a> -->
+	</nav>
+
+	<section id="main"></section>
+
+	<script>
+		'use strict';
+
+		jQuery(function ($) {
+			var _t = {},
+				$main = $('#main'),
+				$navNode = $('nav>ul'),
+				vDOM, range = document.createRange();
+
+			window.onpopstate = function (e) {
+				$main.html(e.state.content);
+				document.title = e.state.title;
+				// console.log("location: " + document.location, "\n state: ", e.state);
+			};
+
+			function ajaxNavigate(nav, $container) {
+				_t.t1 = Date.now();
+				$container.load(nav.href, function (d) {
+					/** !important feature of another solution
+					vDOM = range.createContextualFragment(d);
+					document.title = $(vDOM).find('title').text();
+					*/
+
+					var $this = $(this);
+
+					document.title = $this.find('title').text();
+					history.pushState({
+						title: document.title,
+						content: d
+					}, document.title, '?' + nav.href.split('/').pop());
+
+					$this.append('<hr><div><p> Данная страница отрисовалась (включая запрос серверу) за <b>' + (Date.now() - _t.t1) + '</b> ms</p></div>');
+				});
+			}
+
+			$navNode.on('click', 'a', function ($e) {
+				$e.preventDefault();
+				ajaxNavigate(this, $main);
+			});
+
+			// 1 page
+			$main.load(location.search.slice(1) || 'page1.html');
+			// ajaxNavigate($navNode.first(), $main);
+		});
+	</script>
+
+</body>
+
+</html>

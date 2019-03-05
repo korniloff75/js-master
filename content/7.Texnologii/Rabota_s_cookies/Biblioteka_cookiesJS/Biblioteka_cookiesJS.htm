@@ -1,0 +1,127 @@
+<p> Известно, что нативные методы работы с cookies-файлами в javascript настолько несовершенны, что каждому фронт-эндеру приходится либо писать свой хелпер, либо сильно удлинять код.</p>
+<p>Удивительно, но даже в таком монстре, как jQuery, используемом во многих проектах, в базовой комплектации нет инструмента для работы с кукисами. Есть аддон, позволяющий это делать, однако было бы не разумно подключать Квери + аддон только для этой цели.</p>
+
+<p>Поскольку этот сайт активно использует именно jQuery, я написал <a href="/<?=Path::parentFolder(\H::$Dir )?>plagin_dlya_jQuery/" title="плагин для jQuery">маленький плагин</a> к ней для работы с кукисами.<br></p>
+<p>Для проектов на нативном коде, либо использующих другие фреймворки, я бы рекомендовал маленькую, но довольно мощную либу, успешно справляющуюся с такими задачами: <a href="//github.com/franciscop/cookies.js" rel="nofollow" target="_blank">cookies.js</a>. Её размер не превышает 1 кБ!</p>
+<p>Библиотека создаёт единственную функцию  <em>cookies</em>, которую можно использовать довольно разнообразно. Функция может принимать 1 или 2 параметра. Любой из параметров должен быть объектом javascript. Во всех случаях функция возвращает ссылку на саму себя.</p>
+
+
+<h2>Краткое API</h2>
+
+<h3>Подключение</h3>
+
+<code><script src="//cdnjs.cloudflare.com/ajax/libs/cookiesjs/1.4.2/cookies.min.js"></script></code>
+<p>Либо скачать на Гите по ссылке выше и подключать локально.</p>
+
+<h3>Запись в cookies</h3>
+
+<h4>Использование двух параметров</h4>
+
+<p>Оба параметра должны быть объектами. В первом объекте указываются пары <em>ключ : значение</em>, во втором - указания по их размещению.</p>
+
+<pre><code data-lib="cookiesjs">
+cookies({ cookieKey: 'value' }, {
+	// Все параметры опциональны
+  expires: 10 * 24 * 3600,     // время жизни в секундах
+  domain: false,                // домен
+  path: '/',                    // путь к странице
+  secure: https ? true : false  // передача по https
+});
+</code></pre>
+
+<p>Для записи кукисов с дефолтными настройками можно использовать сокращённый вариант - с передачей только первого параметра в функцию.</p>
+
+<h4>Использование одного параметра</h4>
+
+<pre><code data-lib="cookiesjs">
+cookies({ cookieKey: 'value' });
+cookies({
+	cookieKey1: 'value1',
+	cookieKey2: 'value2',
+	// etc...
+});
+</code></pre>
+
+<h4>Глобальные настройки</h4>
+
+<p>При необходимости изменения дефолтных глобальных настроек - это просто сделать следующим образом:</p>
+
+<pre><code data-lib="cookiesjs">
+// Указаны значения по умолчанию
+
+cookies.expires = 10 * 24 * 3600;
+cookies.domain = false;
+cookies.path = '/';
+cookies.secure = https ? true : false;
+</code></pre>
+
+<p>После этого функция <b>cookies</b> с 1 параметром будет использовать заданные настройки при каждом вызове.</p>
+
+<h4>Дополнительные настройки</h4>
+
+<p>Дополнительные настройки можно указать как глобально (см. пример ниже), так и локально - во втором аргументе функции cookies.</p>
+<pre><code data-lib="cookiesjs">
+// Указаны значения по умолчанию
+
+cookies.nulltoremove = true;
+cookies.autojson = true;
+cookies.autoencode = true;
+cookies.encode = function(str){ return encodeURIComponent(str); };
+cookies.decode = function(str){ return decodeURIComponent(str); };
+</code></pre>
+
+<h5>Установка cookies для всех поддоменов</h5>
+
+<pre><code data-lib="cookiesjs">
+cookies({ cookieKey: 'value' }, { domain: '.example.com' });
+</code></pre>
+
+<h5>Установка cookies для поддомена sub</h5>
+
+<pre><code data-lib="cookiesjs">
+cookies({ cookieKey: 'value' }, { domain: 'sub.example.com' });
+</code></pre>
+
+
+<h4>Запись в виде JSON</h4>
+
+<p>На мой взгляд, одной из полезнейших возможностей является запись нескольких значений в единый cookie в формате JSON. </p>
+
+<pre><code data-lib="cookiesjs">
+cookies({singleCookie : {
+	cookieKey1: 'value1',
+	cookieKey2: 'value2',
+	// etc...
+}});
+// Object { cookieKey1: "value1", cookieKey2: "value2" }
+</code></pre>
+
+<p>Таким образом все значения запишутся в singleCookie.</p>
+
+
+
+<h3>Чтение cookies</h3>
+
+<pre><code data-lib="cookiesjs">
+var cook = cookies('cookieKey');
+</code></pre>
+<p>Благодаря тому, что функция возвращает ссылку на саму себя, можно сделать трюк с одновременной записью и чтением куки в одном выражении.</p>
+<pre><code data-lib="cookiesjs">
+var cook = cookies({cookieKey:'value'})('cookieKey');
+</code></pre>
+<p>Или даже так:</p>
+<pre><code data-lib="cookiesjs">
+var cook = cookies({key1:'value1'})({key2:'value2'})('key1');
+</code></pre>
+
+<p>При этом, если в кукис был сохранён JSON, при чтении вернётся объект. Остальные данные также будут соответствовать своим типам.</p>
+
+
+<h3>Удаление cookies</h3>
+
+<p>Удаление кукиса возможно двумя способами.</p>
+
+<pre><code data-lib="cookiesjs">
+cookies({ cookieKey: null }); // если не изменена глобальная настройка cookies.nulltoremove = true;
+cookies({ cookieKey: 'value' }, { expires: -1 });
+</code></pre>

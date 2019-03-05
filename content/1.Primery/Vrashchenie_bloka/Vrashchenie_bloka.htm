@@ -1,0 +1,97 @@
+<div id="prim">
+	<div id=wrap style="width: 100%; margin-top:70px; position: relative; /* border: 1px solid; */">
+		<div id="field" style="width:300px; height:150px; background:#aaa; margin: auto; position: absolute;"></div>
+		<div id="absc" style=" height:4px; background:#159; margin: auto; position: absolute;"></div>
+	</div>
+
+	<div id="angle" style="position:relative;"></div>
+
+
+	<script>
+	'use strict';
+
+	function gcs (node, prop) {
+		return parseInt(getComputedStyle(node)[prop]);
+	};
+
+	function main() {
+		var field= document.getElementById('field'),
+			wrap= document.getElementById('wrap'),
+			angle= document.getElementById('angle'),
+			absc= document.getElementById('absc');
+
+		wrap.style.height= gcs(field, 'width') * 1.2 + 'px';
+
+		var wwidth = gcs(wrap, 'width'),
+			wheight = gcs(wrap, 'height'),
+			fwidth = gcs(field, 'width'),
+			fheight = gcs(field, 'height'),
+			wcr= wrap.getBoundingClientRect(),
+
+			//	Center field relative to the window
+			nc= [wcr.left + wcr.width/2 , wcr.top + scrollY + wcr.height/2 ];
+
+		// console.log([wwidth, wheight], [fwidth, fheight], getComputedStyle(wrap).width);
+
+		field.style.left = (wwidth - fwidth)/2 + 'px';
+		field.style.top = (wheight - fheight)/2 + 'px';
+
+		absc.style.width= fwidth + 50+'px';
+		absc.style.top= wheight/2 - 2 + 'px';
+		absc.style.left= (wwidth - gcs(absc, 'width'))/2 + 'px';
+
+		// return;
+
+		var ord= absc.cloneNode();
+		ord.id= 'ord';
+
+		ord.style.width= fheight + 50+'px';
+		ord.style.left = (wwidth - parseInt(ord.style.width))/2 + 'px';
+
+		ord.style.background= '#5a5';
+
+		ord.style.transform= 'rotate(90deg)';
+
+		absc.parentNode.insertBefore( ord, absc);
+
+
+		field.onmousemove= function(e) {
+			var cX= e.pageX - nc[0], cY= e.pageY - nc[1] ;
+
+			// console.log(cX, cY);
+
+			var ar= Math.atan2(cY,cX),
+				adeg= ar*180/Math.PI;
+
+			angle.textContent= 'Угол поворота блока - ' + adeg.toFixed(1) + ' градусов';
+			field.style.transform= 'rotate(' + adeg + 'deg)';
+		}
+	}
+
+	// Run after LESS
+	window.addEventListener('DOMContentLoaded', function() {
+		main.inited = 1;
+		if(!window.less) main();
+		else less.pageLoadFinished.then(main);
+	});
+
+	</script>
+</div>
+
+<hr>
+
+<div>
+	<p>Данный скрипт позволяет вращать любой блок сайта, используя события движения мыши. Для наглядности в скрипт добавлены координационные оси и текстовое отображение угла поворота блока.</p>
+	<p>Блок вращается при наведении на него курсора и перемещении курсора вокруг точки начала координат в пределах вращаемого блока.</p>
+</div>
+
+<script>
+	$(function() {
+		if(!main.inited) main();
+	});
+</script>
+
+
+<h4>Исходный код примера</h4>
+<!-- saldom=noLib -->
+<pre><code for="#prim"></code></pre>

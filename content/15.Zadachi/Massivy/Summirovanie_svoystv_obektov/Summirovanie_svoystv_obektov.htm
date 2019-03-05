@@ -1,0 +1,60 @@
+<h2>Условие</h2>
+
+<p>Напишите функцию, принимающую аргументом массив объектов и возвращающую объект, содержащий суммы всех одинаковых свойств объектов входящего массива.</p>
+
+
+<h2>Решение</h2>
+<div id="arr" style="border:3px solid red; display:inline-block; padding:5px;">
+</div>
+
+<script id="prim" type="text/javascript">
+// Суммирование одинаковых свойств
+var a = [
+{prop_1: 1, prop_2: 2, prop_3: 5},
+{prop_1: 2, prop_2: 4},
+{prop_1: 3, prop_2: 6, prop_3: 8},
+{prop_1: 4, prop_2: 8, prop_4: 5}
+];
+
+function sumProps (arr) {
+	var out = {};
+	arr.forEach(function(i) {
+		for (var p in i) {
+			if (i.hasOwnProperty(p)) {
+				out[p] = out[p] || 0;
+				out[p] += i[p];
+			}
+		}
+	});
+	return out;
+}
+console.log(sumProps (a));
+</script>
+
+<button class=button onclick="arr.innerHTML = printObj(sumProps (a));">Суммировать свойства</button>
+
+<script>
+	// Рекурсивный листинг объекта
+	function printObj (obj) {
+		var o='<br>{ ';
+		for (var key in obj) {
+			o += key + ' : ';
+			if(obj[key] instanceof Object) {
+				o += printObj(obj[key]) ;
+				continue;
+			}
+			if (obj.hasOwnProperty(key)) {
+				o += obj[key] + ', ';
+			}
+		}
+		return o + ' }';
+	}
+
+	a.forEach(function(i) {
+		arr.innerHTML += printObj(i) + '<br>';
+	})
+</script>
+
+
+<h3>Исходный код javascript</h3>
+<pre><code for="#prim"></code></pre>

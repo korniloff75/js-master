@@ -1,0 +1,53 @@
+<div>
+	<p>Когда я уезжал, придумал для сайта небольшой <strong>скрипт-объявление</strong>, при помощи которого сообщал о своем отъезде и приблизительной дате возвращения. Скрипт, как обычно, получился компактным и функциональным, и я решил его выложить здесь, среди примеров. Может, кому-то пригодится.</p>
+
+<p>Функционал скрипта, безусловно, достаточно ограничен, однако вполне справляется с основной задачей: донесением срочной информации до пользователей в оригинальной форме.</p>
+
+<p>На базе этого скрипта можно создать и более сложные конструкции при желании. Например, если вам понадобится выводить различный текст для разных групп пользователей, динамически менять содержимое в зависимости от времени суток, выводить объявление единожды для каждого пользователя, а не при каждой загрузке страницы, ну и так далее...
+</p>
+
+</div>
+
+
+<div id="prim">
+	<script type="text/javascript">
+	'use strict';
+	var tmp = {
+		/* Настройки скрипта */
+		txt : "Уважаемые пользователи сайта "+location.host+"! C радостью сообщаю вам, что это объявление исчезнет сразу после его окончания. Тут можете писать все, что необходимо донести до пользователей сайта.", // Собственно, сам текст объявления. Вставляйте любой.
+		obyavaStyle : 'position: fixed; top:250px;width:70%; right:15%; z-index:5000; background:linear-gradient(#eee, #ddf, #7ad) #ddf; font:bold 22px monospace; padding:20px; border:2px solid #159;' // В этой переменной задаем необходимые стили для блока с объявлением.
+	};
+
+	/*********************/
+
+	String.prototype.delayingWrite = function (node, delay, cb) {
+		if (!node) return;
+		node.tn = node.tn || node.appendChild(document.createTextNode(''));
+		if (this.length) {
+			node.stop = 1;
+			node.tn.textContent += this.charAt(0);
+			var s = this.substr(1);
+			setTimeout(function () { s.delayingWrite(node, delay, cb) }, delay);
+		} else {
+			node.stop = 0;
+			cb();
+		}
+
+	}
+
+
+	if(!window.obyava) {
+		var obyava= document.createElement('div');
+		obyava.style.cssText = tmp.obyavaStyle;
+		obyava.innerHTML = '<span class="center" style="display:block;"><u>Объявление:</u></span> <br>';
+
+		document.body.appendChild(obyava);
+
+		tmp.txt.delayingWrite(obyava, 100, function() { obyava.parentNode.removeChild(obyava) } );
+	}
+	</script>
+</div>
+
+
+<h5>Javascript-код:</h5>
+	<pre><code for="#prim" class="js"></code></pre>

@@ -1,0 +1,213 @@
+<style>
+	table {
+	margin: 1em auto;
+}
+table td {
+	padding: .5em 5px;
+}
+#prop td {
+	font-size: 120%;
+	border: 1px solid;
+}
+</style>
+
+<h2>Расчет изгибающего момента</h2>
+<script charset="utf-8" type="text/javascript" src="/js/modules/Ing.js"></script>
+
+<div class="st2"><strong>Для определения изгибающего момента требуется выполнить следующие действия:</strong>
+	<ul>
+		<li>Заполнить значения блока "Исходные данные для расчета"</li>
+		<li>Кликнуть мышью на рисунке с подходящей схемой балки</li>
+		<li>Скопировать результат из поля <em>Расчетный изгибающий момент</em></li>
+	</ul>
+</div>
+<div class="ras4-block" style="border: none;" onclick="$f('#izg_M').val(Ing.Mi(event));">
+	<img class="button" title="" src="/<?=\H::$Dir ?>assets/Balka_1.jpg" alt="балка шарнирная" zakr="8">
+	<img class="button" title="" src="/<?=\H::$Dir ?>assets/Balka_2.jpg" alt="балка защемленная" zakr="12">
+	<img class="button" title="балка консольная" src="/<?=\H::$Dir ?>assets/Balka_3.jpg" alt="балка консольная" zakr="2">
+</div>
+<div>
+	<table>
+		<tbody>
+			<tr>
+				<th colspan="3">Исходные данные для расчета:</th>
+			</tr>
+			<tr>
+				<td>Введите значение распределенной нагрузки, q=</td>
+				<td><input id="q" value="5" size="6" type="text"></td>
+				<td>т/м</td>
+			</tr>
+			<tr>
+				<td>Введите значение длины пролета, L=</td>
+				<td><input id="L" value="4" size="6" type="text"></td>
+				<td>м</td>
+			</tr>
+			<tr>
+				<th colspan="3">Результат расчета:</th>
+			</tr>
+			<tr>
+				<td>Расчетный изгибающий момент, M=</td>
+				<td><input id="izg_M" onclick="this.focus();this.select();" readonly="readonly" size="6" type="text"></td>
+				<td>т*м</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+
+<h2>Определение длины анкеровки и перехлестов арматуры</h2>
+
+<h6>Калькулятор считает по формулам из Пособия по проектированию бетонных и железобетонных конструкций из тяжелого
+	бетона без предварительного напряжения арматуры (к СП 52-101-2003) МОСКВА 2005</h6>
+
+<table style="text-align: left;">
+	<tbody>
+		<tr>
+			<th colspan="2">Длины анкеровки и перехлеста арматуры:</th>
+		</tr>
+		<tr>
+			<td>D<sub>расч</sub>=</td>
+			<td><input id="Darm" onkeyup="" value="10" size="6" type="text"> мм</td>
+		</tr>
+		<tr>
+			<td>D<sub>факт</sub>=</td>
+			<td><input id="Dfarm" value="10" size="6" type="text"> мм</td>
+		</tr>
+		<tr>
+			<td>Бетон</td>
+			<td><select id="bet" class="button" size="1">
+					<option value="B7.5|45.9|4.3">B7.5</option>
+					<option value="B10|61.2|5.7">B10</option>
+					<option value="B15|86.6|7.6">B15</option>
+					<option value="B20|117|9.2">B20</option>
+					<option value="B25|148|9.7">B25</option>
+					<option value="B30|173|11.7">B30</option>
+					<option value="B35|199|13.3">B35</option>
+					<option value="B40|224|14.3">B40</option>
+				</select></td>
+		</tr>
+		<tr>
+			<td>Арматура :</td>
+			<td><select id="arm" class="button" size="1">
+					<option value="A240|2.19|2.19|1.73">A240</option>
+					<option value="A300|2.75|2.75|2.19">A300</option>
+					<option value="A400|3.62|3.62|2.9">A400</option>
+					<option value="A500|4.08|4.43|3.06">A500</option>
+					<option value="B500|3.67|4.23|3.06">B500</option>
+				</select></td>
+		</tr>
+		<tr>
+			<td>Зона анкеровки:</td>
+			<td><select id="napr_sost" class="button" style="width: 110px;" size="1">
+					<option value="1.0|1.2">Растянутая</option>
+					<option value="0.75|0.9">Сжатая</option>
+				</select></td>
+		</tr>
+		<tr>
+			<td colspan="2"><label><input id="pr100" type="checkbox"> -- <strong>100%</strong> стержней стыкуются в одном
+					сечении</label></td>
+		</tr>
+		<tr>
+			<td style="text-align: center; padding: 5px 0;" colspan="2"><input onclick="$f('#Lan').val(Ing.Ank.Lan()); $f('#Li').val(Ing.Ank.Li());"
+				 name="ras4" class="button" value="Расчет" type="button"></td>
+		</tr>
+		<tr>
+			<td>Анкеровка L<sub>an</sub>=</td>
+			<td><input id="Lan" onfocus=" this.select();" readonly="readonly" size="6" type="text"> см</td>
+		</tr>
+		<tr>
+			<td>Перехлест L<sub>i</sub>=</td>
+			<td><input id="Li" onclick=" this.select();" readonly="readonly" size="6" type="text"> см</td>
+		</tr>
+	</tbody>
+</table>
+
+<img src="/<?=\H::$Dir ?>assets/Perehlest.gif" alt="" style="background: #eee;">
+
+<p>В любом случае фактическую длину анкеровки принимают не менее 0,3 * l<sub>0,an</sub>, а также не менее 15 d<sub>s</sub>
+	и 200 мм (учтено в калькуляторе).</p>
+
+<h5>Условия стыковки арматуры внахлест:</h5>
+
+<ul class="clear">
+	<li>относительное количество стыкуемой в одном расчетном сечении элемента рабочей растянутой арматуры периодического
+		профиля должно быть не более 50 %, гладкой арматуры (с крюками или петлями) - не более 25 %;</li>
+	<li>усилие, воспринимаемое всей поперечной арматурой, поставленной в пределах стыка, должно быть не менее половины
+		усилия, воспринимаемого стыкуемой в одном расчетном сечении элемента растянутой рабочей арматурой;</li>
+	<li>расстояние между стыкуемыми рабочими стержнями арматуры не должно превышать 4d<sub>s</sub>;</li>
+	<li>расстояние между соседними стыками внахлестку (по ширине железобетонного элемента) должно быть не менее 2d<sub>s</sub>
+		и не менее 30 мм;</li>
+	<li>При наличии дополнительных анкерующих устройств на концах стыкуемых стержней (приварка поперечной арматуры, загиба
+		концов стыкуемых стержней периодического профиля и др.) длина перепуска стыкуемых стержней может быть уменьшена, но
+		не более чем на 30 %.</li>
+	<li>В любом случае фактическая длина перепуска должна быть не менее 0,4 * α * l<sub>0,an</sub>, не менее 20d<sub>s</sub>
+		и не менее 250 мм (учтено расчетом).</li>
+</ul>
+<!-- Подбор пропорций ингридиентов бетонных смесей -->
+<div style="height: 300px; background: url('/<?=\H::$Dir ?>assets/Concret-mixer.gif') right center no-repeat; background-size: auto 85%;">
+
+
+	<h3>Подбор пропорций ингридиентов бетонных смесей</h3>
+
+	<table id="ingrid" style="width:90%; max-width:500px; background: transparent; border: 2px outset #aaa; text-align: center;">
+		<tbody>
+			<tr>
+				<td colspan="2">Класс бетона :<select id="bet_cl" class="button" size="1" onchange="Selkl_m_Bet()">
+						<option value="B7.5|45.9|4.3">B7.5</option>
+						<option value="B10|61.2|5.7">B10</option>
+						<option value="B15|86.6|7.6">B15</option>
+						<option value="B20|117|9.2">B20</option>
+						<option value="B25|148|9.7">B25</option>
+						<option value="B30|173|11.7">B30</option>
+						<option value="B35|199|13.3">B35</option>
+						<option value="B40|224|14.3">B40</option>
+					</select></td>
+				<td>Цемент :<select id="tcem" class="button" onchange="Selkl_m_Bet()">
+						<option value="400" selected="">M400</option>
+						<option value="500">M500</option>
+					</select></td>
+			</tr>
+			<tr>
+				<th>Массовый состав,<br> Ц:П:Щ, кг</th>
+				<th>Объемный состав<br> на 10 л цемента,<br> П:Щ, л</th>
+				<th>Количество<br> бетона из 10 л<br> цемента, л</th>
+			</tr>
+		</tbody>
+		<tbody>
+			<tr id="prop">
+				<td>1 : 2.6 : 4.5</td>
+				<td>24 : 39</td>
+				<td>50</td>
+			</tr>
+		</tbody>
+	</table>
+
+</div>
+<div>
+	<p>Если вы хотите сделать качественную бетонную смесь самостоятельно, воспользуйтесь этим калькулятором. Он позволит
+		вам подобрать правильные пропорции ингридиентов для создания нужного класса бетона в зависимости от марки
+		используемого вами цемента.</p>
+</div>
+
+
+<h3>Расчет коэффициентов постели для свай</h3>
+
+<div id="prim">
+	<p>Пока нет времени заняться. Если у кого-то есть идеи, алгоритмы или блок-схемы, пишите в Обратную связь!</p>Похоже,
+	займусь ещё не скоро.<br>
+	<p></p>
+</div>
+<script type="text/javascript">
+	//== Определение длин анкеровки и перехлеста
+	Ing.mat.cr(); Ing.mat.cr('arm'); Ing.mat.cr('bet_cl');
+	//== Расчет пропрорций ингридиентов бетона
+	function Selkl_m_Bet() {
+		$f('tr#prop td').each(function (ind, i) {
+			i.textContent = Ing.Bet.prop()[ind];
+		});
+	}
+
+	Selkl_m_Bet();
+
+	$(function () { $f('#pr100')[0].checked = false; });
+</script>

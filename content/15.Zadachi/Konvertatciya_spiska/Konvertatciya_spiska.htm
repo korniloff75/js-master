@@ -1,0 +1,54 @@
+<h2>Задача</h2>
+
+<p>Есть пронумерованный список с с несколькими одинаковыми цифрами, пример:</p>
+<pre>
+1. окно
+1. дом
+1. улица
+2. автомобиль
+2. самолёт
+2. лодка
+</pre>
+<p>Нужно сделать так, чтобы все пункты объединились в один и выглядели так:</p>
+<pre>
+1. окно / дом / улица
+2. автомобиль / самолёт / лодка
+</pre>
+
+<h2>Решение</h2>
+
+<h4>Поле для неформатированного списка</h4>
+
+<div id="prim">
+	<textarea id=txt style="width:100%; height:400px; background: #eee;" placeholder="Вставлять сюда необработанный список, потом нажать кнопку под этим полем">
+</textarea>
+
+<button onclick="getOut()">Конвертировать список</button>
+
+<script type="text/javascript">
+function getOut () {
+	"use strict";
+	var txt= document.getElementById('txt').value.trim().split("\n"), tmp=[];
+	console.log("txt= "+ txt);
+
+	for (var i=0, L=txt.length; i < L; i++) {
+		var parseStr= /^(\d+)\.\s*(.+)$/i.exec(txt[i]);
+		if(parseStr.length) var num= parseStr[1], body= parseStr[2];
+		else continue;
+		tmp[num]= tmp[num] || [];
+		tmp[num].push(body);
+
+	};
+	console.log("tmp= "+ tmp);
+
+	document.getElementById('txt').value='';
+	for (var i=0, L=tmp.length; i < L; i++) {
+		if(!tmp[i]) continue;
+		document.getElementById('txt').value+= i + '. ' + tmp[i].join(' / ') + "\n";
+	};
+}
+</script>
+</div>
+
+<h4>Исходный код</h4>
+<pre><code for="#prim"></code></pre>

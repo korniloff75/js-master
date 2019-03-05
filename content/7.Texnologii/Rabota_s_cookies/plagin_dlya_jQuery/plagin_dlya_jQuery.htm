@@ -1,0 +1,125 @@
+<div>
+	<p>Не найдя в интернете маленького и функционального плагина для работы с cookies, я написал его сам. Он должен был отвечать следующим требованиям:</p>
+
+	<ol>
+		<li>Маленький размер</li>
+		<li>Добавление / удаление данных в cookies</li>
+		<li>Возможность сохранения данных в json</li>
+	</ol>
+
+<p>В итоге вот, что у меня получилось.</p>
+</div>
+
+
+<h4>Исходный код плагина cookie</h4>
+
+<pre><code data-lib="jQuery">
+$.cookie = {
+	set: function set (obj, opts) {
+		if (!(obj = Object(obj))) return;
+		opts = Object.assign({
+			expires: 1,  // сут
+			path: "/",
+			json: '' // name 4 json
+		}, opts || {});
+
+		var expires = (new Date((new Date).getTime() + opts.expires * 3.6e6 * 24)).toUTCString() || null;
+
+		if(opts.json) {
+			document.cookie = opts.json + '=' + JSON.stringify(obj) + ';expires=' + expires  + '; path=' + opts.path;
+
+		} else {
+			Object.keys(obj).forEach(function (i) {
+				if(obj[i] === null)
+					return this.remove(i);
+				document.cookie = i + '=' + obj[i] + ';expires=' + expires  + '; path=' + opts.path;
+			}, this);
+		}
+		return obj;
+	},
+
+	get: function (cookie_name) {
+		if (!cookie_name) return decodeURI(document.cookie);
+
+		var m = document.cookie.match('(^|;)?' + encodeURI (cookie_name) + '=([^;]*?)(;|$)'),
+		out;
+
+		if(m &amp;&amp; (out = m[2]) &amp;&amp; (/^(\[|\{)/i.test(m[2]))) {
+			try {
+				out = JSON.parse(decodeURI (out));
+			} catch (e) {
+				console.error(e);
+			}
+		}
+		return m &amp;&amp; (out || m[2] || null);
+	},
+
+	remove: function (c_names) {
+		// перечислить удаляемые кукисы через запятую
+		var opts = {path: '/'},
+		del = {};
+		for (var i = 0, L = arguments.length; i &lt; L; i++) {
+			if (!this.get(arguments[i]) &amp;&amp; (arguments[i] = Object(arguments[i]))) {
+				opts = Object.assign(opts, arguments[i]);
+				continue;
+			}
+			del[arguments[i]] = 0;
+		}
+		// console.log(opts);
+
+		this.set(del, {path: opts.path, expires: -1});
+	}
+} // cookie
+</code></pre>
+
+
+<h2>API плагина</h2>
+
+<p></p>
+
+<h3>Запись в cookies</h3>
+
+<pre><code data-lib="jQuery">
+$.cookie.set({
+	cookieKey1: 'value',
+	cookieKey2: 'value',
+	cookieKey3: 'value'
+	// etc.
+}, {
+	// Все параметры опциональны
+  expires: 1,     // время жизни в сутках
+	path: '/',      // путь к странице
+	// Имя кукиса, в котором будет храниться JSON
+	json: 'nameForJson'
+});
+</code></pre>
+
+<p>Метод <b>set</b> отвечает за сохранение данных и может принимать 1 или 2 аргумента типа <i>Object</i>. При получении одного объекта метод использует настройки по умолчанию.</p>
+
+<p>Первый объект должен состоять из одной или нескольких пар ключ : значение, которые будут сохранены в cookies броузера для возможности их дальнейшего использования.</p>
+
+<p>Во втором, опциональном, аргументе можно установить кастомные настройки для сохраняемых данных.</p>
+
+<div class="core info">
+	<p>Если во втором аргументе указан ключ <b>json</b> - весь объект из первого аргумента будет сохранён единой json-строкой под именем, указанным в его значении.</p>
+</div>
+
+
+<h3>Чтение cookies</h3>
+
+<pre><code data-lib="jQuery">
+$.cookie.get('cookieKey');
+</code></pre>
+
+<p>Метод <b>get</b> пытается прочитать запись  <em>cookieKey</em> и возвращает либо её значение, либо <em>null</em> -- в случае её отсутствия. При этом, если в <em>cookieKey</em> был записан JSON, значение будет возвращено в виде объекта Object, в иных случаях - строкой.<br></p>
+
+
+<h3>Удаление cookies</h3>
+
+<pre><code data-lib="jQuery">
+$.cookie.remove('cookieKey1', 'cookieKey2', 'cookieKey3', {path: '/'});
+</code></pre>
+
+<p>Метод <b>remove</b> может принимать любое количество строковых аргументов и один опциональный аргумент типа Object, который может располагаться на любой позиции среди других аргументов. Метод будет искать и удалять все записи из cookies по именам строковых аргументов. Если задан аргумент типа Object -- настройки из него будут применены ко всем удаляемым элементам.</p>
+
+<p>Если вам понравился мой маленький плагин и при этом вы уже используете jQuery в своём проекте -- не вижу повода вам не воспользоваться им. На здоровье.<br></p>

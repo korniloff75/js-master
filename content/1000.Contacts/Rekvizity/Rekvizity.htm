@@ -1,0 +1,176 @@
+<p class="core note" style="text-align: left;">
+	<strong>Уважаемые заказчики!</strong> Для исключения возникновения недоразумений с оплатой большая просьба указывать в примечании
+	к платежу адрес вашего сайта и наименование заказанного скрипта или услуги.</p>
+<div>
+	<blockquote>
+		<strong>Из суммы перевода Яндекс-деньгами вычитается комиссия:</strong>
+		<ul>
+			<li>0,5% — за перевод из кошелька;</li>
+			<li>2% — за перевод с карты Visa или MasterCard.</li>
+		</ul>
+	</blockquote>
+
+	<link rel="stylesheet" href="/<?=\H::$Dir ?>req_style.css">
+
+	<div>
+		<form action="https://money.yandex.ru/quickpay/confirm.xml" target="_blank" method="POST" accept-charset="UTF-8" enctype="application/x-www-form-urlencoded">
+			<input type="hidden" value="410011065923190" name="receiver">
+			<!--  -->
+			<input type="hidden" value="Оплата скрипта" name="formcomment">
+			<!--  -->
+			<input type="hidden" value="Оплата скрипта" name="short-dest">
+			<!--  -->
+			<input type="hidden" value="shop" name="quickpay-form">
+			<!--  -->
+			<table class="b-form__grid">
+				<caption>Универсальная форма оплаты</caption>
+				<tbody>
+					<tr>
+						<td class="b-form__label min700">
+							<label>Укажите оплачиваемую услугу</label>
+						</td>
+						<td class="b-form__field">
+							<input type="text" id="targets" maxlength="60" value="" name="targets" class="b-input-text__input" placeholder="Оплачиваемая услуга"
+							 required="required">
+						</td>
+					</tr>
+					<tr>
+						<td class="b-form__label min700">
+							<label>Комментарий</label>
+						</td>
+						<td class="b-form__field">
+							<textarea maxlength="60" name="comment" style="height:5em;" placeholder="Комментарий">
+Сайт -
+Скрипт -
+</textarea>
+						</td>
+					</tr>
+					<tr>
+						<td class="b-form__label min700">
+							<label>Сумма</label>
+						</td>
+						<td class="b-form__field">
+							<input type="text" data-type="number" maxlength="10" id="sum" value="<?= $_GET['s'] ?? 2050 ?>" name="sum" style="text-align: right; width: 100px;"
+							 class="b-input-text__input" required="required">
+							<!--  -->
+							<span class="b-form__input-postfix">руб.</span>
+						</td>
+					</tr>
+					<tr>
+						<td class="b-form__label min700">
+							<label>Способ оплаты</label>
+						</td>
+						<td class="b-form__field">
+							<div onclick="return {'b-form-radio':{name:'b-form-radio',id:'id1163933819932'}}" class="b-form-radio b-form-radio_size_l b-form-radio_theme_grey i-bem b-form-radio_js_inited">
+								<label title="платеж с карты VISA или MasterCard" for="id1163933819941" class="b-form-radio__button b-form-radio__button_id_ b-form-radio__button_disabled_no b-form-radio__button_focused_yes b-form-radio__button_checked_yes b-form-radio__button_side_left">
+									<input type="radio" value="AC" id="id1163933819941" class="b-form-radio__radio" name="paymentType">
+									<img title="" alt="" src="/<?=\H::$Dir ?>assets/YM/quickpay-widget__any-card.png" class="b-icon b-form-radio__ico">
+									<i class="b-form-radio__click"></i>
+								</label>
+								<label title="платеж из кошелька в Яндекс.Деньгах" for="id1163933819964" class="b-form-radio__button b-form-radio__button_id_ b-form-radio__button_disabled_no b-form-radio__button_next-for-checked_yes b-form-radio__button_side_right">
+									<input type="radio" value="PC" id="id1163933819964" class="b-form-radio__radio" name="paymentType" checked="checked">
+									<img title="" alt="" src="/<?=\H::$Dir ?>assets/YM/quickpay-widget__yamoney.png" class="b-icon b-form-radio__ico">
+									<i class="b-form-radio__click"></i>
+								</label>
+							</div>
+						</td>
+					</tr>
+					<tr class="b-form__buttons">
+						<td style="text-align: right;"></td>
+						<td>
+							<input type="submit" name="submit-button" class="b-button__input" value="Оплатить">
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+	</div>
+	<div>
+		<p>Если вы не доверяете протоколам безопасности моего сайта, вы можете
+			<a href="https://money.yandex.ru/to/410011065923190"
+			 target="_blank" title="Произвести платеж с Яндекс-кошелька или банковской карты на официальном сайте поставщика услуги"
+			 rel="nofollow">Заплатить на сайте money.yandex.ru</a>
+		</p>
+	</div>
+	<!-- YM -->
+</div>
+<hr />
+<section class="center">
+	<h5>Банковская карта
+		<svg xmlns="http://www.w3.org/2000/svg" width="47" height="15" viewBox="0 0 47 15" alt="МИР">
+			<defs>
+				<linearGradient id="a" x1="16.705%" x2="81.361%" y1="43.611%" y2="43.611%">
+					<stop stop-color="#38AEE4" offset="0%" />
+					<stop stop-color="#197CCE" offset="100%" />
+				</linearGradient>
+			</defs>
+			<g fill="none">
+				<path fill="#3BA336" d="M4.147 14.13h-4.086v-13.223h4.086c1.829 0 2.231 1.38 2.439 2.069l1.686 5.711c.031.111.066.185.165.19.099-.005.134-.079.165-.19l1.686-5.711c.208-.689.611-2.069 2.439-2.069h4.086v13.223h-4.086v-7.782c-.072-.204-.362-.167-.409.001l-2.452 7.782h-2.86l-2.452-7.782c-.047-.167-.336-.205-.409-.001v7.782zm18.623-13.223h-4.086v13.223h4.086c.702 0 1.116-.334 1.804-1.819l2.729-6.03c.047-.167.343-.205.415-.001v7.85h4.086v-13.223h-4.086c-.919.048-1.369 1.103-1.7 1.819l-2.84 5.963c-.047.167-.336.205-.409.001v-7.782zm11.024 6.032h12.839c-.432 1.282-1.919 2.954-4.219 2.954h-4.534v4.237h-4.086v-7.191z"
+				/>
+				<path fill="url(#a)" d="M46.817 6.281h-6.769c-3.274 0-6.268-1.811-6.787-5.374h9.154c2.79 0 4.941 2.554 4.403 5.374z" />
+			</g>
+		</svg>
+	</h5>
+	<span id="mir">2200020103213825</span>
+
+	<div class="left">
+		<table class="tblList">
+			<tbody>
+				<tr>
+					<td class="nowrap w300">Наименование банка-получателя:</td>
+					<td class="lastVisibleCol">РНКБ БАНК (ПАО), г.СИМФЕРОПОЛЬ</td>
+				</tr>
+				<tr>
+					<td class="nowrap w300">ИНН Банка получателя:</td>
+					<td class="lastVisibleCol">7701105460</td>
+				</tr>
+				<tr>
+					<td class="nowrap w300">КПП Банка получателя:</td>
+					<td class="lastVisibleCol">910201001</td>
+				</tr>
+				<tr>
+					<td class="nowrap w300">БИК:</td>
+					<td class="lastVisibleCol">043510607</td>
+				</tr>
+				<tr>
+					<td class="nowrap w300">Корреспондентский счет:</td>
+					<td class="lastVisibleCol">30101810335100000607</td>
+				</tr>
+				<tr>
+					<td class="nowrap w300">Получатель платежа:</td>
+					<td class="lastVisibleCol">РНКБ БАНК (ПАО), г.СИМФЕРОПОЛЬ</td>
+				</tr>
+				<tr>
+					<td class="nowrap w300">Счет получателя:</td>
+					<td class="lastVisibleCol">30232810440002000004</td>
+				</tr>
+				<tr>
+					<td class="nowrap w300">Назначение платежа:</td>
+					<td class="lastVisibleCol">Пополнение карты 2200020103213825 Корнилов Павел Александрович</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+</section>
+
+<hr />
+
+<table id="WM" class="b-form__grid" style="margin: auto;">
+	<caption align="top">Электронные платежи
+		<img src="/<?=\H::$Dir ?>assets/webmoney.jpg" />
+	</caption>
+	<tbody>
+		<tr>
+			<td>Z146965124780</td>
+			<td>R374477004237</td>
+		</tr>
+	</tbody>
+</table>
+
+
+<script type="text/javascript">
+	$f('#rncb td,#WM td,span#mir').on('click', function(e) {
+		$(this).select();
+	})
+</script>

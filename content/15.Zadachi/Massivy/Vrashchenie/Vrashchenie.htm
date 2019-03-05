@@ -1,0 +1,44 @@
+<h2>Условие</h2>
+<div>
+	<p>Требуется реализовать вращение значений матрицы (2-мерного массива) против часовой стрелки.</p>
+	<p>При этом каждое значение строки должно становиться аналогичным значением столбца.</p>
+</div>
+
+
+<h2>Решение</h2>
+
+<div id="prim" class=center>
+	<div>
+		<div id="mtx" style="border:3px solid red; display:inline-block; padding:5px;"></div>
+	</div>
+	<div>
+		<button onclick="rotateMatrix(newMatrix)">ROTATE</button>
+	</div>
+	<br>
+
+	<script type="text/javascript">
+	var matrix = [
+	  [0,1,0],
+		[1,1,1],
+		[0,0,1]
+	], newMatrix=[];
+
+	function rotateMatrix (m) {
+		var tmpMatrix=[];
+		document.getElementById('mtx').innerHTML='';
+		for (var i=0, L=m.length; i < L; i++) {
+			for (var j=0, L1=m[0].length; j < L1; j++) {
+				tmpMatrix[j]=tmpMatrix[j] || [];
+				tmpMatrix[j][i]= m[i][L1-1-j];
+				document.getElementById('mtx').innerHTML+=m[i][j]+' ';
+			};
+			document.getElementById('mtx').innerHTML+='<br />';
+		};
+		newMatrix=tmpMatrix;
+	}
+
+	rotateMatrix(matrix);
+	</script>
+</div>
+
+<pre><code for="#prim"></code></pre>

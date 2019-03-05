@@ -1,0 +1,128 @@
+<p>На данной странице сделаем сравнительный анализ способов обработки больших массивов и постараемся определить максимально эффективный из них.</p>
+<p>Данные в разных броузерах, конечно, будут отличаться. Насколько мне известно, Мозилла, к примеру, сильно оптимизирует код, сглаживая различия.</p>
+<p>Интересно читать в инете про проблемы с обработкой массивов в 10...100 тысяч элементов. С такими задачами сегодня успешно справляются даже мобильные броузеры, при условии, конечно, грамотно составленного кода. Поэтому мы не будем размениваться на "тысячные" массивы и будем тестировать во всех вариантах массив с миллионом элементов.</p>
+
+
+<h2>Цикл <em>for</em></h2>
+
+<h3>Тест 1</h3>
+
+<p>В данном тесте мы создадим пустой динамический массив и будем наполнять его значениями от 1 до 1е6. Наполнение массива будем производить через нативный метод <em>push</em>.</p>
+<p>Перебор массива проводим циклом <em>for</em>.</p>
+<p><button onclick="range1(1,1e6)">Start Test 1</button></p>
+
+<div id="code1">
+	<div id="t1" class="result">
+		<h4>Результат теста</h4>
+		range1(1,1e6)
+	</div>
+
+	<script>
+	function range1 (a,b) {
+		var start = new Date(), c = [];
+		for (var i=a; i<=b; i++) {
+		c.push(i);
+		}
+
+		document.getElementById('t1').innerHTML+= '<br> Время исполнения, мс - <b>' + (new Date() - start) + '</b>';
+		return c;
+	}
+	</script>
+</div>
+
+<h4>Исходный код теста:</h4>
+<pre><code for="#code1" saldom=noLib></code></pre>
+
+
+
+<h2>Тест 2</h2>
+
+<p>В данном тесте мы создадим пустой динамический массив и будем наполнять его значениями от 1 до 1е6. Наполнение массива будем производить присваиванием значения каждому индексу.</p>
+<p>Перебор массива проводим циклом <em>for</em>.</p>
+<p><button onclick="range2(1,1e6)">Start Test 2</button></p>
+
+<div id="code2">
+	<div id="t2" class="result">
+		<h4>Результат теста</h4>
+		range2(1,1e6)
+	</div>
+
+	<script>
+	function range2 (a,b){
+		var start = new Date(), c = [];
+		 for (var i=a; i<=b; i++) {
+			c[i-a] = i;
+		}
+
+		document.getElementById('t2').innerHTML+= '<br> Время исполнения, мс - <b>' + (new Date() - start) + '</b>';
+		return c;
+	}
+	</script>
+</div>
+
+<h4>Исходный код теста:</h4>
+<pre><code for="#code2" saldom=noLib></code></pre>
+
+
+
+<h2>Тест 3</h2>
+
+<p>В данном тесте мы создадим пустой фиксированный массив и будем наполнять его значениями от 1 до 1е6. Наполнение массива будем производить присваиванием значения каждому индексу.</p>
+<p>Перебор массива проводим циклом <em>for</em>.</p>
+<p>Теоретически, это должен быть самый производительный способ.</p>
+<p><button onclick="range3(1,1e6)">Start Test 3</button></p>
+
+<div id="code3">
+	<div id="t3" class="result">
+		<h4>Результат теста</h4>
+		range3(1,1e6)
+	</div>
+
+	<script>
+	function range3 (a,b){
+		var start = new Date(), len = Math.abs(a - b) + 1, c= new Array(len);
+		for(var i=0; i < len; i++) {
+			c[i] = a + i
+		}
+
+		document.getElementById('t3').innerHTML+= '<br> Время исполнения, мс - <b>' + (new Date() - start) + '</b>';
+		return c;
+	}
+	</script>
+</div>
+
+<h4>Исходный код теста:</h4>
+<pre><code for="#code3" saldom=noLib></code></pre>
+
+<!--
+
+<h2>Цикл <em>forEach</em></h2>
+
+
+<h3>Тест 4</h3>
+
+<p>Аналог теста 1. Наполнение массива будем производить через нативный метод <em>push</em>.</p>
+<p>Перебор массива проводим циклом <em>for</em>.</p>
+<p><button onclick="range1(1,1e6)">Start Test 4</button></p>
+
+<div id="code1">
+	<div id="t4" class="result">
+		<h4>Результат теста</h4>
+	</div>
+
+	<script>
+	function range4 (a,b) {
+		var start = new Date(), c = [];
+		for (var i=a; i<=b; i++) {
+		c.push(i);
+		}
+
+		document.getElementById('t1').innerHTML+= '<br> Время исполнения, мс - <b>' + (new Date() - start) + '</b>';
+		return c;
+	}
+	</script>
+</div>
+
+<h4>Исходный код теста:</h4>
+<pre><code for="#code1" saldom=noLib></code></pre>
+ -->

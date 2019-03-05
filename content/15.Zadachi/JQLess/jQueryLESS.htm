@@ -1,0 +1,131 @@
+<p>Хоть эти задачи предназначены для выполнения при помощи jQuery, привожу их решения на чистом JS.</p>
+
+<h3>Условие</h3>
+
+<div>
+	1. Напишите функцию, которая получает 3 параметра.
+	<p>1) id элемента, с которым надо работать.</p>
+	<p>2) Название атрибута, который нужно изменить.</p>
+	<p>3) Новое значение указанного атрибута.</p>
+	Функция в результате своей работы должна изменить указанный атрибут указанного элемента.
+</div>
+
+<h3>Решение</h3>
+
+<h4>Демо</h4>
+
+<div id="task_1" class="prim">
+	<p id="f1" style="border:3px dotted green; color: blue;" >Исходный элемент для задачи 1</p>
+	<button class=button onclick="f1(document.getElementById('f1'), 'style', '')">Работа f1</button>
+	<script>
+		function f1 (elem, at, newVal) {
+			var id= elem.id;
+			var atr= elem.getAttribute(at);
+			elem.setAttribute(at, newVal);
+		}
+	</script>
+</div>
+
+<h4>Исходный код</h4>
+<pre><code for="#task_1"></code></pre>
+
+
+<h3>Условие</h3>
+
+<div>
+		2. Ваша задача добавить в самый конец тэга новый абзац с любым текстом
+		и дать этому абзацу id="newparagraph".
+		После этого изменить цвет фона этого параграфа на черный, а цвет текста на белый.
+		Используйте цепные функции.
+	</div>
+
+<h3>Решение</h3>
+
+<h4>Демо</h4>
+
+<div id="task_2" class="prim">
+	<div id="f2" style="border:3px dotted green; color: blue;" >
+		Исходный элемент для задачи 2
+	</div>
+	<button class=button onclick="f2(document.getElementById('f2'))">Работа f2</button>
+
+	<script>
+	function f2 (tag) {
+		var newP= document.createElement('p');
+		newP.id= newP.textContent= 'newparagraph';
+		newP.style.cssText= 'background: #000; color: #fff;';
+		tag.appendChild(newP);
+	}
+	</script>
+</div>
+
+<h4>Исходный код</h4>
+<pre><code for="#task_2"></code></pre>
+
+
+<h3>Условие</h3>
+
+<div>
+	3. Ваша задача перебрать все картинки нашей страницы и добавить красную 3px рамку тем из них, у которых в атрибуте title встречается буква "т", а высота больше 50, но меньше 100.
+</div>
+
+<div>
+	4. Примените анимацию, во время которой увеличьте рамку до значения в 10px за 5 секунд.
+	После выполнения анимации плавно скройте изображение с помощью функции fadeOut() за 5 секунд.
+	Используйте цепные функции.
+	Подсказка: свойство для увеличения размера рамки в обычном css записывается как border-width.
+</div>
+
+<h3>Решения</h3>
+
+<h4>Демо</h4>
+
+<div id="task_3" class="prim">
+	<div>
+		<img src="/<?=\H::$Dir ?>assets/HTML_CSS.gif" title="т111" style="height:55px;" />
+		<img src="/<?=\H::$Dir ?>assets/HTML_CSS.gif" title="т222" />
+		<img src="/<?=\H::$Dir ?>assets/porabotitel.jpg" style="width: 300px;" title="т333" />
+	</div>
+	<button class=button onclick="f3('porabotitel')">Работа f3</button>
+
+	<script>
+		function f3 (n) {
+		var col= document.images;
+
+		[].forEach.call(col, function(i) {
+			var h= parseInt(getComputedStyle(i).height);
+			if(i.title && /т/.test(i.title) && h>50 && h<100) {
+				i.style.border= '3px solid red';
+			}
+
+			// 4
+			if(new RegExp(n,'i').test(i.src)) {
+				i.hidden=0;
+				i.style.opacity= 1;
+				i.style.border = '1px outset green';
+
+				var bI= setInterval(function() {
+						if(parseInt(i.style.borderWidth)>=10) {
+							clearInterval(bI);
+							return
+						}
+						i.style.borderWidth= parseInt(i.style.borderWidth) + 1 + 'px';
+					},1000);
+
+				setTimeout(function() {
+					var op= setInterval(function() {
+						if(i.style.opacity==0) {
+							clearInterval(op);
+							i.hidden=1;
+						}
+						i.style.opacity-=.01;
+					},100)
+				}, 7000);
+			}
+		});
+	}
+	</script>
+</div>
+
+<h4>Исходный код</h4>
+<pre><code for="#task_3"></code></pre>

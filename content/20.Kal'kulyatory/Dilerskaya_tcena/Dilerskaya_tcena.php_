@@ -1,0 +1,78 @@
+<?php
+include \H::$Dir  . 'assets/handler.php';
+?>
+
+<!--
+<script src="/js/modules/KFF_Lite.min.js"></script> -->
+
+<style type="text/css" media="screen">
+	#calc_t {border-collapse:collapse; border-spacing: 2px;}
+	#calc_t th{background:#1D5B94; color:#ddd}
+	#calc_t td{padding:7px; vertical-align:top; border:1px solid #aaa;}
+
+</style>
+
+<!--  -->
+<table id="calc_t" width="590">
+ <tr align="center">
+  <th colspan=3> Выбрать раздел :
+    <select id="bname" onchange="changeBase(this.value);" size="1">
+    	<option value="kamaz_serial">Серийные модели</option>
+    	<option value="kamaz_special">Специальные модели</option>
+    	<option value="kamaz_kmu">Комплектующие</option>
+		</select>
+
+ <tr>
+  <th rowspan=2>Выберите модель:<br />
+  	<input type="text" id="search" value="" style="width:150px;" placeholder="Найти..." oninput="search(this.value);"/>
+  <th colspan=2>Цена завода
+ <tr>
+  <th>без НДС:
+  <th width="150">с НДС:
+ <tr align="center">
+  <td>
+  <select id="model" onchange="price();" size="1" style="max-width:150px;">
+  </select>
+  <td id="priceZ">
+  <td id="priceZ+NDS">
+ <tr>
+  <td id="mod_descr" colspan=3><!-- Описание -->
+ <tr>
+  <td colspan=3><b>Дилерская скидка :</b>
+   <select id="rub_pr" onchange="price();" size="1">
+   	<option value="rub">Рубли</option>
+   	<option value="pr" selected="selected">Проценты</option>
+   </select>
+   <input type="text" id="dil_sk" value="10" onkeyup="price();" />
+ <tr>
+  <td colspan=3><b>Дополнительное оборудование :</b>
+  <input type="text" id="dop_oborud" value="0" onkeyup="price();"/> руб.
+ <tr>
+  <td colspan=3><b>Стоимость хранения :</b>
+  <input type="text" id="hran" value="0" onkeyup="price();"/> руб.
+ <tr>
+  <td colspan=3><b>Стоимость доставки :</b>
+  <input type="text" id="dostavka" value="0" onkeyup="price();"/> руб.
+ <tr>
+  <td colspan=2><b>Дополнительные Наценки (Скидки*)</b>,
+  <select id="rub_pr1" onchange="price();" size="1">
+   <option value="rub">Рубли</option>
+   <option value="pr" selected="selected">Проценты</option>
+  </select>
+  <p style="font-size:12px; margin:5px;"><b>*</b> Скидки задавать отрицательными, например, <span style="padding:3px 5px;"><b>-10000</b></span></p>
+  <td id="nacenka" style="text-align:center;"><input type="button" class="button" value=" + " title="Еще" onclick="nac_plus();"/><br /></td>
+ <tr>
+  <th rowspan=2>Цена от дилера
+  <th>без НДС:
+  <th width="120">с НДС:
+ <tr align="center">
+  <td id="price">
+  <td id="price+NDS">
+ <tr>
+  <td colspan=3>
+</table>
+
+<div id="prim"></div>
+
+
+<script src="/<?=\H::$Dir ?>assets/KamAZ_IC.js" type="text/javascript" charset="utf-8"></script>

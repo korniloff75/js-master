@@ -1,0 +1,471 @@
+/*
+MAPS компиллятор не тянет
+*/
+
+@main_color: #fff;
+@font_color: #262729;
+@color-hidden: #d48;
+@help_color: #d8d7d6;
+@help_color_add: #ccc2bf;
+@pattern_url: url('/images/bg_pattern.png');
+@all_bg: transparent;
+
+@transition_dur: .5s;
+@transition_delay: .2s;
+@transition_func: cubic-bezier(0.075, 0.82, 0.165, 1);
+@transition_all: all @transition_dur @transition_delay @transition_func;
+// @transition_all: none;
+
+@desktop: ~"(min-width: 768px)";
+@tablet: ~"(min-width: 500px) and (max-width: 768px)";
+@phone: ~"(max-width: 578px)";
+
+
+// @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
+
+@font-face {
+  font-family: "Source Sans Pro";
+  font-style: normal;
+  font-weight: normal;
+  src: url("/assets/fonts/Source Sans Pro/SourceSansPro-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Source Sans Pro";
+  font-style: normal;
+  font-weight: bold;
+  src: url("/assets/fonts/Source Sans Pro/SourceSansPro-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Source Sans Pro";
+  font-style: italic;
+  font-weight: normal;
+  src: url("/assets/fonts/Source Sans Pro/SourceSansPro-Italic.ttf") format("truetype");
+}
+
+
+// MIXINDS
+
+.desktop(@rules) {
+  @media (min-width: 768px) { @rules(); }
+}
+
+.phone(@rules) {
+  @media (max-width: 570px) {@rules(); }
+}
+
+
+.noselect() {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+	-khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+	user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+	&::selection {
+		background-color:transparent;
+		// color:#000;
+	}
+}
+
+.pos_abs(@w:100%,@h:100%) {
+	// @width: `document.body.clientHWidth`;
+	// @height: `document.body.clientHeight`;
+	// @landscape: boolean(@width >= @height);
+	position: absolute;
+	width: @w;
+	height: @h;
+
+	min-width: @w;
+	min-height: @h;
+
+	// min-width: if(not(@landscape), @w, unset);
+	// min-height: if(@landscape, @w, unset);
+}
+
+
+.display(@display: flex) {
+	display: ~"-webkit-@{display}";
+	display: ~"-ms-@{display}"; // IE11
+	display: ~"-moz-@{display}";
+	display: @display;
+}
+
+
+/* Start FLEX */
+
+.flex(@wrap:wrap, @dir:column, @basis:auto) {
+	display: -webkit-box;
+	display: -moz-box;
+	.display(flex);
+
+	.flex-wrap(@wrap);
+	.flex-direction(@dir);
+	.flex-basis(@basis);
+}
+
+.flex-basis(@width: auto) {
+  -webkit-flex-basis: @width;
+      -ms-flex-basis: @width;
+          flex-basis: @width;
+}
+
+.flex-justify(@justifyStyle) {
+	.ms-flex-justify(@justifyStyle);
+	-webkit-justify-content: @justifyStyle;
+	justify-content: @justifyStyle;
+}
+
+.flex-align-items(@alignStyle) {
+	-ms-flex-align:@alignStyle;
+	-webkit-align-items:@alignStyle;
+	 align-items: @alignStyle;
+}
+
+.flex-align-self(@selfAlignStyle) {
+	.ms-flex-align-self(@selfAlignStyle);
+	-webkit-align-self:@selfAlignStyle;
+	align-self: @selfAlignStyle;
+}
+
+.flex-order(@order) {
+	-ms-flex-order:@order;
+	-webkit-order:@order;
+	order:@order;
+}
+
+.flex-direction(@direction) {
+	-ms-flex-direction:@direction;
+	-webkit-flex-direction:@direction;
+	flex-direction:@direction;
+}
+
+.flex-wrap(@wrap) {
+	-ms-flex-wrap:@wrap;
+	-webkit-flex-wrap:@wrap;
+	 flex-wrap:@wrap;
+}
+
+/* These are the conditional mixins for the different syntax for IE10 Flexbox*/
+.ms-flex-justify(@msJustify) when (@msJustify = space-between)  {
+	-ms-flex-pack:justify;
+}
+
+.ms-flex-justify(@msJustify) when (@msJustify = space-around) {
+	-ms-flex-pack:distribute;
+}
+
+.ms-flex-justify(@msJustify) when (@msJustify = flex-end) {
+	-ms-flex-pack:end;
+}
+
+.ms-flex-justify(@msJustify) when (@msJustify = flex-start) {
+	-ms-flex-pack:start;
+}
+
+.ms-flex-justify(@msJustify) when (@msJustify = center) {
+	-ms-flex-pack:center;
+}
+
+.ms-flex-align-self(@msSelfAlign) when (@msSelfAlign = flex-end) {
+	-ms-flex-item-align: end;
+}
+
+.ms-flex-align-self(@msSelfAlign) when (@msSelfAlign = flex-start) {
+	-ms-flex-item-align: start;
+}
+
+.ms-flex-align-self(@msSelfAlign) when (@msSelfAlign = auto), (@msSelfAlign = center),(@msSelfAlign = baseline), (@msSelfAlign = stretch) {
+	-ms-flex-item-align: @msSelfAlign;
+}
+
+/* End FLEX */
+
+
+.transition(@property: all, @duration: @transition_dur, @delay: @transition_delay, @function: @transition_func) when not (@property = transform) {
+	-webkit-transition: @property @duration @delay @function;
+	-moz-transition: @property @duration @delay @function;
+	-o-transition: @property @duration @delay @function;
+	transition: @property @duration @delay @function;
+}
+
+//Специальный вариант для трансформа
+.transition (@property: all,@duration: @transition_dur, @delay: @transition_delay, @ease: ease-in-out) when (@property=transform) {
+	-webkit-transition: -webkit-transform @duration @delay @ease;
+	-moz-transition: -moz-transform @duration @delay @ease;
+	-o-transition: -o-transform @duration @delay @ease;
+	//Кажется, -ms-transition официально не существует
+	-ms-transition: -ms-transform @duration @delay @ease;
+	transition: @property @duration @delay @ease;
+}
+
+.transform(@val) {
+	-webkit-transform: @val;
+	-moz-transform: @val;
+	-ms-transform: @val;
+	-o-transform: @val;
+	transform: @val;
+}
+
+.transform-origin (@x:center, @y:center) {
+	-webkit-transform-origin: @x @y;
+	-moz-transform-origin:    @x @y;
+	-ms-transform-origin:     @x @y;
+	-o-transform-origin:      @x @y;
+	transform-origin:      @x @y;
+}
+
+.opacity (@val: 0.5) {
+	-webkit-opacity: @val;
+	-moz-opacity: @val;
+	opacity: @val;
+}
+
+.animation (@name, @duration: 300ms, @delay: 0, @ease: ease) {
+	-webkit-animation: @name @duration @delay @ease;
+	-moz-animation:    @name @duration @delay @ease;
+	-ms-animation:     @name @duration @delay @ease;
+	animation:     @name @duration @delay @ease;
+}
+
+/* @group matrix() */
+
+.matrix (@rotate: 0.86, @scale: 0.5, @translate: -0.5, @skew: 0.86, @x: 0, @y: 0) {
+	-webkit-transform: matrix(@rotate, @scale, @translate, @skew, @x, @y);
+		 -moz-transform: matrix(@rotate, @scale, @translate, @skew, @x, @y);
+			-ms-transform: matrix(@rotate, @scale, @translate, @skew, @x, @y);
+			 -o-transform: matrix(@rotate, @scale, @translate, @skew, @x, @y);
+					transform: matrix(@rotate, @scale, @translate, @skew, @x, @y);
+
+	filter: e(%("progid:DXImageTransform.Microsoft.Matrix(M11=%d, M12=%d, M21=%d, M22=%d, sizingMethod='auto expand')", @rotate, @scale, @translate, @skew));
+}
+
+.matrix3d (@values: "1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1") {
+	-webkit-transform: matrix3d(e(@values));
+		 -moz-transform: matrix3d(e(@values));
+			-ms-transform: matrix3d(e(@values));
+			 -o-transform: matrix3d(e(@values));
+					transform: matrix3d(e(@values));
+}
+
+/* @end */
+
+
+.columns (@columnCount: auto, @columnGap: normal) {
+  -webkit-columns: @columnCount;
+     -moz-columns: @columnCount;
+      -ms-columns: @columnCount;
+          columns: @columnCount;
+
+  -webkit-column-gap: @columnGap;
+     -moz-column-gap: @columnGap;
+      -ms-column-gap: @columnGap;
+          column-gap: @columnGap;
+}
+
+
+/* Box Group
+========================== */
+
+.box-align (@value) { /* ( start | end | center | baseline | stretch ) */
+-webkit-box-align: @value;
+	 -moz-box-align: @value;
+		-ms-box-align: @value;
+				box-align: @value;
+
+.display(box);
+}
+
+.box-direction (@value) { /* ( normal | reverse | inherit ) */
+-webkit-box-align: @value;
+	 -moz-box-align: @value;
+		-ms-box-align: @value;
+				box-align: @value;
+
+.display(box);
+}
+
+.box-orient (@value) { /* ( horizontal | vertical | inline-axis | block-axis | inherit ) */
+-webkit-box-align: @value;
+	 -moz-box-align: @value;
+		-ms-box-align: @value;
+				box-align: @value;
+
+.display(box);
+}
+
+.box-pack (@value) { /* ( start | end | center | justify ) */
+-webkit-box-align: @value;
+	 -moz-box-align: @value;
+		-ms-box-align: @value;
+				box-align: @value;
+
+.display(box);
+}
+
+.box-sizing (@type: border-box) { /* ( content-box | border-box | inherit ) */
+-webkit-box-sizing: @type;
+	 -moz-box-sizing: @type;
+				box-sizing: @type;
+}
+
+/* @group box-shadow() */
+
+.box-shadow-init (@all) {
+	-webkit-box-shadow: @all;
+					box-shadow: @all;
+}
+
+.box-shadow (@values: "1px 1px 2px #000, 0 0 4px #fff, inset 1px 3px 2px #000") { /* for multi values */
+	-webkit-box-shadow: e(@values);
+					box-shadow: e(@values);
+}
+
+.box-shadow (@option, @values) when (@option = in) {
+	.box-shadow-init(inset @values);
+}
+
+.box-shadow (@option, @values) when (@option = out) {
+	.box-shadow-init(@values);
+}
+
+.box-shadow (@parameters, @color, @alpha) when (isnumber(@alpha)) {
+	.box-shadow-init(@parameters fade(@color, @alpha));
+}
+
+/* @end */
+
+// /MIXINDS
+
+
+html, body {
+	margin: 0;
+	padding: 0;
+	// overflow-x: hidden;
+	color: @font_color;
+	font-family: 'Source Sans Pro', sans-serif;
+}
+
+* {
+	.box-sizing();
+	// color: @font_color;
+	background: @all_bg;
+	.transition(@transition_all, ~'', ~'', ~'');
+}
+
+.flex, [class|="flex"] {
+	.display(flex);
+}
+.flex.inline, [class|="flex"][class*="-inline"] {
+	.display(inline-flex);
+}
+.flex.wrap, [class|="flex"][class*="wrap"] {
+	.flex-wrap(wrap);
+}
+
+[class|="flex"] {
+	&[class*="-100"] {
+		.flex-basis(100%);
+	}
+	&[class*="-column"] {
+		.flex-direction(column);
+	}
+	&[class*="-justify"] {
+		&[class*="-around"] {
+			.flex-justify(space-around);
+		}
+		&[class*="-between"] {
+			.flex-justify(space-between);
+		}
+	}
+	&.center {
+		.flex-align-items(center);
+	}
+}
+/* /flex */
+
+
+// menu
+.hidden, .hidden * {
+	color: @color-hidden !important;
+}
+
+
+// CORE
+.core {
+	display: block;
+	min-height: 30px;
+	border-style: solid;
+	border-width: 3px 5px 3px 15px;
+	padding: 5px 10px;
+	font-size: 16px;
+	line-height: 1.2;
+	margin: 5px 0;
+	font-family: arial, sans-serif;
+
+	&.strong {
+		background: #fcc;
+		border-color: #900;
+		color: #311;
+	}
+
+	&.warning {
+		background: #fc0 !important;
+		color: #000 !important;
+		border-color: #000 !important;
+	}
+
+	&.message {
+		background: #080 !important;
+		color: #fff !important;
+		text-align: center !important;
+		border-color: #fff !important;
+	}
+
+	&.info {
+		color: #131 !important;
+		border-color: #484 !important;
+		background: #edf9ed !important;
+	}
+
+	&.note {
+		color: #123 !important;
+		border-color: #468 !important;
+		background: #eaf0f9 !important;
+	}
+
+	&.bar {
+		border-color: #050;
+		font-size: 1em;
+		font-weight: 400;
+		color: #def;
+		background: #172;
+
+		a {
+			color: #fd5;
+		}
+
+		&::before {
+			content: "ADM ";
+			color: #900;
+			background: #def;
+		}
+	}
+
+	&.editpanel {
+		line-height: 2.2;
+		background: #195;
+		position: fixed;
+		top: 0;
+		i, button {
+			font-size: 1.2em;
+			margin: 0 .1em
+		}
+	}
+
+	a {
+		color: #159;
+	}
+	a:hover {
+		color: #159 + #444;
+	}
+} // .core

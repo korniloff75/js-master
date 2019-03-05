@@ -1,0 +1,178 @@
+<script charset="utf-8" type="text/javascript" src="/js/modules/Ing.js"></script>
+
+<style>
+table {
+	margin: 1em auto;
+}
+table td {
+	padding: .5em 5px;
+}
+#prop td {
+	font-size: 120%;
+	border: 1px solid;
+}
+</style>
+
+<p>Расчет и проверка принятого армирования железобетонных изгибаемых элементов прямоугольного сечения</p>
+
+<table style="margin-bottom: 20px;">
+	<tbody >
+	<tr ><th  colspan="2">Исходные данные по железобетонному сечению:</th></tr>
+	<tr >
+	<td >Бетон :</td>
+	<td ><select id="bet" size="1" class="button">
+	<option  value="B7.5|45.9|4.3">B7.5</option>
+	<option  value="B10|61.2|5.7">B10</option>
+	<option  value="B15|86.6|7.6">B15</option>
+	<option  value="B20|117|9.2">B20</option>
+	<option  value="B25|148|9.7">B25</option>
+	<option  value="B30|173|11.7">B30</option>
+	<option  value="B35|199|13.3">B35</option>
+	<option  value="B40|224|14.3">B40</option>
+	</select></td>
+	</tr>
+	<tr >
+	<td >Коэффициент &gamma;<sub >b2</sub></td>
+	<td ><input id="Gb_2"  type="text" value="0.9" size="5"></td>
+	</tr>
+	<tr >
+	<td >Коэффициент для бетонов:
+	<ul style="font-size:70%;">
+	<li >тяжелого (0,85)</li>
+	<li >мелкозернистого А; легкого (0,8)</li>
+	<li >мелкозернистого Б, В; ячеистого (0,75)</li>
+	</ul>
+	</td>
+	<td ><select id="Ktb" style="width: 80px; font-size: 12px;" class="button">
+	<option  value="0.85">0.85</option>
+	<option  value="0.8">0.8</option>
+	<option  value="0.75">0.75</option>
+	</select></td>
+	</tr>
+	<tr >
+	<td >Арматура :</td>
+	<td ><select id="arm" class="button" size="1">
+	<option  value="A240|2.19|2.19|1.73">A240</option>
+	<option  value="A300|2.75|2.75|2.19">A300</option>
+	<option  value="A400|3.62|3.62|2.9">A400</option>
+	<option  value="A500|4.08|4.43|3.06">A500</option>
+	<option  value="B500|3.67|4.23|3.06">B500</option>
+	</select></td>
+	</tr>
+	</tbody>
+</table>
+<table >
+<tbody >
+<tr ><th  colspan="2">Габариты сечения:</th></tr>
+<tr >
+<td >Ширина сечения, B=</td>
+<td ><input id="b"  type="text" value="40" size="5"> см</td>
+</tr>
+<tr >
+<td >Высота сечения, H=</td>
+<td ><input id="h"  type="text" value="40" size="5"> см</td>
+</tr>
+<tr >
+<td >Защитный слой бетона, а=</td>
+<td ><input id="a"  type="text" value="4" size="5"> см</td>
+</tr>
+</tbody>
+</table>
+
+
+<div style="clear: left; text-align: center;">
+	<input  onclick="$f('#cont').html($f('#ras4et').html());" class="button" type="button" value="Расчет армирования">&nbsp; <input  onclick="$f('#cont').html($f('#prov').html());" class="button" type="button" value="Проверка армирования">
+</div>
+
+<div id="cont" style="margin: 20px 10px; font-size: 14px;">&nbsp;</div>
+
+<!-- Расчет -->
+<div style="display: none;">
+
+<div id="ras4et" >
+
+<h4>Расчет армирования</h4>
+
+<div >
+<p >Чтобы рассчитать рабочее армирование, требуется ввести необходимые исходные данные в форму ниже и нажать на кнопку "Рассчитать". В результатах расчета будет показано необходимая площадь арматуры, способной воспринять расчетный изгибающий момент.</p>
+</div>
+<table style="margin: auto;">
+	<tbody >
+	<tr ><th  colspan="2">Исходные данные для расчета:</th></tr>
+	<tr >
+	<td >Изгибающий момент</td>
+	<td ><input id="M_izg"  type="text" value="7" size="7"> т*м</td>
+	</tr>
+	<tr >
+	<td >Минимальный<br>процент армирования</td>
+	<td ><input id="minPer"  type="text" value="0.3" size="7"> %</td>
+	</tr>
+	<tr >
+	<td  colspan="2"><input  onclick="rasch()" type="button" class="button" value="Рассчитать"></td>
+	</tr>
+	<tr ><th  colspan="2">Результаты расчета:</th></tr>
+	<tr >
+	<td id="trass"  colspan="2"><!-- Трассировка --></td>
+	</tr>
+	<tr >
+	<td >Необходимая площадь<br>армирования рабочей зоны, <strong >A<sub >s</sub></strong>=</td>
+	<td  valign="bottom"><input id="As"  onclick="this.focus();this.select();" type="text" readonly="readonly" size="7"> см<sup >2</sup></td>
+	</tr>
+	<tr >
+	<td >&nbsp;</td>
+	<td id="ArmSt" class="right" >&nbsp;</td>
+	</tr>
+	</tbody>
+</table>
+</div>
+
+
+<!-- /Расчет --> <!-- Проверка -->
+<div id="prov" >
+<h4>Проверка армирования</h4>
+
+<div >
+<p >Чтобы проверить принятое сечение, требуется ввести необходимые исходные данные и нажать на кнопку "Проверить". В результатах проверки будет показан максимальный изгибающий момент, что сможет воспринять проверяемое сечение.</p>
+</div>
+<table style="margin: auto;">
+	<tbody >
+	<tr ><th  colspan="2">Исходные данные для проверки:</th></tr>
+	<tr >
+	<td >Принятая площадь<br>армирования рабочей зоны, <strong >A<sub >s</sub></strong>=</td>
+	<td ><input id="As_p"  type="text" value="5.9" size="7"> см<sup >2</sup></td>
+	</tr>
+	<tr >
+	<td ><input  onclick="prover()" type="button" class="button" value="Проверить"></td>
+	</tr>
+	<tr ><th  colspan="2">Результаты проверки:</th></tr>
+	<tr >
+	<td id="trass_p"  colspan="2"><!-- Трассировка --></td>
+	</tr>
+	<tr >
+	<td >Изгибающий момент, способный<br>восприниматься сечением, <strong >М<sub >max</sub></strong>=</td>
+	<td  valign="bottom"><input id="M_izg_p"  onclick="this.focus();this.select();" type="text" readonly="readonly" size="7"> т*м</td>
+	</tr>
+	</tbody>
+</table>
+</div>
+<!-- /Проверка --></div>
+<div id="prim" >&nbsp;</div>
+<!-- prim -->
+<script type="text/javascript">
+Ing.mat.cr(); Ing.mat.cr('arm'); Ing.mat.cr('Ktb','0');
+function rasch() {
+	$f('#trass').html(Ing.R.trass());
+	$f('#As').val(Ing.R.Per().toFixed(2));
+	$f('#ArmSt').html('');
+	var $ArmSt = $f('#ArmSt');
+
+	for (var i=2; i <= 6 ; i++) {
+		$ArmSt[0].innerHTML += Ing.R.ArmSt(i)
+	};
+};
+
+function prover() {
+	$f('#trass_p').html(Ing.Pr.trass());
+	$f('#M_izg_p').val(Ing.Pr.M_izg().toFixed(2));
+}
+</script>

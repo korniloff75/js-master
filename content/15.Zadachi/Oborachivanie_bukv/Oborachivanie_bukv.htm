@@ -1,0 +1,48 @@
+<h2>Задача</h2>
+
+<div>
+	<p>Обернуть каждый символ в классах .word (за исключением пробелов) в тег span с классом .letter</p>
+</div>
+
+<h3>Решение</h3>
+
+<div id=prim>
+	<style>
+		.letter {
+			letter-spacing: .2em;
+			border: 1px solid green;
+		}
+	</style>
+	<div class=result>
+		<p class=word>Фраза с классом word</p>
+		<p>Фраза БЕЗ класса word</p>
+		<p class=word>Фраза с классом word</p>
+		<p class=word>Фраза с классом word</p>
+		<p>Фраза БЕЗ класса word</p>
+		<p>Фраза БЕЗ класса word</p>
+		<p class=word>Фраза с классом word</p>
+	</div>
+	<div>
+		<button class="button" onclick="transform(document.querySelector('.result'));">Добавить класс <b>.letter</b></button>
+	</div>
+
+	<script type="text/javascript">
+		function transform(node) {
+			[].forEach.call((node || document).querySelectorAll('.word'), function (i) {
+				var ch = '', tC = i.textContent;
+				for (var c = 0; c < tC.length; c++) {
+					if (tC.charAt(c) === ' ') {
+						ch += ' ';
+						continue;
+					}
+					ch += '<span class=letter>' + tC.charAt(c) + '</span>';
+				}
+				i.innerHTML = ch;
+			});
+		}
+	</script>
+</div>
+
+
+<h4>Исходный код</h4>
+<pre><code for="#prim"></code></pre>

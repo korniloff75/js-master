@@ -1,0 +1,59 @@
+<style type="text/css" media="screen">
+	#iz>li {
+		line-height: 2em;
+	}
+</style>
+<div class="left">
+	<p>Очень маленький скрипт, позволяющий сделать оригинальным меню любого сайта.</p>
+	<p>Для этого нужно каждой ссылке в меню добавить дополнительный атрибут <em>data-foto="Адрес изображения"</em>. Как
+		видно из приведенного ниже примера, изображения могут находиться как на домене сайта, так и на любом другом.</p>
+	<p>Настройки осуществляются в блоке <em>Настройки скрипта</em>, согласно комментариям в коде. Можно можно задать
+		идентификатор (id) блока, в котором находится меню и желаемую ширину выводимых изображений.</p>
+	<p>В качестве достоинства можно отметить, что изображения подгружаются в фоновом режиме и, при полной загрузке
+		страницы, скрипт уже полностью готов к работе.</p>
+</div>
+
+
+<h4>Пример работы скрипта:</h4>
+
+<div id="prim" class="center">
+	<ul id="iz" style="list-style:none; position:relative; font-size: 18px; ">
+		<li><a href="#" data-foto="/assets/images/foto/Svad'ba1.jpg">Example1</a></li>
+		<li><a href="#" data-foto="/assets/images/foto/Svad'ba2.jpg">Example2</a></li>
+		<li><a href="#" data-foto="/assets/images/foto/Svad'ba3.jpg">Example3</a></li>
+		<li><a href="#" data-foto="/assets/images/foto/Svad'ba4.jpg">Example4</a></li>
+		<li><a href="#" data-foto="/assets/images/foto/Svad'ba5.jpg">Example5</a></li>
+	</ul>
+	<script type="text/javascript">
+		"use strict";
+		var sts = { //== Настройки скрипта
+			id_menu: 'iz', //== Идентификатор блока с меню
+			img_width: '150px' //== Ширина выводимых изображений
+		};
+		//==
+
+		[].forEach.call(document.querySelectorAll('#' + sts.id_menu + ' a[data-foto]'), function (i) {
+			i.parentNode.style.position = 'relative';
+			var img = document.createElement('img');
+			img.src = i.getAttribute('data-foto');
+			i.appendChild(img);
+			img.hidden = 1;
+			img.style.cssText = ' width:' + sts.img_width + '; border:3px solid; border-radius:10px;position:absolute; margin-left:3px;';
+
+			img.onload = function () {
+				this.realHeight = parseInt(getComputedStyle(img).width) * this.height / this.width;
+				this.style.top = -(this.realHeight - parseInt(getComputedStyle(i).lineHeight)) / 2 + 'px';
+			}
+
+			i.onmouseover = function () { img.hidden = 0 };
+			i.onmouseout = function () { img.hidden = 1 };
+
+
+		});
+	</script>
+</div>
+
+
+<h4>Исходный код:</h4>
+
+<pre><code for="#prim"></code></pre>

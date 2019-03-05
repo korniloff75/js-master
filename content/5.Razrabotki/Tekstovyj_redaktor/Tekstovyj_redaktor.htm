@@ -1,0 +1,95 @@
+<link rel="stylesheet/less" href="/assets/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet/less" href="/<?=\H::$Dir ?>style.less">
+
+
+<div class="toolbar">
+	<div class="btn-group">
+		<a href="#" data-command="undo">
+			<i class="fa fa-undo"></i>
+		</a>
+		<a href="#" data-command="redo">
+			<i class="fa fa-repeat"></i>
+		</a>
+	</div>
+	<div class="btn-group">
+		<a class="color-palette-wrapper fore-wrapper" href="#">
+			<i class="fa fa-font"></i>
+			<div class="color-palette fore-palette"></div>
+		</a>
+		<a class="color-palette-wrapper back-wrapper" href="#">
+			<i class="fa fa-font"></i>
+			<div class="color-palette back-palette"></div>
+		</a>
+		<a href="#" data-command="bold">
+			<i class="fa fa-bold"></i>
+		</a>
+		<a href="#" data-command="italic">
+			<i class="fa fa-italic"></i>
+		</a>
+		<a href="#" data-command="underline">
+			<i class="fa fa-underline"></i>
+		</a>
+		<a href="#" data-command="strikeThrough">
+			<i class="fa fa-strikethrough"></i>
+		</a>
+	</div>
+	<div class="btn-group">
+		<a href="#" data-command="justifyLeft">
+			<i class="fa fa-align-left"></i>
+		</a>
+		<a href="#" data-command="justifyCenter">
+			<i class="fa fa-align-center"></i>
+		</a>
+		<a href="#" data-command="justifyRight">
+			<i class="fa fa-align-right"></i>
+		</a>
+		<a href="#" data-command="justifyFull">
+			<i class="fa fa-align-justify"></i>
+		</a>
+	</div>
+	<div class="btn-group">
+		<a href="#" data-command="indent">
+			<i class="fa fa-indent"></i>
+		</a>
+		<a href="#" data-command="outdent">
+			<i class="fa fa-outdent"></i>
+		</a>
+	</div>
+	<div class="btn-group">
+		<a href="#" data-command="insertUnorderedList">
+			<i class="fa fa-list-ul"></i>
+		</a>
+		<a href="#" data-command="insertOrderedList">
+			<i class="fa fa-list-ol"></i>
+		</a>
+	</div>
+	<div class="btn-group">
+		<a href="#" data-command="h1">H1</a>
+		<a href="#" data-command="h2">H2</a>
+		<a href="#" data-command="createlink">
+			<i class="fa fa-link"></i>
+		</a>
+		<a href="#" data-command="unlink">
+			<i class="fa fa-unlink"></i>
+		</a>
+		<a href="#" data-command="insertimage">
+			<i class="fa fa-image"></i>
+		</a>
+		<a href="#" data-command="p">P</a>
+	</div>
+	<div class="btn-group">
+		<a href="#" data-command="subscript">
+			<i class="fa fa-subscript"></i>
+		</a>
+		<a href="#" data-command="superscript">
+			<i class="fa fa-superscript"></i>
+		</a>
+	</div>
+</div>
+<div id="editor" contenteditable>
+	<h1>A WYSIWYG Editor.</h1>
+	<p>type something...</p>
+</div>
+
+
+<script src="/<?=\H::$Dir ?>editor.js"></script>

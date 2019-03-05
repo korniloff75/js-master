@@ -1,0 +1,29 @@
+<h2>Условие</h2>
+
+<p>Напишите функцию, принимающую аргументом массив с разными типами элементов, и возвращающую массив со всеми элементами типа INT, содержащимися во входящем массиве.</p>
+
+
+<h2>Решение</h2>
+
+<div id="arr" style="border:3px solid red; display:inline-block; padding:5px;">
+	1,'2',3,'4.5',4.555,'a','b',0,15
+</div>
+<script id="prim" type="text/javascript">
+function filter_INT(arr) {
+	return arr.filter(function(i) {
+			return !isNaN(+i) ? i/Math.round(i) === 1 : false;
+	})
+}
+</script>
+
+<button class="button" onclick="$f('#arr').html(filter_INT($f('#arr').text().split(',')).join(', '));">Получить числа</button>
+
+
+<h3>Исходный код javascript</h3>
+<pre><code for="#prim"></code></pre>
+
+<p>Также, с небольшой доработкой, можно разнообразить исходную задачу, создав функции, фильтрующие массивы по любому типу данных.<br></p>
+
+<div class="core info">
+	<p>Если требуемый тип данных определяется оператором <i><b>typeof</b></i>, то в этом случае -- предпочтительнее использовать его для фильтрации.</p>
+</div>

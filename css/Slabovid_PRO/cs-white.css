@@ -1,0 +1,29 @@
+/*
+<?php
+header('Content-type: text/css');
+?>
+*/
+body * { 
+  background: unset ;
+  color: unset ; 
+}
+*,* *,body *, .block-type-menu ul li>.menu__item__link, .block-type-menu ul li>.menu__item__text, #menuitem2 #pageMenu .menu { background: #fff !important;
+	color: #117;
+}
+
+/*
+ http://www.mo57.ru
+*/
+#wowslider-container1 {display:none !important;}
+/*
+body img {
+	filter: grayscale(100%) !important;
+	filter: url(http://js-master.ru/css/svg/grayscale.svg#greyscale); /* Firefox 4+ */ /*
+	filter: gray; /* IE 6-9 */ /*
+	-webkit-filter: grayscale(100%);
+	-moz-filter: grayscale(100%);
+	-ms-filter: grayscale(100%);
+	-o-filter: grayscale(100%);
+	filter: progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);
+}
+*/

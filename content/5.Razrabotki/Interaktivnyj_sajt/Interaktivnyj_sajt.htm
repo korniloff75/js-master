@@ -1,0 +1,89 @@
+<p>Любой из нижерасположенных демонстрационных блоков можно переместить мышью, потянув за заголовок блока.</p>
+
+<style type="text/css" media="screen">
+	#left_block {width:200px; float:left; margin-right: 5px;}
+	#prim h6 {background:#159; color:#f1f1f1; font-size:20px; text-align:center; padding:15px;}
+	#left_block>div {width:200px; min-height:150px; border:1px solid; padding:7px; color: #147; background: linear-gradient(#cfdfef, #fff, #cfdfef);}
+
+	#center_block {
+	  float: left;
+	  width: 470px;
+	}
+	#center_block>div { min-height:200px; border:1px solid; padding:7px; color: #147; background: linear-gradient(#cfdfef, #fff, #cfdfef);}
+	#sohr {margin:20px 0;}
+	.drag_obj h6 {
+		background: linear-gradient(#159,#cde,#159);
+		padding: 10px;
+	}
+	img.drag_obj {
+	  border: 3px solid #115599;
+	}
+</style>
+
+<div id="dragZone" class="prim" style="margin-top:20px; min-height:800px;">
+	<br />
+	<br />
+	<div id="left_block">
+		<div class="drag_obj">
+			<h6></h6>
+			<p>Какой-то текст...</p>
+		</div>
+		<div class="drag_obj">
+			<h6></h6>
+			<p>Какой-то текст...</p>
+		</div>
+		<div class="drag_obj">
+			<h6></h6>
+			<p>Маленький мальчик нашел пулемет,</p>
+			<p>Больше в деревне никто не живет,</p>
+			<p>Кроме деда Архимеда,</p>
+			<p>У которого - торпеда!</p>
+		</div>
+	</div>
+	<div id="center_block">
+		<div class="drag_obj left">
+			<h6></h6>
+			<p>Последние тенденции сайтостроения вынуждают вебмастеров делать все более и более динамичные и интерактивные сайты. Пользователю предоставляют все больше свободы в интерфейсе.</p>
+			<p>Достигается динамичность сайта разными способами. Поскоьку речь идет об управлении сайтом с клиентской стороны, то лучше всего с этим справляется javascript.</p>
+			<p>В этом примере вы можете видеть, что при помоци этого скрипта мы достигаем полной интерактивности сайта, позволяя пользователям перестроить интерфейс сайта по своим нуждам.</p>
+			<p>Перемещать блоки следует, кликнув по их по заголовку левой кнопкой мыши и, не отпуская ее, перетащить блок в новую позицию. </p>
+			<p>Блоки без заголовков перемещаются при клике на любое их место.</p>
+		</div>
+
+		<div class="drag_obj left">
+			<h6></h6>
+			<p>А в этом блоке вы можете перемещать как его самого, см. описание перетаскивания выше, так и изображения внутри него. При перемещении блока целиком - фото сохранят свое относительное расположение.</p>
+			<div id="imgs" class="center">
+				<img class="drag_obj" src="/assets/images/foto/Svad'ba1.jpg" alt="sampl" width="100" />
+				<img class="drag_obj" src="/assets/images/foto/Svad'ba2.jpg" alt="sampl" width="100" />
+				<img class="drag_obj" src="/assets/images/foto/Svad'ba3.jpg" alt="sampl" width="100" />
+			</div>
+		</div>
+
+		<div class="drag_obj left">
+			<h5>Блок, перемещаемый кликом по любому его месту</h5>
+			<p>Главной фичей этого блока является то, что при попытке выделения текста (стандартное событие броузера) блок будет также перемещен.</p>
+			<p>Данное поведение обусловлено отсутствием в нем конкретной области для перетаскивания.</p>
+		</div>
+	</div>
+
+</div>
+<div class=clear>
+	<label for="sohr">Cохранять позицию </label><input type="checkbox" id="sohr"  />
+	<p>Выделив этот чекбокс вы сохраните пользовательское расположение блоков. После перезагрузки страницы блоки восстановят то положение, в которое были перемещены пользователем. Убрав с него выделение восстановится взаимное расположение блоков по умолчанию.</p>
+	<p>Сохранение позиции приведено в качестве примера, на реальном сайте его не будет, а возможность сохранения позиции будет включаться в настройках скрипта.</p>
+</div>
+
+<script src="/js/modules/Drag.js" type="text/javascript" charset="utf-8"></script>
+
+
+<script type="text/javascript">
+'use strict';
+
+$("#dragZone h6").each(function(ind,i) {
+	i.innerHTML= "Блок №"+ (ind + 1);
+	i.classList.add('drag_handle');
+});
+
+Drag.sts.$dragZone= $('#dragZone');
+</script>

@@ -1,0 +1,123 @@
+/* in developing
+plugin jQuery
+add/del EventListener & useCapture
+ES-5
+
+USE:
+===============
+$(document).e.add|del('click', handler, useCapture);
+
+OR:
+$(document).e.add|del({
+	click: handler1,
+	focus: handler2
+} [, null, useCapture = false]);
+
+Event fix in handler:
+e = $().e.fix(e);
+*/
+'use strict';
+
+jQuery && !jQuery.fn.e && Object.defineProperty(jQuery.fn, 'e', {
+	get: function () {
+		var self = this.get(0);
+
+		return {
+			add: function (type, handler, useCapture) {
+				useCapture = useCapture || false;
+
+				// console.log(self);
+				var o = this.check(type, handler);
+
+				Object.keys(o).forEach(function (type) {
+					// handler = handler.bind(null, )
+					self.addEventListener ? self.addEventListener(type, o[type], useCapture) : self.attachEvent ? self.attachEvent("on" + type, o[type]) : self["on" + type] = o[type];
+
+				});
+
+			},
+
+			del: function (self, type, handler) {
+				var o = this.check(type, handler);
+
+				Object.keys(o).forEach(function (type) {
+					self.removeEventListener ? self.removeEventListener(type, o[type], useCapture) : self.detachEvent ? self.detachEvent("on" + type, o[type]) : self["on" + type] = null;
+
+				});
+
+			},
+
+			check: function (o, type, handler) {
+				var out = {};
+
+				if (!o.__proto__.__proto__) {
+					// o - is Object
+					out = o;
+				} else {
+					out[type] = handler;
+				}
+
+				return out;
+			},
+
+			fix: function (e) {
+				e = e || window.event;
+				if (e.isFixed) return e;
+				e.isFixed = 1;
+
+				var dE = document.documentElement,
+				e_mod = Object.assign({},e),
+				scroll = {
+					get: function () {
+						return {
+							left: window.scrollX || window.pageXOffset || dE.scrollLeft,
+							top: window.scrollY || window.pageYOffset || dE.scrollTop
+						}
+					}
+				};
+
+				e_mod.__proto__ = e.__proto__;
+
+				e_mod.preventDefault = e_mod.preventDefault || function () {
+					this.returnValue = false
+				};
+
+				e_mod.stopPropagation = e_mod.stopPropagation || function () {
+					this.cancelBubble = true
+				};
+
+				if (!e_mod.target) e_mod.target = e_mod.srcElement;
+
+				//== pageX/pageY 4 one tauch (custom)
+				if (e_mod.changedTouches) {
+					e_mod.chT = {
+						get x() {
+							return e_mod.changedTouches[0].pageX
+						},
+						get x() {
+							return e_mod.changedTouches[0].pageY
+						},
+						toLeft: function() {
+							// body
+						}
+
+					}
+
+					console.log(e_mod.chT.x);
+
+				}
+
+				//== add pageX/pageY & which in IE
+				if (e_mod.pageX == null && !e_mod.which && e_mod.button) {
+					e_mod.pageX = e_mod.clientX + scroll.left - (dE.clientLeft || 0);
+					e_mod.pageY = e_mod.clientY + scroll.top - (dE.clientTop || 0);
+					e_mod.which = e_mod.button & 1 ? 1 : (e_mod.button & 2 ? 3 : (e_mod.button & 4 ? 2 : 0))
+				};
+				// is fixed!
+				return e_mod;
+			}
+
+		} // return
+
+	}
+});

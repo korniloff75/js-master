@@ -1,0 +1,92 @@
+<section id="code_block">
+	<div id="ras4block" class="prim">
+		<style>
+			#ras4block input {
+				width: 90px;
+			}
+
+			#ras4block input,
+			#ras4block select {
+				border: none;
+				text-align: center;
+				margin: 0 5px;
+			}
+
+			#ras4block #partName {
+				margin: 20px 0;
+			}
+
+			#ras4block #field input {
+				border: 1px solid green;
+				font: 600 14px arial;
+				width: 120px;
+			}
+		</style>
+
+		<div>
+			<h4>Область применения</h4>
+
+			<select id="partName" class="button" onchange="fillData(this.value);">
+				<option value="load">Нагрузки</option>
+				<option value="load_udel">Погонные нагрузки</option>
+				<option value="pressure">Давление</option>
+				<option value="speed">Скорость</option>
+				<option value="area">Площадь</option>
+				<option value="volume">Объём</option>
+				<option value="temperature">Температура</option>
+			</select>
+		</div>
+
+
+		Количество значащих цифр в результате:
+		<select id="prec" class="button">
+			<option>5</option>
+			<option>6</option>
+			<option>7</option>
+			<option>8</option>
+			<option>9</option>
+		</select>
+
+
+		<h4>Конвертация единиц</h4>
+
+		<div id="field">
+			<span id="f_block">
+				<select id="f_sel" class="button"></select>
+				<input id="f_data" value="1" type="text">
+			</span> =
+			<span id="s_block">
+				<input id="s_data" value="1" type="text">
+				<select id="s_sel" class="button"></select>
+			</span>
+
+		</div>
+
+
+
+		<script src="/<?=\H::$Dir ?>conv.js"></script>
+
+	</div>
+</section>
+
+
+<section>
+	<h2>Описание конвертера</h2>
+
+	<p>Этот простой по интерфейсу конвертер способен переводить любые программно заданные единицы измерения в их аналоги.</p>
+	<p>При выборе области применения конвертер заполняет раскрывающиеся списки возможными для конвертации единицами измерения. Выбор количества значащих цифр позволяет округлить получаемый результат, а при необходимости - перевести его в научный формат. Например, при 5 значащих цифрах, результат <b>1234567890</b> будет отображён как <b>1.2346e+9</b>. <br></p>
+</section>
+
+
+
+<section class="core note">
+	<p>Калькулятор был написан мной для сайта
+		<a href="http://prostobuild.ru/onlainraschet/246-kalkulyator-edinic-izmereniya.html" target="_blank">prostobuild</a>, где он находится в адаптированном дизайне.
+		<br>
+	</p>
+
+	<p>Все пожелания по доработке/исправлению скрипта можно писать в
+		<a href="#comments_header">комментариях</a> к этой странице. Заказать аналогичный скрипт с необходимым функционалом можно через
+		<a href="/content/1000.Contacts/feedback/">Обратную связь</a>
+	</p>
+</section>

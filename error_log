@@ -1,0 +1,159 @@
+[13-Nov-2018 13:25:34 Europe/Moscow] PHP Parse error:  syntax error, unexpected 'if' (T_IF) in /home/i1112822/public_html/php/modules/PHPMailer/MailPlain.php on line 155
+[13-Nov-2018 14:31:29 Europe/Moscow] PHP Fatal error:  Uncaught Exception: В запросе нет $action
+IP - 95.133.161.77 in /home/i1112822/public_html/php/modules/Login.php:37
+Stack trace:
+#0 /home/i1112822/public_html/Helper.php(313): Login->__construct()
+#1 /home/i1112822/public_html/Helper.php(27): H::includeModule('Login')
+#2 /home/i1112822/public_html/Helper.php(469): H->__construct()
+#3 /home/i1112822/public_html/Helper.php(3): H::getInstance()
+#4 /home/i1112822/public_html/index.php(16): require_once('/home/i1112822/...')
+#5 {main}
+  thrown in /home/i1112822/public_html/php/modules/Login.php on line 37
+[13-Nov-2018 14:31:36 Europe/Moscow] PHP Fatal error:  Uncaught Exception: В запросе нет $action
+IP - 95.133.161.77 in /home/i1112822/public_html/php/modules/Login.php:37
+Stack trace:
+#0 /home/i1112822/public_html/Helper.php(313): Login->__construct()
+#1 /home/i1112822/public_html/Helper.php(27): H::includeModule('Login')
+#2 /home/i1112822/public_html/Helper.php(469): H->__construct()
+#3 /home/i1112822/public_html/Helper.php(3): H::getInstance()
+#4 /home/i1112822/public_html/index.php(16): require_once('/home/i1112822/...')
+#5 {main}
+  thrown in /home/i1112822/public_html/php/modules/Login.php on line 37
+[13-Nov-2018 14:31:39 Europe/Moscow] PHP Fatal error:  Uncaught Exception: В запросе нет $action
+IP - 95.133.161.77 in /home/i1112822/public_html/php/modules/Login.php:37
+Stack trace:
+#0 /home/i1112822/public_html/Helper.php(313): Login->__construct()
+#1 /home/i1112822/public_html/Helper.php(27): H::includeModule('Login')
+#2 /home/i1112822/public_html/Helper.php(469): H->__construct()
+#3 /home/i1112822/public_html/Helper.php(3): H::getInstance()
+#4 /home/i1112822/public_html/index.php(16): require_once('/home/i1112822/...')
+#5 {main}
+  thrown in /home/i1112822/public_html/php/modules/Login.php on line 37
+[13-Nov-2018 14:31:42 Europe/Moscow] PHP Fatal error:  Uncaught Exception: В запросе нет $action
+IP - 95.133.161.77 in /home/i1112822/public_html/php/modules/Login.php:37
+Stack trace:
+#0 /home/i1112822/public_html/Helper.php(313): Login->__construct()
+#1 /home/i1112822/public_html/Helper.php(27): H::includeModule('Login')
+#2 /home/i1112822/public_html/Helper.php(469): H->__construct()
+#3 /home/i1112822/public_html/Helper.php(3): H::getInstance()
+#4 /home/i1112822/public_html/index.php(16): require_once('/home/i1112822/...')
+#5 {main}
+  thrown in /home/i1112822/public_html/php/modules/Login.php on line 37
+[13-Nov-2018 14:31:44 Europe/Moscow] PHP Fatal error:  Uncaught Exception: В запросе нет $action
+IP - 95.133.161.77 in /home/i1112822/public_html/php/modules/Login.php:37
+Stack trace:
+#0 /home/i1112822/public_html/Helper.php(313): Login->__construct()
+#1 /home/i1112822/public_html/Helper.php(27): H::includeModule('Login')
+#2 /home/i1112822/public_html/Helper.php(469): H->__construct()
+#3 /home/i1112822/public_html/Helper.php(3): H::getInstance()
+#4 /home/i1112822/public_html/index.php(16): require_once('/home/i1112822/...')
+#5 {main}
+  thrown in /home/i1112822/public_html/php/modules/Login.php on line 37
+[13-Nov-2018 15:04:47 Europe/Moscow] PHP Warning:  Division by zero in /home/i1112822/public_html/content/50.php/Stena/assets/Wall.php on line 82
+[13-Nov-2018 15:04:47 Europe/Moscow] PHP Stack trace:
+[13-Nov-2018 15:04:47 Europe/Moscow] PHP   1. {main}() /home/i1112822/public_html/index.php:0
+[13-Nov-2018 15:04:47 Europe/Moscow] PHP   2. Router->__construct() /home/i1112822/public_html/index.php:25
+[13-Nov-2018 15:04:47 Europe/Moscow] PHP   3. php\classes\Render::content() /home/i1112822/public_html/php/classes/Router.php:65
+[13-Nov-2018 15:04:47 Europe/Moscow] PHP   4. php\classes\Render::contentCollect() /home/i1112822/public_html/php/classes/Render.php:187
+[13-Nov-2018 15:04:47 Europe/Moscow] PHP   5. include_once() /home/i1112822/public_html/php/classes/Render.php:112
+[13-Nov-2018 15:04:47 Europe/Moscow] PHP   6. Wall->__construct() /home/i1112822/public_html/content/50.php/Stena/Stena.php:18
+[13-Nov-2018 15:04:47 Europe/Moscow] PHP   7. Wall->outputImgs() /home/i1112822/public_html/content/50.php/Stena/assets/Wall.php:20
+[13-Nov-2018 18:29:46 Europe/Moscow] PHP Warning:  Division by zero in /home/i1112822/public_html/content/50.php/Stena/assets/Wall.php on line 82
+[13-Nov-2018 18:29:46 Europe/Moscow] PHP Stack trace:
+[13-Nov-2018 18:29:46 Europe/Moscow] PHP   1. {main}() /home/i1112822/public_html/index.php:0
+[13-Nov-2018 18:29:46 Europe/Moscow] PHP   2. Router->__construct() /home/i1112822/public_html/index.php:25
+[13-Nov-2018 18:29:46 Europe/Moscow] PHP   3. php\classes\Render::content() /home/i1112822/public_html/php/classes/Router.php:65
+[13-Nov-2018 18:29:46 Europe/Moscow] PHP   4. php\classes\Render::contentCollect() /home/i1112822/public_html/php/classes/Render.php:187
+[13-Nov-2018 18:29:46 Europe/Moscow] PHP   5. include_once() /home/i1112822/public_html/php/classes/Render.php:112
+[13-Nov-2018 18:29:46 Europe/Moscow] PHP   6. Wall->__construct() /home/i1112822/public_html/content/50.php/Stena/Stena.php:18
+[13-Nov-2018 18:29:46 Europe/Moscow] PHP   7. Wall->outputImgs() /home/i1112822/public_html/content/50.php/Stena/assets/Wall.php:20
+[22-Nov-2018 10:30:18 Europe/Moscow] PHP Warning:  getimagesize(content/50.php/Stena/assets/uploadsWall/2020.jpeg): failed to open stream: No such file or directory in /home/i1112822/public_html/content/50.php/Stena/assets/Wall.php on line 82
+[22-Nov-2018 10:30:18 Europe/Moscow] PHP Stack trace:
+[22-Nov-2018 10:30:18 Europe/Moscow] PHP   1. {main}() /home/i1112822/public_html/index.php:0
+[22-Nov-2018 10:30:18 Europe/Moscow] PHP   2. Router->__construct() /home/i1112822/public_html/index.php:25
+[22-Nov-2018 10:30:18 Europe/Moscow] PHP   3. php\classes\Render::content() /home/i1112822/public_html/php/classes/Router.php:65
+[22-Nov-2018 10:30:18 Europe/Moscow] PHP   4. php\classes\Render::contentCollect() /home/i1112822/public_html/php/classes/Render.php:187
+[22-Nov-2018 10:30:18 Europe/Moscow] PHP   5. include_once() /home/i1112822/public_html/php/classes/Render.php:112
+[22-Nov-2018 10:30:18 Europe/Moscow] PHP   6. Wall->__construct() /home/i1112822/public_html/content/50.php/Stena/Stena.php:18
+[22-Nov-2018 10:30:18 Europe/Moscow] PHP   7. Wall->outputImgs() /home/i1112822/public_html/content/50.php/Stena/assets/Wall.php:20
+[22-Nov-2018 10:30:18 Europe/Moscow] PHP   8. getimagesize() /home/i1112822/public_html/content/50.php/Stena/assets/Wall.php:82
+[29-Nov-2018 18:00:01 Europe/Moscow] PHP Fatal error:  Uncaught Exception: В запросе нет $action
+IP - 157.55.39.131 in /home/i1112822/public_html/php/modules/Login.php:37
+Stack trace:
+#0 /home/i1112822/public_html/Helper.php(313): Login->__construct()
+#1 /home/i1112822/public_html/Helper.php(27): H::includeModule('Login')
+#2 /home/i1112822/public_html/Helper.php(469): H->__construct()
+#3 /home/i1112822/public_html/Helper.php(3): H::getInstance()
+#4 /home/i1112822/public_html/index.php(16): require_once('/home/i1112822/...')
+#5 {main}
+  thrown in /home/i1112822/public_html/php/modules/Login.php on line 37
+[10-Dec-2018 17:49:48 Europe/Moscow] PHP Fatal error:  Uncaught Exception: В запросе нет $action
+IP - 157.55.39.55 in /home/i1112822/public_html/php/modules/Login.php:37
+Stack trace:
+#0 /home/i1112822/public_html/Helper.php(313): Login->__construct()
+#1 /home/i1112822/public_html/Helper.php(27): H::includeModule('Login')
+#2 /home/i1112822/public_html/Helper.php(469): H->__construct()
+#3 /home/i1112822/public_html/Helper.php(3): H::getInstance()
+#4 /home/i1112822/public_html/index.php(16): require_once('/home/i1112822/...')
+#5 {main}
+  thrown in /home/i1112822/public_html/php/modules/Login.php on line 37
+[20-Dec-2018 12:01:48 Europe/Moscow] PHP Notice:  Undefined index: 194.28.88.226 in /home/i1112822/public_html/Helper.php on line 396
+[20-Dec-2018 12:01:48 Europe/Moscow] PHP Stack trace:
+[20-Dec-2018 12:01:48 Europe/Moscow] PHP   1. {main}() /home/i1112822/public_html/index.php:0
+[20-Dec-2018 12:01:48 Europe/Moscow] PHP   2. require_once() /home/i1112822/public_html/index.php:16
+[20-Dec-2018 12:01:48 Europe/Moscow] PHP   3. H::getInstance() /home/i1112822/public_html/Helper.php:3
+[20-Dec-2018 12:01:48 Europe/Moscow] PHP   4. H->__construct() /home/i1112822/public_html/Helper.php:469
+[20-Dec-2018 12:01:48 Europe/Moscow] PHP   5. H::includeModule() /home/i1112822/public_html/Helper.php:27
+[20-Dec-2018 12:01:48 Europe/Moscow] PHP   6. Login->__construct() /home/i1112822/public_html/Helper.php:313
+[20-Dec-2018 12:01:48 Europe/Moscow] PHP   7. Login->auth() /home/i1112822/public_html/php/modules/Login.php:57
+[20-Dec-2018 12:01:48 Europe/Moscow] PHP   8. H::json() /home/i1112822/public_html/php/modules/Login.php:88
+[23-Dec-2018 14:34:40 Europe/Moscow] PHP Notice:  Undefined index: 194.28.88.209 in /home/i1112822/public_html/Helper.php on line 396
+[23-Dec-2018 14:34:40 Europe/Moscow] PHP Stack trace:
+[23-Dec-2018 14:34:40 Europe/Moscow] PHP   1. {main}() /home/i1112822/public_html/index.php:0
+[23-Dec-2018 14:34:40 Europe/Moscow] PHP   2. require_once() /home/i1112822/public_html/index.php:16
+[23-Dec-2018 14:34:40 Europe/Moscow] PHP   3. H::getInstance() /home/i1112822/public_html/Helper.php:3
+[23-Dec-2018 14:34:40 Europe/Moscow] PHP   4. H->__construct() /home/i1112822/public_html/Helper.php:469
+[23-Dec-2018 14:34:40 Europe/Moscow] PHP   5. H::includeModule() /home/i1112822/public_html/Helper.php:27
+[23-Dec-2018 14:34:40 Europe/Moscow] PHP   6. Login->__construct() /home/i1112822/public_html/Helper.php:313
+[23-Dec-2018 14:34:40 Europe/Moscow] PHP   7. Login->auth() /home/i1112822/public_html/php/modules/Login.php:57
+[23-Dec-2018 14:34:40 Europe/Moscow] PHP   8. H::json() /home/i1112822/public_html/php/modules/Login.php:88
+[23-Dec-2018 17:57:04 Europe/Moscow] PHP Fatal error:  Uncaught Exception: В запросе нет $action
+IP - 46.229.168.132 in /home/i1112822/public_html/php/modules/Login.php:37
+Stack trace:
+#0 /home/i1112822/public_html/Helper.php(313): Login->__construct()
+#1 /home/i1112822/public_html/Helper.php(27): H::includeModule('Login')
+#2 /home/i1112822/public_html/Helper.php(469): H->__construct()
+#3 /home/i1112822/public_html/Helper.php(3): H::getInstance()
+#4 /home/i1112822/public_html/index.php(16): require_once('/home/i1112822/...')
+#5 {main}
+  thrown in /home/i1112822/public_html/php/modules/Login.php on line 37
+[24-Dec-2018 12:08:42 Europe/Moscow] PHP Notice:  Undefined index: 194.28.91.145 in /home/i1112822/public_html/Helper.php on line 396
+[24-Dec-2018 12:08:42 Europe/Moscow] PHP Stack trace:
+[24-Dec-2018 12:08:42 Europe/Moscow] PHP   1. {main}() /home/i1112822/public_html/index.php:0
+[24-Dec-2018 12:08:42 Europe/Moscow] PHP   2. require_once() /home/i1112822/public_html/index.php:16
+[24-Dec-2018 12:08:42 Europe/Moscow] PHP   3. H::getInstance() /home/i1112822/public_html/Helper.php:3
+[24-Dec-2018 12:08:42 Europe/Moscow] PHP   4. H->__construct() /home/i1112822/public_html/Helper.php:469
+[24-Dec-2018 12:08:42 Europe/Moscow] PHP   5. H::includeModule() /home/i1112822/public_html/Helper.php:27
+[24-Dec-2018 12:08:42 Europe/Moscow] PHP   6. Login->__construct() /home/i1112822/public_html/Helper.php:313
+[24-Dec-2018 12:08:42 Europe/Moscow] PHP   7. Login->auth() /home/i1112822/public_html/php/modules/Login.php:57
+[24-Dec-2018 12:08:42 Europe/Moscow] PHP   8. H::json() /home/i1112822/public_html/php/modules/Login.php:88
+[11-Jan-2019 06:58:47 Europe/Moscow] PHP Fatal error:  Uncaught Exception: В запросе нет $action
+IP - 46.229.168.136 in /home/i1112822/public_html/php/modules/Login.php:37
+Stack trace:
+#0 /home/i1112822/public_html/Helper.php(313): Login->__construct()
+#1 /home/i1112822/public_html/Helper.php(27): H::includeModule('Login')
+#2 /home/i1112822/public_html/Helper.php(469): H->__construct()
+#3 /home/i1112822/public_html/Helper.php(3): H::getInstance()
+#4 /home/i1112822/public_html/index.php(16): require_once('/home/i1112822/...')
+#5 {main}
+  thrown in /home/i1112822/public_html/php/modules/Login.php on line 37
+[12-Jan-2019 12:12:14 Europe/Moscow] PHP Fatal error:  Uncaught Exception: В запросе нет $action
+IP - 46.229.168.130 in /home/i1112822/public_html/php/modules/Login.php:37
+Stack trace:
+#0 /home/i1112822/public_html/Helper.php(313): Login->__construct()
+#1 /home/i1112822/public_html/Helper.php(27): H::includeModule('Login')
+#2 /home/i1112822/public_html/Helper.php(469): H->__construct()
+#3 /home/i1112822/public_html/Helper.php(3): H::getInstance()
+#4 /home/i1112822/public_html/index.php(16): require_once('/home/i1112822/...')
+#5 {main}
+  thrown in /home/i1112822/public_html/php/modules/Login.php on line 37

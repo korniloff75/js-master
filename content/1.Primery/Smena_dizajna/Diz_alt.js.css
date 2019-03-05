@@ -1,0 +1,14 @@
+div#test_page {
+	padding: 10px;
+}
+div#test_page, div#test_page p {
+	font:20px italic; color:#355;
+	background: #eee;
+}
+div#test_page p.test_p{border:2px ridge #159; background:#def; padding: 30px; font:bold 40px mistral; transform:rotate(1deg);}
+div#test_page p.test_p1 {
+	font: 20px comic sans ms,sans-serif; transform:rotate(-3deg); border:2px ridge #159;
+	color:#355;
+	background:#def; padding: 10px; margin:40px 0;
+}
+div{border-radius:none !important;}

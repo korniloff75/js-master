@@ -1,0 +1,73 @@
+#infobar_Cec {
+	box-sizing: border-box;
+	color: #FFF !important;
+	background: #7ABBEA !important;
+	padding: 10px !important;
+	z-index:10000 !important;
+	width:100% !important; 
+	line-height: 30px;
+	font-weight: bold !important;
+	text-align: center !important;
+	position: fixed;
+	left:0;
+	top:0;
+}
+#infobar_Cec * {font-size:16px !important; box-sizing: border-box; line-height: 1.2em !important; color:#000 !important;}
+
+
+#infobar_Cec i {
+	font-weight: bold !important;
+	background:transparent !important;
+	padding:5px !important;
+	font-style: normal; margin: 0 1px;
+}
+#infobar_Cec i:hover, #infobar_Cec i.imageActive  {
+	cursor: pointer !important;
+	background: #000 !important;
+	color: #fff !important;
+}
+
+a {text-decoration: underline;}
+a:hover {transform:scale(1.1);text-decoration:none;}
+
+
+#infobar_Cec i.changea, #infobar_Cec i.disableimage,  #infobar_Cec button.toExit, #infobar_Cec i.enableimage, #infobar_Cec i.disableimage, #infobar_Cec i.fa-eye-slash {
+	color:#fff !important;
+}
+
+#infobar_Cec .changea.s1 {
+	font-size:14px !important;
+}
+#infobar_Cec .changea.s2 {
+	font-size:18px !important;
+}
+#infobar_Cec .changea.s3 {
+	font-size:23px !important;
+}
+.none {display:none !important;}
+	
+.disableimage, .enableimage {
+	padding:5px !important;
+	font-weight: bold !important;
+}
+
+#infobar_Cec span.min700 { background-color: transparent !important; }
+
+#infobar_Cec i.c1, #infobar_Cec i.c2, #infobar_Cec i.c3, button.toExit  {
+	padding:7px;font-weight: bold; cursor: pointer; position:static; margin:2px; font-size:120% !important;
+}
+#infobar_Cec i.c1:hover, #infobar_Cec i.c2:hover, #infobar_Cec i.c3:hover {
+	border-bottom: 3px solid; border-radius:5px; position:relative; transform: scale(1.1);
+}
+#infobar_Cec .c1, #infobar_Cec .c1:hover {color:#000 !important; background:#FFFFFF !important;}
+#infobar_Cec .c2,#infobar_Cec .c2:hover  {background:#000!important;color:#fff !important;}
+#infobar_Cec .c3,#infobar_Cec .c3:hover  {color: #123 !important; background:#9DD1FF !important;}
+
+#infobar_Cec button.toExit {background:#003064 !important; padding:0 !important; color:#fff !important;border: 1px solid black; font-size:100% !important; }
+#infobar_Cec button.toExit:hover {color:#E2E2E2 !important;}
+
+#infobar_Cec > div {display: inline-block; background: rgba(0, 0, 0, 0) none !important; margin-left: 10px;}
+
+@media (max-width: 700px) {
+	#infobar_Cec .min700 {display:none;} 
+}       

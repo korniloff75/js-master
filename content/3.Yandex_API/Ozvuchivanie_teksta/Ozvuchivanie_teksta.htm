@@ -1,0 +1,124 @@
+<script id="ya_webspeechkit" class="localScript" src="https://webasr.yandex.net/jsapi/v1/webspeechkit.js" type="text/javascript"></script>
+
+<div class="core info">
+	<p>Увы, это API уже не предоставляется Яндексом бесплатно с конца 2018г. А в платном режиме сервис переехал в Яндекс.Облако, и предоставляется только юридическим лицам.</p>
+	<p>По-прежнему можно заказать бесплатный демо-ключ для тестирования, но теперь он будет работать только месяц.</p>
+	<p>Если ничего не изменится, то эта статья будет удаалена.</p>
+</div>
+
+
+<h2>Подключение <em>SpeechKit JavaScript API</em> к сайту</h2>
+
+<div>
+	<p>API SpeechKit выгодно отличается своей продуманностью. В нем уже заложен алгоритм передачи данных на сервер и последующая обработка броузером полученного результата. Поэтому интеграция его в сайт не несет в себе никакой сложности, и мне не пришлось дописывать никаких добавочных модулей.</p>
+	<p>Для подключения <strong>SpeechKit JavaScript API</strong> к сайту нужно выполнить следующие шаги:</p>
+
+	<ol>
+		<li>Подключить основную библиотеку <strong>webspeechkit.js</strong>, желательно между тегами <em>head</em> <code><script src="https://webasr.yandex.net/jsapi/v1/webspeechkit.js" type="text/javascript"></script></code></li>
+		<li>Зайти на страницу получения <a href="https://developer.tech.yandex.ru/" target="_blank" rel="nofollow">индивидуального ключа</a> и получить там код самого ключа. Далее в коде будет обозначен как <code><?#=htmlspecialchars('<key>')?><key></code>.
+		<img src="assets/apiKey.jpg" alt="Выбор API ключа для webspeechkit.js" /></li>
+		<li>Создать в теле сайта скриптовый блок с настройками скрипта. Пример настроек взят с <a href="https://tech.yandex.ru/speechkit/jsapi/doc/dg/concepts/tts-docpage/" target="_blank" rel="nofollow">официального сайта</a>.
+
+		<pre><code>
+		<script type="text/javascript">
+		var tts = new ya.speechkit.Tts(
+		  // Настройки синтеза речи.
+		  {
+			// API-ключ. Обязательно!!!
+			apikey: '<key>',
+			//== Необязательные настройки
+			// Эмоциональная окраска: добрый голос.
+			emotion: 'good',
+			// Скорость речи.
+			speed: 1.5,
+			// Имя диктора.
+			speaker: 'jane'
+		});
+		</script>
+		</code></pre>
+		</li>
+
+		<li>Так же в теле сайта нужно создать блок с уникальным идентификатором и разместить в нем текст для прослушивания. Примерно так:
+		<code><div id="forSpeach">Текст для прослушивания...</div></code></li>
+		<li>Теперь нужно создать кнопку запуска озвучки. В простом варианте она может выглядеть так:
+			<code><input type="button" onclick="tts.speak(document.getElementById('forSpeach' ).textContent)" value="Прослушать"/></code>
+			Указанный идентификатор должен обязательно совпадать с идентификатором блока, созданного в предыдущем шаге.</li>
+		<li>Все, теперь при нажатии на кнопку "Прослушать" броузер воспроизведет текст из блока <code><div id="forSpeach">...</div></code></li>
+	</ol>
+	<p>Как всегда, если возникнут сложности адаптации, обратиться за помощью ко мне можно через Обратную связь.</p>
+	<p>В качестве небольшой плюшки я ввел на эту страницу пример такой адаптации. Если выделить любой фрагмент текста, скрипт зачитает его.</p>
+</div>
+
+<script type="text/javascript">
+$('#ya_webspeechkit').on('load', function() {
+	console.log('ya_webspeechkit loaded');
+	ya.speechkit.settings.apikey = '92c24be9-c348-4c66-8086-33a1327a077b';
+});
+/* $('#ya_webspeechkit')[0].onload = function() {
+	console.log('ya_webspeechkit loaded');
+	ya.speechkit.settings.apikey = '92c24be9-c348-4c66-8086-33a1327a077b';
+}; */
+</script>
+
+<div>
+	<h4>Фикс асинхронной загрузки страницы</h4>
+
+	<p>Благодаря комментариям пользователей была обнаружена проблема работы скрипта на сайте. Это связано с тем, что Яндекс API почему-то не всегда корректно подгружается при асинхронной загрузке страницы.</p>
+
+
+</div>
+<div>
+	<h3>Нерабочие опции</h3>
+	<p>Ложкой дегтя в работе библиотеки можно считать отсутствие заявленной возможности получения с сервера Яндекса набора доступных голосов и эмоций.</p>
+	<p>По идее метод его вызоав должен выглядеть как <code>tts.speakers();</code>. Но при исполнении этот код в консоли дает ошибку: </p>
+	<blockquote class="core warning">Запрос из постороннего источника заблокирован: Политика одного источника запрещает чтение удаленного ресурса на https://webasr.yandex.net/speakers?engine=ytcp&lang=ru. (Причина: отсутствует заголовок CORS 'Access-Control-Allow-Origin').</blockquote>
+	<p>При этом, если зайти непосредственно по <a href="https://webasr.yandex.net/speakers?engine=ytcp&lang=ru" target="_blank" rel="nofollow">адресу запроса</a>? можно вполне увидеть этот набор и использовать его в настройках скрипта.</p>
+
+	<h5>Набор доступных голосов и эмоций:</h5>
+
+	<iframe id="list" src="https://webasr.yandex.net/speakers?engine=ytcp&lang=ru" style="width:100%;height:100px; background: #eee;"></iframe>
+</div>
+
+
+<h2>Рабочий пример подключения <em>webspeechkit.js</em></h2>
+<div id="prim">
+	<div id="forSpeachEx">
+	<pre>Афанасий Фет
+	Купальщица.
+	...
+	Игривый плеск в реке меня остановил.
+	Сквозь ветви темные узнал я над водою
+	Ее веселый лик - он двигался, он плыл,-
+	Я голову признал с тяжелою косою.
+	...
+	Узнал я и наряд, взглянул на белый хрящ,
+	И превратился весь в смущенье и тревогу,
+	Когда красавица, прорвав кристальный плащ,
+	Вдавила в гладь песка младенческую ногу.
+	...
+	Она предстала мне на миг во всей красе,
+	Вся дрожью легкою объята и пугливой.
+	Так пышут холодом на утренней росе
+	Упругие листы у лилии стыдливой.</pre>
+	</div>
+	<input type="button" class="button" onclick="ya.tts.speak($f('#forSpeachEx' ).text())" value="Прослушать" title="Слушать Фета" />
+</div>
+
+
+<script type="text/javascript">
+$(function() {
+	ya.tts = new ya.speechkit.Tts(
+	  {
+		emotion: 'good',
+		speed: .9,
+		speaker: "levitan"
+	});
+ //   ya.tts.speakers();
+ 	$('.content' ).on('mouseup', function(e) {
+		var selNode = window.getSelection().toString() ;// anchorNode.textContent
+		if(e.target.nodeName==='CODE' || !selNode) return;
+		console.log("проигрывается= "+ selNode);
+		return ya.tts.speak(selNode);
+	});
+});
+</script>

@@ -1,0 +1,52 @@
+<h2>Задача</h2>
+<p>Сохранить значения отметок полей <em>input[type=checkbox]</em> при навигации по сайту или перезагрузке страницы. </p>
+<p>Отмеченные поля должны оставаться отмеченными при перезагрузке, либо при переходе на другие страницы.</p>
+
+<h2>Решение</h2>
+<p>В качестве решения предлагается хранить значения атрибутов <em>checked</em> в кукисах броузера. При загрузке страницы скрипт будет проверять наличие нужного кукиса и присваивать его значение соответствующему checkbox-у. По событию <em>change</em> скрипт будет сохранять в кукисах очередное значение.</p>
+<!-- <p>В качестве добавочной опции мы будем также менять описание чекбокса в зависимости от его активности.</p> -->
+<p>Поскольку не хочется захламлять кукисы большим количеством переменных, для данной задачи предлагается использовать единственный кукис, в котором будут записаны значение всех checkbox-ов в формате JSON.</p>
+<p>Для удобства работы с кукисами будем использовать миниатюрную библиотеку <a href="https://github.com/franciscop/cookies.js.git" rel="nofollow" target="_blank">cookies.js</a> с функционалом, полностью соответствующим нашим задачам.</p>
+
+
+<h2 id=toPrim>Пример реализации</h2>
+
+<div id="prim">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cookiesjs/1.4.2/cookies.min.js"></script>
+
+<ol id="ch">
+	<li><label><input id=ch1 type="checkbox"> Checkbox</label></li>
+	<li><label><input id=ch2 type="checkbox"> Checkbox</label></li>
+	<li><label><input id=ch3 type="checkbox"> Checkbox</label></li>
+</ol>
+<p><button onclick="location.replace('#toPrim'); location.reload(); ">Перегрузить страницу</button></p>
+
+<script type="text/javascript">
+(function() {
+	'use strict';
+	var cn = 'CheckBoxes', set = {}, cook = cookies(cn) || {};
+	cookies.expires = 10 * 24 * 3600;
+
+	function saveChecked() {
+		cook[this.id] = this.checked;
+		set[cn] = cook;
+
+		// Записываем в кукис текущее значение checked
+		cookies(set);
+	};
+
+	document.querySelectorAll('#ch input[type=checkbox]').forEach(function(i) {
+		i.onchange = saveChecked;
+		// Устанавливаем значение из кукиса
+		i.checked = !!cook[i.id];
+	})
+
+})();
+</script>
+</div><!-- /#prim -->
+
+
+<h4>Исходный код:</h4>
+<pre><code for="#prim"></code></pre>
+
+

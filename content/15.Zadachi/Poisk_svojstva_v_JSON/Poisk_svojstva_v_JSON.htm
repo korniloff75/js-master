@@ -1,0 +1,54 @@
+<h2>Условие</h2>
+<p>Существует многоуровневый JSON-объект. Требуется найти в нем заданное свойство. Причем свойство может быть как собственным свойством объекта, так и свойством его вложенных объектов.</p>
+
+
+<h2>Решение</h2>
+
+<p>Данная задача решается рекурсивным проходам по всем свойствам вложенных объектов, начиная со свойств родительского объекта.</p>
+<p>Будет найдено первое соответствие заданного свойства. В приведенном примере производится поиск свойства  <b>speed</b>.</p>
+
+<h3>DEMO</h3>
+<div id="prim">
+	<div id=output class=result>Исходный объект: <br></div>
+	<button onclick="output.textContent= findProperty(obj,document.querySelector('#prop').value);">Найти свойство</button>
+	<input id="prop" type="text" value="speed">
+
+	<script>
+		'use strict';
+	var obj= {
+		state: {
+			gpsData: {
+				speed: "first value",
+				acseleration: "normal"
+			},
+			Data: {
+				speed: "second value"
+			}
+		},
+		key: 'value'
+	}, output= document.querySelector('#output');
+
+	function findProperty (obj, key) {
+		if(obj instanceof Object) {
+			if(key in obj) return obj[key];
+
+			for (var k in obj) {
+				var rec= findProperty(obj[k],key);
+				if(rec) return rec;
+			}
+			return "Искомое свойство отсутствует.";
+		}
+		return null;
+
+	}
+
+</script>
+</div>
+
+<script>
+	output.innerHTML+= JSON.stringify(obj);
+</script>
+
+
+<h4>Исходный код:</h4>
+<pre><code for="#prim"></code></pre>

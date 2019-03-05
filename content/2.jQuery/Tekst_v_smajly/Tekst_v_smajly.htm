@@ -1,0 +1,87 @@
+<div class="" style="">
+	<p>Введите в поле ниже выражения с символами типа :) ,или :( ,или =).</p>
+	<p>Эта демонстрация работы скрипта покажет преобразование "смайловых" текстовых символов в изображения на странице.</p>
+	<p>Вы можете также использовать html-теги.</p>
+</div>
+
+<hr />
+
+<h3>Пример работы скрипта</h3>
+
+<div id="prim">
+
+	<div>
+		<p>Предварительно нажмите <b>ctrl+R или F5</b> !!!</p>
+	</div>
+
+	<div>
+		<textarea id="ish" style="max-width:400px; height:200px; color:#000; background:#eee; margin:auto;" onkeyup="$('#cod').html($(this).addSmile(40));">
+		Здесь вы можете напечатать любой текст. И при этом сразу увидеть результаты! )))<br /><hr width="250" />
+		Вот это да!!! :) Это смайлы ;)
+		:? интересно??? :( :P
+		</textarea>
+	</div>
+	<br />
+
+
+	<script type="text/javascript">
+	"use strict";
+
+	// jQuery plugin
+	$.fn.addSmile = function(size,smDU) {
+		var ish= this.val() || this.text(); //  ||
+		// console.log(this, ish);
+		size=size || '';
+		var smD= smDU || {
+		"sm1_21.gif": /(:|=)\)+|\){2,}/g,
+		"sm1_13.gif": /;\)/g,
+		"sm1_28.gif": /(:|=)\(/g,
+		"sm1_2.gif": /:'\(/g,
+		"sm1_12.gif": /:\?/g ,
+		"sm1_19.gif": /(:|=)D/g,
+		"sm1_27.gif": /(:|=)[PР]/g,
+		"sm1_3.gif": /:\*/g,
+		"sm1_8.gif": /%\)/g
+		};
+
+		var ish_path= (smD!=smDU) ? "/assets/images/smiles/sm1/" : "";
+
+		Object.keys(smD).forEach(function(i) {
+			// console.log(i, "/" + i + "/g");
+			ish= ish.replace(smD[i], "<img class=\"smiles none\" sm='sm' src='" + ish_path + i + "' width=" + size + " />");
+		});
+
+		return ish;
+	};
+
+	// use plugin
+	$(function() {
+		$('#cod').html($('#ish').addSmile(40));
+	});
+	</script>
+
+	<h4>Такой будет результат:</h4>
+
+	<pre id="cod"></pre>
+</div><!-- #prim -->
+
+
+<h4>Исходный код примера</h4>
+
+<pre><code for="#prim" data-lib="jQuery"></code></pre>
+
+
+<h5>Пример оформления блока со смайлами</h5>
+
+<div id="ex">
+	<p>Какой-то текст, после которого вставляем смайл :) Получилось! %)</p>
+	<p>Думаю, теперь принцип работы понятен? :? Или нет :'(</p>
+	<p>Для своего сайта, форума или блога скрипт, как всегда, можно заказать через Обратную связь! :)</p>
+	<p>Данная методика очень удачно сочетается с блоками комментариев и постами форума, поскольку позволяет оформлять пользовательские смайлы без bb-кодов и не нагружая серверную часть сайта. :D</p>
+</div>
+
+<script type="text/javascript">
+$(function() {
+	$('#ex').html($('#ex').addSmile(30));
+});
+</script>

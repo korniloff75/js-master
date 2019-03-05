@@ -1,0 +1,250 @@
+@font-face {
+  font-family: "Alegreya Sans SC";
+  font-style: normal;
+  font-weight: normal;
+  src: url("/assets/fonts/Alegreya Sans SC/AlegreyaSansSC-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Alegreya Sans SC";
+  font-style: normal;
+  font-weight: bold;
+  src: url("/assets/fonts/Alegreya Sans SC/AlegreyaSansSC-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Alegreya Sans SC";
+  font-style: italic;
+  font-weight: normal;
+  src: url("/assets/fonts/Alegreya Sans SC/AlegreyaSansSC-Italic.ttf") format("truetype");
+}
+
+h1 {font-size: 3.5em;}
+
+h2 {font-size: 3em;}
+
+h3 {font-size: 2.5em;}
+
+h4 {font-size: 2.1em;}
+
+h5 {font-size: 1.7em;}
+
+h6 {font-size: 1.5em;}
+
+pre {
+	color: #111;
+	background-color: #eee;
+	width: 100%;
+	overflow-x: auto;
+	border: 1px solid;
+	white-space: pre-wrap;
+	line-height: 1.5;
+}
+
+blockquote {
+	color:#333;
+	background: #f6f6f6;
+	font-family: Magnolia-Script;
+	padding: .1em .3em .3em 1.2em;
+	margin: 1em 0;
+	border: 1px solid #999;
+	border-left-width: 3px;
+	white-space: pre-line;
+}
+blockquote::before {
+	content: open-quote;
+	font-size: 2em;
+}
+blockquote::after {
+	content: close-quote;
+	font-size: 2em;
+}
+
+[contenteditable="true"] {
+	/* font-size: 110%; */
+	color: #123;
+	font-family: consolas, monospace;
+	background: #fff;
+	border: 2px red dashed;
+	padding: .5em;
+}
+
+textarea {
+	resize: vertical;
+}
+
+
+
+/*
+ * Упрощающие классы
+*/
+* button,
+* .button {
+	transition: all 0.3s ease;
+	background: #ddd linear-gradient(#ddd, #fff 40%, #ddd 80%) repeat scroll 0 0;
+	border: 1px solid #aca;
+	border-radius: 3px;
+	color: #444;
+	display: inline-block;
+	min-height: 20px;
+	padding: 3px;
+	vertical-align: middle;
+	font-weight: 600;
+	cursor: pointer;
+}
+* .button > option {
+	color: #444;
+	background: #ddd linear-gradient(#ddd, #fff 40%, #ddd 80%) repeat scroll 0 0;
+}
+
+
+/* button:hover,
+.button:hover {
+	background: #eee linear-gradient(#eee, #fff, #eee) repeat scroll 0 0;
+	box-shadow: 0 0 1px 1px #999999;
+	color: #111111;
+	text-decoration: none;
+} */
+
+* button:hover,
+* .button:hover {
+	background: #3C4858 linear-gradient(#3C4858, #234, #3C4858) repeat scroll 0 0;
+	box-shadow: 0 0 1px 1px #3C4858;
+	color: #F9FAFC;
+	border-color: #3C4858;
+	text-decoration: none;
+}
+
+ .left,
+ .left p {
+	 text-align: left;
+ }
+
+ .center,
+ .center>p {
+	 text-align: center;
+ }
+
+ .right,
+ .right p {
+	 text-align: right;
+ }
+
+ .alignleft {
+	float: left;
+}
+
+.alignright {
+	padding: 0 0 0.5em 1em;
+	float: right;
+}
+
+ .clear {
+	 clear: both;
+ }
+
+ .pointer {
+	 cursor: pointer;
+ }
+
+ .new {
+	 padding-right: 25px;
+	 background: url('/assets/images/icons/new.gif') no-repeat right top;
+ }
+
+ .small {
+	 font-size: 70%;
+ }
+
+ .bold,
+ .b,
+ .strong {
+	 font-weight: bold;
+ }
+
+ .big,
+ .strong {
+	 font-size: 110%;
+ }
+
+ .u {
+	 text-decoration: underline;
+ }
+
+.green {
+	color: green !important;
+}
+
+.red {
+	color: red !important;
+}
+
+.blue {
+	color: blue !important;
+}
+
+.green:hover,
+.red:hover,
+.blue:hover {
+	color: inherit !important;
+}
+
+.prim {
+	line-height: 2.2;
+}
+#prim *,
+.result,
+.prim * {
+	font-size: 20px;
+	transition: none;
+}
+
+
+/* smiles */
+[class|="sm"] {
+
+}
+
+.sm-good::before {
+	content: '\1F60A';
+}
+.sm-wink::before {
+	content: '\1F609';
+}
+.sm-trol::before {
+	content: '\1F600';
+}
+.sm-frow::before {
+	content: '\1F629';
+}
+.sm-roll::before {
+	content: '\1F636';
+}
+.sm-kiss::before {
+	content: '\1F617';
+}
+
+a[rel='nofollow']::after {
+	/* font-family: Arial, Helvetica, sans-serif; */
+	content: "\2934";
+	padding-left: .3em;
+}
+
+
+@media (max-width: 700px) {
+	h1, h2, h3, h4, h5, h6 {
+		line-height: 1em;
+		margin: .5em 0;
+	}
+
+	h1 {
+		font-size: 2.5em;
+	}
+
+	h2 {
+		font-size: 2.1em;
+	}
+
+	h3 {
+		font-size: 1.7em;
+	}
+
+}

@@ -1,0 +1,176 @@
+<div>
+	<p>В клиентском программировании часто встречается ситуация, когда требуется навесить обработчики событий на большое количество однотипных элементов. В качестве примера рассмотрим обычный календарь, по клику на каждой ячейке которого должна выводиться дополнительная информация.</p>
+	<p>Да, мы можем обработать событие на каждой ячейке, и всё будет работать. Но мы не пойдем этим путём. Мы будем использовать приём программирования, называемый  <strong>делегированием событий</strong>, основной смысл которого заключается в перехвате события на общем родительском узле DOM. Поскольку в javascript событие является объектом и содержит в себе свойство <em>target</em>, мы можем определить <em>мишень</em> события, произошедшего на родительском элементе, то есть - его дочерний узел.</p>
+
+	<p>В прмере ниже родительский элемент имеет идентификатор id="calendar".</p>
+	<p>Попробуйте кликнуть по любой дате в примере - и во всплывающем окне вы увидите эту дату.</p>
+</div>
+
+<style type="text/css">
+#calendar table {
+	margin: auto;
+	padding: 5px;
+	background: linear-gradient(#777, #555, #333, #555) #555;
+}
+
+#calendar td {
+	cursor: pointer;
+	text-align: center;
+}
+
+#calendar td:hover {
+	background: #159;
+}
+</style>
+
+
+<div align="center" id="calc_all">
+	<select id="month" class="button" onchange="$.cookie.set({mon: this.value}); createCalendar();" size="1">
+		<option value=1>Январь</option>
+		<option value=2>Февраль</option>
+		<option value=3>Март</option>
+		<option value=4>Апрель</option>
+		<option value=5>Май</option>
+		<option value=6>Июнь</option>
+		<option value=7>Июль</option>
+		<option value=8>Август</option>
+		<option value=9>Сентябрь</option>
+		<option value=10>Октябрь</option>
+		<option value=11>Ноябрь</option>
+		<option value=12>Декабрь</option>
+</select>
+
+	<select id="year" class="button" onchange="$.cookie.set({year: this.value}); createCalendar();" size="1"></select>
+
+	<br />
+	<div id="calendar"></div>
+
+</div>
+
+<script>
+	'use strict';
+	var akt_year = new Date().getFullYear(),
+		n_y = 9,
+		yyyy = akt_year - n_y,
+		yyyy_f = akt_year + n_y;
+
+	while (yyyy++ < yyyy_f) {
+		$('<option />', { value: yyyy })
+		.appendTo($('#year'))
+		.text(yyyy);
+	}
+
+
+	function createCalendar() {
+		var $elem = $('#calendar');
+		$('#month').val(
+			$.cookie.get('mon') ? $.cookie.get('mon') : +(new Date().getMonth()) + 1
+		);
+		$('#year').val ($.cookie.get('year') ? $.cookie.get('year') : akt_year);
+
+
+		var mon = +$('#month').val() - 1; // месяцы от 0 до 11
+		var year = +$('#year').val(); //$.cookie.get('year') ||
+
+		var d = new Date(year, mon),
+			table = '<table id="cal"><tr><th>пн</th><th>вт</th><th>ср</th><th>чт</th><th>пт</th><th>сб</th><th>вс</th></tr><tr>';
+		//alert(d)
+
+		for (var i = 0; i < getDay(d); i++) {
+			table += '<td></td>';
+		}
+
+		// ячейки календаря с датами
+		while (d.getMonth() == mon) {
+			table += '<td>' + d.getDate() + '</td>';
+			if (getDay(d) % 7 == 6) {
+				table += '</tr><tr>';
+			}
+			d.setDate(d.getDate() + 1);
+		}
+
+		if (getDay(d) != 0) {
+			for (var i = getDay(d); i < 7; i++) {
+				table += '<td></td>';
+			}
+		}
+
+		table += '</tr></table>';
+		// console.log("table= ", table);
+
+		$elem.html (table);
+
+	}
+
+
+	function getDay(date) {
+		var day = date.getDay();
+		if (day == 0) day = 7;
+		return day - 1;
+	}
+
+	createCalendar();
+
+</script>
+
+
+
+<div id=prim>
+	<script>
+		// to hell jQuery!
+		document.getElementById('calendar').addEventListener('click', function (e) {
+			var t = e.target; // ссылка на объект - инициатор события
+			if(t.tagName !== 'TD') return;
+			alert(t.innerHTML);
+			e.stopPropagation();
+		});
+	</script>
+
+</div>
+
+<h4>Код:</h4>
+<!--  -->
+<pre><code for="#prim" ></code></pre>
+
+
+<!-- <div id=primJQ>
+	<script>
+	// to hell jQuery!
+	$(document).on('click', 'td', function (e) {
+		console.log(e.target);
+		alert(e.target.innerHTML);
+		e.stopPropagation();
+	});
+	</script>
+</div>
+
+<h4>Код:</h4>
+
+<pre><code for="primJQ" data-lib="jQuery"></code></pre> -->
+
+
+<p>И, для тех, кому пример с календарём показался слишком сложным, простейший пример со стандартным списком, выводящим значение атрибута <em>name</em> при клике на любом из его элементов.</p>
+<style type="text/css">
+	#prim2 li {width: auto; cursor: pointer;}
+</style>
+
+<div id="prim2">
+	<ul onclick= "fn(event)">
+	  <li name="one">один</li>
+	  <li name="two">два</li>
+	  <li name="three">три</li>
+	  <li name="four">четыре</li>
+	  <li name="five">пять</li>
+	</ul>
+	<script>
+	function fn (e) {
+		alert(e.target.getAttribute('name'));
+		e.stopPropagation();
+	}
+	</script>
+</div>
+
+
+<h4>Код:</h4>
+<!--  -->
+<pre><code for="#prim2" ></code></pre>

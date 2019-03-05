@@ -1,0 +1,311 @@
+<script src="/js/modules/KFF_Lite.min.js"></script>
+
+<style type="text/css" media="screen">
+	#prim h3,
+	#prim h4 {
+		background: #1D5B94;
+		color: #ddd
+	}
+
+	#ish_d {
+		width: 450px;
+		padding: 5px;
+		border: 1px solid #aaa;
+	}
+
+	#kvo_uch_st input {
+		width: 50px;
+	}
+
+	#prim .input,
+		{
+		width: 50px;
+	}
+
+	#prim input[type="text"] {
+		width: 50px;
+		color: #f1f1f1;
+		background: #123;
+	}
+
+	#rezs {
+		width: 250px;
+		border: 1px ridge #aaa;
+		padding: 5px;
+	}
+
+	#rezs input[type="text"] {
+		width: 90px;
+		border: none;
+		border-bottom: 1px solid #333;
+		text-align: center;
+		font: bold 18px serif;
+	}
+</style>
+
+
+<div id="prim" class="flex-wrap">
+	<div id="ish_d">
+		<div id="kvo_uch_st">
+			<h4>Длина участка стены, м.п.</h4>
+			<span id="st1">
+				<input onclick="this.select();" value="0" type="text">
+			</span>
+		</div>
+		<input value="Еще" class="button" onclick="add_el(_K.G('kvo_uch_st'), _K.G('st1'), 'span');" type="button">
+		<div>
+			Высота стены, м.п. - <input onclick="this.select();" class="input" value="0" id="h_st" type="text">
+		</div>
+
+		<div id="dveri">
+			<h4>Двери:</h4>
+			Ширина откосов, м.п. - <input onclick="this.select();" class="Sh_otk" value="0" type="text">
+			<div id="dv1">
+				Ширина - <input onclick="this.select();" value="0" class="L" type="text"> м.п.; &nbsp;
+				Высота - <input onclick="this.select();" value="0" class="H" type="text"> м.п.; &nbsp;
+				Количество - <input onclick="this.select();" value="0" class="kvo" type="text"> шт.; &nbsp;
+			</div>
+		</div>
+		<input value="Еще" class="button" onclick="add_el(_K.G('dveri'), _K.G('dv1'));" type="button">
+
+		<div id="okna">
+			<h4>Окна:</h4>
+			Ширина откосов, м.п. - <input onclick="this.select();" class="Sh_otk" value="0" type="text">
+			<div id="ok1">
+				Ширина - <input onclick="this.select();" value="0" class="L" type="text"> м.п.; &nbsp;
+				Высота - <input onclick="this.select();" value="0" class="H" type="text"> м.п.; &nbsp;
+				Количество - <input onclick="this.select();" value="0" class="kvo" type="text"> шт.; &nbsp;
+			</div>
+		</div>
+		<input value="Еще" class="button" onclick="add_el(_K.G('okna'), _K.G('ok1'));" type="button">
+
+		<div id="pil">
+			<h4>Пилястры и ниши:</h4>
+			<div id="p1">
+				Выцступ / глубина, м.п. - <input onclick="this.select();" class="Gl_otk" value="0" type="text">
+				Ширина - <input onclick="this.select();" value="0" class="L" type="text"> м.п.; &nbsp;
+				Высота - <input onclick="this.select();" value="0" class="H" type="text"> м.п.; &nbsp;
+				Количество - <input onclick="this.select();" value="0" class="kvo" type="text"> шт.; &nbsp;
+			</div>
+		</div>
+		<input value="Еще" class="button" onclick="add_el(_K.G('pil'), _K.G('p1'));" type="button">
+
+		<div>
+			<table>
+				<tbody>
+					<tr>
+						<td> Расход материала на 1 м.кв. - </td>
+						<td><input onclick="this.select();" value="0" id="mat" type="text"> кг
+						</td>
+					</tr>
+					<tr>
+						<td> Стоимость 1кг материала - </td>
+						<td><input onclick="this.select();" value="0" id="st_mat" type="text"> руб.
+							<!-- <tr><td> Стоимость 1кг материала на откосы - <td><input type="text" value="0" id="st_otk_mat" /> руб. -->
+						</td>
+					</tr>
+					<tr>
+						<td> Расценка 1 м.кв. - </td>
+						<td><input onclick="this.select();" value="0" id="st_w" type="text"> руб.
+							<!-- <tr><td> Коэф-т увеличения на откосы - <td><input type="text" value="2.2" id="kt_otk" /> -->
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<br>
+		<br><input value="Расчет" class="button" onclick="S_st(); _K.G('rezs', {display:''});" style="padding:5px;" type="button">
+		&nbsp;&nbsp;
+		<input value="Очистить" class="button" onclick="res(); " style="padding:5px;" type="button">
+	</div>
+	<!-- /ish_d -->
+
+
+	<div id="rezs" style="display:none;">
+		<h3>Трассировка расчета:</h3>
+		<table>
+			<tbody>
+				<tr>
+					<td colspan="2"> <strong>Площади :</strong>
+					</td>
+				</tr>
+				<tr>
+					<td> Площадь стены сплошная: </td>
+					<td width="170"><input id="S_st" type="text"> м. кв.
+					</td>
+				</tr>
+				<tr>
+					<td> Площадь дверей: </td>
+					<td><input id="S_dv" type="text"> м. кв.
+					</td>
+				</tr>
+				<tr>
+					<td> Площадь дверных откосов: </td>
+					<td><input id="S_dv_otk" type="text"> м. кв.
+					</td>
+				</tr>
+				<tr>
+					<td> Площадь окон: </td>
+					<td><input id="S_ok" type="text"> м. кв.
+					</td>
+				</tr>
+				<tr>
+					<td> Площадь оконных откосов: </td>
+					<td><input id="S_ok_otk" type="text"> м. кв.
+					</td>
+				</tr>
+				<tr>
+					<td> Площадь пилястров и ниш: </td>
+					<td><input id="S_pil" type="text"> м. кв.
+					</td>
+				</tr>
+				<tr style="display:none">
+					<td> Площадь откосов пилястров и ниш: </td>
+					<td><input id="S_pil_otk" type="hidden"> м. кв.
+					</td>
+				</tr>
+				<tr>
+					<td> Площадь стен без проемов: </td>
+					<td><input id="S_st_bp" type="text"> м. кв.
+					</td>
+				</tr>
+				<tr>
+					<td> <strong>Окрашиваемая площадь:</strong> </td>
+					<td><input id="S_st_okr" type="text"> м. кв.
+
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2"> <br>
+						<hr><strong>Материалы :</strong>
+					</td>
+				</tr>
+				<tr>
+					<td> Количество материала: </td>
+					<td><input value="0" id="s_mat" type="text"> кг
+					</td>
+				</tr>
+				<tr>
+					<td> Количество материала на откосы: </td>
+					<td><input value="0" id="s_otk_mat" type="text"> кг
+
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2"> <br>
+						<hr><strong>Ориентировачная cтоимость :</strong><br>
+					</td>
+				</tr>
+				<tr>
+					<td> Основного материала: </td>
+					<td><input value="0" id="ss_st_mat" type="text"> руб.
+					</td>
+				</tr>
+				<tr>
+					<td> Материала откосов: </td>
+					<td><input value="0" id="ss_otk_mat" type="text"> руб.
+					</td>
+				</tr>
+				<tr>
+					<td> Основных работ: </td>
+					<td><input value="0" id="ss_st_w" type="text"> руб.
+					</td>
+				</tr>
+				<tr style="display:none">
+					<td> Работ по откосам: </td>
+					<td><input value="0" id="ss_otk_w" type="hidden"> руб.
+					</td>
+				</tr>
+				<tr>
+					<td> <strong>Общая :</strong> </td>
+					<td><input value="0" id="ss" type="text"> руб.
+						<!-- <tr><td> Средняя удельная: <td><input type="text" value="0" id="sss" /> руб./м.кв -->
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+
+		<script type="text/javascript">
+			function add_el(parr, obr, bl) {
+				if (!bl) dv = parr.cr('div', { style: 'margin-top:7px;' })
+				else dv = parr.cr(bl, {})
+				dv.innerHTML = obr.innerHTML;
+			}
+			function S_st() {
+				L_sD = _K.G('kvo_uch_st').getElementsByTagName('input');
+				L_s_l = L_sD.length;
+				L_s = 0;
+				while (L_s_l--) {
+					L_s -= -L_sD[L_s_l].value
+				}
+				_K.G('S_st').value = (L_s * _K.G('h_st').value)
+
+				calc_D(_K.G('dveri'), 'S_dv', 'S_dv_otk');
+				calc_D(_K.G('okna'), 'S_ok', 'S_ok_otk');
+				calc_D(_K.G('pil'), 'S_pil', 'S_pil_otk', 1);
+
+				_K.G('S_st_bp').value = _K.G('S_st').value - (-_K.G('S_pil_otk').value) - _K.G('S_dv').value - _K.G('S_ok').value;
+				S_otk = _K.G('S_dv_otk').value - (-_K.G('S_ok_otk').value); //  - (-_K.G('S_pil_otk').value)
+				_K.G('S_st_okr').value = _K.G('S_st_bp').value - (-S_otk);
+				// mat *************
+				_K.G('s_mat').value = (_K.G('S_st_bp').value) * _K.G('mat').value;
+				_K.G('s_otk_mat').value = S_otk * _K.G('mat').value;
+				// stoim ***********
+				_K.G('ss_st_mat').value = _K.G('s_mat').value * _K.G('st_mat').value;
+				_K.G('ss_otk_mat').value = _K.G('s_otk_mat').value * _K.G('st_mat').value;
+				_K.G('ss_st_w').value = _K.G('S_st_bp').value * _K.G('st_w').value;
+				_K.G('ss_otk_w').value = S_otk * _K.G('st_w').value; // _K.G('kt_otk').value;
+				_K.G('ss').value = _K.G('ss_st_mat').value - (-_K.G('ss_otk_mat').value) - (-_K.G('ss_st_w').value) - (-_K.G('ss_otk_w').value);
+				//	_K.G('sss').value= _K.G('ss').value / _K.G('S_st_okr').value;
+
+				rez();
+				//	alert(S_otk)
+			}
+			function calc_D(Dg, inp_S, inp_S_otk, pil) {
+				D = Dg.getElementsByTagName('div')
+				D_l = D.length;
+				_K.G(inp_S).value = 0; _K.G(inp_S_otk).value = 0
+				while (D_l--) {
+					Ldv = D[D_l].G('.L')[0].value;
+					Hdv = D[D_l].G('.H')[0].value;
+					Kvo_dv = D[D_l].G('.kvo')[0].value;
+
+					if (Dg == _K.G('pil')) {
+						Sh_otk = D[D_l].G('.Gl_otk')[0].value;
+						_K.G(inp_S).value -= -(Ldv * Hdv * Kvo_dv) - (Kvo_dv * (Ldv - (-2 * Hdv)) * Sh_otk);
+					} else {
+						Sh_otk = Dg.G('.Sh_otk')[0].value;
+						_K.G(inp_S).value -= -(Ldv * Hdv * Kvo_dv);
+					}
+					//	  _K.G(inp_S).value-= -(Ldv*Hdv*Kvo_dv);
+					_K.G(inp_S_otk).value -= -(Kvo_dv * (Ldv - (-2 * Hdv)) * Sh_otk);
+				}
+
+				//	 alert(Sh_otk + ' ' + parseInt(Sh_otk))
+			}
+
+			inps = _K.G('A$ish_d input');
+			inpsL = inps.length;
+			while (inpsL--) {
+				if (inps[inpsL].type == 'text') _K.G(inps[inpsL]).attr({ onclick: 'this.select();' })
+			}
+
+			function rez() {
+				inps = _K.G('rezs').getElementsByTagName('input');
+				for (i = 0; i < inps.length; i++) {
+					inps[i].value = parseInt(inps[i].value * 100, 10).toFixed(2) / 100;
+				}
+			}
+
+			function res() {
+				inps = _K.G('ish_d').G('A$input');
+				inpsL = inps.length;
+				while (inpsL--) {
+					if (inps[inpsL].type == 'text') inps[inpsL].value = 0;
+				}
+				_K.G('rezs', { display: 'none' });
+			}
+		</script>
+	</div>
+</div>

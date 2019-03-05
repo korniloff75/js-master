@@ -1,0 +1,64 @@
+<p>Отличный пример простейшей, но при этом вполне рабочей капчи (<strong>captcha</strong> - защитный код от спам-ботов) я увидел на сайте - <a href="http://sitear.ru/material/captcha-php" target="_blank" rel="nofollow">sitear.ru</a></p>
+<p>Немного подправив код, решил выложить там же в комментариях, но не смог по причине ограничений сайта. При попытке добавить сообщение получил <em>Disallowed Key Characters</em>. Так что выкладываю у себя, приведя ссылку на сайт автора.</p>
+<p>Все настройки находятся в блоке кода <b>Settings</b>: </p>
+<p><b>$ttf</b> - путь к файлу шрифта капчи, <b>$ts</b> - размер шрифта. <br />Остальное лучше не трогать без понимания процесса.</p>
+<p>Код тестировался на работоспособность в PHP-7.1</p>
+
+
+<h2>Код файла капчи</h2>
+<pre><code saldom=noLib>
+&lt;?php
+// Settings ////////////////////////////
+$ttf= "/path to/fonts.ttf"; // path to ttf file
+$ts= 25; // text size
+$rgb=0xffffff; //background-color
+////////////////////////////////////////
+
+ini_set('session.cookie_httponly', 1);
+session_start();
+header("Content-type: image/gif");
+$_SESSION['code'] = $code = random_int(100, 9999);
+$color1 = random_int (10, 200);
+$color2 = random_int (10, 200);
+$color3 = random_int (10, 200);
+
+$txt_box=imagettfbbox($ts, 0, $ttf, $code);
+foreach ($txt_box as &$c) {
+	$c= abs($c);
+}
+unset($c);
+
+$box_width=($txt_box[0]+$txt_box[2]+$txt_box[4]+$txt_box[6])/2;
+$box_height=($txt_box[1]+$txt_box[3]+$txt_box[5]+$txt_box[7])/2;
+$img = imagecreatetruecolor($box_width+1,$box_height+1);
+imagefill($img, 0, 0, $rgb);
+imagettftext($img, $ts, 0, 1, $box_height-2, imageColorAllocate($img, $color1,$color2,$color3), $ttf, $code);
+imagegif($img);
+imagedestroy($img);
+?&gt;
+</code></pre>
+
+<p>Этот код нужно сохранить в файл <b>captcha.php</b> и можно разместить в любом каталоге. В дальнейшем коде путь к этому файлу я буду обозначать, как <code>/path to/captcha.php</code>. GET-параметр <code>random_int(1,1e5)</code> будем использовать для уничтожения возможности кеширования изображения капчи броузером клиента.</p>
+<p>Также добавим возможность пользовательской перегрузки капчи по клику на ее изображении. Для этого будем использовать событие <b>click</b> этого изображения.</p>
+<p>Далее нужно <a href="/?module=php/modules/Download.php&file=assets/fonts/captcha/Bharatic-Fontw.ttf">скачать</a> и сохранить под названием <code>fonts.ttf</code> у себя на сервере файл шрифтов для капчи . Вы можете использовать как этот, так и любой другой, найденный в инете. В коде выше этот файл прописан в настройках по пути <code>/path to/fonts.ttf</code></p>
+
+
+<h2>Пример использования капчи</h2>
+<h3>Код для защищаемой формы</h3>
+<pre><code saldom=noLib>
+<img id="captcha" alt="captcha" title= "Обновить" style= "height:50px; min-width:101px; border: 1px solid #999; cursor:pointer;" src= "/path to/captcha.php?&lt;?=random_int(1,1e5)?&gt;" onclick="this.src='/path to/captcha.php?'+Math.floor(Math.random() * 1e5)">
+<span>Введите текст с картинки: </span><input type="text" name="user_code" required="required" style="width:70px;" value="">
+</code></pre>
+
+<h3>Код проверки формы на сервере</h3>
+<p>И вот, после отправки формы на сервер, когда пользователь ввел защитный код, нужно проверить его соответствие коду, сгенерировавшему изображение капчи. Последний был записан в сессионом массиве с параметром <b>code</b>.</p>
+<pre><code saldom=noLib>
+&lt;?php
+if(!isset($_SESSION)) session_start();
+if($_GET['user_code'] == $_SESSION['code']) echo 'Проверка пройдена. Можно сохранять пост.';
+else die ('Число с картинки введено не верно');
+?&gt;
+</code></pre>
+<p>Ну тут, думаю, все понятно без лишних объяснений. Если проверка пройдена, то можно выполнять дальнейшие программные действия. Если нет, обрываем работу программы с выводом предупреждающего сообщения.</p>
+<p>В конечном результате вышеприведенные коды позволят вам защитить свои ресурсы от автоматических регистраций и бот-постинга, скажем, процентов на 90. Для большего процента защиты нужны будут уже более сложные реализации капчи. А пример данной реализации был использован с некоторыми доработками в форме добавления комментариев под этой статьей.</p>
+<p>Еще раз спасибо автору исходного кода. Если мои объяснения или реализация скрипта вас в чем-то не устроила, вы всегда сможете посетить сайт автора по ссылке в начале этой статьи и воспользоваться его оригинальной реализацией.</p>

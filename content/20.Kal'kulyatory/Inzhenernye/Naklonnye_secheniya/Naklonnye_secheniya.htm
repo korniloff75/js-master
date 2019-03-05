@@ -1,0 +1,133 @@
+<script charset="utf-8" type="text/javascript" src="/js/modules/Ing.js"></script>
+
+<style>
+	table {
+	margin: 1em auto;
+}
+table td {
+	padding: .5em 5px;
+}
+#prop td {
+	font-size: 120%;
+	border: 1px solid;
+}
+</style>
+
+<table style="border-bottom: 1px solid #aaa; margin-bottom: 20px;">
+	<tbody>
+		<tr>
+			<th colspan="3">Исходные данные для расчета:</th>
+		</tr>
+		<tr>
+			<td>Ширина балки В=</td>
+			<td><input id="b" type="text" value="40" size="6"> см</td>
+		</tr>
+		<tr>
+			<td>Высота балки H=</td>
+			<td><input id="h" type="text" value="40" size="6"> см</td>
+		</tr>
+		<tr>
+			<td>Защитный слой бетона, а=</td>
+			<td><input id="a" type="text" value="4" size="6"> см</td>
+		</tr>
+		<tr>
+			<td>Бетон<select id="Fb2" class="button">
+					<option value="тяжелый или ячеистый|2|.01">тяжелый или ячеистый</option>
+					<option value="мелкозернистый|1.7|.01">мелкозернистый</option>
+					<option value="легкий|1.6|.02">легкий</option>
+				</select>:</td>
+			<td><select id="bet" class="button">
+					<option value="B7.5|45.9|4.3">B7.5</option>
+					<option value="B10|61.2|5.7">B10</option>
+					<option value="B15|86.6|7.6">B15</option>
+					<option value="B20|117|9.2">B20</option>
+					<option value="B25|148|9.7">B25</option>
+					<option value="B30|173|11.7">B30</option>
+					<option value="B35|199|13.3">B35</option>
+					<option value="B40|224|14.3">B40</option>
+				</select></td>
+		</tr>
+		<tr>
+			<td>Толщина монолит. перекрытия, h`<sub>f</sub>=<br> <span>(Пустое поле или 0 - нет перекрытия)</span></td>
+			<td><input id="h_per" type="text" value="" size="6"> см</td>
+		</tr>
+		<tr>
+			<td>Предварительное напряжение арматуры, P=<br> <span>(Пустое поле или 0 - нет преднапряжения)</span></td>
+			<td><input id="prednapr" type="text" value="" size="6"> т</td>
+		</tr>
+		<tr>
+			<td>Поперечная арматура :</td>
+			<td colspan="2"><select id="arm" size="1" class="button">
+					<option value="A240|2.19|2.19|1.73">A240</option>
+					<option value="A300|2.75|2.75|2.19">A300</option>
+					<option value="A400|3.62|3.62|2.9">A400</option>
+					<option value="A500|4.08|4.43|3.06">A500</option>
+					<option value="B500|3.67|4.23|3.06">B500</option>
+				</select></td>
+		</tr>
+		<tr>
+			<td>Диаметр D<sub>sw</sub>=<br> <span>(Пустое поле или 0 - без арматуры)</span></td>
+			<td colspan="2"><input id="Dsw" type="text" value="8" size="6"> мм</td>
+		</tr>
+		<tr>
+			<td>Шаг S<sub>sw</sub>=</td>
+			<td colspan="2"><input id="Ssw" type="text" value="100" size="6"> мм</td>
+		</tr>
+		<tr>
+			<td>Количество прутов поперечной арматуры</td>
+			<td colspan="2"><input id="Kvo" type="text" value="2" size="6"> шт</td>
+		</tr>
+		<tr>
+			<td><input class="clear button" onclick="Pop()" type="button" value="Расчет"></td>
+		</tr>
+
+		<tr>
+			<th colspan="3">Результаты расчета:</th>
+		</tr>
+		<tr>
+			<td id="trass" colspan="3">
+				<!-- Трассировка -->
+			</td>
+		</tr>
+
+		<tr>
+			<td colspan="2">Поперечная сила, <strong>Q<sub>min</sub></strong>= <input id="Qmin" onclick="this.focus();this.select();"
+				 type="text" readonly="readonly" size="6"> тс</td>
+		</tr>
+	</tbody>
+</table>
+
+<p><img style="background: #eee;padding: 5px;" src="/<?=\H::$Dir ?>assets/NaklS.gif" alt="" border="0"></p>
+
+
+<h5>В расчете учтены требования:</h5>
+
+<ul>
+	<li>В общем случае задаются рядом наклонных сечений при различных значениях <strong>с</strong>, не превышающих
+		расстояние от опоры до сечения с максимальным изгибающим моментом и не более 3h<sub>0</sub>;</li>
+	<li>Расчет изгибаемых элементов по бетонной полосе между наклонными сечениями производят из условия: Q < 0,3*φ<sub>w1</sub>*φ<sub>b1</sub>*R<sub>b</sub>*b*h<sub>0</sub>;</li>
+	<li>Значение Q<sub>b</sub> принимают не более 2,5R<sub>bt</sub>bh<sub>0</sub> и не менее 0,5R<sub>bt</sub>bh<sub>0</sub>;</li>
+	<li>с<sub>0</sub> - длина проекции наклонной трещины, принимаемая равной <strong>с</strong>, но не более <strong>2h<sub>0</sub></strong>;</li>
+	<li>Хомуты учитывают в расчете, если соблюдается условие q<sub>sw</sub> > 0,25R<sub>bt</sub>b</li>
+</ul>
+<p>Расчет производится по 10 наклонным сечениям, проекции которых находятся в интервале h<sub>0</sub>...3h<sub>0</sub>
+	сечения балки. В результат расчета выводится наименьшая поперечная сила из воспринимаемых этими сечениями.</p>
+<p>Данная методика позволяет с достаточной степенью вероятности выявить наименее прочное сечение.</p>
+<div id="prim"> </div>
+<script type="text/javascript">
+
+	Ing.mat.cr('Fb2', '0'); Ing.mat.cr(); Ing.mat.cr('arm', '0');
+
+	function Pop() {
+		var trass = "h<sub>0</sub>= " + Ing.h0() + " см<br />" + "R<sub>bt</sub>= " + Ing.Rbt() + " тс/м<sup>2</sup><br />" //+ "Q<sub>b</sub>= "+ Ing.Pop.Qb().toFixed(1) +" т<br />";
+		if (Ing.Pop.Qsw() > 0) {
+			trass += "R<sub>sw</sub>= " + Ing.Rsw() + " тс/м<sup>2</sup><br />";
+			// 	trass+= "Q<sub>sw</sub>= "+ Ing.Pop.Qsw().toFixed(1) +" т<br />";
+		}
+		trass += "Проекции сечений: <br>" + Ing.Pop.ci() + " см<br />";
+		trass += "Поперечные силы: <br>" + Ing.Pop.Qbsw() + " тс<br />";
+		trass += "Q(по пособию)= " + Ing.Pop.Q().toFixed(1) + " тс<br />";
+		$f('#trass').html(trass);
+		$f('#Qmin').val(Ing.Pop.Qi().toFixed(1));
+	};
+</script>

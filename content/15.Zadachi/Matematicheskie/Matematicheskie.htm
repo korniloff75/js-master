@@ -1,0 +1,157 @@
+<h2>Задача 1</h2>
+
+<p>Вычислить сумму тех элементов квадратной матрицы <b>mtx</b> порядка <b>N</b>, номера строк которых <u>принадлежат</u> непустому множеству номеров строк <b>S1</b> и <u>не принадлежат</u> непустому множеству номеров столбцов <b>S2</b>.</p>
+
+
+<h3>Решение</h3>
+
+<p>В данном решении я не подставлял конкретных значений. При желании вы сможете сделать это сами, присвоив соответствующие значения объявленным в скрипте переменным. Имена переменных соответствуют условию.</p>
+
+<pre><code>
+<script id="prim" type="text/javascript">
+var mtx=[[],[]], N, S1=[], S2=[], summ=0;
+
+// Перебираем массив S1
+for (var j in S1) {
+	// Перебираем ВСЕ строки матрицы
+	for (var i=0; i < N; i++) {
+		// Если номер строки находится в S2 - переходим на следующую итерацию
+		if(i in S2) continue;
+		// Иначе - добавляем значение элемента к сумме.
+		summ += mtx[i][j];
+	};
+};
+</script>
+</code></pre>
+
+
+
+<h2>Задача 2</h2>
+
+<div>
+	<p>Составьте программу, создающую динамическую целочисленную матрицу порядка NxM,заполните матрицу случайными числами. Найдите номера строк, все элементы которых четны. </p>
+</div>
+
+<h3>Решение</h3>
+
+<div id=prim2>
+	<div>
+		<div id="mtx" class=result style=" display:inline-block;"></div>
+		<div id=chet></div>
+		<div><button class="button" onclick="Fill(5,7);">Заполнить матрицу</button></div>
+	</div>
+
+	<script type="text/javascript">
+		function Fill(N, M) {
+			var matrix = [], chet = [], mtx = document.getElementById('mtx');
+			mtx.innerHTML = document.getElementById('chet').innerHTML='';
+
+			for (var i = 0; i < N; i++) {
+				// Создаём пустую матрицу
+				matrix[i] = [];
+				mtx.innerHTML += '<p>';
+				// Заполняем случайными числами 0...100
+				for (var j = 0; j < M; j++) {
+					matrix[i][j] = Math.round(Math.random() * 100);
+					mtx.innerHTML += matrix[i][j] + ' ';
+				}
+
+				// Находим все строки с чётными элементами
+				if (matrix[i].every(function (cell) {
+					return cell % 2 === 0
+				})) chet.push(i + 1);
+
+				console.log(matrix[i].valueOf());
+
+				mtx.innerHTML += '</p>';
+			}
+
+			console.log("chet= " + chet);
+			if(chet.length) document.getElementById('chet').innerHTML= 'Строки ' + chet.valueOf() + ' содержат только четные элементы.';
+			else document.getElementById('chet').innerHTML= 'Матрица не содержит строк с четными элементами.';
+		}
+
+	</script>
+</div>
+
+<pre><code for="#prim2"></code></pre>
+
+
+
+<h2>Задача 3</h2>
+
+<div>
+	<p>Вводятся целые числа a и b. Гарантируется, что a не превосходит b. Выведите все числа на отрезке от a до b, являющиеся полными квадратами. Если таких чисел нет, то ничего выводить не нужно.</p>
+</div>
+
+<h3>Решение</h3>
+
+<div id=prim3>
+	<p>Введите данные для расчёта. Значение А должно быть меньше значения В.</p>
+	<p>A= <input type="text" id=a value=5> B= <input type="text" id=b value=500></p>
+	<div class="result t3">
+	</div>
+	<div>
+		<button class="button" onclick="document.querySelector('.result.t3').innerHTML= findSquare(document.querySelectorAll('#a,#b'));">Найти квадраты</button>
+	</div>
+
+	<script type="text/javascript">
+		function findSquare(range) {
+			range= [+range[0].value, +range[1].value];
+			if (range[0] >= range[1]) return alert('Введите корректные значения: А должно быть меньше В.');
+			var res= [];
+			for (var i = range[0]; i <= range[1]; i++) {
+				if(Math.sqrt(i)*1e5 === Math.round(Math.sqrt(i)*1e5)) res.push(i)
+			}
+			return res.map(function(i) {
+				return ' ' +  Math.sqrt(i) + '^2= <big>' + i + '</big>';
+			});
+		}
+	</script>
+</div>
+
+
+<h4>Исходный код</h4>
+<pre><code for="#prim3"></code></pre>
+
+
+<h2>Задача 4</h2>
+
+<div>
+	<p>Задача циклического типа. Подсчитать количество натуральных делителей числа x И ВЫВЕСТИ ВСЕ НАТУРАЛЬНЫЕ ДЕЛИТЕЛИ (включая 1 и само число; x <= 30000))</p>
+</div>
+
+<h3>Решение</h3>
+
+<p>Решение представлено функцией, принимающей в качестве аргумента число Х.</p>
+	<p>X= <input type="text" id=d4 value=555></p>
+	<div class="result t4">
+	</div>
+	<p><button class="button" onclick="f4(+$('#d4').val());">Вычислить</button></p>
+
+<div id=prim4>
+
+	<script type="text/javascript">
+	function f4 (d) {
+		// Отсекаем не числа и превышающие лимит
+		d=Number(d);
+		if(typeof d !== 'number' || d>30000) {
+			alert('Введите числовое значение в диапазоне 0 ... 30000');
+			return;
+		}
+
+		// Объявляем массив и сохраняем начальное значение
+		var res=[], ish=d;
+		// Проходим циклом по всем числам от d до 0, находим натуральные делители
+		while(d) {
+			(ish%d === 0) && res.push(d);
+			d--;
+		}
+		document.querySelector('.t4').innerHTML = res.join(', ');
+	}
+	</script>
+</div>
+
+
+<h4>Исходный код</h4>
+<pre><code for="#prim4"></code></pre>

@@ -1,0 +1,45 @@
+/* GRAY design */
+#CECpanel {
+	position: fixed;
+	background: #d6d6d6 !important;
+	top: 0;
+	left: 0;
+	width: 100%;
+	margin: 0 auto;
+	text-align: center;
+	z-index: 10000;
+	padding-bottom: 1px;
+}
+#CECpanel div, #CECpanel span {
+	background-color: transparent !important;
+	display: inline-block;
+	font: 500 18px 'PT Sans Narrow', sans-serif !important;
+	color: #000 !important;
+	margin: 0 20px 0 0;
+	font-size: 18px;
+}
+
+#CECpanel i {
+	padding: 3px;
+	width: 1.2em;
+	margin: 0 3px;
+	cursor:pointer;
+	color: #000 !important;
+	font-weight: 500;
+	background-color: transparent !important;
+}
+
+#CECpanel span.min700 { background-color: transparent !important; }
+
+#CECpanel .color > i {display: inline-block; height:23px;}
+#CECpanel i.c1 {background-color:#fff !important;color:#000 !important}
+#CECpanel i.c2 {background-color:#000 !important;color:#fff !important}
+#CECpanel i.c3 {background-color:#9DD1FF !important;color:#063462 !important}
+
+#CECpanel a:hover, #CECpanel i:hover, #CECpanel i.imageActive {
+	text-decoration: underline;
+}
+
+@media (max-width: 700px) {
+	#CECpanel .min700 {display:none;} 
+}

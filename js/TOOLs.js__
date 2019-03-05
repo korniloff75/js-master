@@ -1,0 +1,404 @@
+'use strict';
+// location.pathname - /subsite/
+var TOOLs = {
+	fb: { //== _K.fns.fb.b - кнопка для feedback
+		t: false,
+		toMail: function self(s) {
+			s = Object.assign({}, s || {});
+
+			if(s.btn && (_K.tmp.node = s.par = s.btn.closest('.code'))) {
+				_K.tmp.code = s.par.innerHTML;
+
+				Ajax.r('/?f=core/modules/mailform.php&topic=' + (_K.G('$h1') && _K.G('$h1').textContent)).done(
+					function() {
+						s.par.innerHTML = '<p><button onclick="_K.tmp.node.innerHTML = _K.tmp.code;">back to CODE</button></p>' + this.response
+				});
+
+			} else if (!!_K.G('$meta[content*="Pavel KorniloFF"]')) {
+				location.href = '/?mailform';
+			}
+		},
+
+		send : function(f) {
+			// f - form
+			// console.log(f);
+			f.elements.submit.onclick = function(e) {
+				e.preventDefault();
+				var err0 = "Заполните корректно поля:\n", err = '';
+
+				// validation
+				Object.keys(f.elements).forEach(function(i) {
+					var el = f.elements[i];
+					if(el.required) switch (el.name) {
+						case 'senderName':
+							Check.name(el.value) || (err += "Имя\n");
+							break;
+						case 'senderMail':
+							Check.mail(el.value) || (err += "E-mail\n");
+							break;
+						case 'mailform':
+							Check.mess(el.value) || (err += "Сообщение\n");
+					}
+				});
+				if(err) {
+					alert(err0 + err); err = ''; return;
+				}
+
+				var send = Ajax.all_form(f);
+
+				Ajax.r(_K.G(f).attr('action'), {
+					send : send
+				}).done(function() {
+					var r = this.response;
+					f.innerHTML = r;
+					if (r.indexOf('ERROR') < 0) history.pushState(null, null, location.href + '&emailformsent');
+				})
+				this.disabled = 1;
+			}
+		},
+
+		b: '<p><input class="btn" type="button" value="Обратная связь" title="Обратная связь" onclick="TOOLs.fb.toMail({btn:this});"></p>',
+
+	},
+
+	// Рекурсивный листинг объекта
+  printObj : function printObj(obj) {
+	 var o='{ \n';
+	 Object.keys(obj).forEach(function(key) {
+		o += key + ' : ';
+    if(obj[key] instanceof Object) {
+		 o += printObj(obj[key]) ;
+		//  console.log(o);
+     return;
+		}
+
+		o += obj[key] + ', \n';
+	 });
+
+   return o + ' } \n';
+	},
+
+
+	get qs () {
+		return location.pathname + (location.search || '?').split('#')[0].split('&')[0];
+	},
+
+	get subsite () {
+		return location.pathname;
+	},
+
+
+	adm : {
+		cf : {
+			// edit config.php
+			save : function(e, cap) {
+				e = _K.e.fix(e);
+				var t = e ? e.target : event.srcElement;
+				if(t.tagName !== 'BUTTON') return;
+				e.preventDefault();
+				e.stopPropagation();
+				var item = t.closest('.item'),
+				group = item.closest('.itemGroup').previousElementSibling.textContent,
+				key = item.querySelector('p').textContent,
+				val = item.querySelector('.area').value;
+
+				Ajax.r(location.pathname + '?saveConfig', {send : {
+					group : group.toLowerCase(), key : key.toLowerCase(), val : val, cap : cap
+				}}).done(function() {
+					item.classList.add('changed');
+				});
+			},
+
+			// change admin pass
+			chPsswd : function(path, psswd, cap) {
+				Ajax.r('/?f=' + path, {send : {
+					newPsswd : psswd, cap : cap
+				}});
+			}
+
+		}, // cf
+
+
+		editContent : function(node) {
+			if(!node) return;
+
+			node.contenteditable="true";
+			node.classList.add('editNode');
+
+			this.editPanel(node);
+
+		}, // editContent
+
+
+		setFormat : function (cmd, par, val) {
+			this.focus ();
+
+			val = val || (par ? encodeURI(prompt ("Введите " + par)) : null);
+			//developer.mozilla.org/ru/docs/Web/API/Document/execCommand
+			document.execCommand (cmd, false, val);
+		},
+
+
+		editPanel: function (target) {
+			// create edit panel
+			var ep = target.cr('div',{id : 'core_editpanel'},'before'),
+				opts= {
+				// img_name : (str) cmd
+				// img_name : (arr) cmd, (hint_promt_val | ("", val))
+				"b" : "bold", "i" : "italic", "u" : "underline",  "strike" : "strikeThrough",
+				"hr" : "insertHorizontalRule",
+				"left" : "justifyLeft" ,"center" : "justifyCenter", "right" : "justifyRight",
+				"sub" : "subscript", "sup" : "superscript",
+				"list" : "insertUnorderedList", "ordered-list" : "insertOrderedList",
+				"p" : ["formatBlock","имя тега", "P"],
+				"blockquote" : "indent",
+				"tag-block" : ["formatBlock","имя тега"], "url" : ["createLink","URL"], "link" : "unlink", "font-type" : ["fontName","font-family"], "tele" : "removeFormat"
+			},
+				dFr= _K.G(document.createDocumentFragment()), opt,
+				save = ep.cr('button', {class : 'green button', title : 'Сохранить изменения', style : 'margin: 0 1em;'}, 'fCh');
+
+			save.textContent = 'SAVE';
+
+			var self = this;
+
+			save.e.add('click', function(e) {
+				// format before saving
+				self.saveEdit(e, target.innerHTML);
+			});
+			// console.log(save);
+
+			// use local styles
+			document.execCommand ('styleWithCSS', false, false);
+
+			Object.keys(opts).forEach(function(i) {
+				var cmd, par, val = null;
+				if(Array.isArray(opts[i])) {
+					cmd = opts[i][0];
+					par = opts[i][1];
+					val = opts[i][2];
+				} else cmd = opts[i];
+
+				dFr.cr('img',{src:'/images/Keys/bb/' + i + '.gif', title : cmd, alt : cmd, class : "button"}).onclick= this.setFormat.bind(target, cmd, par, val);
+			}, this);
+
+			_K.G(ep).Append(dFr);
+
+		}, // editPanel
+
+
+		saveEdit : function(e, art, cb) {
+			e = _K.e.fix(e);
+			e.stopPropagation();
+
+			if(!confirm('Сохранить изменения?')) return;
+
+			var dblBr = "p|h[1-6]|ol|ul|div|section|table|article",
+				Br = "li";
+
+			function addBr (tags) {
+				return new RegExp("(<\\/(?:" + tags + ")>)(?!\\s|$)", 'ig');
+			}
+
+			art = art.replace(/\s*(?:(?:fsish|contenteditable)=[^\s>]+|class=([\'\"])\s*\1)/ig, '')
+				.replace(addBr(dblBr), "$1\n\n")
+				.replace(addBr(Br), "$1\n");
+
+
+			// Ajax.r(location.pathname + '?contentEditable', {
+			Ajax.r(location.pathname + '?f=' + sv.CORE + 'modules/editContent.php', {
+				send : {arrPathes : JSON.stringify(sv.arrPathes), art : art, save : 1}
+			}).done(function() {
+				// console.log(this.response);
+
+				TOOLs.popup({fields : {
+					'empty' : {
+						tag: 'div',
+						html: this.response,
+					}
+
+				}});
+
+				if(typeof cb === 'function') cb();
+				// Чистим кеш
+				Ajax.r('/?f=' + sv.CASH_DIR + '/cash_handler.php&action=del_cash');
+				})
+		} // saveEdit
+
+	}, // adm
+
+
+
+	//== Выделение текста
+	select: function () {
+		this.title = this.title || 'Выделить';
+		var rng, sel;
+		if (document.createRange) {
+			rng = document.createRange(); //создаем объект Range
+			rng.selectNodeContents(this); //== Содержимое текущего узла (selectNode - сам узел)
+			sel = window.getSelection(); //Получаем объект текущее выделение
+			var strSel = sel.toString();
+			if (!strSel.length) { //Если ничего не выделено
+				sel.removeAllRanges(); //Очистим все выделения (на всякий случай)
+				sel.addRange(rng); //Выделим текущий узел
+			}
+		} else {
+			document.body.createTextRange().moveToElementText(this).select();
+		}
+	},
+
+
+	paginator : function(e, path, node, name_request) {
+		// & $kff['paginator]
+
+		e = _K.e.fix(e);
+		var t = e.target;
+
+		name_request = name_request || 'p';
+
+		if(t.tagName !== 'A') return;
+		e.stopPropagation();
+		e.preventDefault();
+
+		Ajax.r(path, {send : name_request + '=' + t.textContent})
+		.done(function() {
+			node.innerHTML = this.response;
+			_K.ajax.DR();
+		});
+	},
+
+
+	popup: function(o) {
+		o = Object.assign({
+			fields : {
+				'name' : {
+					tag: 'div',
+					html: 'Hello!',
+					style: 'display: inline-block;'
+				}
+
+			}
+		}, (o || {}));
+
+		_K.G().e.add('keypress', close);
+		console.log(this);
+
+		function close (e) {
+			if(!TOOLs.keyCode(e,'esc')) return;
+
+			e.stopPropagation();
+			[].forEach.call(document.querySelectorAll('.popup_canvas'), function(i) {
+				i.remove();
+			});
+
+			_K.G().e.del('keypress', close);
+		}
+
+		var addStyle = '<style>'
+			+ '.popup_canvas{width:100%;min-height:100%;background-color: rgba(0,0,0,0.5);overflow:hidden;position:fixed;top:0px;text-align: center;}'
+			+ '.popup{display: inline-block;margin:40px auto 0px auto;width:initial;max-width:90%;max-height: 80%;padding:10px;background-color: #c5c5c5;border-radius:5px;box-shadow: 0px 0px 10px #000;}'
+			+ '</style>';
+
+		document.head.insertAdjacentHTML('beforeend', addStyle);
+
+		// var df = document.createDocumentFragment(),
+		var pw = '<div class="popup_canvas" onclick="close()">'
+			+ '<div class=popup>';
+		// document.createElement('div')
+
+		Object.keys(o.fields).forEach(function(name) {
+			pw += (!name.includes('empty')? name + ' - ': '') + '<' + this[name].tag + ' style= "' + this[name].style + '">' + (this[name].html || '') + '</' + this[name].tag + '>\n';
+
+			// f.innerHTML = i.html;
+			// pw.appendChild(f);
+		}, o.fields);
+
+/* 		Object.keys(o.fields).forEach(function(f) {
+
+		}); */
+
+/* 		df.appendChild(pw);
+
+		document.body.appendChild(df); */
+		pw += '</div></div>';
+
+		document.body.insertAdjacentHTML('beforeend', pw);
+	},
+
+
+	keyCode : function(e, toc) {
+
+		/* _K.G().e.add(handler, function(e) {
+			console.log(e.keyCode);
+		}); */
+
+		return (e.keyCode === ({
+			esc : 27,
+			space : 0,
+			arr_left : 37,
+			arr_up : 38,
+			arr_right : 39,
+			arr_down : 40
+		})[toc]);
+
+	}
+
+} // TOOLs
+
+/* _K.DR(function() {
+	TOOLs.popup({
+		fields: {
+			'Ответ - ': {
+				tag : 'textarea',
+				style: 'width:500px;'
+			},
+			'empty send': {
+				tag : 'button',
+				style: 'width:50%;',
+				html: 'Send'
+			}
+		}
+	})
+}); */
+
+
+// number handling
+
+var _num = {
+	val : function (id) {
+		return +(document.querySelector(id).value.replace(",", ".")) || 0;
+	},
+
+	toPrecision : function (num, precision) {
+		// remove the extra zeros
+		return num.toPrecision(precision).replace(/(\..+?)0+($|e)/, '$1$2');
+	}
+}
+
+
+
+//
+String.prototype.translit = String.prototype.translit || function (course) {
+	var Chars = {
+		'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 'c', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya', 'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'E', 'Ё': 'YO', 'Ж': 'ZH', 'З': 'Z', 'И': 'I', 'Й': 'Y', 'К': 'K', 'Л': 'L', 'М': 'M', 'Н': 'N', 'О': 'O', 'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U', 'Ф': 'F', 'Х': 'H', 'Ц': 'C', 'Ч': 'CH', 'Ш': 'SH', 'Щ': 'SHCH', 'Ъ': '', 'Ы': 'Y', 'Ь': '', 'Э': 'E', 'Ю': 'YU', 'Я': 'YA'
+	},
+		t = this;
+	for (var i in Chars) { t = t.replace(new RegExp(i, 'g'), Chars[i]); }
+	return t;
+};
+
+
+///========================================= /
+
+var getW_H = {
+	get W() { return _K.dE.clientWidth ? _K.dE.clientWidth : (_K.G().parentWindow || _K.G().defaultView).innerWidth },
+	get Hsait() { return (!window.opera) ? _K.body().clientHeight : (_K.G().parentWindow || _K.G().defaultView).innerHeight },
+	get H() { return document.documentElement.clientHeight }
+	// get H() { return window.screen.availHeight }
+},
+
+
+Check = {
+	name: function (name) { return !!name && /^[\w\W\d]{3,15}$/i.test(name) },
+	mail: function (mail) { return /^.+?@.+?\..{2,}$/i.test(mail) },
+	mess: function (name) { return !!name && /^[\w\W\d]{3,}$/i.test(name) }
+}

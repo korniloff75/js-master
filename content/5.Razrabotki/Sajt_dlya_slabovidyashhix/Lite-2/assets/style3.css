@@ -1,0 +1,19 @@
+body,* {
+	background-color: #9DD1FF !important;
+	background: #9DD1FF !important;
+}
+a, p, span, li, ul, td, tr, table, div {
+	color: #123 !important;     /* #063462 */
+}
+p a, span a, li a, ul a, td a, tr a, table a, div, div a, .eTitle, .eTitle a, .eBlock, .eBlock a {
+	color: #123 !important;
+}
+header, footer, #header, #footer, #content, #body, div, span, td, section, header, aside, h1, h2, h3, h4, h5 {
+	background: #9DD1FF !important; color: #123 !important;
+
+}
+div img, span img {display:inline;}
+
+a {
+	background: none !important;
+}

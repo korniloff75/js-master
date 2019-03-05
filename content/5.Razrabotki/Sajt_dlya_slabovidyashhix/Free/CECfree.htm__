@@ -1,0 +1,138 @@
+<div id="test">
+	<p>Сейчас у многих владельцев сайта появилась новая проблема: с них стали требовать <strong>версию сайта для слабовидящей аудитории</strong>,
+		иными словами, для людей с ограниченными возможностями. Ко мне поступило несколько подобных заказов, для которых я разработал
+		скрипт, позволяющий броузеру запоминать последний выбор пользователя, чтобы при последующем заходе на этот же сайт страница
+		отображалась уже в том виде, в котором была при последнем выходе с сайта.</p>
+	<p>Собственно, сам скрипт не единственная проблема для создания версии сайта для слабовидящих. Он достаточно универсален,
+		чтобы работать практически на любом ресурсе и корректно отображаться в любом броузере. Однако, нужно написать
+		еще файл стилей CSS индивидуально для каждого сайта, чтобы не произошло сбивки разметки и сайт отображался корректно в
+		обоих версиях. Тут уже абсолютно универсального решения нет. Если не сможете сделать такой файл самостоятельно, обращайтесь
+		ко мне за помощью.</p>
+	<p>В данном примере файл стилей <b>Slabovid_uni.css</b> располагается в папке <b>css</b>.</p>
+
+	<p><b>UPD 03.12.2017</b> - Скрипт был переписан на Vanilla.js (native ES-5). Для работы с cookies-данными используется маленькая библиотека  <span class="doc"><a href="/?Javascripts___Технологии___Работа_с_cookies">cookies.js</a></span>. Никаких дополнительных библиотек и фреймворков не требуется.</p>
+
+	<h5 id="using">Использование скрипта</h5>
+	<ul>
+		<li>Копируете приведенный ниже фрагмент кода в нужное место на своем сайте.
+			</li>
+<li>Создаете дополнительный файл стилей, в котором прописываете все правила изменения внешнего вида сайта (в приведенном примере - это файл <b>/css/Slabovid_uni.css</b> <a href="/?module=php/modules/Download.php&file=assets/css/Slabovid_uni.css">Скачать файл стилей</a>)
+				</li>
+<li>Сохраняете созданный файл стилей по указанному пути, либо меняете путь в строке <b>value="/css/Slabovid_uni.css"</b>
+					</li>
+<li>Перезагружаете страницу с очисткой кеша броузера (<b>CTRL+R</b>)
+						</li>
+<li>Все, скрипт работает!
+	</li>
+</ul>
+</div>
+
+
+<h4>Примеры работы скрипта:</h4>
+<div>
+	<p>А это образцы того, как должен работать скрипт на вашем сайте:</p>
+
+	<h4>Вариант 1</h4>
+	<div id="v1">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/cookiesjs/1.4.2/cookies.min.js"></script>
+		<script type="text/javascript">
+		"use strict";
+		function dizSave (path) {
+			cookies({diz_name : path || null}, {expires: 10 * 24 * 3600, autoencode : 0});
+			location.reload();
+		}
+
+		;(function(d) {
+			var cook = cookies('diz_name'),
+				dcl = ('onpageshow' in window) ? 'pageshow' : 'DOMContentLoaded';
+
+			window.addEventListener(dcl, function() {
+				var linki = d.querySelectorAll('link');
+				var link_alt = d.createElement('link');
+				link_alt.rel = "StyleSheet";
+				d.querySelector('head').appendChild(link_alt);
+				d.querySelector('#diz_sel').value = link_alt.href = cookies('diz_name') || '';
+				console.info('diz_name= ' + d.querySelector('#diz_sel').value);
+
+			})
+		})(document);
+
+		</script>
+
+		<select id="diz_sel" style="font-size:24px; max-width:100%;" onchange="dizSave(this.value);" title="" size="1">
+			<option value="">Основной дизайн</option>
+			<option value="/assets/css/Slabovid_uni.css">Версия для слабовидящих</option>
+		</select>
+	</div>
+
+	<div>
+		<h6>HTML + Javascript код:</h6>
+		<pre><code for="#v1" nolib=""></code></pre>
+	</div>
+
+	<h4>Вариант 2</h4>
+	<div id="v2">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/cookiesjs/1.4.2/cookies.min.js"></script>
+		<script type="text/javascript">
+		"use strict";
+		function dizSave (path) {
+			cookies({diz_name : path || null}, {expires: 10 * 24 * 3600, autoencode : 0});
+			location.reload();
+		}
+
+		;(function(d) {
+			var cook = cookies('diz_name'),
+				dcl = ('onpageshow' in window) ? 'pageshow' : 'DOMContentLoaded';
+
+			window.addEventListener(dcl, function() {
+				var linki = d.querySelectorAll('link');
+				var link_alt = d.createElement('link');
+				link_alt.rel = "StyleSheet";
+				d.querySelector('head').appendChild(link_alt);
+				link_alt.href = cookies('diz_name') || '';
+			})
+		})(document);
+
+		</script>
+		<blockquote>
+			<a onclick="dizSave('/assets/css/Slabovid_uni.css'); return false;" href="" style="font-size:120%;">Версия для слабовидящих</a>				· <a onclick="dizSave(); return false;" href="">Основной дизайн</a>
+		</blockquote>
+	</div>
+	<div>
+		<h6>HTML + Javascript код:</h6>
+		<pre><code for="#v2" nolib></code></pre>
+	</div>
+</div>
+
+
+<h5>Послесловие</h5>
+<div>
+	<p>Если приведенного функционала скрипта вам недостаточно, можете воспользоваться платной <em>(но недорогой!)</em> версией
+		скрипта <a title="Версия сайта для слабовидящих PRO" href="/?Javascripts___Версии_скриптов_для_слабовидящих___Версия_PRO-3">Версия сайта для слабовидящих PRO</a>.</p>
+	<p>Этой версии я уделил намного больше времени, она продолжает развиваться и оптимизироваться. Осуществляется помощь по интеграции
+		скрипта в сайт, а также - индивидуальная поддержка при возникновении сложностей.</p>
+</div>
+
+
+
+<h4>Подробные инструкции</h4>
+<div>
+	<p>Этот раздел был создан благодаря пользователям, готовым поделиться своими пошаговыми инструкциями по установке скрипта.</p>
+	<p>Каждый из вас может прислать мне серию скриншотов со своими инструкциями установки, предварительно написав мне через Обратную
+		связь.</p>
+	<p>Если инструкция будет доходчива и полезна другим пользователям, я обязательно ее опубликую на своем сайте.</p>
+</div>
+<h5 class="pointer" title="Показать" onclick="var par_bl = $f('#PARALLELS' )[0]; par_bl.hidden = !par_bl.hidden;">Установка скрипта на конструктор сайтов <em>PARALLELS</em></h5>
+<div id="PARALLELS" hidden="">
+	<p>Материал подготовлен автором сайта <a href="http://baevoschool.edu22.info/" target="_blank" rel="nofollow">baevoschool.edu22.info</a>			- Андреем Железняковым</p>
+
+</div>
+
+<script type="text/javascript">
+// console.log('Скрипт сработал');
+	for (var i = 1; i <= 14; i++) {
+		$('#PARALLELS').cr('p').cr('img', { src: '/<?=\H::$Dir ?>assets/toParallels/' + i + '.jpg', alt: 'script to ParallelS', class: 'toBig', title: 'Кликните для увеличения' });
+	};
+
+	// $(_H.open.bind($('#sidebar')));
+</script>
