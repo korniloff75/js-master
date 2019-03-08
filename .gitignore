@@ -4,6 +4,7 @@ node_modules
 *.log
 /dist
 db/*.json
+js/db
 
 # local env files
 .env.local
