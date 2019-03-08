@@ -1,7 +1,7 @@
-/* 
+/*
 <?php
 header('Content-Type: application/javascript; charset=utf-8');
-?> 
+?>
 */
 
 "use strict";
@@ -16,19 +16,19 @@ header('Content-Type: application/javascript; charset=utf-8');
 
 	// шелаболиха|10.12 centr\.com|28.04- TEST
 
-	if(/kpa\-|master|:90|olenenok\.ucoz\.net|school\-(podosinovets)|voi\-(orenburg)|дши\-рышково|(kamsoccentr|(ww\.|^)bsch1|ub\-rddt|muzapacha|kb1\-sterlitamak|gymnasium8perm|ub\-kcson|u\-bdmsh|pedkolledj|onko\-sochi|ivint|ub\-mdk|ub\-biblion|ub\-museum|nekrinternat|dom\-veter|orelgerocentr|newurengoy|centr\-deti|gluhovskaya|zconnow|lotos\-med24|sodaplant)\.ru|s10kuragino|(шатиловский\-интернат|тмкк|сонлышко|бабайки|музейхудекова|мдди|школа-2|колушки-интернат)\.рф|(ds-romaschka-pnk.edu22)\.info|10\.16\.0\.173|grav[.:]/i 
+	if(/kpa\-|master|:90|olenenok\.ucoz\.net|school\-(podosinovets)|voi\-(orenburg)|дши\-рышково|(kamsoccentr|(ww\.|^)bsch1|ub\-rddt|muzapacha|kb1\-sterlitamak|gymnasium8perm|ub\-kcson|u\-bdmsh|pedkolledj|onko\-sochi|ivint|ub\-mdk|ub\-biblion|ub\-museum|nekrinternat|dom\-veter|orelgerocentr|newurengoy|centr\-deti|gluhovskaya|zconnow|lotos\-med24|sodaplant|svt19|biblioteka15|mboumukvilino)\.ru|s10kuragino|(шатиловский\-интернат|тмкк|сонлышко|бабайки|музейхудекова|мдди|школа-2|колушки-интернат|кцсон\-орел|рсци)\.рф|(ds-romaschka-pnk.edu22)\.info|10\.16\.0\.173|185\.117\.153\.195|grav[.:]/i
 
-		.test(DizSel.host)) {  // 
+		.test(DizSel.host)) {  //
 
 //		console.log("startSTS ");
 
 		_K.clonePpts(DizSel.sts, { //== Настройки скрипта default
 
-			BG_dim: {'cs-white':'БЕЛЫЙ фон', 'cs-blue':'СИНИЙ фон', 'cs-black':'ЧЕРНЫЙ фон'}, 
+			BG_dim: {'cs-white':'БЕЛЫЙ фон', 'cs-blue':'СИНИЙ фон', 'cs-black':'ЧЕРНЫЙ фон'},
 
 			button: {
 
-				image:"eye.gif", 
+				image:"eye.gif",
 
 				get value () {return !DizSel.v.DAlt? "ДЛЯ СЛАБОВИДЯЩИХ": "Обычный вид" }, callback:false,
 
@@ -64,7 +64,7 @@ header('Content-Type: application/javascript; charset=utf-8');
 
 			},
 
-			fontSize: { fixed:false, min:12, step:2, iter:3, NoTags: /^(head|script|title|link|style|iframe|img|hr|br|code)$/i, h1Size:24}, //== 
+			fontSize: { fixed:false, min:12, step:2, iter:3, NoTags: /^(head|script|title|link|style|iframe|img|hr|br|code)$/i, h1Size:24}, //==
 
 			imageOff: { minImg: 60},
 
@@ -90,9 +90,13 @@ header('Content-Type: application/javascript; charset=utf-8');
 
 		DizSel.log.push("typeof(_K)==='object'= "+ (typeof(_K) === 'object'));
 
-	} else _K={log:['A suspicion of plagiarism of the script'],v:{diz:true}, prot:false};
+	} else {
 
-	
+		_K={log:['A suspicion of plagiarism of the script'],v:{diz:true}, prot:false, G:function(){return {}}, DR:function(){return false}};
+		DizSel.SlabovidButton && DizSel.SlabovidButton.remove();
+	}
+
+
 
 	DizSel.addons.db.remove();
 
@@ -108,7 +112,7 @@ DizSel.SlabovidButtonParent= _K.G('#header');
 
 
 
-_K.DR(function() { 
+_K.DR(function() {
 
 	function menu (e, node, disp) {
 
@@ -170,7 +174,7 @@ _K.DR(function() {
 
 
 
-DizSel.checkUrl= '/js/Diz_alt_pro/'; 
+DizSel.checkUrl= '/js/Diz_alt_pro/';
 
 DizSel.SlabovidButtonParent= _K.G('#butslab');
 

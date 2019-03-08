@@ -43,4 +43,28 @@ li.active {
 }
 li.active a {
 	color: #eee;
-	te
+	text-decoration: none;
+}
+
+header h1 {
+	text-align: center;
+	color: blue;
+}
+
+div#nav {
+	display: none;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 600px) {
+	header{
+		height: unset;
+	}
+
+/* 	#main {
+		flex-direction: column;
+		flex-wrap: nowrap;
+	} */
+}

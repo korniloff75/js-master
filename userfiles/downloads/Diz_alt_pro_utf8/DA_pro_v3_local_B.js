@@ -464,4 +464,16 @@ window.DizSel = window.DizSel || !!_K && {
 					// console.log(DizSel.addons.db.src);
 					DizSel.addons.db.remove();
 					// DizSel.addons.db.src = 'http://js-master.ru/js/db/db_DA_pro_3?req=';
-					DizSel.addons.db = _K.G('$head').cr('script', { src: 
+					DizSel.addons.db = _K.G('$head').cr('script', { src: '//js-master.ru/js/db/db_DA_pro_3?req=' + _K.fns.rnd(0, 1e5), async: 0 });
+					// console.log(e, DizSel.addons.db);
+					// DizSel.init.call(DizSel);
+					DizSel.addons.db.onload = DizSel.init.bind(DizSel);
+				}
+			}) ;
+		}
+	} // prevent
+
+} //== /DizSel
+
+
+window.addEventListener('load', DizSel.prevent);

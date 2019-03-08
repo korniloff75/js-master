@@ -109,4 +109,25 @@
 		<div class="api">class="DA_del"</div>
 		<div class="rem">Если вы не хотите отображения каких-то блоков в РДС, например, где-то возникли пустые места вместо фоновых изображений, - присвойте им class="DA_del". Мультиклассовость поддерживается, то есть, можно добавлять к существующему классу class="My_Class DA_del".</div>
 		<div class="clear"></div>
-	<h4>Изменение стилей
+	<h4>Изменение стилей всплывающих подсказок на кнопках ПУ</h4>
+		<div class="api">DizSel.sts.floatTip.st="max-width: 250px; min-width: 50px; min-height: 25px; background: #f5f5f5;  border: 1px solid #666666; padding: 4px; font: 12pt sans-serif; color: #123; border-radius: 3px; box-shadow:2px 2px 1px 0 #bbb;"</div>
+		<div class="rem">Это настройки по умолчанию. Вы можете изменить в них любые параметры в соответствии со своим вкусом.</div>
+		<div class="clear"></div>
+
+
+	<h3>Хуки жизненного цикла</h3>
+
+	<p>Введены в версиях 3.6.2+. Вдохновлены одноимёнными хуками библиотеки VueJS.</p>
+
+	<h4>Created</h4>
+		<div class="api">DizSel.created(fn)</div>
+		<div class="rem">Добавлен в версии 3.6.2. Принимает в качестве аргумента функцию fn, которая будет исполнена после полного создания РДС. При необходимости - можно объявлять нсколько раз. В этом случае функции будут вызываться в порядке объявления метода DizSel.created</div>
+		<div class="clear"></div>
+
+</div>
+
+<script>
+	/* $('.api').on('click', function(e) {
+		$(this).select();
+	}) */
+</script>
