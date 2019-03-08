@@ -2,6 +2,7 @@
 node_modules
 *.zip
 *.log
+*_log
 /dist
 /tmp
 db/*.json
