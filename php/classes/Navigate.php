@@ -23,33 +23,27 @@ class Navigate
 
 		$this->map_path = $map_path = $dir . 'map_content.json';
 
-		if(file_exists($map_path))
+		#
+		$this->mapObj = new \DbJSON($map_path);
+
+		if(!count($this->mapObj->db))
 		{
-			$this->map = \H::json($map_path);
-		}
-		else
-		{
-			note('Нет файла с картой', __FILE__, __LINE__);
-			$this->map = $this->createMap();
-			// file_put_contents($map_path, json_encode($this->map));
-			\H::json($map_path, $this->map, 'rewrite');
+			$this->mapObj->set($this->createMap());
 		}
 
+
 		# Flat file array
-		$this->map_flat = $this->map_flat ?? array_values(iterator_to_array(
-			new \RecursiveIteratorIterator(
-				new \RecursiveArrayIterator($this->map)
-			)
-		));
+		$this->map_flat = $this->mapObj->getFlat();
 		natsort($this->map_flat);
 
 		$this->firstPage = $this->map_flat[0];
+		// $this->firstPage = $this->mapObj->get(0);
 
 		// $this->createMap();
 
 		/* echo '<pre>';
 		var_dump(
-			$this->map,
+			$this->mapObj->db,
 			$this->map_flat
 		);
 		echo '</pre>';
@@ -124,7 +118,7 @@ class Navigate
 	# В разработке
 	public function createGlobalMap($map = null, $ref=\CONT)
 	{
-		$map = $map ?? $this->map;
+		$map = $map ?? $this->mapObj->db;
 
 		foreach($map as $title => &$item_val) {
 			$path = $ref . $title . '/';
@@ -240,7 +234,7 @@ class Navigate
 		<nav id="menu_content">\n
 			<ul id="menu">
 
-			<?php $this->readMap($this->map[$dir])?>
+			<?php $this->readMap($this->mapObj->db[$dir])?>
 
 			</ul>
 		<!-- #menu -->
@@ -255,7 +249,7 @@ class Navigate
 		</div>
 
 		<?php
-		// var_dump($this->map);
+		// var_dump($this->mapObj->db);
 
 		return ob_get_clean();
 	}

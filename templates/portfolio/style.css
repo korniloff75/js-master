@@ -395,6 +395,27 @@ div#nav_main .nav_item.active > div {
   padding: 3em 0;
   margin: 0 auto;
   z-index: 7;
+  display: -webkit-box;
+  display: -moz-box;
+  -ms-flex-wrap: wrap;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -ms-flex-direction: column;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-flex-basis: auto;
+  -ms-flex-basis: auto;
+  flex-basis: auto;
+  display: -webkit-flex;
+  display: -ms-flex;
+  display: -moz-flex;
+  display: flex;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
 }
 .toSidebar:hover > svg {
   -webkit-transform: scale(2, 1);
@@ -403,6 +424,9 @@ div#nav_main .nav_item.active > div {
   -o-transform: scale(2, 1);
   transform: scale(2, 1);
   cursor: pointer;
+}
+.toSidebar img {
+  margin: auto;
 }
 #menu_block {
   position: absolute;

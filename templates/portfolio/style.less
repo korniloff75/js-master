@@ -193,10 +193,17 @@ div#nav_main {
 	padding: 3em 0;
 	margin: 0 auto;
 	z-index: 7;
+	.flex();
+	.flex-justify(center);
+	.flex-align-items(center);
 
 	&:hover > svg {
 		.transform(scale(2,1));
 		cursor: pointer;
+	}
+
+	img {
+		margin: auto;
 	}
 }
 

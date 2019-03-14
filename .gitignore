@@ -6,7 +6,11 @@ node_modules
 /dist
 /tmp
 db/*.json
-js/db
+js/db/*.*
+/google*
+*_
+*.xml
+*.gz
 
 # local env files
 .env.local

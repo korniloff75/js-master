@@ -72,6 +72,7 @@ $Nav = new \php\classes\Navigate;
 
 
 <footer>
+<p><img src="https://freelancehunt.com/freelancer/KorniloFF.html?r=pvpva" alt="Я фрилансер"></p>
 </footer>
 
 </body>
