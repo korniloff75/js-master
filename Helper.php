@@ -240,11 +240,12 @@ class H {
 
 		if(empty(self::$tmp{$cn}))
 		{
-			self::$tmp{$cn} = gettime();
+			// self::$tmp{$cn} = gettime();
+			self::$tmp{$cn} = microtime(true);
 		}
 		else
 		{
-			$info = '<p>Page generation - ' . bcsub(gettime(), self::$tmp{$cn}, 5)*1000 . 'ms | Memory usage - now ( '. round (memory_get_usage()/1024) . ') max (' . round (memory_get_peak_usage()/1024) . ') Kbytes</p>';
+			$info = '<p>Page generation - ' . bcsub(microtime(true), self::$tmp{$cn}, 5)*1000 . 'ms | Memory usage - now ( '. round (memory_get_usage()/1024) . ') max (' . round (memory_get_peak_usage()/1024) . ') Kbytes</p>';
 			// self::$tmp{$cn} = null;
 			return  "<div class='core bar'><b>block $n Technical Info $rem </b>: $info</div>";
 		}

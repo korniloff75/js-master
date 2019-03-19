@@ -17,9 +17,9 @@ function note($i, $file = null, $line = null)
 
 function gettime()
 {
-	$part_time = explode(' ', microtime());
-	$real_time = $part_time[1].substr($part_time[0], 1);
-	return $real_time;
+	// $part_time = explode(' ', microtime(true));
+	// $real_time = $part_time[1]; // . substr($part_time[0], 1);
+	return microtime(true);
 }
 
 

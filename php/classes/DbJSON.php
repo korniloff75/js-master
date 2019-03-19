@@ -9,9 +9,9 @@ class DbJSON {
 
 	public function __construct(string $path=null)
 	{
-		if(!strlen($path)) throw new LogicException("Отсутствует \$path", 1);
+		// if(!strlen($path)) throw new LogicException("Отсутствует \$path", 1);
 
-		$this->path = $path;
+		$this->path = (strpos($path, '/') === 0 ? BASE_DIR : '') . $path;
 		$this->json = @file_get_contents($this->path);
 		$this->db = json_decode($this->json, true) ?? [];
 
@@ -38,6 +38,15 @@ class DbJSON {
 		return $this;
 	}
 
+	/**
+	 * @data <array>
+	 */
+	public function replace(array $data)
+	{
+		$this->db = $data;
+		return $this->set($data);
+	}
+
 
 	# Плоский массив из многомерного
 	public function getFlat()
@@ -55,4 +64,4 @@ class DbJSON {
 	{
 		return json_encode(($arr), JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
 	}
-} // DbJSON
+} // DbJ
