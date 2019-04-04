@@ -1,0 +1,32 @@
+<p>Если кликнуть на надписи Прыгучий объект - будет совершен прыжок.</p>
+
+
+<h4>Пример</h4>
+
+<div id="prim">
+	<div class="result pointer" onclick="jump(this);" style="background:#eee; color:green; display: inline-block; padding: 5px;">
+		Прыгучий объект
+	</div>
+
+	<script type="text/javascript">
+	'use strict';
+	window.jump =  (el)=> {
+		el.style.position='relative';
+		var i=0, an= setInterval(function() {
+			if (i>=Math.PI) {
+				clearInterval(an);
+				el.style.top= 0;
+			} else el.style.top= -100*Math.sin(i) + 'px';
+			i+=.1;
+		}, 25);
+	}
+	console.log(jump);
+	</script>
+</div>
+
+<div>
+	<p>При помощи такого несложного кода можно осуществить анимацию движения объекта, используя исключительно нативный javascript.</p>
+</div>
+
+<h4>Исходный код</h4>
+<pre><code for="#prim" noLib></code></pre>

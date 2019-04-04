@@ -11,7 +11,7 @@ class DbJSON {
 	{
 		// if(!strlen($path)) throw new LogicException("Отсутствует \$path", 1);
 
-		$this->path = (strpos($path, '/') === 0 ? BASE_DIR : '') . $path;
+		$this->path = (strpos($path, '/') === 0 ? $_SERVER['DOCUMENT_ROOT'] : '') . $path;
 		$this->json = @file_get_contents($this->path);
 		$this->db = json_decode($this->json, true) ?? [];
 
@@ -64,4 +64,4 @@ class DbJSON {
 	{
 		return json_encode(($arr), JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
 	}
-} // DbJ
+} // DbJSON

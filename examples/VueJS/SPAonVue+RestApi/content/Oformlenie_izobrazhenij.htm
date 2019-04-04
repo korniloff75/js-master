@@ -1,0 +1,83 @@
+<div>
+<p>Не все эффекты можно достичь исплючительно CSS стилями. Рассмотрим пример органичного использования сочетания CSS / Javascript.</p>
+<p>При присвоении <em>class="bg"</em>изображения поменяют свой фон на градиентный. Это будет полностью выполнено при помощи CSS. Однако, если мы захотим добавить нестандартную тень под изображение, одним CSS мы уже справиться не сможем.</p>
+<p>При присвоении <em>class="shad"</em>под каждым изображением появится такая тень. Ссылка для скачивания файла с использованной в примере тенью находится под самим примером ниже. При использовании этого класса уже не имеет значения прозрачность фона основного изображения.</p>
+<p>При присвоении мультикласса <em>class="shad bg"</em>описанные выше свойства классов объединяются, создавая объединенный эффект оформления изображений. </p>
+<p>В данном примере мы объединили способность скрипта изменять DOM-модель с эффектами CSS .Как видно, таким образом можно создавать очень интересные способы оформления элементов сайта.</p>
+</div>
+
+
+<h4>Примеры сочетаний оформления изображений</h4>
+
+<div style="color: #123; background: #f5f5f5; text-align: center;">
+	<h6>Изображения без <em>class</em>(обычные)</h6>
+
+	<img class="none" src="/userfiles/images/Katrin1.png" alt="">&nbsp; <img class="none" src="/userfiles/images/Katrin2.png" alt="">&nbsp; <img class="none" src="/userfiles/images/Katrin3.png" alt="">&nbsp; <img class="none" src="/userfiles/images/examples/head5.jpg" alt="">
+
+	<h6>Изображения с <em>class="bg"</em></h6>
+
+	<img class="bg none" src="/userfiles/images/Katrin1.png" alt="">&nbsp; <img class="bg none" src="/userfiles/images/Katrin2.png" alt="">&nbsp; <img class="bg none" src="/userfiles/images/Katrin3.png" alt="">&nbsp; <img class="bg none" src="/userfiles/images/examples/head5.jpg" alt="">
+
+	<h6>Изображения с <em>class="shad"</em></h6>
+
+	<img class="shad none" src="/userfiles/images/Katrin1.png" alt="">&nbsp; <img class="shad none" src="/userfiles/images/Katrin2.png" alt="">&nbsp; <img class="shad none" src="/userfiles/images/Katrin3.png" alt="">&nbsp; <img class="shad none" src="/userfiles/images/examples/head5.jpg" alt="">
+
+	<h6>Изображения с мультиклассом <em>class="shad bg"</em></h6>
+
+	<img class="shad bg none" src="/userfiles/images/Katrin1.png" alt="">&nbsp; <img class="shad bg none" src="/userfiles/images/Katrin2.png" alt="">&nbsp; <img class="shad bg none" src="/userfiles/images/Katrin3.png" alt="">&nbsp; <img class="shad bg none" src="/userfiles/images/examples/head5.jpg" alt="">
+</div>
+
+
+<div id="prim">
+<style>
+img.bg {
+	border: 1px solid #ccc;
+	background:  linear-gradient(150deg, #e5e5e5, transparent);
+}
+img.shad {
+	display: block;
+	margin: 0;
+}
+img.shad + p {
+	/* Указываем путь к изображению нестандартной тени */
+	background: url("/userfiles/images/shadow_bottom.png") no-repeat 0 0 / 100% 100%;
+	margin: 0;
+}
+</style>
+<!-- Прописать внизу страницы (в футере) -->
+<script type="text/javascript">
+addStyle('shad'); //== Запускаем добавление теней (опционально)
+
+function addStyle(cl) {
+	var imgs = document.querySelectorAll('img.' + cl),
+		tmp, sh;
+	if (!imgs) return;
+
+	[].forEach.call(imgs, function(i) {
+		if (!i.shell) {
+			tmp = document.createElement('span');
+			tmp.style.display = 'inline-block';
+			tmp.style.margin = '5px';
+			tmp.style.maxWidth= '100%';
+			i.parentNode.insertBefore(tmp, i);
+			tmp.appendChild(i);
+			i.shell = true;
+		}
+		if (cl === 'shad') {
+			//	console.info(i+' tmp= '+ tmp);
+			sh = document.createElement('p');
+			sh.style.height = '20px';
+			tmp.appendChild(sh);
+		}
+
+	} );
+}
+</script>
+</div>
+
+
+<h5>Исходный код примера:</h5>
+
+<p><a href="/?module=Download&file=userfiles/images/shadow_bottom.png" target="_blank">Скачать изображение нестандартной тени</a></p>
+
+<pre><code for="#prim" data-lib="native JS-5 + CSS-3"></code></pre>
