@@ -1,7 +1,6 @@
 <?php
 \H::protectScript(basename(__FILE__));
 
-// \H::$tmp['module'] = Path::fromRootStat(__FILE__);
 if(!headers_sent() && !isset($_SESSION)) session_start();
 $_SESSION['captcha'] = \H::realIP();
 ?>
@@ -11,7 +10,7 @@ $_SESSION['captcha'] = \H::realIP();
 
 <div id="form-outbox">
 
-	<div id="form-container">
+	<div class="form-container">
 
 		<form id="feedback-form" name="feedback-form" method="post" action="/?module=php/modules/PHPMailer/handler.php">
 			<input type="hidden" name="captcha" id="captcha"  value="<?=\H::realIP()?>" />
@@ -24,6 +23,11 @@ $_SESSION['captcha'] = \H::realIP();
 			<div>
 				<label for="email">Email</label>
 				<input type="text" name="email" id="email" required />
+			</div>
+
+			<div>
+				<label for="tg">Telegram</label>
+				<input type="text" name="tg" id="tg" placeholder="@NickName или https://t.me/yourLogin" />
 			</div>
 
 			<div>
@@ -64,13 +68,19 @@ $_SESSION['captcha'] = \H::realIP();
 
 </div>
 
+<p>Благодаря внедрению <a href="https://core.telegram.org/api" rel="nofollow" target="_blank">Telegram API</a> с декабря 2019г. в исходный код сайта, ваши письма стали доходить ко мне значительно быстрее. Если, всё же, на какое-либо обращение вы не получили ответ - воспользуйтесь разделом ниже.</p>
+
+
+<!-- <div>
+	<h3><a href="https://t.me/korniloff_75">Telegram</a></h3>
+</div> -->
+
 
 
 
 <script>
 (function() {
 	var form = document.forms['feedback-form'];
-	// console.log($(form));
 
 	form.onsubmit = function(e) {
 		e = $().e.fix(e);

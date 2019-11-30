@@ -1,10 +1,11 @@
-/*
-<?php
-require_once '../css.php';
-header('Content-type: text/css');
-ob_start("compress_css");
-?>
-*/
+div#altObj, div#altBody {
+	position: absolute;
+}
+
+div#altBody {
+	z-index: 5;
+}
+
 div#altObj, div#altBody, div#altBody *, div#altBody *::before, div#altBody *::after {
 	background-image: none !important;
 	box-sizing: border-box;
@@ -251,6 +252,10 @@ div#altBody #menuitem2 #pageMenu .menu {padding:5px;}
 	display: inline-flex;
 }
 
+/* div#altObj ul.menu ul {
+	top: unset;
+} */
+
 /*
 Адаптация
 */
@@ -261,7 +266,3 @@ div#altBody #menuitem2 #pageMenu .menu {padding:5px;}
 	div#altObj div#special-panel {top: unset; bottom: 0px;}
 	div#altObj div#special-panel img.imgPU {height:30px; width:auto;}
 }
-
-/*
-<?php ob_end_flush();?>
-*/

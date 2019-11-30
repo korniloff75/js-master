@@ -30,18 +30,21 @@
 
 	<p>На сегодня осталась возможность отправки <b> <?=$lastLimit?></b> сообщений администрации.</p>
 
-	<form id="sendSMS" class="flex-column  center" action="/<?=\H::$Dir ?>" method="post">
-		<input type="hidden" name="keyCaptcha" value="<?=\H::realIP()?>">
-		<p hidden>Вы можете ввести <span class=strong id="maxLen"></span> символов</p>
+	<div class="form-container">
+		<form id="sendSMS" class="flex-column  center" action="/<?=\H::$Dir ?>" method="post">
+			<input type="hidden" name="keyCaptcha" value="<?=\H::realIP()?>">
+			<p hidden>Вы можете ввести <span class=strong id="maxLen"></span> символов</p>
 
-		<textarea name="SMS" rows="7" onkeyup="countChars.call(this, $('#maxLen'), event)" required="required" placeholder="Введите текст SMS"></textarea>
+			<textarea name="SMS" rows="7" onkeyup="countChars.call(this, $('#maxLen'), event)" required="required" placeholder="Введите текст SMS"></textarea>
 
-		<div class="flex-justify-around">
-			<input type="submit" class=button value="Отправить SMS" style="flex:5 0;">
-			<input type="reset" class=button style="flex:1 1;">
-		</div>
+			<div class="flex-justify-around">
+				<input type="submit" value="Отправить SMS" style="flex:5 0; margin-right: 10px;">
+				<input type="reset" style="flex:1 1;">
+			</div>
 
-	</form>
+		</form>
+	</div>
+
 
 
 	<script type="text/javascript">

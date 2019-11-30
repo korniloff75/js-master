@@ -122,6 +122,40 @@ class MailPlain extends PHPMailer
 	}
 
 
+	/**
+	 * Telegram API
+	 * MailPlain::toTG();
+	 *
+	 * Отправка GET-запросом
+	 * $sendToTelegram = fopen("https://api.telegram.org/bot{$token}/sendMessage?chat_id={$tg_chat_id}&parse_mode=html&text={$tg_txt}","r");
+	 */
+	public static function toTG($chat_id = -1001433749294)
+	{
+		$token = "1028281410:AAHBV_yuvrXcjNNg4FvSfuR1-2vjKNVfwys";
+		// $tg_txt = "<b>{$subject}</b> <pre>$message</pre> {$_REQUEST['email']}";
+
+		$ch = curl_init();
+		curl_setopt_array(
+			$ch,
+			[
+				CURLOPT_URL => "https://api.telegram.org/bot{$token}/sendMessage",
+				CURLOPT_POST => TRUE,
+				CURLOPT_RETURNTRANSFER => TRUE,
+				CURLOPT_TIMEOUT => 10,
+				CURLOPT_POSTFIELDS => [
+					'chat_id' => $chat_id,
+					'parse_mode' => 'html',
+					'text' => "<b>{$_REQUEST['subject']}\n{$_REQUEST['name']}</b> пишет:\n <pre>{$_REQUEST['message']}</pre>\n {$_REQUEST['tg']}\n{$_REQUEST['email']}",
+				],
+			]
+		);
+		/* var_dump(
+			// $subject
+		); */
+		return curl_exec($ch);
+	}
+
+
 	public function uploads()
 	{
 		foreach($_FILES as $fd) {

@@ -1,6 +1,6 @@
 <!-- <script type="text/javascript" src="/js/tools/mootools-core.js"></script> -->
 <div>
-		<input class="imgPU no-size btn min700 DA_del" style="padding: 3px 5px 3px 50px; margin:0 auto; font-size:20px; background: url('/<?=\H::$Dir ?>assets/eye.gif') no-repeat scroll 3px center, #ddd linear-gradient(#ccc, #eee, #ccc) repeat scroll 0 0;border: 1px solid #58a; border-radius:5px; z-index:9949; position:static; left:5px; top:20px; cursor: url('/<?=\H::$Dir ?>assets/glasses.png'), pointer;" id="diz_alt" value="Для слабовидящих" title="Для слабовидящих" type="button">
+		<input class="imgPU no-size btn min700 DA_del" style="padding: 3px 5px 3px 50px; margin:0 auto; font-size:20px; background: url('/<?=\H::$Dir ?>assets/eye.gif') no-repeat scroll 3px center, #ddd linear-gradient(#ccc, #eee, #ccc) repeat scroll 0 0;border: 1px solid #58a; border-radius:5px; z-index:9949; position:static; left:5px; top:20px; cursor: url('/<?=\H::$Dir ?>assets/glasses.png'), pointer;" id="RDS" value="Для слабовидящих" title="Для слабовидящих" type="button">
 </div>
 
 <div>
@@ -76,7 +76,7 @@
 	<li>Подключить скрипт у себя в сайте, прописав в header:
 		<pre><code saldom=noLib>
 		<script src="/<?=\H::$Dir ?>assets/KFF_Lite.min.js" type="text/javascript" charset="utf-8" ant="no"></script>
-		<script src="/<?=\H::$Dir ?>assets/DA_pro_v3_local.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="/<?=\H::$Dir ?>assets/DA_pro_v3_local.prod.js" type="text/javascript" charset="utf-8"></script>
 		</code></pre>
 	</li>
 	<li>Внести дополнительные тонкие настройки, согласно разделу <b>API версии PRO-3</b>.
@@ -100,7 +100,14 @@
 </ol>
 
 <script>
-	DizSel.SlabovidButton = _K.G('#diz_alt');
+	DizSel.SlabovidButton = _K.G('#RDS');
+	// DizSel.callbacks.push(()=>{
+	_K.DR(()=>{
+		_K.G('$#menu_block').classList.add('DA_del');
+		// Открываем боковую панель
+		_K.G('$aside#sidebar').classList.add('opened');
+	});
+
 </script>
 
 

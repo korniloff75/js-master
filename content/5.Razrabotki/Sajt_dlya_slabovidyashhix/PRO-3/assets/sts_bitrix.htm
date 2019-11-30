@@ -1,0 +1,46 @@
+<!-- visually impaired -->
+<style>
+	#RDS {
+		position: fixed;
+		bottom: 5px;
+		right: 5px;
+		z-index: 1000;
+		cursor: pointer;
+		text-align: right;
+		text-decoration: underline;
+		font-weight: 700;
+		/* width: 55px; */
+		background: rgba(255,255,255,.7);
+	}
+	#RDS>img {
+		transition: all .7s ease-in-out;
+		width: 50px;
+	}
+	#RDS:hover>img {
+		transform: scale(1.5) rotate(360deg);
+	}
+	#altBody #brisk_header {
+		/* display: none; */
+	}
+	#altBody .basic-item-wrap.fadeIn {
+		display: block;
+		visibility: unset;
+	}
+
+</style>
+
+<!-- Кнопка перехода в РДС -->
+<div id="RDS" class="DA_del">
+	ДЛЯ СЛАБОВИДЯЩИХ
+	<img src="/CC-Pro-3/glaz.png" alt="РДС" />
+</div>
+<!-- /Кнопка перехода в РДС -->
+
+<script src="/CC-Pro-3/KFF_Lite.min.js" type="text/javascript" charset="utf-8" ant="no"></script>
+<script src="/CC-Pro-3/DA_pro_v3_local.min.js" type="text/javascript" charset="utf-8"></script>
+
+<script type="text/javascript">
+	DizSel.checkUrl = '/CC-Pro-3/'; DizSel.SlabovidButton = _K.G('$#RDS');
+</script>
+
+<!-- /visually impaired -->
