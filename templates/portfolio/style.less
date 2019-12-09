@@ -242,15 +242,16 @@ div#nav_main {
 	@w_close: 20px;
 	@sum_right_block: @right_close + @w_close + 2px;
 
-	#menu_close {
+	// #menu_close {
+	.close_button {
 		z-index: 15;
 		// .pos_abs(@w_close, @w_close);
-		width: @w_close;
-		height: @w_close;
+		// width: @w_close;
+		// height: @w_close;
 		position: fixed;
 		color: #fff;
 		display: none;
-		flex-basis: @w_close;
+		// flex-basis: @w_close;
 		right: @right_close;
 		top: @right_close;
 		cursor: pointer;

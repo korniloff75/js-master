@@ -63,36 +63,25 @@ Object.setPrototypeOf = Object.setPrototypeOf || function (obj, proto) {
 
 Object.getPrototypeOf = Object.getPrototypeOf || function (obj) { return obj.__proto__ };
 
+
 Object.values = Object.values || function(obj) {
-	var allowedTypes = ["[object String]", "[object Object]", "[object Array]", "[object Function]"];
-	var objType = Object.prototype.toString.call(obj);
+	var
+		allowedTypes = ["[object String]", "[object Object]", "[object Array]", "[object Function]"],
+		objType = Object.prototype.toString.call(obj);
 
 	if(obj === null || typeof obj === "undefined") {
 		throw new TypeError("Cannot convert undefined or null to object");
-	} else if(!~allowedTypes.indexOf(objType)) {
+	} else if(allowedTypes.includes(objType)) { // allowedTypes.indexOf(objType) >= 0
 		return [];
 	} else {
-		// if ES6 is supported
-		if (Object.keys) {
-			return Object.keys(obj).map(function (key) {
-				return obj[key];
-			});
-		}
-
-		var result = [];
-		for (var prop in obj) {
-			if (obj.hasOwnProperty(prop)) {
-				result.push(obj[prop]);
-			}
-		}
-
-		return result;
+		return Object.keys(obj).map(function (key) {
+			return obj[key];
+		});
 	}
 };
 
 
-var getComputedStyle = getComputedStyle || function (elem) { return elem.currentStyle };
-
+window.getComputedStyle = window.getComputedStyle || function (elem) { return elem.currentStyle };
 
 //=========================================/
 Function.prototype.bind = Function.prototype.bind || function (oThis) {
@@ -185,7 +174,7 @@ if (!Object.prototype.unwatch) {
 
 
 var FormData = FormData || function(form) {
-	return $(form).ajaxForm();
+	return window.$ && $.rnd && $(form).ajaxForm();
 }
 
 
@@ -195,7 +184,9 @@ String.prototype.tabTrim = function () { return this.replace(/\t/gm, '  ') };
 String.prototype.rtrim = String.prototype.rtrim || function () { return this.replace(/\s+$/gm, '') };
 String.prototype.fulltrim = String.prototype.fulltrim || function () { return this.replace(/((^|\n)\s+|\s+($|\n))/gm, '').replace(/\s+/gm, ' '); };
 
-String.prototype.toFun || Object.defineProperty(String.prototype, 'toFun', { get: function () { return new Function(this) } });
+String.prototype.toFun || Object.defineProperty(String.prototype, 'toFun', {
+	get: function () { return new Function(this) }
+});
 Math.sign = Math.sign || function (x) {
 	x = +x;
 	return (x === 0 || isNaN(x)) ? x : x > 0 ? 1 : -1;

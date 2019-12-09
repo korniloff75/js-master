@@ -2,10 +2,6 @@
 # https://github.com/PHPMailer/PHPMailer
 # https://medium.com/@alfakrai/%D0%B2%D0%BC%D0%B5%D0%BD%D1%8F%D0%B5%D0%BC%D0%B0%D1%8F-%D0%B8%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%86%D0%B8%D1%8F-%D0%BA-phpmailer-51bf4530e2e4
 
-/**
- *
- */
-
 if (version_compare(PHP_VERSION, '7.0', '<') ) exit("Извини, брат, с пыхом ниже 7 - не судьба!\n");
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -20,13 +16,7 @@ class MailPlain extends PHPMailer
 
 {
 	const
-		ADMIN = \ADMIN ?? 0,
-		T_SUCCESS_SEND = "Ваше сообщение успешно отправлено!<br>Ожидайте ответа на указанный email",
-		T_FAIL_SEND = "<div class=\"error\">Ваше сообщение не было доставлено.<br>Просим прощения за неудобство. При следующей отправке скопируйте текст сообщения в буфер обмена или в текстовый документ.</div>",
-
-		TG_TOKEN = "1028281410:AAHBV_yuvrXcjNNg4FvSfuR1-2vjKNVfwys",
-		// TG_CHAT_ID = -1001433749294; // Группа js-master
-		TG_CHAT_ID = -1001245760492; // Cannel
+		ADMIN = \ADMIN ?? 0;
 
 	public
 		# Custom params
@@ -76,12 +66,6 @@ class MailPlain extends PHPMailer
 		$this->Subject = $this->validated['subject'];
 		$this->isHTML($__smtp['isHTML']);
 
-		$this->validated['messageNL'] = $this->validated['message'] = "<pre>{$this->validated['message']}</pre>\n"
-		. "\nTime - " . date(\CF['date']['format'])
-		. "\nEmail - {$this->validated['email']}"
-		. "\nIP - " . \H::realIP()
-		. ($_REQUEST['tg'] ? "\nTelegram - {$_REQUEST['tg']}" : "");
-
 		if($__smtp['isHTML']) {
 			$this->validated['message'] = nl2br($this->validated['message']);
 		}
@@ -125,10 +109,7 @@ class MailPlain extends PHPMailer
 
 	# MailPlain::save($mailPlain->validated);
 	# in handler.php
-	/**
-	 * Save input data in DB
-	 */
-	public static function save(array $data)
+	public static function save($data)
 	{
 		$answer = '';
 		$m_save = [
@@ -142,54 +123,16 @@ class MailPlain extends PHPMailer
 
 
 	/**
-	 * collect body of main message
-	 * in developing ...
-	 * now use in the comments
-	 */
-	public static function collectMessage($arr)
-
-	{
-		$message = '';
-
-		foreach($arr as $name=>$value) {
-			if(
-				!trim($value)
-				|| in_array($name, ['time', 'email', 'IP'], 1)
-			) continue;
-
-			if(in_array($name, ['Post', 'Ответ'], 1))
-				$name = "===============\n" . $name . ": \n";
-			elseif(is_string($name))
-				$name = $name . ": ";
-			else $name = '';
-
-			$message .= $name . $value . " \n";
-		}
-
-		return $message;
-	}
-
-
-	/**
 	 * Telegram API
-	 *
-	 * https://api.telegram.org/bot1028281410:AAHBV_yuvrXcjNNg4FvSfuR1-2vjKNVfwys/getUpdates
-	 *
-	 * # To Me
-	 * MailPlain::toTG(673976740);
-	 * # To Cat
-	 * MailPlain::toTG(677430081);
+	 * MailPlain::toTG();
 	 *
 	 * Отправка GET-запросом
 	 * $sendToTelegram = fopen("https://api.telegram.org/bot{$token}/sendMessage?chat_id={$tg_chat_id}&parse_mode=html&text={$tg_txt}","r");
 	 */
-	public static function toTG(
-		$text = null,
-		$chat_id = null
-	)
+	public static function toTG($chat_id = -1001433749294)
 	{
-		$chat_id = $chat_id ?? self::TG_CHAT_ID;
-		$token = self::TG_TOKEN;
+		$token = "1028281410:AAHBV_yuvrXcjNNg4FvSfuR1-2vjKNVfwys";
+		// $tg_txt = "<b>{$subject}</b> <pre>$message</pre> {$_REQUEST['email']}";
 
 		$ch = curl_init();
 		curl_setopt_array(
@@ -202,11 +145,13 @@ class MailPlain extends PHPMailer
 				CURLOPT_POSTFIELDS => [
 					'chat_id' => $chat_id,
 					'parse_mode' => 'html',
-					'text' => $text,
+					'text' => "<b>{$_REQUEST['subject']}\n{$_REQUEST['name']}</b> пишет:\n <pre>{$_REQUEST['message']}</pre>\n {$_REQUEST['tg']}\n{$_REQUEST['email']}",
 				],
 			]
 		);
-
+		/* var_dump(
+			// $subject
+		); */
 		return curl_exec($ch);
 	}
 
@@ -261,31 +206,22 @@ class MailPlain extends PHPMailer
 		if(count($_FILES))
 			$this->uploads();
 
-		# Send to Telegram
-		$textToTG = "<b>{$this->validated['subject']}</b>\n {$this->validated['messageNL']}";
-		$sttg = self::toTG($textToTG);
-
-		/* var_dump(
-			$sttg,
-			$this->validated
-		); */
 
 		try {
 			$this->Send();
 			return true;
 
 		} catch (phpmailerException $e) {
-			if($__smtp['isHTML'])
-				try {
-					$this->isHTML(false);
-					$this->Send();
-					return true;
-				} catch (phpmailerException $e) {
-					// var_dump($e);
-					echo 'Mailer Error: ' . $this->ErrorInfo;
-					return false;
-					// return $e->xdebug_message;
-				}
+			if($__smtp['isHTML']) try {
+				$this->isHTML(false);
+				$this->Send();
+				return true;
+			} catch (phpmailerException $e) {
+				// var_dump($e);
+				echo 'Mailer Error: ' . $this->ErrorInfo;
+				return false;
+				// return $e->xdebug_message;
+			}
 		} catch (Exception $e) {
 			// var_dump($e);
 			return false;

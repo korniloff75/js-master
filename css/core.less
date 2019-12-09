@@ -181,10 +181,10 @@ MAPS компиллятор не тянет
 /* End FLEX */
 
 
-.transition(@property: all, @duration: @transition_dur, @delay: @transition_delay, @function: @transition_func) when not (@property = transform) {
+/* .transition */
+.transition (@property: all, @duration: @transition_dur, @delay: @transition_delay, @function: @transition_func) when not (@property = transform) {
 	-webkit-transition: @property @duration @delay @function;
 	-moz-transition: @property @duration @delay @function;
-	-o-transition: @property @duration @delay @function;
 	transition: @property @duration @delay @function;
 }
 
@@ -197,6 +197,16 @@ MAPS компиллятор не тянет
 	-ms-transition: -ms-transform @duration @delay @ease;
 	transition: @property @duration @delay @ease;
 }
+
+//Специальный вариант для none
+.transition (@property,@duration: @transition_dur, @delay: @transition_delay, @ease: ease-in-out) when (@property=none) {
+	-webkit-transition: @property;
+	-moz-transition: @property;
+	transition: @property;
+}
+
+/* /.transition */
+
 
 .transform(@val) {
 	-webkit-transform: @val;

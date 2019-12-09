@@ -24,7 +24,7 @@ class Comments
 
 	protected
 		$err = [],
-		$dataMap= ['Дата'=>'','Имя'=>'','Пост'=>'','Сайт'=>'','Email'=>'','IP'=>'','Ответ'=>'','CMS'=>''],
+		$dataMap= ['Дата'=>'','Имя'=>'','Post'=>'','Site'=>'','Email'=>'','IP'=>'','Ответ'=>'','CMS'=>''],
 		# Путь к файлу комментариев
 		$path =  \DIR . "comments.json",
 		# Arr with comments
@@ -60,13 +60,13 @@ class Comments
 
 
 ############################
-	private function Create_comment_box($num,$time, $name, $mess, $sait, $email, $IP,$answer='',$cms=NULL)
+	private function Create_comment_box($num,$time, $name, $mess, $Site, $email, $IP,$answer='',$cms=NULL)
 ############################
 	{
 		# Формируем тело комментария
-		if(strlen($sait)>5) { # fixSait
-			$sait= preg_match('#^\s*?(//|http)#i', $sait)? $sait: 'http://' . trim($sait);
-			$name='<a href="'.$sait.'" title="'.$sait.'" rel="nofollow" target="_blank">'.$name.'</a>';
+		if(strlen($Site)>5) { # fixSait
+			$Site= preg_match('#^\s*?(//|http)#i', $Site)? $Site: 'http://' . trim($Site);
+			$name='<a href="'.$Site.'" title="'.$Site.'" rel="nofollow" target="_blank">'.$name.'</a>';
 		}
 
 
@@ -172,12 +172,12 @@ class Comments
 
 		if(self::TO_EMAIL == true && $_POST['sendToMail'])
 		{
-			$subject = "Ответ администрации сайта " . \HOST;
+			$subject = "Ответ администрации Saitа " . \HOST;
 
 			$name = $_POST['name'] ?? 'Гость';
 
 			self::sendMail([
-				"Уважаемый(ая) " . $name . "!\nАдминистрация сайта " . \HOST
+				"Уважаемый(ая) " . $name . "!\nАдминистрация Saitа " . \HOST
 				. " ответила на Ваш комментарий на странице - " . $this->p_name,
 				'Комментарий' => $e,
 				'Ответ' => $o,
@@ -213,25 +213,31 @@ class Comments
 		if(strlen(trim(@$_POST['entry'])) < 3)
 			$this->err[]= "Нет сообщения.";
 
-		if(\ADMIN)
-			$_POST = array_merge([
-				'name' => \OWNER['name'],
-				'homepage' => \BASE_URL
-			], $_POST);
 
 		if(empty($_POST['email']))
 			$this->err[] = "Не указан email";
 
+		if(\ADMIN)
+			$_POST = array_merge($_POST, [
+				'name' => $_POST['name'] ? $_POST['name'] : \OWNER['name'],
+				'homepage' => \BASE_URL
+			]);
+
 		$arr= [
-			"Время"=>date("d.m.Y H:i:s"),
-			"name"=>$_POST['name'],
-			"Пост"=>@$_POST['entry'],
-			"Сайт"=>@$_POST['homepage'],
+			"time" => date(\CF['date']['format']),
+			"name" => $_POST['name'],
+			"Post" => @$_POST['entry'],
+			"Site"=>@$_POST['homepage'],
 			"email"=>@$_POST['email'],
 			"IP"=>\H::realIP(),
 			"Ответ"=>"",
 			"CMS"=>@$_POST['CMS'],
 		];
+
+		/* var_dump(
+			$_POST,
+			\OWNER['name']
+		); */
 
 
 		if(empty($arr['IP']))
@@ -240,7 +246,6 @@ class Comments
 		# Проверяем на наличие в базе
 		if(file_exists(self::SPAM_IP))
 		{
-			$spamers = \H::json(self::SPAM_IP);
 			if(in_array($arr['IP'], \H::json(self::SPAM_IP)))
 				$this->err[] = 'Попался, товарищ спамер!';
 		}
@@ -262,15 +267,16 @@ class Comments
 		# Если указан, то отсылаем на мыло
 		if(self::TO_EMAIL == true)
 		{
-			$subject = "Комментарий со страницы $this->p_name - ". \HOST;
+			$subject = "Комментарий со страницы $this->p_name - ". ($_REQUEST['curpage'] ?? \HOST);
 			self::sendMail($arr, $subject);
 		}
+		// var_dump($arr);
 
-		# Блокируем файл и добавляем новый пост в его конец
+		# Блокируем файл и добавляем новый Post в его конец
 		$this->file[] = array_values($arr);
 
 		if (!\H::json($this->path, $this->file, 'rewrite'))
-			die('<div class="core warning">Невозможно добавить новый пост!</div>');
+			die('<div class="core warning">Невозможно добавить новый Post!</div>');
 
 
 		# Динамический вывод блока с последним комментом
@@ -310,22 +316,11 @@ class Comments
 
 	{
 		require_once 'php/modules/PHPMailer/MailPlain.php';
-		$message = '';
 
-		foreach($arr as $name=>$value) {
-			if(!trim($value)) continue;
+		$message = MailPlain::collectMessage($arr);
+		$email = $_REQUEST['email'];
 
-			if(in_array($name, ['Пост','Ответ'], 1))
-				$name = "\n===============\n\n" . $name . ": \n";
-			elseif(is_string($name))
-				$name = $name . ": ";
-			else $name = '';
-
-			$message .= $name . $value . " \n";
-		}
-
-		$mailPlain = new MailPlain ($subject, $message, $arr['email'], $arr['name']);
-
+		$mailPlain = new MailPlain ($subject, $message, $email, $arr['name']);
 
 		if($send_succ = $mailPlain->TrySend())
 		{
@@ -377,17 +372,17 @@ class Comments
 
 				$num = $pager['data_count'] + self::MAX_ON_PAGE - $pager['lp'] - $i ; # nE!
 
-				list($time, $name, $mess, $sait, $email, $IP,$answer) = $ent;
+				list($time, $name, $mess, $Site, $email, $IP,$answer) = $ent;
 
 				/* echo '<h3>$time</h3><pre>';
-				var_dump( $time);
+				var_dump( $ent);
 				echo '</pre>'; */
 
 				$name = strlen($name) ? $name : "Гость";
 				$cms = !empty($ent[7]) ? $ent[7] : 'Не указана...';
 				$mess = !empty($mess) ? $mess : "<p class='core warning'>No post</p>"; # Для модерации
 
-				$comments.= $this->Create_comment_box($num, $time, $name, $mess, $sait, $email, $IP,$answer,$cms);
+				$comments.= $this->Create_comment_box($num, $time, $name, $mess, $Site, $email, $IP,$answer,$cms);
 
 			}
 				// echo $comments;

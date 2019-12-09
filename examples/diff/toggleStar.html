@@ -1,0 +1,21 @@
+<table>
+	<tr>
+	<td>
+		<font color="#FF0000"><b>*</b></font>отчество (при наличии)
+	</td>
+	<td><input type="text" name="fam03" id="fam03" x-autocompletetype="name"
+			class="w101 border">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;отчество
+		отсутствует <input id="otchestvo" type="checkbox" name="noot01" value="отчество отсутствует"></td>
+	<td></td>
+	<td></td>
+</tr>
+</table>
+
+
+
+<script>
+	document.querySelector('input[type=checkbox][name=noot01]').onclick = function (e) {
+		var star = this.closest('tr').querySelector('font');
+		star.hidden = this.checked === true;
+	};
+</script>

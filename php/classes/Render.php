@@ -95,9 +95,9 @@ class Render
 		$data = $current ? $Data : Navigate::setData($dir);
 		$images = $current ? \IMAGES : (new \DirFilter($dir, "#\.(jpe?g|png)$#"))->natSort();
 		$cond = \ADMIN && empty($opts['rss']);
-		$hidden = $data['hidden'] ?? null;
+		$hidden = !\ADMIN && !empty($data['hidden']);
 
-		if(!empty($data['hidden'])) return '';
+		if($hidden) return '';
 
 		$eswitcher = '<select size="1" class="core note editorSwitcher">
 		<option class="core info" title="Без редактирования" selected="selected">normal</option>
@@ -134,7 +134,7 @@ class Render
 		$content = ob_get_clean();
 
 		return "<header>
-		<h1" . ($hidden ? " class=hidden" : "") . ">{$data['title']}</h1>
+		<h1" . (!empty($Data['hidden']) ? " class=hidden" : "") . ">{$data['title']}</h1>
 		</header>\n$content";
 	}
 
@@ -144,10 +144,9 @@ class Render
 	{
 		global $Data, $SV;
 		$out = '';
-		$hidden = !empty($Data['hidden']);
 
-		if(!\ADMIN && $hidden)
-			\H::shead(403);
+		if(!\ADMIN && !empty($Data['hidden']))
+			\H::shead(404);
 
 		/* ob_start();
 
@@ -184,14 +183,15 @@ class Render
 
 		$content = ob_get_clean(); */
 
-		$content = "<div class=\"content\">\n" . self::contentCollect(\H::$Dir) . "\n</div>\n<!-- /.content -->\n";
 
+		$content = self::contentCollect(\H::$Dir);
 		// var_dump(\DIR, $content); exit;
 
-		if(!strlen($content))
+		if(!strlen($content) || !empty($data['hidden']))
 			die (\H::shead(404));
 		else
 		{
+			$content = "<div class=\"content\">\n{$content}\n</div>\n<!-- /.content -->\n";
 			# Add comments & return
 			#
 			// $content = self::breadCrumbs() . $content;

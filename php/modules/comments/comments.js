@@ -11,7 +11,6 @@ var commFns = {
 
 		sts = Object.assign( {
 			handler: '/',
-			// handler: '/' + location.search,
 			hash: '#',
 			cb: null // callback
 		}, sts || {});
@@ -106,7 +105,8 @@ var commFns = {
 		ajaxData = Object.assign({
 			s_method: 'write',
 			keyCaptcha: comm_vars.captcha,
-			dataCount: comm_vars.dataCount
+			dataCount: comm_vars.dataCount,
+			curpage: location.href,
 		}, ajaxData);
 
 		// console.log("JSON.stringify(formData)= ", JSON.stringify(ajaxData));
@@ -169,7 +169,7 @@ var commFns = {
 		var $paginators = $("#comments .paginator"),
 		$form = $('#comments_form'),
 		form = $form[0],
-		entry = $('#entry')[0];
+		$entry = $('#entry')[0];
 
 		// console.log('form = ', form, $paginators);
 
@@ -181,9 +181,7 @@ var commFns = {
 		$('#c_subm').on("click", gl.commFns.Send);
 
 		// ajax на пагинатор
-		$paginators.each(function(ind,i) {
-			$(i).on("click",commFns.paginator);
-		}, commFns);
+		$paginators.on("click",commFns.paginator);
 
 		$(document).on("keyup", function (e) {
 			if (commFns.$formEdit && $().e.fix(e).defKeyCode('esc')) commFns.$formEdit.remove();
@@ -191,13 +189,13 @@ var commFns = {
 
 		if(!window.BB) return;
 
-		BB.panel('#bb_bar', entry, {
+		BB.panel('#bb_bar', $entry, {
 			b: ['fa-bold'],
 			i: ['fa-italic'],
 			u: ['fa-underline'],
 			s: ['fa-strikethrough'],
 		});
-		BB.smiley('#sm_bar', entry);
+		BB.smiley('#sm_bar', $entry);
 
 		// $('#CMS').val(comm_vars.cms);
 	} // init

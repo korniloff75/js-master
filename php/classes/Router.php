@@ -53,7 +53,7 @@ class Router
 			/* var_dump($module, strpos($_REQUEST['module'], '/'));
 			die; */
 			if(file_exists($module))
-				require_once($module);
+				require_once $module;
 			die;
 		}
 
@@ -93,7 +93,12 @@ class Router
 		}
 
 		# CONST to js variable sv
-		$SV = "<script>\nwindow.sv =" . json_encode(get_defined_constants(true)['user'], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK)
+		$userCONST = get_defined_constants(true)['user'];
+		$userCONST = array_filter($userCONST, function($i) {
+			return !is_string($i) || !preg_match("/^HOST_IP/i", $i);
+		});
+		// var_dump($userCONST);
+		$SV = "<script>\nwindow.sv =" . json_encode($userCONST, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK)
 		. "; sv.firstPage = \"$Nav->firstPage\";
 		</script>\n";
 	}

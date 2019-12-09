@@ -42,6 +42,7 @@
  	'use strict';
 	function sendForm (e, f) {
 		var button= e.target;
+		e.preventDefault();
 
 		// very stuped validation
 		if(f.data.value.length) {
@@ -61,6 +62,15 @@
 					xhr.status == 200 && _H && _H.popup({
 						empty: {html: xhr.response}
 					});
+
+					// Разблокировка кнопки по таймауту - опционально
+					{
+						setTimeout(function () {
+							button.textContent = 'Отправить';
+							button.disabled = false;
+						}, 3000);
+					}
+
 				}
 
 			}
@@ -69,7 +79,6 @@
 			button.disabled = true;
 		}
 	}
-
 	</script>
 </div>
 

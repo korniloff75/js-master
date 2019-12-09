@@ -22,6 +22,8 @@ MAPS компиллятор не тянет
 /* Start FLEX */
 /* These are the conditional mixins for the different syntax for IE10 Flexbox*/
 /* End FLEX */
+/* .transition */
+/* /.transition */
 /* @group matrix() */
 /* @end */
 /* Box Group
@@ -43,7 +45,6 @@ body {
   background: transparent;
   -webkit-transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1)   ;
   -moz-transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1)   ;
-  -o-transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1)   ;
   transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1)   ;
 }
 .flex,
@@ -205,7 +206,6 @@ div#bg_wraper div#bg {
   background-size: cover;
   -webkit-transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
   -moz-transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
-  -o-transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
   transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
   -webkit-transition: -webkit-transform 10s 0.3s cubic-bezier(0.15, 0.3, 0.5, 1);
   -moz-transition: -moz-transform 10s 0.3s cubic-bezier(0.15, 0.3, 0.5, 1);
@@ -218,7 +218,7 @@ div#bg_wraper div#bg #bg_mask {
   height: 100%;
   z-index: 1;
   background: radial-gradient(#000, #555, #000);
-  opacity: .35;
+  opacity: 0.35;
 }
 div#bg_wraper div#bg.zoom {
   -webkit-transform: scale(1.5, 1.5);
@@ -286,7 +286,7 @@ div#bg_wraper div#bg.zoom {
 }
 @media (max-width: 578px) {
   #logo {
-    letter-spacing: .5em;
+    letter-spacing: 0.5em;
   }
 }
 #logo * {
@@ -381,7 +381,6 @@ div#nav_main .nav_item > div {
   background: #fff;
   -webkit-transition: all 0.9s cubic-bezier(0.075, 0.82, 0.165, 1) cubic-bezier(0.075, 0.82, 0.165, 1);
   -moz-transition: all 0.9s cubic-bezier(0.075, 0.82, 0.165, 1) cubic-bezier(0.075, 0.82, 0.165, 1);
-  -o-transition: all 0.9s cubic-bezier(0.075, 0.82, 0.165, 1) cubic-bezier(0.075, 0.82, 0.165, 1);
   transition: all 0.9s cubic-bezier(0.075, 0.82, 0.165, 1) cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 div#nav_main .nav_item:hover > div,
@@ -457,22 +456,19 @@ div#nav_main .nav_item.active > div {
   display: block;
   padding-top: 100%;
 }
-#menu_block #menu_close {
+#menu_block .close_button {
   z-index: 15;
-  width: 20px;
-  height: 20px;
   position: fixed;
   color: #fff;
   display: none;
-  flex-basis: 20px;
   right: 7px;
   top: 7px;
   cursor: pointer;
 }
-#menu_block #menu_close img {
+#menu_block .close_button img {
   width: 100%;
 }
-#menu_block #menu_close:hover {
+#menu_block .close_button:hover {
   -webkit-transform-origin: center center;
   -moz-transform-origin: center center;
   -ms-transform-origin: center center;
@@ -491,10 +487,10 @@ div#nav_main .nav_item.active > div {
   height: inherit;
   min-width: inherit;
   min-height: inherit;
-  width: calc(71%);
-  flex-basis: calc(71%);
+  width: calc(100% - 29px);
+  flex-basis: calc(100% - 29px);
   margin: 1em 0 0;
-  padding: .5em;
+  padding: 0.5em;
 }
 #menu_block > #menu_content * {
   color: #d8d7d6;
@@ -519,11 +515,13 @@ div#nav_main .nav_item.active > div {
   text-transform: uppercase;
   -webkit-transition: none 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
   -moz-transition: none 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
-  -o-transition: none 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
   transition: none 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
+  -webkit-transition: none;
+  -moz-transition: none;
+  transition: none;
 }
 #menu_block > #menu_content ul#menu li {
-  padding: .2em .3em .3em 1em;
+  padding: 0.2em 0.3em 0.3em 1em;
   list-style: none;
   cursor: pointer;
   line-height: 150%;
@@ -536,7 +534,6 @@ div#nav_main .nav_item.active > div {
   background-color: #d8d7d6;
   -webkit-transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
   -moz-transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
-  -o-transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
   transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 #menu_block > #menu_content ul#menu li:hover {
@@ -579,7 +576,7 @@ div#nav_main .nav_item.active > div {
   -ms-transform: translateY(-1em);
   -o-transform: translateY(-1em);
   transform: translateY(-1em);
-  padding: .7em 0;
+  padding: 0.7em 0;
   background: #1c1c1c;
   font-size: 20px;
 }
@@ -594,7 +591,6 @@ div#nav_main .nav_item.active > div {
   z-index: 2;
   -webkit-transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
   -moz-transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
-  -o-transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
   transition: all 0.5s 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 #menu_butt .menu_icon {
@@ -604,15 +600,14 @@ div#nav_main .nav_item.active > div {
 #menu_butt .menu_icon-item {
   height: 2px;
   width: 25px;
-  margin: .3em 0;
+  margin: 0.3em 0;
   background-color: #fff;
   -webkit-transition: background-color 0.5s ease cubic-bezier(0.075, 0.82, 0.165, 1);
   -moz-transition: background-color 0.5s ease cubic-bezier(0.075, 0.82, 0.165, 1);
-  -o-transition: background-color 0.5s ease cubic-bezier(0.075, 0.82, 0.165, 1);
   transition: background-color 0.5s ease cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 #menu_butt:hover .menu_icon-item {
-  margin: .5em 0;
+  margin: 0.5em 0;
 }
 aside {
   position: absolute;
@@ -683,7 +678,7 @@ aside #bg_pattern {
   min-width: 100%;
   min-height: 100%;
   background: url('/images/bg_pattern.png');
-  opacity: .2;
+  opacity: 0.2;
   z-index: -1;
 }
 #ajax-content {

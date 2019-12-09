@@ -466,7 +466,6 @@ class H {
 			$paginator = '';
 		}
 
-
 		return [
 			'fragm'=>array_slice($data,$first_page,$max_entries), #-1
 			'paginator' => $paginator,

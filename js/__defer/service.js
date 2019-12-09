@@ -1,28 +1,25 @@
 'use strict';
 
 // Define globals
-var body_main = $('section#body_main'),
-	$bg = $('#bg'),
-	$bg_mask = $('div#bg_mask'),
-	$logo = $('#logo'),
-	$sidebar = $('#sidebar'),
-	$page_content = $page_content || $('div#ajax-content'),
-	$menu_butt = $('#menu_butt'),
-	$menu = $('#menu_block'),
-	$menu_items = $menu.find('a'),
-	$nav_main = $('#nav_main'),
-	$nav_block = $('nav#nav_block'),
-	$nav_items = $nav_block.find('.nav_item'),
+var
 	$gl = $(window);
+
+/* Object.defineProperties(window, {
+	_S.v.$nav_items: {
+		get: function() {
+			return _S.v.$nav_block.find('.nav_item')
+		}
+	}
+}) */
 
 
 window.onpopstate = function(e) {
 	if(!e.state) return;
-	$page_content.html();
-	$page_content.html(e.state.html);
+	_S.v.$page_content.html();
+	_S.v.$page_content.html(e.state.html);
 	$.cookie.set({page_ind: e.state.page_ind});
 
-	_S.afterLoad($nav_items[e.state.page_ind]);
+	_S.afterLoad(_S.v.$nav_items[e.state.page_ind]);
 
 	// console.log(e.state, nav_items[e.state.page_ind]);
 };
@@ -30,57 +27,62 @@ window.onpopstate = function(e) {
 
 // servise
 var _S = {
-	loadPage: function(nextItem) {
-		// ajax load page from nextItem attr 'data-page'
+	v: {},
+	loadPage: function loadPage($nextItem) {
+		// ajax load page from $nextItem attr 'data-page'
+		$nextItem = $.check($nextItem);
+		_S.v.$bg_mask.css({ opacity: .5, zIndex: 10 });
 
-		$bg_mask.css({ opacity: .5, zIndex: 10 });
+		// console.log('$nextItem = ', $nextItem);
+
 		var profile = new Date(),
-		pagePath = _H.fixSlash(nextItem.getAttribute('data-page') || nextItem['data-page']);
+		page_ind = $.cookie.get('page_ind'),
+		pagePath = _H.fixSlash($nextItem.attr('data-page') || $nextItem[0]['data-page']);
 
 		// console.log('pagePath = ', pagePath);
 
 		document.loading = 1;
 
-		// clean
-			$page_content.html('');
+		/* clean */
+		{
+			_S.v.$page_content.html('');
 			window.myMap && myMap.destroy();
-
 			_H.defer.clean();
+		}
 
-		$page_content.load('/', {
+		// Рендеринг по ответу сервера
+		_S.v.$page_content.load('/', {
 			page: pagePath,
 			ajax: 1
-		}, function (response) {
-		// $page_content.load('/?page=' + pagePath + '&ajax=1', function (response) {
-			// console.log('sysData = ', sysData);
-
-			// console.log('page_ind = ', page_ind);
-
-			/* if(response.includes('<!DOCTYPE html>')) {
-				// change template
-				location.reload();
-				// document.documentElement.innerHTML = response;
-			} */
-
-			_H.open.call($sidebar);
+		}, function (response, status) {
+			// 403, 404
+			if(status !== 'success') {
+				// _H.nav.next(_S.v.$nav_block);
+				var $nextItem = _H.nav.next(_S.v.$nav_block);
+				console.log("$nextItem = ", $nextItem);
+				return loadPage($nextItem);
+			}
+			_H.open.call(_S.v.$sidebar);
 
 			_S.afterLoad(pagePath, response);
 
+			// Конец рендеринга
 			document.loading = 0;
 
-			console.info("Время рендеринга страницы, мс - ", new Date() - profile);
+			console.info("Время рендеринга страницы, мс - ", new Date() - profile, "\nresponse status = ", status);
 		});
 	}, // loadPage
 
 
 	afterLoad: function(path, response) {
-		var current = _H.findItem($nav_items, path),
-		page_ind = $.cookie.get('page_ind') || 0;
+
+		var page_ind = _H.nav.current(_S.v.$nav_items, path);
 
 		// console.log('page_ind = ', page_ind);
 
-		$menu.removeClass('opened');
-		$bg.css({
+		_S.v.$menu.removeClass('opened');
+
+		_S.v.$bg.css({
 			backgroundImage: 'url(\'/' + $.rnd(sv.IMAGES.length && sv.IMAGES || sv.BG) + '\')'
 		});
 
@@ -93,6 +95,7 @@ var _S = {
 			window.DizSel && _H.defer.add(DizSel.prevent);
 			window.CC && _H.defer.add(CC.init);
 			window._A && _H.defer.add(_A.init);
+			_H.ADs && _H.defer.add(_H.ADs.init.bind(_H.ADs));
 
 			// Update #adm
 			if(sv.ADMIN) {
@@ -106,12 +109,7 @@ var _S = {
 
 		// console.log(bg.css('backgroundImage'));
 
-		$bg_mask.css({ opacity: '', zIndex: 1 });
-
-		// set active menu item
-		$nav_items.each(function(page_ind,i) {
-			i.classList.remove('active');
-		});
+		_S.v.$bg_mask.css({ opacity: '', zIndex: 1 });
 
 		_H.defer.eval();
 
@@ -123,12 +121,37 @@ var _S = {
 			// }, document.title, '/?page=' + path);
 		}
 
-		// console.log(current, $nav_items, page_ind);
-		$(current || $nav_items[page_ind]).addClass('active');
+		// console.log(_S.v.$nav_items, page_ind);
 
 	}, // afterLoad
 
 }; // _S
+
+
+_S.v = {
+	$bg : $('#bg'),
+	$bg_mask : $('div#bg_mask'),
+	$logo : $('#logo'),
+	$sidebar : $('#sidebar'),
+	$page_content : $('div#ajax-content'),
+	$menu_butt : $('#menu_butt'),
+	$menu : $('#menu_block'),
+	$nav_main : $('#nav_main'),
+	$nav_block : $('nav#nav_block'),
+}
+
+Object.defineProperties(_S.v, {
+	$menu_items: {
+		get: function() {
+			return this.$menu.find('li>a')
+		}
+	},
+	$nav_items: {
+		get: function() {
+			return this.$nav_block.find('.nav_item')
+		}
+	},
+});
 
 
 var Doc_evs = {
@@ -136,8 +159,8 @@ var Doc_evs = {
 	// Navigate on wheel
 	wheel: function(e) {
 		e = $().e.fix(e);
-		var $t = $(e.target),
-		$contentChild = $t.closest($page_content, $page_content);
+		var $t = $.check(e.target),
+		$contentChild = $t.closest(_S.v.$page_content, _S.v.$page_content);
 
 		// console.log('this = ', this, (this === document), this.loading);
 
@@ -166,24 +189,20 @@ var Doc_evs = {
 
 
 	// Background parallax
-	mousemove: function (e) {
+	mousemove: (function (e) {
 		e = $().e.fix(e);
-		if(!$bg.length ||!e.target.closest || e.target.closest('#sidebar')) return;
+		if(!_S.v.$bg.length ||!e.target.closest || e.target.closest('#sidebar')) return;
 
 		// console.log(e.target.closest('#logo'));
 
-		var left = (e.pageX - $bg.offset().left),
-		top = (e.pageY - $bg.offset().top);
+		var left = (e.pageX - _S.v.$bg.offset().left),
+		top = (e.pageY - _S.v.$bg.offset().top);
 
 		$(this).css({
 			left: -0.12 * left + 'px',
 			top: -(0.1 * top) + 'px',
 		});
-
-		/* $('#bg_pattern').css({
-			backgroundPosition: '-' + (0.03 * left) + 'px -' + (0.03 * top) + 'px'
-		}) */
-	}.bind($bg),
+	}).bind(_S.v.$bg),
 
 
 	mouseover: function(e) {
@@ -192,7 +211,7 @@ var Doc_evs = {
 		if(t.closest('#logo') && !t.closest('#sidebar')) {
 			// console.log(t, t.closest('#sidebar'));
 			// Transform bg
-			$bg.addClass('zoom');
+			_S.v.$bg.addClass('zoom');
 		}
 
 	},
@@ -202,7 +221,7 @@ var Doc_evs = {
 		var t = e.target;
 		if(t.closest('#logo')) {
 			// Transform bg
-			$bg.removeClass('zoom');
+			_S.v.$bg.removeClass('zoom');
 		}
 
 	},
@@ -219,14 +238,13 @@ var Doc_evs = {
 		};
 
 		// console.log(this.mousePos);
-
 	},
 
 
 	mouseup: function(e) {
 		e = $().e.fix(e);
 		var t = e.target,
-			contentChild = $(t).closest($page_content, $page_content);
+			contentChild = $.check(t).closest(_S.v.$page_content, _S.v.$page_content);
 
 		// console.log('loading = ', this.loading );
 
@@ -267,11 +285,11 @@ var Doc_evs = {
 
 			// sidebar
 			if(t.closest('#sidebar') && Math.sign(d_touch.x) > 0) {
-				_H.close.call($sidebar);
+				_H.close.call(_S.v.$sidebar);
 			}
 
-			if(Math.sign(d_touch.x) < 0 && !$sidebar.hasClass('opened')) {
-				_H.open.call($sidebar);
+			if(Math.sign(d_touch.x) < 0 && !_S.v.$sidebar.hasClass('opened')) {
+				_H.open.call(_S.v.$sidebar);
 			}
 
 		} else if(d_touch.vertical) {
@@ -281,19 +299,22 @@ var Doc_evs = {
 				return;
 			};
 
-			// prev / next page ...
-			if(Math.sign(d_touch.y) < 0 ) {
-				var nextItem = $nav_main.find('.nav_item.active').next()[0] || $nav_main.find('.nav_item:first')[0];
-
-			} else {
-				var nextItem = $nav_main.find('.nav_item.active').prev('.nav_item')[0] || $nav_main.find('.nav_item:last')[0];
+			/* prev / next page ... */
+			{
+				if(Math.sign(d_touch.y) < 0 ) {
+					var $nextItem = _H.nav.next(_S.v.$nav_main);
+				} else {
+					var $nextItem = _H.nav.prev(_S.v.$nav_main);
+				}
 			}
 
-			// console.log('nextItem = ', nextItem);
-			_S.loadPage(nextItem);
+
+			// console.log('$nextItem = ', $nextItem);
+			_S.loadPage($nextItem);
 		}
 
 	},
+	// mouseup
 
 	touchstart: function(e) {
 		return Doc_evs.mousedown.call(this, e);
@@ -324,7 +345,7 @@ var Doc_evs = {
 		$t = $(t);
 
 
-		if($t.closest($page_content).length) {
+		if($t.closest(_S.v.$page_content).length) {
 			return;
 		}
 
@@ -332,15 +353,15 @@ var Doc_evs = {
 
 		// Open/Close sidebar
 		if(t.closest('.toSidebar')) {
-			_H.open.call($sidebar);
+			_H.open.call(_S.v.$sidebar);
 
 		} else if(!t.closest('aside, #edit_comm')) {
-			_H.close.call($sidebar);
+			_H.close.call(_S.v.$sidebar);
 		}
 
 		// Close menu
-		if($menu.hasClass('opened') && (t.closest('#menu_close') || !t.closest('#menu_block'))) {
-			_H.close.call($menu);
+		if(_S.v.$menu.hasClass('opened') && (t.closest('#menu_close') || !t.closest('#menu_block'))) {
+			_H.close.call(_S.v.$menu);
 		}
 
 		if(t.closest('#menu_block')) {
@@ -351,21 +372,21 @@ var Doc_evs = {
 
 	keyup: function(e) {
 		e = $().e.fix(e);
-		if(e.defKeyCode('esc')) _H.close.call($menu);
+		if(e.defKeyCode('esc')) _H.close.call(_S.v.$menu);
 	},
 } // doc_evs
 
 
 
-$menu_butt.on({
+_S.v.$menu_butt.on({
 	click: function(e) {
-		_H.open.call($menu);
+		_H.open.call(_S.v.$menu);
 		$().e.fix(e).stopPropagation();
 	}
 });
 
 // fix scroll sidebar
-$sidebar.on({
+_S.v.$sidebar.on({
 	wheel: function(e) {
 		// console.log('scroll', this.scrollHeight, w.innerHeight());
 		if(this.scrollHeight*.99 <= $gl.innerHeight()) return;
@@ -379,7 +400,7 @@ $sidebar.on({
 
 
 // menu handlers
-$nav_main.on({
+_S.v.$nav_main.on({
 	// ajax 4 changing page_content
 	click: function (e) {
 		var t;
@@ -404,14 +425,14 @@ $(document).on(Doc_evs);
 
 $(function() {
 	// onload set active menu item
-	$nav_main.find('.nav_item:first').addClass('active');
+	_S.v.$nav_main.find('.nav_item:first').addClass('active');
 
-	$menu_items.each(function(ind,i) {
+	_S.v.$menu_items.each(function(_ind,i) {
 		i['data-page'] = _H.getPath(i.href);
-		// console.log('page = ', i['data-page']);
+		// console.log('page = ', i['data-page'], i);
 	});
 
-	$menu.on({
+	_S.v.$menu.on({
 		mouseover: function(e) {
 			e = $().e.fix(e);
 			var t = e.target.closest('li');
@@ -437,12 +458,12 @@ $(function() {
 		wheel: function(e) {
 			e.stopPropagation();
 		}
-	}); // $menu
+	}); // _S.v.$menu
 
 	_S.afterLoad();
 
 	// draw closses
-	$('.close_button').each(function(ind,i) {
+	$('.close_button').each(function(_ind,i) {
 		_H.closeButton(i);
 	});
 

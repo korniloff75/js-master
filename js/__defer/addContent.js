@@ -1,150 +1,138 @@
 "use strict";
-$.addContent = function() {
-	var ADs= {
-		__proto__: null,
-		AliExpress: {
-			uri: '/',
-//			link: '<a href="" target="_blank" rel="nofollow">'+ADs.title+'</a>',
-			base: 'https://alitems.com',
-			alt: 'Aliexpress INT',
+_H.ADs = {
+	__proto__: null,
+	AliExpress: {
+		// uri: '/',
+		base: 'https://alitems.com',
+		alt: 'Aliexpress INT',
+		links: [
+			'3pl9pni30ga4ec867dbe16525dc3e8',
+			'nc8nd50jlda4ec867dbe16525dc3e8',
+			'jh0df3sloba4ec867dbe16525dc3e8',
+			'6qq5igyqyfa4ec867dbe16525dc3e8',
+			'ugv2rqjiica4ec867dbe16525dc3e8',
+		]
+	},
+	/* https://ad.admitad.com/g/npsw06cnp5a4ec867dbe369ea22811/?i=4
+	<!-- admitad.banner: ugv2rqjiica4ec867dbe16525dc3e8 Aliexpress WW -->
+	<a target="_blank" rel="nofollow" href="https://alitems.com/g/ugv2rqjiica4ec867dbe16525dc3e8/?i=4"><img width="468" height="60" border="0" src="https://ad.admitad.com/b/ugv2rqjiica4ec867dbe16525dc3e8/" alt="Aliexpress WW"/></a>
+	<!-- /admitad.banner -->
+	 */
+	Timeweb: { //== Хост
+		uri: 'Javascripts|content',
+		alt: 'хостинг Timeweb',
+		links: [
+			'n6q5j342fca4ec867dbe5fb557f5d8', 'tpflk1dgaga4ec867dbe5fb557f5d8', 'jsqzs4datla4ec867dbe5fb557f5d8', 'nhp2d1t7mga4ec867dbe5fb557f5d8', 'duvxj343x9a4ec867dbe5fb557f5d8', 'o98bdksin1a4ec867dbe5fb557f5d8'
+		]
+	},
+	/*
+	<!-- admitad.banner: eq0fuuj113a4ec867dbe8753afd1f1 Letyshops [lifetime] -->
+	<a target="_blank" rel="nofollow" href="https://katuhus.com/g/eq0fuuj113a4ec867dbe8753afd1f1/?i=4"><img width="468" height="60" border="0" src="https://ad.admitad.com/b/eq0fuuj113a4ec867dbe8753afd1f1/" alt="Letyshops [lifetime]"/></a>
+	<!-- /admitad.banner -->
+	*/
+	Magzter: {
+		uri: 'content',
+		alt: 'сервис Magzter [CPS] IN',
+		src: 'https://www.magzter.com/static/images/maglogo/magzlogosm.png',
+		links: [
+			'6zlx8gln2ua4ec867dbe03fc6030ed',
+		]
+	},
+	Letyshops: { //== Дисконт
+		uri: 'Primery|content',
+		alt: 'кэшбэк Letyshops',
+		base: 'https://homyanus.com',
+		links: [
+			'nkoywaphvra4ec867dbe8753afd1f1',
+			'w27poh5mmla4ec867dbe8753afd1f1',
+			'koujs74zmya4ec867dbe8753afd1f1',
+			'eq0fuuj113a4ec867dbe8753afd1f1',
+		]
+	},
+	Tea101: {
+		uri: 'content',
+		base: null,
+		alt: 'магазин 500 видов чая',
+		links: [
+			'ipw0vli5fua4ec867dbed55ad7d85a', '8aq5xn9ydsa4ec867dbed55ad7d85a', 'xs3x94yw7ga4ec867dbed55ad7d85a', 'n692sbotrva4ec867dbed55ad7d85a',
+		],
+	},
 
-			links: [
-				'f84p7uuriqa4ec867dbe16525dc3e8',
-				'ea128ec2b1a4ec867dbe16525dc3e8',
-				'pw950vjs7pa4ec867dbe16525dc3e8'
-			]
-		},
+	init: function addContent() {
+		var
+			that = this,
+			area = $('body article, body #sidebar')[0],
+			// Exceptions
+			noAD = /Sajt_dlya_slabovidyashhix\/(PRO|Lite)|Rekvizity/i,
+			parsMin = 5, interval = 3;
 
-		Tinydeal: {
-			/* https://www.admitad.com/ru/webmaster/websites/572937/offers/6420/?start_date=14.09.2015&end_date=24.06.2018&page=6&order_by=-ecpc&rpp=20&region=RU#banners */
-			uri: '/',
-			alt: 'Tinydeal',
-			links: [
-				'yaak6ligwua4ec867dbe91a72d4870',
-				'ke86kpzv49a4ec867dbe91a72d4870',
-				'k697k16odqa4ec867dbe91a72d4870',
-				'r1rxe4e551a4ec867dbe91a72d4870'
-			]
-		},
+		// console.log(this);
+		this['$pars'] = $(area).find('p');
 
-/*
+		if (
+			//== Собираем все <p> в area. Если их меньше, чем parsMin - уходим
+			this['$pars'].length < parsMin
+			|| !area || !/js\-/i.test(location.host)
+			|| noAD.test(location.href)
+		) return;
+		/* console.log(
+			area,
+			'this['$pars'] = ', this['$pars']
+		); */
 
- */
+		// Удаляем скрытые
+		this['$pars'] = this['$pars'].filter((ind, i) => !i.closest || !i.closest('[hidden]'));
 
-		LPgenerator: { //== Landing Page
-			uri: 'Javascripts|Веб-мастеру',
-			alt: 'LPgenerator',
-			links: [
-				'6k4nkydf6ga4ec867dbe369ea22811','z5nk7xfzmpa4ec867dbe369ea22811','npsw06cnp5a4ec867dbe369ea22811',
-				'gk0v656qgva4ec867dbe369ea22811','iz3ko6iy3ra4ec867dbe369ea22811','vj5jskl69ea4ec867dbe369ea22811'
-			]
+		//== Удаляем из _H.ADs свойства, не соответствующие uri
+		Object.keys(this).forEach(function (k) {
+			if (this[k].uri && !new RegExp(this[k].uri, 'i').test(decodeURIComponent(location.href))) {
+				delete this[k];
+			}
+		}, this);
 
-		},
+		Object.defineProperties(this, {
+			init : { enumerable: false},
+			$img : { enumerable: false, writable: true},
+			$pars : { enumerable: false},
+		});
+		// console.log("this = ", this);
 
-		Timeweb: { //== Хост
-			uri: 'Javascripts|Веб-мастеру|PHP',
-			alt: 'Timeweb',
-			links: [
-				'n6q5j342fca4ec867dbe5fb557f5d8','tpflk1dgaga4ec867dbe5fb557f5d8','jsqzs4datla4ec867dbe5fb557f5d8','nhp2d1t7mga4ec867dbe5fb557f5d8','duvxj343x9a4ec867dbe5fb557f5d8','o98bdksin1a4ec867dbe5fb557f5d8'
-			]
+		if (!Object.keys(this).length) return;
 
-		},
+		//== Выбираем случайный элемент из _H.ADs, берем из него случайный links и конструируем ссылку и баннер
+		var sel = this[$.rnd(Object.keys(this))],
+			r = $.rnd(sel.links),
+			g = (sel.base || 'https://ad.admitad.com') + '/g/' + r + '/?i=4',
+			b = sel.src || (sel.base || 'https://ad.admitad.com') + '/b/' + r + '/';
 
-		Store77 : { // Бытовая техника, электроника
-			uri: 'Windows|Информ-раздел|Javascripts',
-			alt : 'Store77',
-			links: [
-				'uil6q6hkh5a4ec867dbebe0600316f',
-				'dosyz70l67a4ec867dbebe0600316f',
-				'p5t8jytw40a4ec867dbebe0600316f',
-				's6yv5n1w3ia4ec867dbebe0600316f',
-				'dllbj2lr5za4ec867dbebe0600316f',
-				'npz4r7vjuha4ec867dbebe0600316f',
-				'ofmv7gu1x0a4ec867dbebe0600316f',
-				'u485l8vnr8a4ec867dbebe0600316f',
-				'mf8tvnwp4za4ec867dbebe0600316f'
-			]
-		},
+		/* console.log(
+			'sel = ', sel,
+			'block = ', block
+			); */
 
-/*
+		//== Создаем рекламный блок после случайного <p> и наполняем его
+		this['$img'] = $($.rnd(this['$pars'])).cr('div', { class: 'Adv center pointer' }, 'after').cr('img', { src: b, alt: sel.alt });
+		this['$img'].parent().on('click', e => location.href = g);
 
-*/
+		// Отлов блокировщиков
+		setTimeout(function() {
+			// console.log(this['$img']);
+			var $anAD;
+			if (($anAD = that['$img'].closest('[hidden]')).length) {
+				console.log(
+					"$anAD = ", $anAD,
+				);
+				$anAD[0].hidden = false;
+				$anAD.css('display', 'block');
 
-/*
-		Letyshops: { //== Дисконт
-			uri: 'Javascripts',
-			alt: 'Letyshops',
-			base: 'https://homyanus.com',
-			links: [
-				'nxezo4ieo1a4ec867dbe8753afd1f1'
-			]
-
-		},
-*/
-
-		Tea101: {
-			uri: 'Веб-мастеру|Информ-раздел',
-			base: null,
-			alt: '500 видов чая',
-			links: [
-				'ipw0vli5fua4ec867dbed55ad7d85a','8aq5xn9ydsa4ec867dbed55ad7d85a','xs3x94yw7ga4ec867dbed55ad7d85a','n692sbotrva4ec867dbed55ad7d85a'
-
-			],
-		}
-	}; //== /ADs
-	///////////////////////////////////
-
-//== Собираем все <p> в <article>. Если их меньше, чем parsMin - уходим
-	var area = $('body article, body #sidebar')[0];
-
-	if(!area || !/js\-/i.test(location.host)) return;
-	var $pars= $(area).find('p'),
-		parsMin= 5, interval= 3;
-	if ($pars.length < parsMin) return;
-
-
-	//== Удаляем из ADs свойства, не соответствующие uri
-	console.log(
-		// decodeURIComponent(location.href)
-	);
-	Object.keys(ADs).forEach(function(k) {
-		if(!new RegExp(ADs[k].uri,'i').test(decodeURIComponent(location.href))) {
-			console.log(
-				decodeURIComponent(location.href)
+				$anAD.closest('div').cr('div', { class: 'core message' }).html('<h6 style="margin:0;">Друзья! У меня на сайте нет навязчивой рекламы.</h6> <p>Более того, вся она может вам пригодиться, поскольку я сам вручную отбираю своих рекламных партнеров, а не доверяю автоматическим роботам. Все мои рекламные партнеры - фирмы с хорошей репутацией.</p><p>Если вы отключите блокировщик рекламы, возможно, вы сможете помочь и себе, и этому сайту.</p>');
+			}
+			else console.info(
+				"Реклама не блокируется"
+				// , $('.Adv')
 			);
-			delete ADs[k];
-		}
-
-	});
-
-	console.log(
-		area,
-		ADs
-	);
-
-	if(!Object.keys(ADs).length) return;
-
-
-//== Выбираем случайный элемент из ADs, берем из него случайный links и конструируем ссылку и баннер
-	var sel= ADs[$.rnd(Object.keys(ADs))],
-		r= $.rnd(sel.links),
-		g= (sel.base || 'https://ad.admitad.com') +'/g/'+ r + '/?i=4',
-		b= (sel.base || 'https://ad.admitad.com') +'/b/'+ r +'/';
-	//== Создаем рекламный блок после случайного <p> и наполняем его
-	console.log(
-		'sel = ', sel,
-		'$pars = ', $pars,
-		$.rnd($pars).after("<div class=\"Adv\"><a href=\"${g}\"><img src=\"${b}\" /></a></div>")
-	);
-
-	// $($pars.rnd).cr('div',{class:'Adv'}, 'after').cr('a',{href:g, target:'_blank', rel:'nofollow'}).cr('img',{src:b,alt:sel.alt});
-
-
-
-	$(function() {
-		var $img = $('.Adv img');
-		if($img.prop('hidden')) $pars.rnd.cr('div', {class:'warning'},'after').innerHTML= '<p>Друзья! У меня на сайте нет навязчивой рекламы.</p> <p>Более того, вся она может вам пригодиться, поскольку я сам вручную отбираю своих рекламных партнеров, а не доверяю автоматическим роботам. Все мои рекламные партнеры - фирмы с хорошей репутацией.</p><p>Если вы отключите блокировщик рекламы, возможно, вы сможете помочь и себе, и этому сайту.</p>'
-	})
-};
-
-$.addContent();
+		}, 1500);
+	}
+}; //== /_H.ADs
+///////////////////////////////////
+_H.defer.add(_H.ADs.init.bind(_H.ADs));

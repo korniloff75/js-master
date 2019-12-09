@@ -6,8 +6,8 @@ require_once __DIR__ . '/MailPlain.php';
 ); */
 
 
-$subject = "{$_REQUEST['subject']} - Обратная связь с " . HOST;
-$message = "{$_REQUEST['name']} пишет: \n\n{$_REQUEST['message']} \n\nTelegram - {$_REQUEST['tg']}";
+$subject = "{$_REQUEST['subject']} - feedback from " . HOST;
+$message = "{$_REQUEST['name']} пишет: \n{$_REQUEST['message']}";
 
 $mailPlain = new MailPlain ($subject, $message, $_REQUEST['email'], $_REQUEST['name']);
 
@@ -45,17 +45,3 @@ else
 }
 
 if(@$adm) var_dump($send_succ);
-
-
-/* Telegram
-# To Me
-$sendToTelegram = MailPlain::toTG(673976740);
-# To Cat
-MailPlain::toTG(677430081);
-*/
-
-$sendToTelegramGroup = MailPlain::toTG();
-
-/* var_dump(
-	$sendToTelegramGroup
-); */

@@ -1,1 +1,6 @@
-{"title":"Транслит","comments":-1,"template":"templates\/portfolio\/"}
+{
+	"title": "Транслит",
+	"comments": -1,
+	"hidden": 1,
+	"template": "templates\/portfolio\/"
+}

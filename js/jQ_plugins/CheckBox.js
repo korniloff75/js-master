@@ -18,7 +18,8 @@ $.fn.CheckBoxes = function (checkboxStyles) {
 	}, checkboxStyles || {});
 
 	var st = 'radial-gradient(40% 35%, #cde, #bbb 60%)', //== Отключенный
-		stCh = 'radial-gradient(40% 35%, #5aef5a, #25d025 60%)'; //== Включенный
+		stCh = 'radial-gradient(40% 35%, #5aef5a, #25d025 60%)', //== Включенный
+		title = "Выбрать";
 
 	checkboxStyles.height = checkboxStyles.height || checkboxStyles.width;
 
@@ -28,11 +29,13 @@ $.fn.CheckBoxes = function (checkboxStyles) {
 		this.css(checkboxStyles);
 	};
 
+	// console.log("this = ", this);
+
 	this.find('input[type=checkbox]').each( function(ind,i) {
 		var $i = $(i);
 		i.checked = i.checked || $i.attr('checked');
 
-		var $p = $i.hasClass('chb') ? $i.parent() : $i.wrap('<label title = "Выбрать" />').parent();
+		var $p = $i.hasClass('chb') ? $i.parent() : $i.wrap('<label title = "' + title + '" />').parent();
 
 		checkbox.call($p, i.checked);
 

@@ -87,11 +87,6 @@ jQuery && !jQuery.fn.e && Object.defineProperties(jQuery.fn,
 
 					// define keyCode
 					e.defKeyCode = function(toc) {
-						/* // e.which keyCode
-						$(window).e.add({keyup: function(e) {
-							console.log(e.ctrlKey);
-						}});
-						*/
 
 						return eO.keyCode && (eO.keyCode === ({
 							esc : 27,
@@ -176,13 +171,14 @@ jQuery && !jQuery.fn.e && Object.defineProperties(jQuery.fn,
 		value: function app(el, pos) {
 
 			// console.log(this[0]);
-			var self = this[0] || this;
+			var self = this instanceof jQuery ? this[0] : this;
 
 			console.assert(!!self, el + ' не имеет ' + self + ' в ' + this + '\nОшибка в Append');
 			if(!self) console.log(this);
 
 			switch (pos) {
 				case "after":
+					!self.parentNode ? app.call(self, el) :
 					!!self.nextSibling ? self.parentNode.insertBefore(el, self.nextSibling) : self.parentNode.appendChild(el);
 					break;
 				case "before":
@@ -193,7 +189,7 @@ jQuery && !jQuery.fn.e && Object.defineProperties(jQuery.fn,
 					break;
 				case null:
 				case undefined:
-					self.appendChild(el);
+						self.appendChild ? self.appendChild(el) : console.info('Self hasn\'t method appendChild', self);
 					break;
 			}
 			return $(el);
@@ -274,6 +270,16 @@ Object.defineProperties(jQuery, {
 		writable: true
 	},
 
+	check : {
+		value: function (obj, direct) {
+			direct = direct === undefined ? 1 : 0;
+			if (direct)
+				return obj instanceof jQuery ? obj : $(obj);
+			else
+				return obj instanceof jQuery ? obj[0] : obj;
+		}
+	},
+
 	cookie: {
 		// configurable: true,
 		// writable: true,
@@ -347,15 +353,12 @@ Object.defineProperties(jQuery, {
 
 	rnd: {
 		value: function (arr) {
-
-			if(!arr.length) {
+			if(!(arr instanceof Array)) {
 				arr = Object.values(arr);
 				// console.info('argument is not array');
 			}
-
-			var rnd = Math.floor(Math.random() * arr.length);
-
-			// console.log('rnd = ', rnd, arr);
+			// console.log("arr= ", arr);
+			var rnd = Math.floor(Math.random() * (arr.length-1));
 
 			return arr[rnd];
 		}

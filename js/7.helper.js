@@ -1,10 +1,10 @@
 'use strict';
 
 // Main jQ context
-var $Content = $('#ajax-content'),
-$f = function(selector) {
+var $f = function(selector) {
 	return $('#ajax-content').find(selector);
 },
+// $Content = $('#ajax-content'),
 
 // helpers
 _H = {
@@ -33,44 +33,97 @@ _H = {
 		return this.fixSlash(path).replace(location.protocol + '//' + location.host + '/', '');
 	},
 
-	findItem: function(list, path) {
+	nav : {
 		// define current page in nav
-		path = path || this.getPath(location.pathname);
-		// console.log('path = ', path);
+		current: function($list, path) {
+			$list = $.check($list);
+			path = path || _H.getPath(location.pathname);
+			// console.log('path = ', path);
 
-		var current = list.filter(function(ind,i) {
-			var page = i.getAttribute('data-page') || i['data-page'];
-			return path === page;
-		})[0];
+			var current = $list.filter(function(ind,i) {
+				var page = i.getAttribute('data-page') || i['data-page'];
+				return path === page;
+			})[0],
+			page_ind = $list.index(current);
 
-		$.cookie.set({page_ind: list.index(current)});
+			$list.removeClass('active');
+			$list[page_ind].classList.add('active');
+			$.cookie.set({page_ind: page_ind});
 
-		// console.log('path = ', path, current);
-		return current;
+			// console.log('current = ', current, page_ind, $list);
+			return page_ind;
+		},
+
+		next: function($list) {
+			return this.serv($list, +1);
+		},
+
+		prev: function($list) {
+			return this.serv($list, -1);
+		},
+
+		// общая функция для next & prev
+		serv: function($list, direct) {
+			var $oldItem = $list.find('.nav_item.active'),
+				$current = direct > 0 ? (
+					$oldItem.next('.nav_item').length && $oldItem.next('.nav_item') || $list.find('.nav_item:first')
+				) : (
+					$oldItem.prev('.nav_item').length && $oldItem.prev('.nav_item') || $list.find('.nav_item:last')
+				);
+
+			$oldItem.removeClass('active');
+			$current.addClass('active');
+			$.cookie.set({page_ind: $list.index($current)});
+			// console.log($list, $oldItem, $current);
+			return $current;
+		},
 	},
+	// nav
+
+	findItem: null,
 
 	// create .close_button
 	closeButton: function(node, param) {
 		param = Object.assign({
+			canvSize: 50,
 			size: 20,
 			lineWidth: 3,
+			bg: '#333',
 			color: '#fff'
 		}, (param || {}));
 
-		var c = $(node).cr('canvas', {width: param.size, height: param.size})[0];
+		var $node = $(node),
+			c = $node.addClass('close_button').cr('canvas', {width: param.canvSize, height: param.canvSize})[0],
+			padding = (param.canvSize - param.size)/2;
 		// console.log(i, c);
 		if (!c.getContext) return;
-		var ctx = c.getContext("2d");
+		var ctx = c.getContext("2d"),
+			r = 1.0 * param.canvSize/2;
+
+		// ctx.globalAlpha = '.2';
 		ctx.beginPath();
+		// ctx.fillRect(0, 0, param.size, param.size);
+		ctx.arc(param.canvSize/2,param.canvSize/2,r,0,Math.PI*2,true);
+		ctx.fillStyle = param.bg;
+		ctx.fill();
+		// ctx.closePath();
+
+		ctx.beginPath();
+		ctx.moveTo(padding, padding);
+		ctx.lineTo(param.size + padding, param.size + padding);
+		ctx.moveTo(padding, param.size + padding);
+		ctx.lineTo(param.size+padding, padding);
 		ctx.lineWidth = param.lineWidth;
 		ctx.strokeStyle = param.color;
-
-		ctx.moveTo(0, 0);
-		ctx.lineTo(param.size, param.size);
-		ctx.moveTo(0, param.size);
-		ctx.lineTo(param.size, 0);
 		ctx.stroke();
-		ctx.closePath();
+		// ctx.globalAlpha = '.0';
+
+		$node.css({
+			width: param.canvSize + 'px',
+			height: param.canvSize + 'px',
+			// 'transform-origin': 'center center',
+		});
+
 	},
 
 
@@ -150,32 +203,28 @@ _H = {
 
 
 	popup: function(o) {
-		/* o = Object.assign({
-				name : {
-					tag: 'div',
-					html: 'Hello!',
-					style: 'display: inline-block;'
-			}
-		}, (o || {})); */
-
 		var def = {
 				tag: 'div',
 				html: 'Hello!',
 				style: 'display: inline-block;'
 		};
 
-		$(document).on('keypress', close);
 
 		// console.log(this);
 
 		function close (e) {
 			e = $().e.fix(e);
 			var bool = e.defKeyCode('esc') || e.type === 'click';
-			// console.log(bool);
+			/* console.log(
+				"bool = ", bool,
+				"\nthis = ", this,
+				"\ne = ", e
+			); */
 			if(!bool) return;
 
 			e.stopPropagation();
-			$('.popup_canvas').each(function(ind, i) {
+			e.preventDefault();
+			(this === e.target || e.target.closest('.close_button')) && $('.popup_canvas').each(function(ind, i) {
 				i.remove();
 			});
 
@@ -183,22 +232,22 @@ _H = {
 		}
 
 		var addStyle = '<style>'
-			+ '.popup_canvas{width:100%;min-height:100%;background-color: rgba(0,0,0,0.5);overflow:hidden;position:fixed;top:0px;text-align: center; z-index:20;}'
-			+ '.popup{display: inline-block;margin:40px auto 0px auto;width:initial;max-width:90%;max-height: 80%;padding:10px;background-color: #c5c5c5;border-radius:5px;box-shadow: 0px 0px 10px #000;}'
-			+ '</style>';
+		+ '.popup_canvas{width:100%;min-height:100%;background-color: rgba(0,0,0,0.5);overflow:hidden;position:fixed;top:0px;text-align: center; z-index:20;}'
+		+ '.popup{display: inline-block;margin:40px auto 0px auto;width:initial;max-width:90%;max-height: 80%;padding:10px;background-color: #c5c5c5;border-radius:5px;box-shadow: 0px 0px 10px #000;}'
+		+ '</style>';
 
 		document.head.insertAdjacentHTML('beforeend', addStyle);
 
-		// var df = document.createDocumentFragment(),
-		var pw = '<div class="popup_canvas" onclick="close()">'
-			+ '<div class=popup>';
+		// var df = document.createDocumentFragment(), //  onclick="close()"
+		var pw = '<div class="popup_canvas">'
+		+ '<div class=popup><div class=close_button style="position: absolute;right: 1em;"></div>';
 		// document.createElement('div')
 
 		Object.keys(o).forEach(function(name) {
 			this[name] = Object.assign(def, this[name]);
 			pw += (!name.includes('empty') ?
-				name + ' - ' :
-				'') + '<' + this[name].tag + ' style= "' + this[name].style + '">' + (this[name].html || '') + '</' + this[name].tag + '>\n';
+			name + ' - ' :
+			'') + '<' + this[name].tag + ' style= "' + this[name].style + '">' + (this[name].html || '') + '</' + this[name].tag + '>\n';
 
 			// f.innerHTML = i.html;
 			// pw.appendChild(f);
@@ -208,7 +257,39 @@ _H = {
 
 		document.body.insertAdjacentHTML('beforeend', pw);
 
+		$(document).on('keypress', close);
+		// $(document).e.add('keyup', close);
 		$('.popup_canvas').on('click', close);
+		$('.popup_canvas .close_button').each(function(ind, i) {
+			_H.closeButton(i);
+		});
+	},
+	// popup
+
+	/**
+	 * Динамическая подгрузка скриптов
+	 * beta
+	 */
+	loadScript: function (src, callback) {
+		var script = document.createElement('script'),
+				out = {};
+			script.src = src;
+			document.head.append(script);
+
+		if(window.Promise) {
+			return new Promise(function(resolve, reject) {
+
+				script.onload = () => resolve(script);
+				script.onerror = () => reject(new Error(`Ошибка загрузки скрипта ${src}`));
+			});
+
+		} else {
+			script.onload = () => callback(null, script);
+			script.onerror = () => callback(new Error(`Ошибка загрузки скрипта ${src}`));
+
+			return out;
+		}
+
 	},
 
 
@@ -216,8 +297,9 @@ _H = {
 		// Storage 4 evaluating after every $.load()
 		funcs: [],
 		tocs: [],
+		complete: 0,
 		add: function(fn) {
-			var toc = fn.toString();
+			var toc = fn.toString().trim();
 			// console.log(toc);
 			if(this.tocs.indexOf(toc) !== -1) {
 				console.log('Функция ', toc, ' уже сохранена!');
@@ -230,10 +312,11 @@ _H = {
 		clean: function() {
 			this.funcs = [];
 			this.tocs = [];
+			this.complete = 0;
 			return this;
 		},
 		eval: function() {
-			// if(this.complete) return;
+			if(this.complete) return;
 			this.funcs.forEach(function(i) {
 				if(typeof i === 'function') {
 					// console.log(i);
@@ -241,7 +324,10 @@ _H = {
 				}
 			});
 			this.complete = 1;
-			console.log('_H.defer.complete = ' + this.complete);
+			console.log(
+				'_H.defer.complete = ' + this.complete
+				// , "\nfuncs ", this.funcs
+			);
 		},
 	}
 
