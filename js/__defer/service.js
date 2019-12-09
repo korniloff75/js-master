@@ -28,7 +28,7 @@ window.onpopstate = function(e) {
 // servise
 var _S = {
 	v: {},
-	loadPage: function loadPage($nextItem) {
+	loadPage: function loadPage($nextItem, direct) {
 		// ajax load page from $nextItem attr 'data-page'
 		$nextItem = $.check($nextItem);
 		_S.v.$bg_mask.css({ opacity: .5, zIndex: 10 });
@@ -58,8 +58,11 @@ var _S = {
 			// 403, 404
 			if(status !== 'success') {
 				// _H.nav.next(_S.v.$nav_block);
-				var $nextItem = _H.nav.next(_S.v.$nav_block);
-				console.log("$nextItem = ", $nextItem);
+				var $nextItem = _H.nav.serv(_S.v.$nav_block, direct);
+				console.log(
+					"$nextItem = ", $nextItem,
+					"\ndirect = ", direct
+					);
 				return loadPage($nextItem);
 			}
 			_H.open.call(_S.v.$sidebar);
@@ -310,7 +313,7 @@ var Doc_evs = {
 
 
 			// console.log('$nextItem = ', $nextItem);
-			_S.loadPage($nextItem);
+			_S.loadPage($nextItem, -Math.sign(d_touch.y));
 		}
 
 	},
