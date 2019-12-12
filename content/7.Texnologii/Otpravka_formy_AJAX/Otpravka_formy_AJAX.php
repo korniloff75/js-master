@@ -12,6 +12,7 @@
 	text-align: center;
 }
 #sform > form {
+	background: #222;
 	display: inline-block;
 	border: 2px outset;
 	padding: 5px;

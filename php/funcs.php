@@ -5,6 +5,9 @@ function note($i, $file = null, $line = null)
 	global $notes;
 	// \H::$notes = array_merge_recursive(\H::$notes, [$file => ($line ? [$line => $i] : $i)]);
 
+	if(realpath('') !== realpath(\HOME))
+		return;
+
 	if($line)
 		\H::$notes[$file][$line][] = $i;
 	elseif($file)

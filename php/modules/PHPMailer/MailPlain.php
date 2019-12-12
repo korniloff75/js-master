@@ -265,6 +265,8 @@ class MailPlain extends PHPMailer
 		$textToTG = "<b>{$this->validated['subject']}</b>\n {$this->validated['messageNL']}";
 		$sttg = self::toTG($textToTG);
 
+		if(isset($_REQUEST['NoSendEmail'])) return;
+
 		/* var_dump(
 			$sttg,
 			$this->validated

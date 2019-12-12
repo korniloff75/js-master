@@ -37,7 +37,7 @@
 		left: 0;
 		z-index: 5;
 		margin:0;
-		transition: left 2s;
+		transition: left 1s 1s;
 	}
 	div#sl .shad {
 		/* position: relative; */

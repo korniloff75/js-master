@@ -88,9 +88,9 @@ var commFns = {
 	},
 
 
-	Send: function () {
-		var $form = $("#comments_form"),
-			ajaxData = $form.ajaxForm(),
+	Send: function ($form) {
+		$form = $.check($form) || $("#comments_form");
+		var ajaxData = $form.ajaxForm(),
 			err='',
 			TO=10000;
 
@@ -109,10 +109,11 @@ var commFns = {
 			curpage: location.href,
 		}, ajaxData);
 
-		// console.log("JSON.stringify(formData)= ", JSON.stringify(ajaxData));
+		console.log("ajaxData= ", ajaxData);
 
 		if($().spam)
-			ajaxData.entry = $f('#comments_form #entry').spam(10).trim();
+			// ajaxData.entry = $f('#comments_form #entry').spam(10).trim();
+			ajaxData.entry = $($form[0].elements.entry).spam(10).trim();
 
 		commFns.refresh(ajaxData, {
 			cb: function(response) {

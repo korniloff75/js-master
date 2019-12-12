@@ -171,10 +171,10 @@ jQuery && !jQuery.fn.e && Object.defineProperties(jQuery.fn,
 		value: function app(el, pos) {
 
 			// console.log(this[0]);
-			var self = this instanceof jQuery ? this[0] : this;
+			var self = $.check(this, -1);
 
 			console.assert(!!self, el + ' не имеет ' + self + ' в ' + this + '\nОшибка в Append');
-			if(!self) console.log(this);
+			if(!self) console.info(this);
 
 			switch (pos) {
 				case "after":
@@ -189,7 +189,12 @@ jQuery && !jQuery.fn.e && Object.defineProperties(jQuery.fn,
 					break;
 				case null:
 				case undefined:
-						self.appendChild ? self.appendChild(el) : console.info('Self hasn\'t method appendChild', self);
+					if(self.appendChild)
+						self.appendChild(el);
+					else {
+						console.warn('Self hasn\'t method appendChild', self);
+						console.info(self);
+					}
 					break;
 			}
 			return $(el);
@@ -223,14 +228,14 @@ jQuery && !jQuery.fn.e && Object.defineProperties(jQuery.fn,
 
 			if(!f.elements)
 				throw new TypeError('Context of the $().ajaxForm must be a FORM');
-			console.log(f.elements);
+			// console.log(f.elements);
 
 			[].forEach.call(f.elements, function(i) {
 				if(!i.name) return;
 				out[i.name] = i.value.trim();
 			});
 
-			return out;
+			return out; // obj
 		}
 	},
 
@@ -272,8 +277,8 @@ Object.defineProperties(jQuery, {
 
 	check : {
 		value: function (obj, direct) {
-			direct = direct === undefined ? 1 : 0;
-			if (direct)
+			direct = direct || 1;
+			if (direct > 0)
 				return obj instanceof jQuery ? obj : $(obj);
 			else
 				return obj instanceof jQuery ? obj[0] : obj;

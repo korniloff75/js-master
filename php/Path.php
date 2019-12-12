@@ -1,4 +1,50 @@
 <?php
+require_once $_SERVER['DOCUMENT_ROOT'] . '/' . "CONST.php";
+
+
+class kffFileInfo extends SplFileInfo
+{
+	const
+		ROOT = \BASE_URL;
+
+	public
+		$path;
+
+	public function __construct($path)
+	{
+		return is_object($path) && in_array('SplFileInfo', class_parents($path)) ? $path : parent::__construct($path);
+	}
+
+	public static function fixSlashes($path)
+	:string
+	{
+		$path = str_replace("\\", '/', $path);
+		return preg_replace("#(?!https?|^)//+#", '/', $path);
+	}
+
+	public function fromRoot()
+	:string
+	{
+		return str_replace($this->fixSlashes($_SERVER['DOCUMENT_ROOT']) . '/', '', $this->getPathname());
+	}
+
+	public function getPathname() :string
+	{
+		return self::fixSlashes(parent::getPathname());
+	}
+
+	public function getPath() :string
+	{
+		return self::fixSlashes(parent::getPath());
+	}
+
+	public function getRealPath() :string
+	{
+		return self::fixSlashes(parent::getRealPath());
+	}
+
+}
+
 /*
 	$path_from_root = (new \Path(__DIR__))->fromRoot();
 	OR (use static method)
@@ -12,36 +58,20 @@
 	returns 'path/to/'
 */
 
-class Path {
+class Path extends kffFileInfo {
 	public $path;
 
 	public function __construct($path)
 
 	{
-		$wrap = is_object($path) ? $path : new SplFileInfo($path);
-		$this->path = $wrap->getPathname();
+		return parent::__construct($path);
 
 		/* 	var_dump(
-		$wrap->getPath(),
-		$wrap->getPathname(),
-		$wrap->getRealPath(),
-		$wrap->getFilename()
+		$wrapPath->getPath(),
+		$wrapPath->getPathname(),
+		$wrapPath->getRealPath(),
+		$wrapPath->getFilename()
 		); */
-	}
-
-
-	public static function fixSlashes($path)
-	:string
-	{
-		$path = str_replace('\\', '/', $path);
-		return preg_replace("#(?!https?|^)//+#", '/', $path);
-	}
-
-
-	public function fromRoot()
-	:string
-	{
-		return str_replace($this->fixSlashes($_SERVER['DOCUMENT_ROOT']) . '/', '', $this->fixSlashes($this->path));
 	}
 
 
@@ -50,7 +80,6 @@ class Path {
 	{
 		return str_replace(self::fixSlashes($_SERVER['DOCUMENT_ROOT']) . '/', '', self::fixSlashes($path));
 	}
-
 
 	public static function parentFolder(string $haystack, $needle = null)
 	:string

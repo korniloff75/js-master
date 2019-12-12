@@ -21,7 +21,7 @@ class H {
 	{
 		global $Nav, $__Start;
 
-		require_once 'CONST.php';
+		require_once $_SERVER['DOCUMENT_ROOT'] . '/CONST.php';
 
 		if(array_key_exists('login', $_REQUEST))
 			self::includeModule('Login');
@@ -38,7 +38,7 @@ class H {
 
 		// var_dump(\ADMIN, $_SESSION, self::realIP(), (strpos(self::realIP(), \ADM) === 0));
 
-		if(ADMIN)
+		if(ADMIN || \TEST)
 		{
 			# Develop
 			ini_set('display_errors', 1);
@@ -52,21 +52,25 @@ class H {
 			error_reporting(0);
 		}
 
-		require_once 'php/funcs.php';
+		# Для подключение не через ROOT
+		if (realpath('') !== realpath(\HOME))
+			return;
+
+		require_once \HOME . 'php/funcs.php';
 		self::profile('base');
-		require_once 'php/Path.php';
+		require_once \HOME . 'php/Path.php';
 		# before classes
-		require_once 'php/modules/Iterator.php';
+		require_once \HOME . 'php/modules/Iterator.php';
 
 		eval (self::addFromDir('php/classes/', 'php'));
 
 		# create map ...
-		$Nav = new php\classes\Navigate;
+		$Nav = new \php\classes\Navigate;
 
 		# Define current page
-		self::$fileInfo = new SplFileInfo($_REQUEST['page'] ?? $Nav->firstPage);
+		self::$fileInfo = new kffFileInfo($_REQUEST['page'] ?? $Nav->firstPage);
 
-		self::$Dir = Path::fromRootStat(self::$fileInfo->getPathname()) . '/';
+		self::$Dir = self::$fileInfo->fromRoot() . '/';
 
 		// define('DIR', Path::fromRootStat(self::$fileInfo->getPathname()) . '/');
 		define('DIR', self::$Dir);
@@ -75,7 +79,7 @@ class H {
 
 		// var_dump($bg, IMAGES, BG);
 		// exit;
-	}
+	} // __construct
 
 	public static function is(string $prop)
 	{
@@ -148,7 +152,7 @@ class H {
 
 			// var_dump($i, $fn);
 
-			if(strpos($fn, $opts['except']) === 0) return '';
+			if(strpos($fn, (string) $opts['except']) === 0) return '';
 
 			switch ($ext) {
 				case 'js':
@@ -174,7 +178,7 @@ class H {
 						(!is_file($css) || filemtime($i) > filemtime($css))
 					)
 					{
-						// require_once 'php/modules/lessc.inc.php';
+						// require_once \HOME . 'php/modules/lessc.inc.php';
 						try {
 
 							/* compile file $in to file $out if $in is newer than $out
@@ -246,7 +250,7 @@ class H {
 		{
 			$info = '<p>Page generation - ' . bcsub(gettime(), self::$tmp{$cn}, 5)*1000 . 'ms | Memory usage - now ( '. round (memory_get_usage()/1024) . ') max (' . round (memory_get_peak_usage()/1024) . ') Kbytes</p>';
 			// self::$tmp{$cn} = null;
-			return  "<div class='core bar'><b>block $n Technical Info $rem </b>: $info</div>";
+			return  "<div class='core bar'><b>Used PHP-" . phpversion() . " block $n Technical Info $rem </b>: $info</div>";
 		}
 
 	}
@@ -324,7 +328,7 @@ class H {
 
 	public static function includeModule ($name)
 	{
-		require_once "php/modules/$name.php";
+		require_once \HOME . "php/modules/$name.php";
 		return new $name();
 	}
 

@@ -1,15 +1,4 @@
 <h3>Пример работы скрипта:</h3>
-<!-- <script src="/js/__defer/Img.js"></script>
-
-<script>
-// Обнуляем Img.data
-window.Img = Object.assign((window.Img || {}), {
-	inited: 0,
-	data: []
-});
-console.log('Обнуляем Img.data - ', Img);
-</script> -->
-
 <div id="prim" style="text-align:center; max-width:100%;">
 	<!-- Подключаем плагин анимации -->
 	<style type="text/css" media="screen">
@@ -73,10 +62,6 @@ console.log('Обнуляем Img.data - ', Img);
 		</div>
 	</div>
 
-	<!-- Подключаем плагин слайдера -->
-
-	<script src="path/to/Img.js"></script>
-
 	<script type="text/javascript">
 		"use strict";
 
@@ -108,7 +93,8 @@ console.log('Обнуляем Img.data - ', Img);
 				var img;
 				if (!(img = this.sts.$parent.find('img'))) {
 					img = new Image();
-					img.src = Img.data[0].src;
+					img.src = path + pict[0][0];
+					// img.src = Img.data[0].src;
 					img = $parent.append(img);
 
 				}

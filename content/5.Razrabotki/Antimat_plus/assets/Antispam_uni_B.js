@@ -41,7 +41,7 @@ Antispam.db.done(function() {
 					// console.log('spnum = ', spnum);
 					if (spnum == 1) alert('Вас заметили в распространении спама!\n Мы следим за вашим поведением на сайте.');
 
-					mes.value = 'Сообщение удалено [url=//js-master.ru/content/5.Razrabotki/Antimat_plus/]Антиспамом[/url]. [b]'+ spnum +'-е[/b] предупреждение Автору за спам! После 3-го предупреждения Вы не сможете добавлять посты на этом ресурсе [b]'+time+'[/b] дней. \\n Если вы считаете, что скрипт обшибся, напишите в [url=http://js-master.ru/?mailform]Форму обратной связи[/url] свою претензию.';
+					mes.value = 'Сообщение удалено [url=//js-master.ru/content/5.Razrabotki/Antimat_plus/]Антиспамом[/url]. [b]'+ spnum +'-е[/b] предупреждение Автору за спам! После 3-го предупреждения Вы не сможете добавлять посты на этом ресурсе [b]'+time+'[/b] дней. \\n Если вы считаете, что скрипт обшибся, напишите в [url=//js-master.ru/content/1000.Contacts/feedback/]Форму обратной связи[/url] свою претензию.';
 
 					$.cookie.set({
 						spnum: spnum,
@@ -75,10 +75,10 @@ Antispam.db.done(function() {
 });
 
 
-/** examole 4 form
+/** example 4 form
 $(document.forms['addForm']).on('submit', function(e) {
 	e.preventDefault();
-	var message = $(this.elements.message).spam(10);
-	if(message) this.submit();
+	var message;
+	if((message = $(this.elements.message).spam(10))) this.submit();
 });
 */

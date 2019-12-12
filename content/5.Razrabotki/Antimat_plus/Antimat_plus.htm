@@ -34,7 +34,7 @@
 	<div class="article" style="margin: auto; background:linear-gradient(#369, #def, #147) #cde;">
 		<form id="addform" name="addform" action="" method="post">
 			<div style="text-align: center; padding: 15px 10px;">
-			<textarea name="message" style="min-height:400px; width: 100%; color:#123; background: #eee; resize:vertical; margin-top:10px;" id="message">			  Включите ваше воображение и представьте, что это поле отправки сообщений в вашем форуме!
+			<textarea name="entry" style="min-height:400px; width: 100%; color:#123; background: #eee; resize:vertical; margin-top:10px;" id="message">			  Включите ваше воображение и представьте, что это поле отправки сообщений в вашем форуме!
 			  Нажмите кнопку "Вставить спам" для автоматического добавления его фрагмента в это поле. Также вручную можно добавить любое другое распространенное спамовое сообщение.
 			  При нажатии кнопки "Вставить реферал" в поле вставzтся реферальные (для примера) ссылки.
 			  Нецензурный контент вы можете вбить в это поле вручную, поскольку я не заготовил его заранее. Можете не стесняться в выражениях! =)
@@ -53,10 +53,11 @@
 </div>
 <br>
 
+<div class="core message">
+	<p>Попробуйте выругаться так, чтобы скрипт вас не заблокировал!</p>
 
-<p class="core message">Попробуйте выругаться так, чтобы скрипт вас не заблокировал!</p>
-
-<p>Вы можете также опробовать работу скрипта, оставив комментарий к этой странице.</p>
+	<p>Вы можете также опробовать работу скрипта, <b>оставив комментарий к <u>этой</u> странице</b>.</p>
+</div>
 
 
 <script type="text/javascript" charset="utf-8">
@@ -70,8 +71,16 @@ function ins_ref(id) {
 
 
 $(function() {
+	$form = $('#addform');
+	$form
+		.append('<input name="email" type="hidden" value="test@tt.ru">')
+		.append('<input name="NoSendEmail" type="hidden" value="0">');
+	// $form[0].elements.email = "test@tt.ru";
+
 	$('#frF16').on( 'click', function() {
-	$('#message').spam(1);
+		// $('#message').spam(1);
+		console.log("$form[0] = ", $form[0]);
+		commFns.Send($form);
 	} );
 
 } );

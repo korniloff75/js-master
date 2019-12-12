@@ -172,12 +172,12 @@ class Comments
 
 		if(self::TO_EMAIL == true && $_POST['sendToMail'])
 		{
-			$subject = "Ответ администрации Saitа " . \HOST;
+			$subject = "Ответ администрации сайта " . \HOST;
 
 			$name = $_POST['name'] ?? 'Гость';
 
 			self::sendMail([
-				"Уважаемый(ая) " . $name . "!\nАдминистрация Saitа " . \HOST
+				"Уважаемый(ая) " . $name . "!\nАдминистрация сайта " . \HOST
 				. " ответила на Ваш комментарий на странице - " . $this->p_name,
 				'Комментарий' => $e,
 				'Ответ' => $o,
@@ -272,7 +272,6 @@ class Comments
 		}
 		// var_dump($arr);
 
-		# Блокируем файл и добавляем новый Post в его конец
 		$this->file[] = array_values($arr);
 
 		if (!\H::json($this->path, $this->file, 'rewrite'))
@@ -328,7 +327,9 @@ class Comments
 			echo self::T_SUCCESS_SEND;
 			// updateCaptcha();
 		}
-		else echo self::T_FAIL_SEND;
+		elseif(!isset($_REQUEST['NoSendEmail']))
+			echo self::T_FAIL_SEND;
+		else return;
 
 		if(\ADMIN) var_dump($send_succ);
 	}
@@ -513,7 +514,7 @@ class Comments
 			'<i class="fa sm-good"></i>', '<i class="fa sm-wink"></i>', '<i class="fa sm-trol"></i>', '<i class="fa sm-frow"></i>', '<i class="fa sm-roll"></i>', '<i class="fa sm-kiss"></i>'
 		];
 		$texto = preg_replace($a, $b, $texto);
-		$texto = nl2br($texto);
+		// $texto = nl2br($texto);
 		return $texto;
 	}
 
@@ -526,9 +527,9 @@ $Comments = $Comments ?? new Comments;
 
 /*============ Сохранение, редактирование и удаление комментариев по AJAX-запросу ===========*/
 
-$comm_req = $_REQUEST['s_method'] ?? null;
+$s_method = $_REQUEST['s_method'] ?? null;
 
-switch($comm_req) {
+switch($s_method) {
 	# Добавляем новый коммент
 	case 'write': $Comments->write(); break;
 	# Выводим форму редактирования коммента

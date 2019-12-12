@@ -31,6 +31,7 @@ var _S = {
 	loadPage: function loadPage($nextItem, direct) {
 		// ajax load page from $nextItem attr 'data-page'
 		$nextItem = $.check($nextItem);
+		direct = direct || 1;
 		_S.v.$bg_mask.css({ opacity: .5, zIndex: 10 });
 
 		// console.log('$nextItem = ', $nextItem);
@@ -263,6 +264,7 @@ var Doc_evs = {
 		var d_touch= {
 			x: (e.wheel.x || e.pageX || e.chT.x) - this.mousePos.x,
 			y: (e.wheel.y || e.pageY || e.chT.y ) - this.mousePos.y,
+
 			get horiz() {
 				return Math.abs(this.x) > Math.abs(this.y * 2.5)
 			},
@@ -275,7 +277,7 @@ var Doc_evs = {
 		// console.log('d_touch = ', d_touch, d_touch.horiz, d_touch.vertical);
 
 		// remove random  taouchs
-		if(Math.abs(d_touch.x) < 10 && Math.abs(d_touch.y) < 10) return;
+		if(Math.abs(d_touch.x) < 20 && Math.abs(d_touch.y) < 20) return;
 
 		e.preventDefault();
 		// e.stopPropagation();
@@ -291,14 +293,14 @@ var Doc_evs = {
 				_H.close.call(_S.v.$sidebar);
 			}
 
-			if(Math.sign(d_touch.x) < 0 && !_S.v.$sidebar.hasClass('opened')) {
+			else if(Math.sign(d_touch.x) < 0 && !_S.v.$sidebar.hasClass('opened')) {
 				_H.open.call(_S.v.$sidebar);
 			}
 
 		} else if(d_touch.vertical) {
 			// vertical
 
-			if(t.closest('#sidebar')) {
+			if(t.closest('#sidebar, #menu_block, .popup_canvas')) {
 				return;
 			};
 
@@ -310,7 +312,6 @@ var Doc_evs = {
 					var $nextItem = _H.nav.prev(_S.v.$nav_main);
 				}
 			}
-
 
 			// console.log('$nextItem = ', $nextItem);
 			_S.loadPage($nextItem, -Math.sign(d_touch.y));

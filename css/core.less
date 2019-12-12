@@ -93,7 +93,7 @@ MAPS компиллятор не тянет
 
 /* Start FLEX */
 
-.flex(@wrap:wrap, @dir:column, @basis:auto) {
+.flex( @dir:row, @basis:auto, @wrap:wrap) {
 	display: -webkit-box;
 	display: -moz-box;
 	.display(flex);
@@ -115,10 +115,17 @@ MAPS компиллятор не тянет
 	justify-content: @justifyStyle;
 }
 
+.flex-align-content(@alignStyle) {
+	-webkit-align-content: @alignStyle;
+	-moz-align-content: @alignStyle;
+	-ms-align-content: @alignStyle;
+	align-content: @alignStyle;
+}
+
 .flex-align-items(@alignStyle) {
 	-ms-flex-align:@alignStyle;
 	-webkit-align-items:@alignStyle;
-	 align-items: @alignStyle;
+	align-items: @alignStyle;
 }
 
 .flex-align-self(@selfAlignStyle) {
@@ -189,7 +196,7 @@ MAPS компиллятор не тянет
 }
 
 //Специальный вариант для трансформа
-.transition (@property: all,@duration: @transition_dur, @delay: @transition_delay, @ease: ease-in-out) when (@property=transform) {
+.transition (@property: all, @duration: @transition_dur, @delay: @transition_delay, @ease: ease-in-out) when (@property=transform) {
 	-webkit-transition: -webkit-transform @duration @delay @ease;
 	-moz-transition: -moz-transform @duration @delay @ease;
 	-o-transition: -o-transform @duration @delay @ease;

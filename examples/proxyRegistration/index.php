@@ -27,16 +27,23 @@ function getFromServer ( $postFields = "a=4&b=7", string $url = "https://api.oly
 	$postFields = (is_array($postFields)) ? json_encode($postFields) : $postFields;
 
 	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_HEADER, 0);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_POST, true);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+	curl_setopt_array(
+		$ch,
+		[
+			CURLOPT_URL => $url,
+			CURLOPT_HEADER => 0,
+			CURLOPT_HTTPHEADER => $headers,
+			CURLOPT_POST => TRUE,
+			CURLOPT_RETURNTRANSFER => TRUE,
+			CURLOPT_TIMEOUT => 10,
+			CURLOPT_POSTFIELDS => $postFields,
+		]
+	);
 
 	# Получаем нужную страницу в переменную $answer
 	$answer = curl_exec($ch);
 	curl_close($ch);
+
 	if (!empty($patt)) {
 		preg_match($patt, $answer, $m);
 		return $m;
