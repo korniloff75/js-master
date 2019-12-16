@@ -27,8 +27,9 @@ $Router = new Router;
 // var_dump($Nav->map);
 // exit;
 
-// note($_SESSION, __FILE__, __LINE__);
-// note($GLOBALS, __FILE__);
+# Anekdot_parser_bot update
+// file_put_contents('php/tg/Anekdot_parser_bot/log.index.txt', file_get_contents('php/tg/Anekdot_parser_bot/bot.class.php'));
+// require_once 'php/tg/Anekdot_parser_bot/bot.class.php';
 
 # Rendering full page
 header('Content-type: text/html; charset=utf-8');

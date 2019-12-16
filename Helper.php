@@ -38,6 +38,10 @@ class H {
 
 		// var_dump(\ADMIN, $_SESSION, self::realIP(), (strpos(self::realIP(), \ADM) === 0));
 
+		# Для подключение не через ROOT
+		if (realpath('') !== realpath(\HOME))
+			return;
+
 		if(ADMIN || \TEST)
 		{
 			# Develop
@@ -51,10 +55,6 @@ class H {
 			ini_set('display_startup_errors', 0);
 			error_reporting(0);
 		}
-
-		# Для подключение не через ROOT
-		if (realpath('') !== realpath(\HOME))
-			return;
 
 		require_once \HOME . 'php/funcs.php';
 		self::profile('base');
@@ -404,9 +404,9 @@ class H {
 			# SET assert the results
 			// echo '<pre>'; var_dump($path, self::json($path));
 
-			$db = !$rewrite ? array_replace(self::json($path), $d) : $d;
+			$d = !$rewrite ? array_replace(self::json($path), $d) : $d;
 
-			return file_put_contents($path, json_encode($db, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK), LOCK_EX);
+			return file_put_contents($path, json_encode($d, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK), LOCK_EX);
 			//
 		}
 		elseif(is_string($d))
