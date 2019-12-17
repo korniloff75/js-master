@@ -66,7 +66,7 @@ class TG {
 	}
 
 
-	public function getKeyBoard($data)
+	public function getKeyboard($data)
 	{
 	 $keyboard = [
 		 "keyboard" => $data,
@@ -74,6 +74,15 @@ class TG {
 		 "resize_keyboard" => true
 	 ];
 	 return json_encode($keyboard);
+	}
+
+	// not use
+	public function getInlineKeyboard(array $data)
+	: string
+	{
+		return json_encode( [
+		 "inline_keyboard" => $data,
+		], JSON_UNESCAPED_UNICODE);
 	}
 
 	/* public function buildKeyboard()

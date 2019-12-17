@@ -23,7 +23,6 @@ define("BOT_DIR", Path::fromRootStat(__DIR__));
 require_once __DIR__ . "/../tg.class.php";
 
 
-
 class AnekdotBot extends TG
 {
 	const
@@ -62,7 +61,7 @@ class AnekdotBot extends TG
 		$addTime = 12 * 3600,
 		$id = [
 			'anekdoty' => -1001393900792,
-			 'to me' => 673976740,
+			 'tome' => 673976740,
 		];
 
 	public function __construct()
@@ -266,9 +265,20 @@ class AnekdotBot extends TG
 
 				# Отправляем в канал.
 				self::$t[]= $this->request([
-					'chat_id' => $this->id['anekdoty'], // anekdoty | to me
+					'chat_id' => $this->id['tome'], // anekdoty | tome
 					'parse_mode' => 'markdown',
 					'text' => $bus,
+					'reply_markup' => $this->getInlineKeyboard([[
+						[
+							"text" => "Хочу ещё",
+							"callback_data" => 'myText',
+							// "callback_data" => json_encode(["data" => "more"], JSON_UNESCAPED_UNICODE),
+						],
+						[
+							"text" => "Хочу",
+							"callback_data" => 'myText',
+						],
+					]]),
 				]);
 				$bus = '';
 				sleep(.5);
@@ -277,7 +287,7 @@ class AnekdotBot extends TG
 
 
 			# Test server response
-			// self::log(['echo "static::\$t = "', 'var_dump(static::$t )'], __FILE__, __LINE__);
+			self::log(['echo "static::\$t = "', 'var_dump(static::$t )'], __FILE__, __LINE__);
 
 		}
 
