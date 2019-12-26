@@ -8,11 +8,12 @@ error_reporting(-1);
 require_once $_SERVER['DOCUMENT_ROOT'] . "/Helper.php";
 require_once \HOME . "php/Path.php";
 define("BOT_DIR", Path::fromRootStat(__DIR__));
+ob_start();
 # TG
 require_once __DIR__ . "/../tg.class.php";
 
 
-class AnekdotBot extends TG implements iTG 
+class AnekdotBot extends TG implements iTG
 {
 	protected
 		# Test mode, bool
@@ -20,6 +21,7 @@ class AnekdotBot extends TG implements iTG
 		$token = '1052237188:AAFIh-yeUO05Qv--LfAGaJnFmo8vvT9jDjY',
 		# Время обновления базы, s
 		$addTime = 12 * 3600,
+		$baseDir = 'base/',
 		$id = [
 			'anekdoty' => -1001393900792,
 			 'tome' => 673976740,
@@ -28,7 +30,7 @@ class AnekdotBot extends TG implements iTG
 	public static
 		# Input stream
 		$json,
-		$base,
+		$base = [],
 		$content = [],
 		// $contentMD,
 		$postFields,
@@ -45,108 +47,78 @@ class AnekdotBot extends TG implements iTG
 
 	protected static
 		$remoteSourse = [
-			'https://www.anekdot.ru/',
-			'https://www.anekdot.ru/best/anekdot/1214/',
+			'https://anekdot.ru/',
+			'http://anekdotov.net/',
 		],
-		# param 4 request
-		$url,
-		# Имя текущего файла для парсера
-		$currentName = '',
+
 		$lastBaseItem,
 		$lastBase = [],
 
 		# TMP
-		$responseSetWebhook,
 		$t = [];
 
 
 	// private static
 
-	
+
 
 	public function __construct()
 	{
-		self::$url = \BASE_URL . BOT_DIR . '/' . basename(__FILE__);
+		$this->botPath = \BASE_URL . BOT_DIR . '/' . basename(__FILE__);
 
 		parent::__construct()->webHook()->init();
 
-		self::log([
-			'echo "END of __construct"'
-		], __FILE__, __LINE__);
+		echo "END of __construct";
 
 	} //__construct
-
-
-	/**
-	 * Singl
-	 */
-	protected function webHook()
-	{
-		# Однократно запускаем webHook
-		if(file_exists("webHookRegistered.trigger"))
-		{
-			echo "<pre>Webhook уже зарегистрирован\n";
-		}
-		else
-		{
-			self::$responseSetWebhook = $this->request([
-				'url' => self::$url,
-				'parse_mode' => null,
-			], 'setWebhook') ?? [];
-	
-			self::log([
-				'echo "url = " . static::$url',
-				'echo "response after setWebhook = "',
-				'var_dump(static::$responseSetWebhook)',
-			], __FILE__, __LINE__);
-	
-	
-			if(count(self::$responseSetWebhook))
-				file_put_contents("webHookRegistered.trigger", json_encode(self::$responseSetWebhook, JSON_UNESCAPED_UNICODE));
-		}
-		
-		self::log(['echo "END of webHook"'], __FILE__, __LINE__);
-		return $this;
-	}
 
 	/**
 	 *
 	 */
 	public function init()
 	{
-		$baseDir = 'base/';
+		if(!is_dir($this->baseDir))
+			mkdir($this->baseDir);
+		else
+		{
+			# Сканируем базу в массив из json-файлов
+			foreach ((new DirectoryIterator($this->baseDir)) as $fileinfo) {
+				echo $fileinfo->getFilename();
+				if($fileinfo->getExtension() === 'json')
+					self::$base[$fileinfo->getMTime()] = $fileinfo->getFilename();
+			}
+			# Дата создания - по убыванию
+			krsort(self::$base);
+			self::$base = array_values(self::$base);
+		}
 
-		if(!is_dir($baseDir)) mkdir($baseDir);
 
-		self::$currentName = $baseDir . time();
-
-		# Сканируем базу в массив из json-файлов
 		# Имена файлов по убыванию - SCANDIR_SORT_DESCENDING
-		self::$base = scandir($baseDir);
-		natsort(self::$base);
-		self::$base = array_reverse(self::$base);
+		// self::$base = scandir($this->baseDir);
+		// natsort(self::$base);
 
-		self::$base = array_filter(self::$base, function($i) use ($baseDir) {
-			return pathinfo($baseDir . $i, PATHINFO_EXTENSION) === 'json';
+		// self::$base = array_reverse(self::$base);
+
+		/* self::$base = array_filter(self::$base, function($i) use ($this->baseDir) {
+			return pathinfo($this->baseDir . $i, PATHINFO_EXTENSION) === 'json';
 		});
-		self::$base = array_values(self::$base);
+		self::$base = array_values(self::$base); */
 
 		self::log(['echo "self::\$base = "','var_dump(static::$base)'], __FILE__, __LINE__);
 
 		# Получаем содержимое последнего файла в массив
 		if(!empty(self::$base[0]))
 		{
-			self::$lastBaseItem = $baseDir . self::$base[0];
+			self::$lastBaseItem = $this->baseDir . self::$base[0];
 			self::$content = self::$lastBase = \H::json(self::$lastBaseItem);
 
 		}
 
 
 		self::log([
-			'echo "static::\$content =" ',
-			'var_dump(static::$content)',
-			'echo "static::\$lastBaseItem =" ',
-			'var_dump(static::$lastBaseItem)',
+			// 'echo "static::\$lastBaseItem =" ',
+			// 'var_dump(static::$lastBaseItem)',
+			'echo "static::\$lastBaseItem = \n" . static::$lastBaseItem . "\n=====\n"',
 		], __FILE__, __LINE__);
 
 		# Парсим сайт из self::$remoteSourse
@@ -155,7 +127,8 @@ class AnekdotBot extends TG implements iTG
 
 		self::log(['echo "count(static::\$content) = " . count(static::$content)',], __FILE__, __LINE__);
 
-		file_put_contents('log.txt', TG::$log);
+		file_put_contents('buffer.log', ob_get_clean());
+		file_put_contents('TG.log', TG::$log);
 
 		die('OK');
 
@@ -168,15 +141,18 @@ class AnekdotBot extends TG implements iTG
 	public function parser(int $ind)
 
 	{
-		self::log(['echo "static::\$content"', 'var_dump(static::$content)'], __FILE__, __LINE__);
+		// self::log(['echo "static::\$content"', 'var_dump(static::$content)'], __FILE__, __LINE__);
 
 		$doc = new DOMDocument();
 		@$doc->loadHTMLFile(self::$remoteSourse[$ind]);
+
 		// $docEl = $doc->documentElement;
 
 		# Подключаем частный парсер
 		// план - перенести частные в дочерний класс
 		$parserName = "parser$ind";
+
+		# use custom parser
 		if(method_exists(get_class($this), $parserName))
 		{
 			# rewrite self::$content
@@ -194,29 +170,27 @@ class AnekdotBot extends TG implements iTG
 
 		self::log([
 			'echo "count(static::\$content) = " . count(static::$content)',
-			'echo "self::\$lastBase = "',
-			'var_dump(static::$lastBase)',
 		], __FILE__, __LINE__);
 
 		# Ислючаем дубли
 		if(count($diff = array_diff(self::$content, self::$lastBase)))
 		{
 			// Пишем файл без редакции
-			\H::json(self::$currentName . '.json', self::$content);
+			\H::json($this->baseDir . basename(self::$remoteSourse[$ind]) . '.json', self::$content);
 
 			# Чистим для MD
 			$diff = array_filter($diff, function($i) {
 				return strpos($i, 'читать дальше', -30) === false;
 			});
 			self::$log[]= '$diff = ';
-			self::$log[]= $diff;
+			self::$log[]= json_encode($diff, JSON_UNESCAPED_UNICODE) . "\n";
 
 			shuffle($diff);
 
 			$diff = str_replace(["\r", '\r', '_', '*', '=', ], ["\n", "\n", ' ', ''], $diff);
 
 			# создаём .md
-			file_put_contents(self::$currentName . '.md', array_map(function($i) {
+			file_put_contents($this->baseDir . time() . basename(self::$remoteSourse[$ind]) . '.md', array_map(function($i) {
 				return $i . "\n\n---\n";
 			}, $diff));
 
@@ -247,7 +221,7 @@ class AnekdotBot extends TG implements iTG
 		}
 
 		# If not exist new content
-		elseif ($data = $this->getCallback('callback_query'))		
+		elseif ($data = $this->getCallback('callback_query'))
 		{
 			return $this->request([
 			'callback_query_id' => $data['id'],
@@ -256,11 +230,11 @@ class AnekdotBot extends TG implements iTG
 
 			// else $this->requestTG(self::$noUdates);
 		}
-	
+
 
 	} // parser
 
-	
+
 	public function requestTG($bus)
 	{
 		# Отправляем в канал.
@@ -315,7 +289,7 @@ class AnekdotBot extends TG implements iTG
 	}
 
 
-	public function sendTG()
+	/* public function sendTG()
 	{
 		$first_name="";
 		$last_name="";
@@ -336,24 +310,15 @@ class AnekdotBot extends TG implements iTG
 				$text="<b>Здравствуйте, $first_name $last_name!</b>";
 		} //private chat
 
-
-		/* $text = iconv ( 'windows-1251' , 'utf-8' , $text );
-		print_r($text);
-		$text=strip_tags($text, '<b><strong><pre>'); */
-
 		self::$postFields = [
 			'chat_id' => $chat_id,
 			'text' => self::$content[0],
-			/* 'reply_markup' => $this->getKeyBoard(
-				[["text" => "Голосовать"], ["text" => "Помощь"
-				]
-			) */
 		];
 
 		self::log(['echo "static::\$postFields = "', 'var_dump(static::$postFields)'], __FILE__, __LINE__);
 
 		$this->request(self::$postFields);
-	}
+	} */
 
 }
 

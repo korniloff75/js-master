@@ -37,6 +37,8 @@ class TG {
 			"http://183.91.33.41:91",
 			"http://183.91.33.41:8081",
 		],
+		# define in child classes
+		$botPath,
 		# define callback
 		$callback,
 		$inputData = null,
@@ -63,7 +65,7 @@ class TG {
 		return $this;
 	}
 
-	
+
 	/**
 	 * TG::log([], __FILE__, __LINE__);
 	 */
@@ -90,15 +92,13 @@ class TG {
 			# Ловим входящий поток
 			$this->inputJson = file_get_contents('php://input');
 
-			self::$log[]= "\$this->inputJson = \n{$this->inputJson}\n\n";
-			
 			# Кодируем в массив
 			$this->inputData = @json_decode($this->inputJson, true);
 
 			if(strlen($this->inputJson)) file_put_contents('inputData.json', $this->inputJson);
 			else self::log(['echo "Нет callback!\n"',], __FILE__, __LINE__);
 		}
-		
+
 		return $this;
 	} // getData
 
@@ -122,32 +122,63 @@ class TG {
 			array_intersect(['message', 'callback_query'], array_keys($this->inputData))
 		)[0] ?? false;
 
-		self::$log[]= "\$cbn= " . $cbn. "\n\n";
+		self::$log[]= basename(__FILE__) . ': ' . __LINE__ . " - \$cbn= " . $cbn. "\n\n";
+
+		$cb = $this->getCallback($cbn);
+
+		switch ($cbn) {
+			case 'message':
+				$this->chat_id = $cb['chat']['id'];
+				$this->text = $cb['text'];
+				break;
+			case 'callback_query':
+				$this->chat_id = $cb['message']['chat']['id'];
+				$this->text = $cb['message']['text'];
+				break;
+
+			default:
+				$this->chat_id = null;
+				break;
+		}
+
+		self::$log[]= "\$this->chat_id = {$this->chat_id}\n";
+
+		return $cb;
+
+	}
 
 
-		// if($cbn) {
-			$cb = $this->getCallback($cbn);
+	/**
+	 * Singl
+	 */
+	protected function webHook()
+	{
+		# Однократно запускаем webHook
+		$trigger = $_SERVER['DOCUMENT_ROOT'] . parse_url(pathinfo($this->botPath, PATHINFO_DIRNAME))['path'] . "/webHookRegistered.trigger";
+		if(file_exists($trigger))
+		{
+			echo "<pre>Webhook уже зарегистрирован\n";
+		}
+		else
+		{
+			$responseSetWebhook = $this->request([
+				'url' => $this->botPath,
+				'parse_mode' => null,
+			], 'setWebhook') ?? [];
 
-			switch ($cbn) {
-				case 'message':
-					$this->chat_id = $cb['chat']['id'];
-					$this->text = $cb['text'];
-					break;
-				case 'callback_query':
-					$this->chat_id = $cb['message']['chat']['id'];
-					$this->text = $cb['message']['text'];
-					break;
-				
-				default:
-					$this->chat_id = null;
-					break;
-			}
+			echo __FILE__ . __LINE__ . " - \$this->url = {$this->botPath}\n";
+			echo "response after setWebhook = ";
+			var_dump($responseSetWebhook);
 
-			self::$log[]= "\$this->chat_id = {$this->chat_id}\n";
 
-			return $cb;
-		// }
+			if(count($responseSetWebhook))
+				file_put_contents($trigger, json_encode($responseSetWebhook, JSON_UNESCAPED_UNICODE));
+		}
 
+		echo __FILE__ . __LINE__ . "\n";
+		echo "\$trigger = $trigger\n";
+		echo "END of webHook\n\n";
+		return $this;
 	}
 
 
@@ -166,7 +197,7 @@ class TG {
 			"Cookie: __test=4dff14837c8240634dc1565329ba5274",
 			'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0',
 		];
-  
+
 	}
 
 	public function findProxy()
@@ -176,16 +207,16 @@ class TG {
 		foreach($this->proxyList as $proxy) {
 			$p = parse_url($proxy);
 			// $p['scheme'].'://'.
-			if($fp = fsockopen($p['host'], $p['port'], $errCode, $errStr, $timeoutInSeconds)) { 
-				self::$log[]= __FILE__.': '.__LINE__ . " $proxy - is AVAILABLE\n";
-				return $proxy;  
-				break;
+			if($fp = fsockopen($p['host'], $p['port'], $errCode, $errStr, $timeoutInSeconds))
+			{
+				self::$log[]= __FILE__.': '.__LINE__ . " Proxy $proxy - is AVAILABLE\n";
+				return $proxy; break;
 			} else {
 				self::$log[]= __FILE__.': '.__LINE__ . " $proxy - ERROR: $errCode - $errStr\n";
-			} 
-			fclose($fp);
+			}
+			// fclose($fp);
 		}
-		
+
 		return false;
 	}
 
@@ -196,7 +227,7 @@ class TG {
 	public  function request(array $postFields = [], string $method = 'sendMessage')
 	{
 		# Find available proxy from proxyList
-		if (!$proxy = $this->findProxy()) 
+		if (!$proxy = $this->findProxy())
 		{
 			self::$log[]= __FILE__.': '.__LINE__ . " Available proxy NOT found!\n";
 			return;
@@ -215,8 +246,7 @@ class TG {
 		if($this->__test) {
 			echo '$postFields = ';
 			var_dump($postFields);
-			echo 'URL - ' . $this->api . $method;
-			echo '<hr>';
+			echo 'URL - ' . $this->api . $method . "\n";
 		}
 
 		// echo "Content: \n" . file_get_contents('http://kfftg.22web.org/') . '<hr>';
@@ -304,7 +334,7 @@ class TG {
 			'chat_id' => $chat_id,
 			'photo' => new CURLFile(realpath("image.jpg"))
 		], 'sendPhoto');
-	
+
 	}
 
 
