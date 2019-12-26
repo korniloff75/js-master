@@ -1,16 +1,5 @@
-<style>
-.log {
-  overflow-wrap: normal;
-  word-wrap: break-word;
-  word-break: keep-all;
-  line-break: auto;
-	hyphens: manual;
-	border: inset 1px #eee;
-}
-</style>
-
 <?php
-define("TG_TEST", 1);
+// define("TG_TEST", 1);
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -23,10 +12,18 @@ define("BOT_DIR", Path::fromRootStat(__DIR__));
 require_once __DIR__ . "/../tg.class.php";
 
 
-class AnekdotBot extends TG
+class AnekdotBot extends TG implements iTG 
 {
-	const
-		TOKEN = '1052237188:AAFIh-yeUO05Qv--LfAGaJnFmo8vvT9jDjY';
+	protected
+		# Test mode, bool
+		$__test = 1 ,
+		$token = '1052237188:AAFIh-yeUO05Qv--LfAGaJnFmo8vvT9jDjY',
+		# Время обновления базы, s
+		$addTime = 12 * 3600,
+		$id = [
+			'anekdoty' => -1001393900792,
+			 'tome' => 673976740,
+		];
 
 	public static
 		# Input stream
@@ -36,79 +33,80 @@ class AnekdotBot extends TG
 		// $contentMD,
 		$postFields,
 		$DOMNodeList,
-		$ad = [
+		$adv = [
 			'Зарабатывай без вложений' => 'https://t.me/CapitalistGameBot?start=673976740',
 			'Учись инвестировать играя' => 'https://t.me/CapitalistGameBot?start=673976740',
 			'Заказать быстрый сайт' => 'https://js-master.ru/content/1000.Contacts/Zakazchiku/',
 			'Сайт на AJAX с поддержкой SEO!' => 'https://js-master.ru/content/1000.Contacts/Zakazchiku/',
-		];
+			'Дешевый хостинг' => 'https://invs.ru?utm_source=partner&ref=ueQYF',
+			'Хостинг от 49р' => 'https://invs.ru?utm_source=partner&ref=ueQYF',
+		],
+		$noUdates = "Обновлений пока нет. Попробуйте позже.";
 
 	protected static
 		$remoteSourse = [
 			'https://www.anekdot.ru/',
 			'https://www.anekdot.ru/best/anekdot/1214/',
 		],
+		# param 4 request
+		$url,
 		# Имя текущего файла для парсера
 		$currentName = '',
 		$lastBaseItem,
-		$inputData = [],
 		$lastBase = [],
 
 		# TMP
-		$t = [],
-		$curHash,
-		$lastHash;
+		$responseSetWebhook,
+		$t = [];
 
 
 	// private static
 
-	protected
-		# Время обновления базы, s
-		$addTime = 12 * 3600,
-		$id = [
-			'anekdoty' => -1001393900792,
-			 'tome' => 673976740,
-		];
+	
 
 	public function __construct()
 	{
-		parent::__construct(self::TOKEN);
+		self::$url = \BASE_URL . BOT_DIR . '/' . basename(__FILE__);
 
-		# Однократно запускаем webHook
-		if(!file_exists("registered.trigger"))
-			$this->webHook();
-		else
-		{
-			echo "<pre>Webhook уже зарегистрирован\n";
-		}
+		parent::__construct()->webHook()->init();
 
-		$this->init();
-
-		self::log(['echo "END of __construct"'], null, __LINE__);
+		self::log([
+			'echo "END of __construct"'
+		], __FILE__, __LINE__);
 
 	} //__construct
+
 
 	/**
 	 * Singl
 	 */
 	protected function webHook()
 	{
-		/* $url = "https://api.telegram.org/bot".TOKEN."/setWebhook?url=https://js-master.ru/" . BOT_DIR . "/bot.php";
-		$l1=file_get_contents($url);
-		$response = json_decode($l1); */
-
-		$response = $this->request([
-			'url' => \BASE_URL . BOT_DIR . "/bot.php"
-		], 'setWebhook');
-		$response = json_decode($response);
-		print_r(
-			[$response, ]
-		);
-		if($response)
-			file_put_contents("registered.trigger",time());
-
+		# Однократно запускаем webHook
+		if(file_exists("webHookRegistered.trigger"))
+		{
+			echo "<pre>Webhook уже зарегистрирован\n";
+		}
+		else
+		{
+			self::$responseSetWebhook = $this->request([
+				'url' => self::$url,
+				'parse_mode' => null,
+			], 'setWebhook') ?? [];
+	
+			self::log([
+				'echo "url = " . static::$url',
+				'echo "response after setWebhook = "',
+				'var_dump(static::$responseSetWebhook)',
+			], __FILE__, __LINE__);
+	
+	
+			if(count(self::$responseSetWebhook))
+				file_put_contents("webHookRegistered.trigger", json_encode(self::$responseSetWebhook, JSON_UNESCAPED_UNICODE));
+		}
+		
 		self::log(['echo "END of webHook"'], __FILE__, __LINE__);
-
+		return $this;
 	}
 
 	/**
@@ -116,27 +114,17 @@ class AnekdotBot extends TG
 	 */
 	public function init()
 	{
-		$key = 'channel_post';
 		$baseDir = 'base/';
-
-		# Ловим входящий поток
-		$json = file_get_contents('php://input');
-		# Кодируем в массив
-		self::$inputData = json_decode($json, TRUE)[$key] ?? [];
-
-		if(strlen($json)) file_put_contents('inputData.json', $json);
 
 		if(!is_dir($baseDir)) mkdir($baseDir);
 
 		self::$currentName = $baseDir . time();
-		// self::$currentName = $baseDir . '/' . time();
 
-		# Сканируем базу в массив, убираем точки
+		# Сканируем базу в массив из json-файлов
 		# Имена файлов по убыванию - SCANDIR_SORT_DESCENDING
 		self::$base = scandir($baseDir);
 		natsort(self::$base);
 		self::$base = array_reverse(self::$base);
-
 
 		self::$base = array_filter(self::$base, function($i) use ($baseDir) {
 			return pathinfo($baseDir . $i, PATHINFO_EXTENSION) === 'json';
@@ -155,10 +143,6 @@ class AnekdotBot extends TG
 
 
 		self::log([
-			'echo "\$lastHash =" ',
-			'var_dump(static::$lastHash)',
-			'echo "\$json =" ',
-			'var_dump(static::$json)',
 			'echo "static::\$content =" ',
 			'var_dump(static::$content)',
 			'echo "static::\$lastBaseItem =" ',
@@ -167,23 +151,6 @@ class AnekdotBot extends TG
 
 		# Парсим сайт из self::$remoteSourse
 		$this->parser(0);
-
-		# Обрабатываем self::$inputData
-		if(count(self::$inputData))
-		{
-			/* if (array_key_exists('message', self::$inputData)) {
-			$chat_id = self::$inputData['message']['chat']['id'];
-			$message = self::$inputData['message']['text'];
-
-			} elseif (array_key_exists('callback_query', self::$inputData)) {
-					$chat_id = self::$inputData['callback_query']['message']['chat']['id'];
-					$message = self::$inputData['callback_query']['data'];
-			} */
-
-			if (isset(self::$inputData['message_id']))
-				$this->sendTG();
-			else self::log(['echo "Нет message!\n"',], __FILE__, __LINE__);
-		} // self::$inputData
 
 
 		self::log(['echo "count(static::\$content) = " . count(static::$content)',], __FILE__, __LINE__);
@@ -226,8 +193,6 @@ class AnekdotBot extends TG
 		} */
 
 		self::log([
-			'echo "\$lastHash = " . static::$lastHash',
-			'echo "\$curHash = " . static::$curHash',
 			'echo "count(static::\$content) = " . count(static::$content)',
 			'echo "self::\$lastBase = "',
 			'var_dump(static::$lastBase)',
@@ -236,12 +201,15 @@ class AnekdotBot extends TG
 		# Ислючаем дубли
 		if(count($diff = array_diff(self::$content, self::$lastBase)))
 		{
+			// Пишем файл без редакции
 			\H::json(self::$currentName . '.json', self::$content);
 
 			# Чистим для MD
 			$diff = array_filter($diff, function($i) {
 				return strpos($i, 'читать дальше', -30) === false;
 			});
+			self::$log[]= '$diff = ';
+			self::$log[]= $diff;
 
 			shuffle($diff);
 
@@ -252,43 +220,24 @@ class AnekdotBot extends TG
 				return $i . "\n\n---\n";
 			}, $diff));
 
-			# Отсылаем пост
 			$bus = '';
-			$arrayLength = count($diff);
+			$diffLength = count($diff);
 
-			foreach($diff as $k => $i) {
-				--$arrayLength;
+			foreach($diff as $i) {
+				--$diffLength;
 				# Разбиваем на строки фикс. размера
 				if(strlen($bus) + strlen($i) < self::$textLimit)
 				{
 					$bus .= "$i\n\n\n";
-					if($arrayLength) continue;
+					if($diffLength) continue;
 					// elseif(!strlen(trim($bus))) $bus= ;
 				}
 
 				# Отправляем в канал.
 				$this->requestTG($bus);
 
-				/*
-				self::$t[]= $this->request([
-					'chat_id' => $this->id['tome'], // anekdoty | tome
-					'parse_mode' => 'markdown',
-					'text' => $bus,
-					'reply_markup' => $this->getInlineKeyboard([[
-						# Row
-						[
-							"text" => "Хочу ещё",
-							"callback_data" => 'myText',
-							// "callback_data" => json_encode(["data" => "more"], JSON_UNESCAPED_UNICODE),
-						],
-						[
-							"text" => "Хочу",
-							"callback_data" => 'myText',
-						],
-					]]),
-				]); */
 				$bus = '';
-				sleep(.5);
+				usleep(500);
 
 			}
 
@@ -296,34 +245,36 @@ class AnekdotBot extends TG
 			self::log(['echo "static::\$t = "', 'var_dump(static::$t )'], __FILE__, __LINE__);
 
 		}
-		else
+
+		# If not exist new content
+		elseif ($data = $this->getCallback('callback_query'))		
 		{
-			$this->requestTG("Обновлений пока нет. Попробуйте позже.");
+			return $this->request([
+			'callback_query_id' => $data['id'],
+			'text' => self::$noUdates,
+			], 'answerCallbackQuery');
+
+			// else $this->requestTG(self::$noUdates);
 		}
+	
 
 	} // parser
 
-
+	
 	public function requestTG($bus)
 	{
-		# Advert
-		shuffle(self::$ad);
-		$ad = array_keys(self::$ad)[0] . ' - ' . array_values(self::$ad)[0];
-
 		# Отправляем в канал.
-		self::$t[]= $this->request([
-			'chat_id' => $this->id['anekdoty'], // anekdoty | tome
+		return self::$t[]= $this->request([
+			'chat_id' => $this->chat_id, // anekdoty | tome
+			// 'chat_id' => $this->__test ? $this->id['tome'] : $this->id['anekdoty'], // anekdoty | tome
 			'parse_mode' => 'markdown',
 			'text' => $bus,
 			'reply_markup' => $this->getInlineKeyboard([[
 				# Row
-				[
-					"text" => $ad,
-					"callback_data" => 'myText',
-				],
+				$this->getAdvButton(),
 				[
 					"text" => "Хочу ещё",
-					"callback_data" => 'myText',
+					"callback_data" => '/more',
 				],
 			]]),
 		]);
@@ -351,17 +302,17 @@ class AnekdotBot extends TG
 	} // parser0
 
 
-	/* public function autoPost()
+	public function getAdvButton()
 	{
-		self::$postFields = [
-			'chat_id' => $chat_id,
-			'text' => self::$content[0],
+		# Advert
+		$text = array_keys(self::$adv);
+		shuffle($text);
+
+		return [
+			"text" => $text[0],
+			"url" => self::$adv[$text[0]],
 		];
-
-		self::log(['echo "static::\$postFields = "', 'var_dump(static::$postFields)'], __FILE__, __LINE__);
-
-		$this->request(self::$postFields);
-	} */
+	}
 
 
 	public function sendTG()
@@ -370,16 +321,16 @@ class AnekdotBot extends TG
 		$last_name="";
 		$username="";
 
-		$chat_id=self::$inputData['chat']['id'];
+		$chat_id=$this->inputData['chat']['id'];
 
-		if (self::$inputData['chat']['type']=="private" || false)
+		if ($this->inputData['chat']['type']=="private" || false)
 		{
-			if (isset(self::$inputData['chat']['first_name']))
-				$first_name=self::$inputData['chat']['first_name'];
-			if (isset(self::$inputData['chat']['last_name']))
-				$last_name=self::$inputData['chat']['last_name'];
-			if (isset(self::$inputData['chat']['username']))
-				$username=self::$inputData['chat']['username'];
+			if (isset($this->inputData['chat']['first_name']))
+				$first_name=$this->inputData['chat']['first_name'];
+			if (isset($this->inputData['chat']['last_name']))
+				$last_name=$this->inputData['chat']['last_name'];
+			if (isset($this->inputData['chat']['username']))
+				$username=$this->inputData['chat']['username'];
 
 			if ($first_name!="" AND $last_name!="")
 				$text="<b>Здравствуйте, $first_name $last_name!</b>";

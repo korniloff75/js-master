@@ -277,6 +277,7 @@ Object.defineProperties(jQuery, {
 
 	check : {
 		value: function (obj, direct) {
+			if(!obj) return null;
 			direct = direct || 1;
 			if (direct > 0)
 				return obj instanceof jQuery ? obj : $(obj);

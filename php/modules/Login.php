@@ -31,7 +31,7 @@ class Login
 			$_SESSION['auth'] = 0;
 			session_destroy();
 		}
-		elseif(empty($action))
+		elseif(!isset($login) && empty($action))
 		{
 			$this->tryLogin(1);
 			throw new Exception('В запросе нет $action' . "\nIP - {$this->uip}" , 1);
@@ -43,6 +43,7 @@ class Login
 				if(empty($pswd)) throw new Exception('В запросе нет $pswd', 1);
 				$this->DB = \H::json(self::LOGIN_PATH);
 
+				# Если в базе нет админа - создаём нового
 				if(empty($this->DB['admin']))
 				{
 					$this->DB['admin'] = password_hash($pswd, PASSWORD_DEFAULT);
@@ -52,7 +53,7 @@ class Login
 					// die;
 				}
 
-				$login = empty($login) ? 'admin' : $login;
+				$login = empty(trim($login)) ? 'admin' : $login;
 
 				$this->auth($login, $pswd);
 				break;
@@ -72,6 +73,15 @@ class Login
 	private function auth(string $login, string $pswd)
 	{
 		// var_dump($login);
+		\H::$tmp['db'] = $this->DB;
+		\H::$tmp['login'] = $login;
+		\H::$tmp['pswd'] = $pswd;
+		\H::log([
+			'echo "\$login = " . self::$tmp[\'login\'] . "; \$pswd = " . self::$tmp[\'pswd\']',
+			// 'echo "\$this->DB[\$login] = {$db[$login]}"',
+			'echo "password_verify(\$pswd, \$this->DB[\$login]) = "',
+			'var_dump(password_verify(self::$tmp[\'pswd\'], self::$tmp[\'db\'][self::$tmp[\'login\']]))'
+		], __FILE__, __LINE__);
 		if(
 			$this->tryDB <= self::TRY_ADMIN
 			&& !empty($this->DB[$login])

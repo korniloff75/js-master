@@ -6,6 +6,11 @@
 <p>На базе этого скрипта можно создать и более сложные конструкции при желании. Например, если вам понадобится выводить различный текст для разных групп пользователей, динамически менять содержимое в зависимости от времени суток, выводить объявление единожды для каждого пользователя, а не при каждой загрузке страницы, ну и так далее...
 </p>
 
+<h3>Пример работы</h3>
+<div>
+	<button class="button">Запустить</button>
+</div>
+
 </div>
 
 
@@ -14,8 +19,8 @@
 	'use strict';
 	var tmp = {
 		/* Настройки скрипта */
-		txt : "Уважаемые пользователи сайта "+location.host+"! C радостью сообщаю вам, что это объявление исчезнет сразу после его окончания. Тут можете писать все, что необходимо донести до пользователей сайта.", // Собственно, сам текст объявления. Вставляйте любой.
-		obyavaStyle : 'position: fixed; top:250px;width:70%; right:15%; z-index:5000; background:linear-gradient(#eee, #ddf, #7ad) #ddf; font:bold 22px monospace; padding:20px; border:2px solid #159;' // В этой переменной задаем необходимые стили для блока с объявлением.
+		txt : "Уважаемые пользователи сайта "+location.host+"! C радостью сообщаю вам, что это объявление вы можете удалить, кликнув по нему. Тут можете писать все, что необходимо донести до пользователей сайта.", // Собственно, сам текст объявления. Вставляйте любой.
+		obyavaStyle : 'position: fixed; top:250px;width:70%; right:15%; z-index:5000; background:linear-gradient(#eee, #ddf, #7ad) #ddf; font:bold 22px monospace; padding:20px; border:2px solid #159; cursor:pointer' // В этой переменной задаем необходимые стили для блока с объявлением.
 	};
 
 	/*********************/
@@ -36,18 +41,42 @@
 	}
 
 
-	if(!window.obyava) {
-		var obyava= document.createElement('div');
-		obyava.style.cssText = tmp.obyavaStyle;
-		obyava.innerHTML = '<span class="center" style="display:block;"><u>Объявление:</u></span> <br>';
+	var obyava = {
+		create: function() {
+				this.o = document.createElement('div');
+				document.body.appendChild(this.o);
+				this.o.style.cssText = tmp.obyavaStyle;
+				this.o.innerHTML = '<span class="center" style="display:block;"><u>Объявление:</u></span> <br>';
+				this.o.onclick = e=> {
+					e.stopPropagation();
+					this.o.remove();
+					delete this.o;
+				}
+				tmp.txt.delayingWrite(this.o, 100, this.remove.bind(this) );
+				return this.o;
+			},
+			remove: function () {
+				if(this.o) this.o.remove();
+				delete this.o;
+			}
+		},
+		btn = document.querySelector('.button');
+	btn.addEventListener('click', obyava.create);
 
-		document.body.appendChild(obyava);
 
-		tmp.txt.delayingWrite(obyava, 100, function() { obyava.parentNode.removeChild(obyava) } );
+	function startObyava(e) {
+		if(!obyava.o) obyava.create();
+		// btn.removeEventListener('click', startObyava);
 	}
+
+	function endObjava(o) {
+		!!o && o.remove();
+		o = null;
+	}
+	
 	</script>
 </div>
 
 
 <h5>Javascript-код:</h5>
-	<pre><code for="#prim" class="js"></code></pre>
+	<pre><code for="#prim" data-lib="ES-6"></code></pre>

@@ -12,9 +12,9 @@ define('HOST', $_SERVER['HTTP_HOST']);
 
 define('DEMO', 0);
 
-$isHttps = !empty($_SERVER['HTTPS']) && 'off' !== strtolower($_SERVER['HTTPS']);
+// $isHttps = !empty($_SERVER['HTTPS']) && 'off' !== strtolower($_SERVER['HTTPS']);
 
-define('BASE_URL', ($isHttps ? 'https' : 'http') . '://' . HOST . '/');
+// define('BASE_URL', ($isHttps ? 'https' : 'http') . '://' . HOST . '/');
 
 define('LANG', "ru");
 

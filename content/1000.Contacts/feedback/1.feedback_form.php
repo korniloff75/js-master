@@ -1,8 +1,8 @@
 <?php
 \H::protectScript(basename(__FILE__));
 
-if(!headers_sent() && !isset($_SESSION)) session_start();
-$_SESSION['captcha'] = \H::realIP();
+/* if(!headers_sent() && !isset($_SESSION)) session_start();
+$_SESSION['captcha'] = \H::realIP(); */
 ?>
 
 

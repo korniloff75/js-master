@@ -13,13 +13,17 @@ class H {
 		$tmp = [],
 		$fileInfo,
 		$Dir,
+		$log = [],
 		$notes = [];
+
 
 	// public $add;
 
 	private function __construct()
 	{
 		global $Nav, $__Start;
+
+		ini_set('short_open_tag', 'On');
 
 		require_once $_SERVER['DOCUMENT_ROOT'] . '/CONST.php';
 
@@ -37,10 +41,16 @@ class H {
 		);
 
 		// var_dump(\ADMIN, $_SESSION, self::realIP(), (strpos(self::realIP(), \ADM) === 0));
+		define('BASE_URL', (self::is('https') ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/');
 
 		# Для подключение не через ROOT
 		if (realpath('') !== realpath(\HOME))
 			return;
+
+		\H::log([
+			'echo "Helper started from ROOT" ',
+		], __FILE__, __LINE__);
+
 
 		if(ADMIN || \TEST)
 		{
@@ -62,9 +72,12 @@ class H {
 		# before classes
 		require_once \HOME . 'php/modules/Iterator.php';
 
+
+		# Include all classes
 		eval (self::addFromDir('php/classes/', 'php'));
 
 		# create map ...
+		// echo phpversion();
 		$Nav = new \php\classes\Navigate;
 
 		# Define current page
@@ -72,7 +85,6 @@ class H {
 
 		self::$Dir = self::$fileInfo->fromRoot() . '/';
 
-		// define('DIR', Path::fromRootStat(self::$fileInfo->getPathname()) . '/');
 		define('DIR', self::$Dir);
 
 		if(!is_dir(self::$Dir)) self::shead(404);
@@ -81,19 +93,36 @@ class H {
 		// exit;
 	} // __construct
 
+
 	public static function is(string $prop)
 	{
 		$prop = strtolower($prop);
-		if (!in_array($prop, $defines)) return null;
 
 		$defines = [
 			'ajax' => function() {
 				return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
 				&& !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
 				&& strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
-			}
+			},
+			'https' => function() {
+				return !empty($_SERVER['HTTPS']) && ('off' !== strtolower($_SERVER['HTTPS']));
+			},
 		];
+		if (!array_key_exists($prop, $defines)) return null; 
 		return $defines[$prop]();
+	}
+
+
+	public static function log($data=[], $file='', $line='')
+	{
+		ob_start();
+			echo basename($file) . " : $line\n";
+			foreach($data as $i) {
+				eval($i . ';');
+				echo "\nOK ";
+			}
+		self::$log[] = ob_get_clean();
+
 	}
 
 
@@ -238,19 +267,19 @@ class H {
 	public static function profile($n, $rem='')
 	// :string
 	{
-		if(!\ADMIN) return '';
+		// if(!\ADMIN) return '';
 
 		$cn = 'profile_' . $n;
 
-		if(empty(self::$tmp{$cn}))
+		if(empty(self::$tmp[$cn]))
 		{
-			self::$tmp{$cn} = gettime();
+			self::$tmp[$cn] = gettime();
 		}
 		else
 		{
-			$info = '<p>Page generation - ' . bcsub(gettime(), self::$tmp{$cn}, 5)*1000 . 'ms | Memory usage - now ( '. round (memory_get_usage()/1024) . ') max (' . round (memory_get_peak_usage()/1024) . ') Kbytes</p>';
-			// self::$tmp{$cn} = null;
-			return  "<div class='core bar'><b>Used PHP-" . phpversion() . " block $n Technical Info $rem </b>: $info</div>";
+			$info = '<p>Page generation - ' . bcsub(gettime(), self::$tmp[$cn], 5)*1000 . 'ms | Memory usage - now ( '. round (memory_get_usage()/1024) . ') max (' . round (memory_get_peak_usage()/1024) . ') Kbytes</p>';
+			// self::$tmp[$cn]= null;
+			return  "<div class='core info'><b>Used PHP-" . phpversion() . " block $n Technical Info $rem </b>: $info</div>";
 		}
 
 	}
@@ -412,7 +441,7 @@ class H {
 		elseif(is_string($d))
 		{
 			# GET value
-			return self::json($path)[$d];
+			return @self::json($path)[$d];
 		}
 		else
 		{

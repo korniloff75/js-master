@@ -88,6 +88,7 @@ class Render
 
 		$current = $dir === \DIR;
 		\H::$Dir = $dir;
+		// echo $dir;
 		// define('DIR', $dir);
 		ob_start();
 
@@ -204,10 +205,18 @@ class Render
 			{
 				$content .= \CF['counter'];
 			}
-			if(\ADMIN)
+
+			$content .= '<div class="DA_del">';
+			if(\ADMIN || \TEST)
 			{
-				$content .= \H::profile('base', basename(__FILE__) . ' : ' . __LINE__);
+				# Выводим логи
+				foreach(\H::$log as $log) {
+					$content .= "<pre class='core warning' style='max-height: 200px; overflow: auto;'>$log</pre>";
+				}
+				
 			}
+			$content .= \H::profile('base', basename(__FILE__) . ' : ' . __LINE__);
+			$content .= '</div> <!--/.DA_del-->';
 		}
 
 		return $content;

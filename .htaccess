@@ -53,8 +53,9 @@ RewriteRule ^(cgi-bin)/(.*) error [F,L]
 ## End - Security
 
 # ЧПУ
-# RewriteCond %{REQUEST_FILENAME} -d
+RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^(content.+)/($|\?) index.php?page=$1 [L]
+# RewriteRule (content.+)/($|\?) index.php?page=$1 [L]
 # RewriteRule ^(.+)/($|\?) index.php?page=$1 [L]
 
 </IfModule>
@@ -62,6 +63,7 @@ RewriteRule ^(content.+)/($|\?) index.php?page=$1 [L]
 # Begin - Prevent Browsing and Set Default Resources
 Options -Indexes
 DirectoryIndex index.php index.html index.htm
+php_value short_open_tag 1
 # End - Prevent Browsing and Set Default Resources
 
 ## Error pages

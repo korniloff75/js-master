@@ -1,6 +1,6 @@
 <?php
 # https://github.com/PHPMailer/PHPMailer
-# https://medium.com/@alfakrai/%D0%B2%D0%BC%D0%B5%D0%BD%D1%8F%D0%B5%D0%BC%D0%B0%D1%8F-%D0%B8%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%86%D0%B8%D1%8F-%D0%BA-phpmailer-51bf4530e2e4
+# https://medium.com/@shpaginkirill/вменяемая-инструкция-к-phpmailer-отправка-писем-и-файлов-на-почту-b462f8ff9b5c
 
 /**
  *
@@ -32,19 +32,28 @@ class MailPlain extends PHPMailer
 		# Custom params
 
 		# SMTP auth
-		$Username  = "fb@js-master.ru",
+		$Username  = "korniloff_proekt@mail.ru",
 		$Password = "1975kp@1975",
-		$Host = "web01-cp.marosnet.net",
+		$Host = "ssl://smtp.mail.ru",
+		/* $Username  = "fb@js-master.ru",
+		$Password = "1975kp@1975",
+		$Host = "web01-cp.marosnet.net", */
 		$to_emails = [/* str || aray with emails */],
 
 		# Common
 
-		$Port = 465,
+		/* $Port = 465,
 		$SMTPAuth = true,
-		$SMTPSecure = "ssl",
+		$SMTPSecure = "ssl", */
 		$CharSet    = 'UTF-8',
 
 		$attach = null;
+
+	private
+		$SMTP = [
+			"on" => true,
+			"isHTML" => true,
+		];
 
 
 	public function __construct($subject, $message, $from_mail, $from_name = null)
@@ -55,11 +64,6 @@ class MailPlain extends PHPMailer
 
 		# 4 test
 		if(!empty($GLOBALS['test'])) $this->to_emails = 'support@js-master.ru';
-
-		$__smtp = [
-			"on" => true,
-			"isHTML" => true,
-		];
 
 		$this->validated = $this->valid([
 			'name' => $from_name,
@@ -72,9 +76,9 @@ class MailPlain extends PHPMailer
 			die("Отправляемые данные не прошли серверную валидацию. Попробуйте ещё раз.");
 		}
 
-		$this->FromName = $from_name;
+		$this->FromName = $this->validated['name'];
 		$this->Subject = $this->validated['subject'];
-		$this->isHTML($__smtp['isHTML']);
+		$this->isHTML($this->SMTP['isHTML']);
 
 		$this->validated['messageNL'] = $this->validated['message'] = "<pre>{$this->validated['message']}</pre>\n"
 		. "\nTime - " . date(\CF['date']['format'])
@@ -82,17 +86,23 @@ class MailPlain extends PHPMailer
 		. "\nIP - " . \H::realIP()
 		. ($_REQUEST['tg'] ? "\nTelegram - {$_REQUEST['tg']}" : "");
 
-		if($__smtp['isHTML']) {
+		if($this->SMTP['isHTML']) {
 			$this->validated['message'] = nl2br($this->validated['message']);
 		}
-		$this->Body = $this->validated['message'];
 
-		if ($__smtp['on'])
+		$this->Body = $this->validated['message'];
+		$this->AltBody = strip_tags($this->validated['messageNL']);
+
+		if ($this->SMTP['on'])
 		{
+			$this->IsSMTP();
+			$this->Port = 465;
+			$this->SMTPAuth = true;
+			$this->SMTPSecure = "ssl";
 			$this->Mailer = 'smtp';
 			$this->SMTPDebug = self::ADMIN ? 2 : 0;
-			$this->IsSMTP();
-			$this->setFrom($this->validated['email'], $this->validated['name']);
+			$this->setFrom($this->Username);
+			// $this->setFrom($this->validated['email'], $this->validated['name']);
 		}
 		else
 		{
@@ -188,26 +198,16 @@ class MailPlain extends PHPMailer
 		$chat_id = null
 	)
 	{
+		require_once \HOME . 'php/tg/tg.class.php';
+		$tg = new TG(self::TG_TOKEN);
 		$chat_id = $chat_id ?? self::TG_CHAT_ID;
-		$token = self::TG_TOKEN;
 
-		$ch = curl_init();
-		curl_setopt_array(
-			$ch,
-			[
-				CURLOPT_URL => "https://api.telegram.org/bot{$token}/sendMessage",
-				CURLOPT_POST => TRUE,
-				CURLOPT_RETURNTRANSFER => TRUE,
-				CURLOPT_TIMEOUT => 10,
-				CURLOPT_POSTFIELDS => [
-					'chat_id' => $chat_id,
-					'parse_mode' => 'html',
-					'text' => $text,
-				],
-			]
-		);
+		return $tg->request([
+			'chat_id' => $chat_id,
+			'parse_mode' => 'html',
+			'text' => $text,
+		]);
 
-		return curl_exec($ch);
 	}
 
 
@@ -263,21 +263,32 @@ class MailPlain extends PHPMailer
 
 		# Send to Telegram
 		$textToTG = "<b>{$this->validated['subject']}</b>\n {$this->validated['messageNL']}";
-		$sttg = self::toTG($textToTG);
+		$response = self::toTG($textToTG);
+
+		/* \H::$tmp['tg'] = [
+			'response' => $response,
+		];
+		\H::log([
+			'echo \'response = \'',
+			'var_dump(self::$tmp[\'tg\'][\'response\'])',
+		]); */
+
+		file_put_contents('response.json', json_encode($response, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK), LOCK_EX);
+
+		/* var_dump(
+			$response
+			// , $this->validated
+		); */
 
 		if(isset($_REQUEST['NoSendEmail'])) return;
 
-		/* var_dump(
-			$sttg,
-			$this->validated
-		); */
 
 		try {
 			$this->Send();
 			return true;
 
 		} catch (phpmailerException $e) {
-			if($__smtp['isHTML'])
+			if($this->SMTP['isHTML'])
 				try {
 					$this->isHTML(false);
 					$this->Send();

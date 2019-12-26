@@ -89,7 +89,10 @@ var commFns = {
 
 
 	Send: function ($form) {
-		$form = $.check($form) || $("#comments_form");
+		$form = $.check($form || this.form);
+		$form = !!$form && $form[0].tagName === 'FORM' && $form;
+		console.log("$form = ", $form);
+
 		var ajaxData = $form.ajaxForm(),
 			err='',
 			TO=10000;
@@ -179,7 +182,7 @@ var commFns = {
 
 		// Навешиваем отправку
 		// $form.find("#subm").e.add("click",commFns.Send);
-		$('#c_subm').on("click", gl.commFns.Send);
+		$('#c_subm').on("click", gl.commFns.Send.bind(null, $form));
 
 		// ajax на пагинатор
 		$paginators.on("click",commFns.paginator);

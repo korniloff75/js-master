@@ -24,7 +24,7 @@ if (\ADMIN &&
 	?>
 
 
-	<?if(\ADMIN && !empty($this->err)):?>
+	<?php if(\ADMIN && !empty($this->err)): ?>
 		<div class="core warning">
 			<pre>
 				<?php
@@ -33,5 +33,5 @@ if (\ADMIN &&
 				?>
 			</pre>
 		</div>
-	<?endif?>
+	<?php endif ?>
 </div>

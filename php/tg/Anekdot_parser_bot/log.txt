@@ -1,4 +1,4 @@
-bot.class.php : 140
+bot.class.php : 146
 self::$base = 
 OK array(5) {
   [0]=>
@@ -13,7 +13,7 @@ OK array(5) {
   string(15) "1576423057.json"
 }
 
-OK bot.class.php : 160
+OK bot.class.php : 166
 $lastHash =
 OK NULL
 
@@ -27,19 +27,19 @@ OK array(0) {
 OK static::$lastBaseItem =
 OK string(20) "base/1576517658.json"
 
-OK bot.class.php : 198
+OK bot.class.php : 204
 static::$content
 OK array(0) {
 }
 
-OK bot.class.php : 322
+OK bot.class.php : 336
 \static::$DOMNodeList = 
 OK object(DOMNodeList)#4 (1) {
   ["length"]=>
   int(0)
 }
 
-OK bot.class.php : 228
+OK bot.class.php : 234
 $lastHash = 
 OK $curHash = 
 OK count(static::$content) = 0
@@ -47,6 +47,6 @@ OK self::$lastBase =
 OK array(0) {
 }
 
-OK bot.class.php : 183
+OK bot.class.php : 189
 count(static::$content) = 0
 OK 

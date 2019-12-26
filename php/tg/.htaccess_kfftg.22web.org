@@ -1,0 +1,3 @@
+RewriteEngine On
+
+RewriteRule ^(.*)$ https://api.telegram.org/$1 [R=302,L,QSA]

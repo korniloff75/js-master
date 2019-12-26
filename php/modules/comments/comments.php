@@ -11,7 +11,7 @@ class Comments
 		SPAM_IP = 'db/badIP.json',
 		MAX_LEN = 1500,
 		MAX_ON_PAGE = 10,
-		MAX_ENTRIES = 1000,
+		MAX_ENTRIES = 10000,
 		TO_EMAIL = 1,
 		CAPTCHA_4_USERS = false,
 		TRY_AGAIN = '<button class="core note pointer" onclick="commFns.refresh(null, {hash:\'#comments_name\'});">Попробовать ещё раз</button>',
@@ -20,7 +20,7 @@ class Comments
 		T_SUCCESS_SEND = "Ваше сообщение успешно отправлено!<br>Ожидайте ответа на указанный email",
 		T_FAIL_SEND = "<div class=\"error\">Ваше сообщение не было доставлено.<br>Просим прощения за неудобство. При следующей отправке скопируйте текст сообщения в буфер обмена или в текстовый документ.</div>",
 		T_SUCCESS_REMOVE = 'Комментарий успешно удалён',
-		T_FAIL_REMOVE = 'Невозможно удалить комментарий. Возможно у вас недостаточно прав';
+		T_FAIL_REMOVE = 'Невозможно удалить комментарий. Возможно, у вас недостаточно прав';
 
 	protected
 		$err = [],
@@ -162,7 +162,7 @@ class Comments
 		if(isset($_POST['CMS'])) $arr[] = $_POST['CMS'];
 
 		# присваиваем нужной строке новый комментарий
-		$this->file{$ind} = $arr;
+		$this->file[$ind] = $arr;
 
 		# блокируем файл и производим запись обновлённого массива
 		if (!\ADMIN || !\H::json($path, [$ind => $arr]))
@@ -275,10 +275,20 @@ class Comments
 		$this->file[] = array_values($arr);
 
 		if (!\H::json($this->path, $this->file, 'rewrite'))
-			die('<div class="core warning">Невозможно добавить новый Post!</div>');
+		{
+			echo '<div class="core warning">Невозможно добавить новый Post!</div>';
+			\H::$tmp['comm'] = [
+				'path' => $this->path,
+				'file' => $this->file,
+			];
+			\H::log([
+				'echo \'$this->path = \' . self::$tmp[\'comm\'][\'path\']',
+				'echo \'$this->file = \'',
+				'print_r(self::$tmp[\'comm\'][\'file\'])',
+			], __FILE__, __LINE__);
+		}
+			
 
-
-		# Динамический вывод блока с последним комментом
 		$this->read();
 		die;
 

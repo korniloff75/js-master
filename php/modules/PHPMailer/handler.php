@@ -25,10 +25,11 @@ $mailPlain->to_emails = [
 ],
 */
 
-if(@$_REQUEST['captcha'] != $_SERVER['REMOTE_ADDR'])
+if(@$_REQUEST['captcha'] != \H::realIP())
 {
 	echo $_REQUEST['captcha'] . '<br>';
-	echo $_SERVER['REMOTE_ADDR'] . '<br>';
+	echo \H::realIP() . '<br>';
+	// echo $_SERVER['REMOTE_ADDR'] . '<br>';
 	// echo $_SESSION['captcha'] . '<br>';
 	echo "Невидимая каптча не пройдена. Попробуйте ещё раз.";
 }

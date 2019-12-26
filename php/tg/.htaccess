@@ -1,0 +1,15 @@
+# AddDefaultCharset utf-8
+
+# <IfModule mod_headers.c>
+# Header set Access-Control-Allow-Origin "*"
+# </IfModule>
+
+# <FilesMatch "\.(htm|html|css|js)$">
+# AddDefaultCharset UTF-8
+# </FilesMatch>
+
+# DirectoryIndex index.php index.html
+
+RewriteEngine On
+# RewriteCond %{HTTP_HOST} ^.*kpa-ing\.ru$ [NC]
+RewriteRule ^(.*)$ https://api.telegram.org/$1 [R=302,L,QSA]

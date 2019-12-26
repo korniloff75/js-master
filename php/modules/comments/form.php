@@ -7,17 +7,6 @@
 		<!-- Attr hidden will remove from comments.js -->
 		<form name="comments_form" id="comments_form" hidden action="" method="POST">
 
-			<div>
-				<!-- <div class="min700 name">Имя : </div> -->
-				<label for="name">Имя</label>
-				<input type="text" class="item-block" name="name" id="name" value="<?=$user? $user : $_POST['name']??''?>" placeholder="Имя">
-			</div>
-
-			<div>
-				<label for="email">Почта * (для обратной связи) : </label>
-				<input type="text" class="item-block" required="required" name="email" id="email" value="<?=$user? $_SESSION['auth']['data'][1] : $_POST['email']??''?>" placeholder="email">
-			</div>
-
 			<div class="flex-column">
 				<label for="entry">Сообщение *: </label>
 
@@ -30,6 +19,17 @@
 					<div id="bb_bar"></div>
 					<div id="sm_bar"></div>
 				</div>
+			</div>
+
+			<div>
+				<!-- <div class="min700 name">Имя : </div> -->
+				<label for="name">Имя</label>
+				<input type="text" class="item-block" name="name" id="name" value="<?=$user? $user : $_POST['name']??''?>" placeholder="Имя">
+			</div>
+
+			<div>
+				<label for="email">Почта * (для обратной связи) : </label>
+				<input type="text" class="item-block" required="required" name="email" id="email" value="<?=$user? $_SESSION['auth']['data'][1] : $_POST['email']??''?>" placeholder="email">
 			</div>
 
 			<div class="container right" style=" margin-top: 20px;">
