@@ -22,6 +22,7 @@ class AnekdotBot extends TG implements iTG
 		# Время обновления базы, s
 		$addTime = 12 * 3600,
 		$baseDir = 'base/',
+		$botDir,
 		$id = [
 			'anekdoty' => -1001393900792,
 			 'tome' => 673976740,
@@ -64,7 +65,8 @@ class AnekdotBot extends TG implements iTG
 
 	public function __construct()
 	{
-		$this->botPath = \BASE_URL . BOT_DIR . '/' . basename(__FILE__);
+		$this->botDir = \Path::fromRootStat(__DIR__);
+		$this->botURL = \BASE_URL . $this->botDir . '/' . basename(__FILE__);
 
 		parent::__construct()->webHook()->init();
 
@@ -116,8 +118,6 @@ class AnekdotBot extends TG implements iTG
 
 
 		self::log([
-			// 'echo "static::\$lastBaseItem =" ',
-			// 'var_dump(static::$lastBaseItem)',
 			'echo "static::\$lastBaseItem = \n" . static::$lastBaseItem . "\n=====\n"',
 		], __FILE__, __LINE__);
 
@@ -268,9 +268,7 @@ class AnekdotBot extends TG implements iTG
 			// if(!is_object($class) || $class->nodeValue !== 'text') {
 				// continue;
 			if(is_object($class) && $class->nodeValue === 'text') {
-				echo $t->textContent;
 				self::$content[]= $t->textContent;
-				echo "\n***********\n";
 			}
 		}
 	} // parser0

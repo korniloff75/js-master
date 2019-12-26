@@ -38,7 +38,8 @@ class TG {
 			"http://183.91.33.41:8081",
 		],
 		# define in child classes
-		$botPath,
+		$botDir,
+		$botURL,
 		# define callback
 		$callback,
 		$inputData = null,
@@ -154,7 +155,7 @@ class TG {
 	protected function webHook()
 	{
 		# Однократно запускаем webHook
-		$trigger = $_SERVER['DOCUMENT_ROOT'] . parse_url(pathinfo($this->botPath, PATHINFO_DIRNAME))['path'] . "/webHookRegistered.trigger";
+		$trigger = \HOME . $this->botDir . "/webHookRegistered.trigger";
 		if(file_exists($trigger))
 		{
 			echo "<pre>Webhook уже зарегистрирован\n";
@@ -162,11 +163,11 @@ class TG {
 		else
 		{
 			$responseSetWebhook = $this->request([
-				'url' => $this->botPath,
+				'url' => $this->botURL,
 				'parse_mode' => null,
 			], 'setWebhook') ?? [];
 
-			echo __FILE__ . __LINE__ . " - \$this->url = {$this->botPath}\n";
+			echo __FILE__ . __LINE__ . " - \$this->url = {$this->botURL}\n";
 			echo "response after setWebhook = ";
 			var_dump($responseSetWebhook);
 
@@ -179,7 +180,7 @@ class TG {
 		echo "\$trigger = $trigger\n";
 		echo "END of webHook\n\n";
 		return $this;
-	}
+	} // webHook
 
 
 	public function browsEmul()
