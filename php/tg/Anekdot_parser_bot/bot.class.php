@@ -1,30 +1,12 @@
-<meta charset="UTF-8">
-<style>
-pre {
-	box-sizing: border-box;
-	white-space: pre-wrap;
-	border: inset 1px #eee;
-}
-</style>
-
 <?php
-// define("TG_TEST", 1);
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(-1);
 
-# Ловим входящий поток
-// $inputJson = file_get_contents('php://input');
-// file_put_contents('__inputData.json', $inputJson);
-// die();
-
 require_once $_SERVER['DOCUMENT_ROOT'] . "/Helper.php";
 
-// set_error_handler('\H::userErrorHandler');
-
 require_once \HOME . "php/Path.php";
-// define("BOT_DIR", Path::fromRootStat(__DIR__));
 
 # TG
 require_once __DIR__ . "/../tg.class.php";
@@ -249,9 +231,9 @@ class AnekdotBot extends TG implements iTG
 			// 'chat_id' => $this->__test ? $this->id['tome'] : $this->id['anekdoty'], // anekdoty | tome
 			'parse_mode' => 'markdown',
 			'text' => $bus,
-			'reply_markup' => $this->getInlineKeyboard([[
+			'reply_markup' => $this->setInlineKeyboard([[
 				# Row
-				$this->getAdvButton(),
+				$this->setAdvButton(),
 				[
 					"text" => "Хочу ещё",
 					"callback_data" => '/more',
@@ -281,7 +263,7 @@ class AnekdotBot extends TG implements iTG
 	} // parser0
 
 
-	public function getAdvButton()
+	public function setAdvButton()
 	{
 		# Advert
 		$text = array_keys(self::$adv);
@@ -323,6 +305,20 @@ class AnekdotBot extends TG implements iTG
 
 		$this->apiRequest(self::$postFields);
 	} */
+
+	public function __destruct()
+	{
+		?>
+		<meta charset="UTF-8">
+		<style>
+		pre {
+			box-sizing: border-box;
+			white-space: pre-wrap;
+			border: inset 1px #eee;
+		}
+		</style>
+		<?php
+	}
 
 }
 

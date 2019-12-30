@@ -376,7 +376,7 @@ class TG {
 	}
 
 	// not use
-	public function getInlineKeyboard(array $data)
+	public function setInlineKeyboard(array $data)
 	: string
 	{
 		return json_encode( [
