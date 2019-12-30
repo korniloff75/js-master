@@ -1,18 +1,9 @@
-<style>
-pre {
-	box-sizing: border-box;
-	white-space: pre-wrap;
-	border: inset 1px #eee;
-}
-</style>
-
-<pre>
-
 <?php
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-error_reporting(-1);
+// error_reporting(-1);
 
+// ob_start();
 
 interface iTG
 {
@@ -27,7 +18,7 @@ class TG {
 		$inputJson = null,
 		$token,
 		$api,
-		$headers = [],
+		$headers = ["Content-Type:multipart/form-data"],
 		$proxyList = [
 			"socks4://89.190.120.116:52941",
 			"socks4://188.93.238.17:51565",
@@ -38,15 +29,15 @@ class TG {
 			"http://183.91.33.41:8081",
 		],
 		# define in child classes
+		$botFileInfo,
+		$log, # instanceof Logger
+
 		$botDir,
-		$botURL,
 		# define callback
 		$callback,
 		$inputData = null,
 		$chat_id;
 
-	static
-		$log=[];
 
 	protected static
 		$textLimit = 3500;
@@ -54,61 +45,86 @@ class TG {
 
 	public function __construct($token=null)
 	{
-		$this->token = $this->token ?? $token;
+		# Если не логируется из дочернего класса
+		if(!$this->log)
+		{
+			require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
+			$this->log = new Logger('tg.class.log', __DIR__);
+		}
+		$this->log->add("tg.class.php started");
+
+		$this->token = $token ?? $this->token;
 		if(!is_string($this->token))
-			throw new Exception("\$token must be string!", 1);
+		{
+			$this->log->add("There is no TOKEN from child class to continue working!", E_USER_WARNING);
+			$this->__destruct();
+			die();
+		}
+
+		if($this->botFileInfo)
+		{
+			# Relative from root
+			$this->botDir = $this->botFileInfo->getPathInfo()->fromRoot();
+
+			$this->log->add("\$this->botDir = {$this->botDir}");
+		}
 
 		$this->api = "https://api.telegram.org/bot{$this->token}/";
-		// var_dump($this->api);
+
+		$this->log->add("Init bot.class.php");
 
 		# Обрабатываем входящие данные
-		$this->callback = $this->findCallback();
+		$this->callback = $this->webHook()->findCallback();
 		return $this;
 	}
 
 
-	/**
-	 * TG::log([], __FILE__, __LINE__);
-	 */
-	public static function log($data=[], $file='', $line='')
-	{
-		ob_start();
-		echo '<h4>' . basename($file) . " : $line</h4>\n";
-		foreach($data as $i) {
-			eval($i . ';');
-			echo "\n===\n ";
-		}
-		// $log= $this->__test ? ob_get_flush() : ob_get_clean();
-		self::$log[]= ob_get_clean();
-
-		// self::$log[]= $log;
-
-	} // log
-
-
 	public function getData()
 	{
+		$this->log->add("getData() started = " . (is_null($this->inputData) ? 'TRUE' : 'FALSE'));
 		if(is_null($this->inputData))
 		{
 			# Ловим входящий поток
 			$this->inputJson = file_get_contents('php://input');
 
 			# Кодируем в массив
-			$this->inputData = @json_decode($this->inputJson, true);
+			$this->inputData = @json_decode($this->inputJson, true) ?? false;
 
-			if(strlen($this->inputJson)) file_put_contents('inputData.json', $this->inputJson);
-			else self::log(['echo "Нет callback!\n"',], __FILE__, __LINE__);
+			if(strlen($this->inputJson))
+				file_put_contents($this->botFileInfo->getPath() . '/inputData.json', $this->inputJson);
+			else $this->log->add("Нет callback!");
 		}
 
 		return $this;
 	} // getData
 
 
-	public function getCallback($key)
+	public function getCallback($key, $data=null)
 	{
 		if(!$this->getData()->inputData) return;
 
-		return array_key_exists($key, $this->inputData) ? $this->inputData[$key] : false;
+		$data = $data ?? $this->inputData;
+
+		if(array_key_exists('message', $data))
+			return $data['message'];
+		else
+		{
+			switch ($key) {
+				case 'result':
+					$data = $data['result'][0];
+				case 'callback_query':
+					$data = $data['callback_query'];
+					break;
+
+				default:
+					return false;
+					break;
+			}
+			return $this->getCallback(0, $data);
+		}
+
+
+		// return array_key_exists('message', $data) ? $data['message'] : false;
 
 	}
 
@@ -118,16 +134,23 @@ class TG {
 	 */
 	public function findCallback()
 	{
-		if(!$this->getData()->inputData) return;
+		if(!$this->getData()->inputData)
+		{
+			$this->log->add("inputData is EMPTY!", E_USER_WARNING, [$this->inputData]);
+			return null;
+		}
+
 		$cbn = array_values(
-			array_intersect(['message', 'callback_query'], array_keys($this->inputData))
+			array_intersect(['message', 'callback_query', 'result'], array_keys($this->inputData))
 		)[0] ?? false;
 
-		self::$log[]= basename(__FILE__) . ': ' . __LINE__ . " - \$cbn= " . $cbn. "\n\n";
+		// $this->log->add("");
 
 		$cb = $this->getCallback($cbn);
+		$this->chat_id = $cb['chat']['id'];
+		$this->text = $cb['text'];
 
-		switch ($cbn) {
+		/* switch ($cbn) {
 			case 'message':
 				$this->chat_id = $cb['chat']['id'];
 				$this->text = $cb['text'];
@@ -140,9 +163,9 @@ class TG {
 			default:
 				$this->chat_id = null;
 				break;
-		}
+		} */
 
-		self::$log[]= "\$this->chat_id = {$this->chat_id}\n";
+		$this->log->add("\$cbn = $cbn\n\$this->chat_id = {$this->chat_id}");
 
 		return $cb;
 
@@ -154,31 +177,40 @@ class TG {
 	 */
 	protected function webHook()
 	{
-		# Однократно запускаем webHook
+		# Full URI
+		$botURL = \BASE_URL . $this->botDir . '/' . $this->botFileInfo->getBaseName();
+
+		# path to bot is incorrect
+		if(!file_exists($this->botFileInfo->getRealPath()))
+		{
+			// $this->__destruct();
+			$this->log->add("\$botURL is NOT exist! - ", E_USER_WARNING, $botURL);
+			return $this;
+		}
 		$trigger = \HOME . $this->botDir . "/webHookRegistered.trigger";
+
+		# Однократно запускаем webHook
 		if(file_exists($trigger))
 		{
-			echo "<pre>Webhook уже зарегистрирован\n";
+			$this->log->add("Webhook уже зарегистрирован", E_USER_WARNING);
 		}
 		else
 		{
-			$responseSetWebhook = $this->request([
-				'url' => $this->botURL,
+			$responseSetWebhook = $this->apiRequest([
+				'url' => $botURL,
 				'parse_mode' => null,
 			], 'setWebhook') ?? [];
 
-			echo __FILE__ . __LINE__ . " - \$this->url = {$this->botURL}\n";
-			echo "response after setWebhook = ";
-			var_dump($responseSetWebhook);
+			$this->log->add("response after setWebhook", null, [$responseSetWebhook]);
 
-
-			if(count($responseSetWebhook))
-				file_put_contents($trigger, json_encode($responseSetWebhook, JSON_UNESCAPED_UNICODE));
+			if(
+				$responseSetWebhook
+				&& file_put_contents($trigger, json_encode($responseSetWebhook, JSON_UNESCAPED_UNICODE))
+			)
+			$this->log->add("Был создан файл - $trigger", E_USER_WARNING);
 		}
 
-		echo __FILE__ . __LINE__ . "\n";
-		echo "\$trigger = $trigger\n";
-		echo "END of webHook\n\n";
+		$this->log->add("\$botURL = {$botURL}\n\nEND of webHook");
 		return $this;
 	} // webHook
 
@@ -210,10 +242,10 @@ class TG {
 			// $p['scheme'].'://'.
 			if($fp = fsockopen($p['host'], $p['port'], $errCode, $errStr, $timeoutInSeconds))
 			{
-				self::$log[]= __FILE__.': '.__LINE__ . " Proxy $proxy - is AVAILABLE\n";
+				$this->log->add("Proxy $proxy - is AVAILABLE\n");
 				return $proxy; break;
 			} else {
-				self::$log[]= __FILE__.': '.__LINE__ . " $proxy - ERROR: $errCode - $errStr\n";
+				$this->log->add("$proxy - ERROR: $errCode - $errStr", E_USER_WARNING);
 			}
 			// fclose($fp);
 		}
@@ -221,16 +253,28 @@ class TG {
 		return false;
 	}
 
+	public function apiRequestWebhook(array $postFields = [], string $method = 'sendMessage')
+	{
+		if(headers_sent())
+		{
+			$this->log->add("The headers were sent earlier", E_USER_ERROR);
+		}
+		$postFields["method"] = $method;
+
+		header("Content-Type: application/json");
+		echo json_encode($postFields, JSON_UNESCAPED_UNICODE);
+	}
+
 
 	/**
-	 * Make request to $this->api
+	 * Make apiRequest to $this->api
 	 */
-	public  function request(array $postFields = [], string $method = 'sendMessage')
+	public  function apiRequest(array $postFields = [], string $method = 'sendMessage')
 	{
 		# Find available proxy from proxyList
 		if (!$proxy = $this->findProxy())
 		{
-			self::$log[]= __FILE__.': '.__LINE__ . " Available proxy NOT found!\n";
+			$this->log->add("Available proxy NOT found!", E_USER_WARNING);
 			return;
 		}
 
@@ -244,13 +288,14 @@ class TG {
 
 		], $postFields);
 
-		if($this->__test) {
-			echo '$postFields = ';
-			var_dump($postFields);
-			echo 'URL - ' . $this->api . $method . "\n";
+		foreach ($postFields as &$val) {
+			// encoding to JSON array parameters, for example reply_markup
+			if (!is_numeric($val) && !is_string($val)) {
+				$val = json_encode($val);
+			}
 		}
 
-		// echo "Content: \n" . file_get_contents('http://kfftg.22web.org/') . '<hr>';
+		$this->log->add("URL - {$this->api}$method\n\$postFields", null, [$postFields]);
 
 		curl_setopt_array(
 			$ch,
@@ -267,39 +312,57 @@ class TG {
 				// CURLOPT_INTERFACE => '2001:67c:4e8:f004::9',
 
 				CURLOPT_PROXY =>  $proxy, // Worked !
-				// CURLOPT_PROXY =>  "http://190.242.119.194:3128", // Worked !
 				/* CURLOPT_COOKIESESSION => true,
 				CURLOPT_COOKIEJAR => 'cookies',
 				CURLOPT_COOKIEFILE => is_file('cookies') ? 'cookies' : '', */
 				CURLOPT_HTTPHEADER => $this->headers,
-				CURLOPT_FOLLOWLOCATION => true,
-				CURLOPT_SSL_VERIFYPEER => false,
-				CURLOPT_SSL_VERIFYHOST => false,
+				// CURLOPT_FOLLOWLOCATION => true,
+				// CURLOPT_SSL_VERIFYPEER => false,
+				// CURLOPT_SSL_VERIFYHOST => false,
 
 				CURLOPT_POSTFIELDS => $postFields,
 			]
 		);
 
-		// $r = gzdecode(curl_exec($ch));
-		$r = curl_exec($ch);
+		return $this->execCurl($ch);
+	}
 
-		// Проверяем наличие ошибок
-		if($errno = curl_errno($ch)) {
-			$error_message = curl_strerror($errno);
-			echo "<b>cURL error ({$errno}):</b>\n {$error_message}";
+
+	function execCurl($ch) {
+		$response = curl_exec($ch);
+
+		if ($response === false) {
+			$errno = curl_errno($ch);
+			$error = curl_error($ch);
+			$this->log->add("Curl returned error $errno: $error", E_USER_WARNING);
+			curl_close($ch);
+			return false;
 		}
 
-		if($this->__test) {
-			// echo "response = " . gzdecode($r) . "<hr>";
-			var_dump($r, curl_getinfo($ch));
-			echo '<hr>';
-		}
-
-		// Закрываем дескриптор
+		$http_code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 		curl_close($ch);
 
-		return json_decode($r, true);
-	}
+		$response = json_decode($response, true);
+
+		if ($http_code >= 500) {
+			// do not wat to DDOS server if something goes wrong
+			sleep(5);
+			return false;
+		} else if ($http_code != 200) {
+			$this->log->add("apiRequest has failed with error {$response['error_code']}: {$response['description']}", E_USER_WARNING);
+			if ($http_code == 401) {
+				$this->log->add('Invalid access token provided', E_USER_ERROR);
+			}
+			return false;
+		} else {
+			if (isset($response['description'])) {
+				$this->log->add("apiRequest was successful: {$response['description']}");
+			}
+			$response = $response['result'];
+		}
+
+		return $response;
+	} // execCurl
 
 
 	public function getKeyboard($data)
@@ -327,11 +390,9 @@ class TG {
 	 */
 	function sendPhoto($chat_id, $url) {
 
-		$this->headers = ["Content-Type:multipart/form-data"];
-
 		file_put_contents(basename($url), file_get_contents($url));
 
-		return $this->request([
+		return $this->apiRequest([
 			'chat_id' => $chat_id,
 			'photo' => new CURLFile(realpath("image.jpg"))
 		], 'sendPhoto');
@@ -341,14 +402,16 @@ class TG {
 
 	public function __destruct()
 	{
-		if(!$this->__test) return;
+		// if(!$this->__test) return;
 
-		self::log(['echo "EVALUATE __destruct"'], __FILE__, __LINE__);
+		$this->log->add('EVALUATE __destruct');
+
+		/* $this->bufferLog = ob_get_clean();
+		file_put_contents($this->botFileInfo->getPath() . '/buffer.log', strip_tags($this->bufferLog)); */
 
 		# Выводим логи
-		foreach(self::$log as $log) {
-			print_r ("<pre class='log' style='max-height: 200px; overflow: auto;'>$log</pre>");
-		}
+		// print_r("<h3>Buffer Log</h3><pre>{$this->bufferLog}</pre>");
+		if($this->__test) $this->log->print();
 
 	}
 

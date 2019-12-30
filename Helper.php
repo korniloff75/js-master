@@ -27,8 +27,12 @@ class H {
 
 		require_once $_SERVER['DOCUMENT_ROOT'] . '/CONST.php';
 
+
 		if(array_key_exists('login', $_REQUEST))
 			self::includeModule('Login');
+
+		/* # Обрабатываем фаталы
+		$this->handleFatals(); */
 
 		define('ADMIN',
 			isset($_SESSION['auth']['login'])
@@ -108,7 +112,7 @@ class H {
 				return !empty($_SERVER['HTTPS']) && ('off' !== strtolower($_SERVER['HTTPS']));
 			},
 		];
-		if (!array_key_exists($prop, $defines)) return null; 
+		if (!array_key_exists($prop, $defines)) return null;
 		return $defines[$prop]();
 	}
 
@@ -263,6 +267,25 @@ class H {
 	} // addFromDir
 
 
+	/* public function handleFatals()
+	{
+		# Логируем фаталы
+		register_shutdown_function(function () {
+			$error = error_get_last();
+			if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_COMPILE_ERROR])) {
+			// if ($error && ($error['type'] == E_ERROR || $error['type'] == E_PARSE || $error['type'] == E_COMPILE_ERROR)) {
+				if (strpos($error['message'], 'Allowed memory size') === 0) {
+					# если кончилась память
+					ini_set('memory_limit', (intval(ini_get('memory_limit'))+64)."M"); // выделяем немножко что бы доработать корректно
+					Log::error("PHP Fatal: not enough memory in ".$error['file'].":".$error['line']);
+				} else {
+					Log::error("PHP Fatal: ".$error['message']." in ".$error['file'].":".$error['line']);
+				}
+				 // ... завершаемая корректно ....
+		 }
+	 });
+	} */
+
 
 	public static function profile($n, $rem='')
 	// :string
@@ -380,21 +403,21 @@ class H {
 	{
 		$sSuffix = strtoupper(substr($sSize, -1));
 	   if (!in_array($sSuffix,array('P','T','G','M','K')))
-	     return (int)$sSize;
+		 return (int)$sSize;
 
 	   $iValue = substr($sSize, 0, -1);
 	   switch ($sSuffix) {
 			case 'P':
-			    $iValue *= 1024;
+				$iValue *= 1024;
 			case 'T':
-			    $iValue *= 1024;
+				$iValue *= 1024;
 			case 'G':
-			    $iValue *= 1024;
+				$iValue *= 1024;
 			case 'M':
-			    $iValue *= 1024;
+				$iValue *= 1024;
 			case 'K':
-			    $iValue *= 1024;
-			    break;
+				$iValue *= 1024;
+				break;
 	   }
 	   return (int)$iValue;
 	}

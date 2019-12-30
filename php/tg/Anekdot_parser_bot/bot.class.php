@@ -1,3 +1,12 @@
+<meta charset="UTF-8">
+<style>
+pre {
+	box-sizing: border-box;
+	white-space: pre-wrap;
+	border: inset 1px #eee;
+}
+</style>
+
 <?php
 // define("TG_TEST", 1);
 
@@ -5,10 +14,18 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(-1);
 
+# Ловим входящий поток
+// $inputJson = file_get_contents('php://input');
+// file_put_contents('__inputData.json', $inputJson);
+// die();
+
 require_once $_SERVER['DOCUMENT_ROOT'] . "/Helper.php";
+
+// set_error_handler('\H::userErrorHandler');
+
 require_once \HOME . "php/Path.php";
-define("BOT_DIR", Path::fromRootStat(__DIR__));
-ob_start();
+// define("BOT_DIR", Path::fromRootStat(__DIR__));
+
 # TG
 require_once __DIR__ . "/../tg.class.php";
 
@@ -18,24 +35,27 @@ class AnekdotBot extends TG implements iTG
 	protected
 		# Test mode, bool
 		$__test = 1 ,
-		$token = '1052237188:AAFIh-yeUO05Qv--LfAGaJnFmo8vvT9jDjY',
+		$token = '1052237188:AAESfJXhbZLxBiZTb7m0CDy-3ZkGgoO9YrU',
 		# Время обновления базы, s
 		$addTime = 12 * 3600,
 		$baseDir = 'base/',
+		$lastBase = [],
+		$base = [],
+		$DOMNodeList,
+		$content = [],
 		$botDir,
 		$id = [
 			'anekdoty' => -1001393900792,
 			 'tome' => 673976740,
-		];
+		],
+		$lastBaseItem,
+		$respTG=[];
 
 	public static
 		# Input stream
 		$json,
-		$base = [],
-		$content = [],
 		// $contentMD,
 		$postFields,
-		$DOMNodeList,
 		$adv = [
 			'Зарабатывай без вложений' => 'https://t.me/CapitalistGameBot?start=673976740',
 			'Учись инвестировать играя' => 'https://t.me/CapitalistGameBot?start=673976740',
@@ -50,27 +70,19 @@ class AnekdotBot extends TG implements iTG
 		$remoteSourse = [
 			'https://anekdot.ru/',
 			'http://anekdotov.net/',
-		],
-
-		$lastBaseItem,
-		$lastBase = [],
-
-		# TMP
-		$t = [];
-
-
-	// private static
+		];
 
 
 
 	public function __construct()
 	{
-		$this->botDir = \Path::fromRootStat(__DIR__);
-		$this->botURL = \BASE_URL . $this->botDir . '/' . basename(__FILE__);
+		# Set local data
+		$this->botFileInfo = new kffFileInfo(__FILE__);
+		// $this->botDir = \Path::fromRootStat(__DIR__);
+		require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
+		$this->log = new Logger('tg.log', $this->botFileInfo->getPathInfo()->getRealPath());
 
-		parent::__construct()->webHook()->init();
-
-		echo "END of __construct";
+		parent::__construct()->init();
 
 	} //__construct
 
@@ -85,50 +97,44 @@ class AnekdotBot extends TG implements iTG
 		{
 			# Сканируем базу в массив из json-файлов
 			foreach ((new DirectoryIterator($this->baseDir)) as $fileinfo) {
-				echo $fileinfo->getFilename();
+				// echo "{$fileinfo->getFilename()}\n";
 				if($fileinfo->getExtension() === 'json')
-					self::$base[$fileinfo->getMTime()] = $fileinfo->getFilename();
+					$this->base[$fileinfo->getMTime()] = $fileinfo->getFilename();
 			}
 			# Дата создания - по убыванию
-			krsort(self::$base);
-			self::$base = array_values(self::$base);
+			krsort($this->base);
+			$this->base = array_values($this->base);
+
+			$this->log->add('$this->base', null, [$this->base]);
 		}
 
 
 		# Имена файлов по убыванию - SCANDIR_SORT_DESCENDING
-		// self::$base = scandir($this->baseDir);
-		// natsort(self::$base);
+		// $this->base = scandir($this->baseDir);
+		// natsort($this->base);
 
-		// self::$base = array_reverse(self::$base);
+		// $this->base = array_reverse($this->base);
 
-		/* self::$base = array_filter(self::$base, function($i) use ($this->baseDir) {
+		/* $this->base = array_filter($this->base, function($i) use ($this->baseDir) {
 			return pathinfo($this->baseDir . $i, PATHINFO_EXTENSION) === 'json';
 		});
-		self::$base = array_values(self::$base); */
+		$this->base = array_values($this->base); */
 
-		self::log(['echo "self::\$base = "','var_dump(static::$base)'], __FILE__, __LINE__);
 
 		# Получаем содержимое последнего файла в массив
-		if(!empty(self::$base[0]))
+		if(!empty($this->base[0]))
 		{
-			self::$lastBaseItem = $this->baseDir . self::$base[0];
-			self::$content = self::$lastBase = \H::json(self::$lastBaseItem);
+			$this->lastBaseItem = $this->baseDir . $this->base[0];
+			$this->content = $this->lastBase = \H::json($this->lastBaseItem);
 
 		}
 
-
-		self::log([
-			'echo "static::\$lastBaseItem = \n" . static::$lastBaseItem . "\n=====\n"',
-		], __FILE__, __LINE__);
+		$this->log->add('$lastBaseItem = ' . $this->lastBaseItem);
 
 		# Парсим сайт из self::$remoteSourse
 		$this->parser(0);
 
-
-		self::log(['echo "count(static::\$content) = " . count(static::$content)',], __FILE__, __LINE__);
-
-		file_put_contents('buffer.log', ob_get_clean());
-		file_put_contents('TG.log', TG::$log);
+		$this->log->add("count(\$this->content) = " . count($this->content));
 
 		die('OK');
 
@@ -141,8 +147,6 @@ class AnekdotBot extends TG implements iTG
 	public function parser(int $ind)
 
 	{
-		// self::log(['echo "static::\$content"', 'var_dump(static::$content)'], __FILE__, __LINE__);
-
 		$doc = new DOMDocument();
 		@$doc->loadHTMLFile(self::$remoteSourse[$ind]);
 
@@ -155,9 +159,9 @@ class AnekdotBot extends TG implements iTG
 		# use custom parser
 		if(method_exists(get_class($this), $parserName))
 		{
-			# rewrite self::$content
-			self::$content = [];
-			self::{$parserName}($doc);
+			# rewrite $this->content
+			$this->content = [];
+			$this->{$parserName}($doc);
 		}
 		else return;
 
@@ -168,22 +172,20 @@ class AnekdotBot extends TG implements iTG
 			$docEl->removeChild($scripts->item($i));
 		} */
 
-		self::log([
-			'echo "count(static::\$content) = " . count(static::$content)',
-		], __FILE__, __LINE__);
+		$this->log->add("count(\$this->content) = " . count($this->content));
 
 		# Ислючаем дубли
-		if(count($diff = array_diff(self::$content, self::$lastBase)))
+		if(count($diff = array_diff($this->content, $this->lastBase)))
 		{
 			// Пишем файл без редакции
-			\H::json($this->baseDir . basename(self::$remoteSourse[$ind]) . '.json', self::$content);
+			\H::json($this->baseDir . basename(self::$remoteSourse[$ind]) . '.json', $this->content);
 
 			# Чистим для MD
 			$diff = array_filter($diff, function($i) {
 				return strpos($i, 'читать дальше', -30) === false;
 			});
-			self::$log[]= '$diff = ';
-			self::$log[]= json_encode($diff, JSON_UNESCAPED_UNICODE) . "\n";
+
+			$this->log->add("\$diff = " . json_encode($diff, JSON_UNESCAPED_UNICODE));
 
 			shuffle($diff);
 
@@ -204,7 +206,6 @@ class AnekdotBot extends TG implements iTG
 				{
 					$bus .= "$i\n\n\n";
 					if($diffLength) continue;
-					// elseif(!strlen(trim($bus))) $bus= ;
 				}
 
 				# Отправляем в канал.
@@ -216,19 +217,19 @@ class AnekdotBot extends TG implements iTG
 			}
 
 			# Test server response
-			self::log(['echo "static::\$t = "', 'var_dump(static::$t )'], __FILE__, __LINE__);
+			$this->log->add("\$this->respTG", null, [$this->respTG]);
+
 
 		}
 
 		# If not exist new content
 		elseif ($data = $this->getCallback('callback_query'))
 		{
-			return $this->request([
-			'callback_query_id' => $data['id'],
+			return $this->apiRequest([
+			'callback_query_id' => $this->inputData['callback_query']['id'],
 			'text' => self::$noUdates,
 			], 'answerCallbackQuery');
 
-			// else $this->requestTG(self::$noUdates);
 		}
 
 
@@ -238,7 +239,12 @@ class AnekdotBot extends TG implements iTG
 	public function requestTG($bus)
 	{
 		# Отправляем в канал.
-		return self::$t[]= $this->request([
+		if(!$this->chat_id)
+		{
+			return $this->log->add("\$this->chat_id =", E_USER_WARNING, $this->chat_id);
+		}
+
+		return $this->respTG[]= $this->apiRequest([
 			'chat_id' => $this->chat_id, // anekdoty | tome
 			// 'chat_id' => $this->__test ? $this->id['tome'] : $this->id['anekdoty'], // anekdoty | tome
 			'parse_mode' => 'markdown',
@@ -254,21 +260,22 @@ class AnekdotBot extends TG implements iTG
 		]);
 	}
 
-	public static function parser0($doc)
+	public function parser0($doc)
 
 	{
-		self::$DOMNodeList = $doc->getElementsByTagName("div");
-		self::log(['echo "\static::\$DOMNodeList = "', 'var_dump(static::$DOMNodeList )'], __FILE__, __LINE__);
+		$this->DOMNodeList = $doc->getElementsByTagName("div");
 
-		if(!self::$DOMNodeList->length) return;
+		$this->log->add("\$DOMNodeList", null, [$this->DOMNodeList]);
 
-		foreach(self::$DOMNodeList as $t) {
+		if(!$this->DOMNodeList->length) return;
+
+		foreach($this->DOMNodeList as $t) {
 			$class = $t->attributes->getNamedItem('class');
 
 			// if(!is_object($class) || $class->nodeValue !== 'text') {
 				// continue;
 			if(is_object($class) && $class->nodeValue === 'text') {
-				self::$content[]= $t->textContent;
+				$this->content[]= $t->textContent;
 			}
 		}
 	} // parser0
@@ -286,6 +293,7 @@ class AnekdotBot extends TG implements iTG
 		];
 	}
 
+	// Делаем АШИПКУ
 
 	/* public function sendTG()
 	{
@@ -310,12 +318,10 @@ class AnekdotBot extends TG implements iTG
 
 		self::$postFields = [
 			'chat_id' => $chat_id,
-			'text' => self::$content[0],
+			'text' => $this->content[0],
 		];
 
-		self::log(['echo "static::\$postFields = "', 'var_dump(static::$postFields)'], __FILE__, __LINE__);
-
-		$this->request(self::$postFields);
+		$this->apiRequest(self::$postFields);
 	} */
 
 }

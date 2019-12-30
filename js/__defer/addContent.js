@@ -120,7 +120,7 @@ _H.ADs = {
 			var $anAD;
 			if (($anAD = that['$img'].closest('[hidden]')).length) {
 				console.log(
-					"$anAD = ", $anAD,
+					"$anAD = ", $anAD
 				);
 				$anAD[0].hidden = false;
 				$anAD.css('display', 'block');

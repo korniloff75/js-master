@@ -12,6 +12,9 @@ class kffFileInfo extends SplFileInfo
 
 	public function __construct($path)
 	{
+		# Методы родительского класса возвращают объекты - экземпляры дочернего класса.
+		parent::setInfoClass(__CLASS__);
+
 		return is_object($path) && in_array('SplFileInfo', class_parents($path)) ? $path : parent::__construct($path);
 	}
 
@@ -28,6 +31,11 @@ class kffFileInfo extends SplFileInfo
 		return str_replace($this->fixSlashes($_SERVER['DOCUMENT_ROOT']) . '/', '', $this->getPathname());
 	}
 
+	/* public function getPathInfo($class_name=__CLASS__)
+	{
+		return (new self(parent::getPathInfo()));
+	} */
+
 	public function getPathname() :string
 	{
 		return self::fixSlashes(parent::getPathname());
@@ -43,7 +51,7 @@ class kffFileInfo extends SplFileInfo
 		return self::fixSlashes(parent::getRealPath());
 	}
 
-}
+} // kffFileInfo
 
 /*
 	$path_from_root = (new \Path(__DIR__))->fromRoot();
@@ -62,7 +70,6 @@ class Path extends kffFileInfo {
 	public $path;
 
 	public function __construct($path)
-
 	{
 		return parent::__construct($path);
 

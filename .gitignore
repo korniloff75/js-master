@@ -11,6 +11,8 @@ js/db/*.*
 *_
 *.xml
 *.gz
+*.pem
+*.key
 
 # local env files
 .env.local

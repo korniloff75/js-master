@@ -19,7 +19,7 @@ RewriteRule ^(.*)$ https://js-master.ru/$1 [R=301,L,QSA]
 # This attempts to block the most common type of exploit `attempts` to Grav
 #
 # Block out any script trying to base64_encode data within the URL.
-RewriteCond %{QUERY_STRING} base64_encode[^(]*\([^)]*\) [OR]
+# RewriteCond %{QUERY_STRING} base64_encode[^(]*\([^)]*\) [OR]
 # Block out any script that includes a <script> tag in URL.
 RewriteCond %{QUERY_STRING} (<|%3C)([^s]*s)+cript.*(>|%3E) [NC,OR]
 # Block out any script trying to set a PHP GLOBALS variable via URL.
@@ -32,17 +32,17 @@ RewriteRule .* index.php [F,L]
 ## End - Exploits
 
 
-## Begin - Index
-# If the requested path and file is not /index.php and the request
+# # Begin - Index
+# # If the requested path and file is not /index.php and the request
 # # has not already been internally rewritten to the index.php script
 # # RewriteCond %{REQUEST_URI} !^/index\.php
 # # and the requested path and file doesn't directly match a physical file
 # RewriteCond %{REQUEST_FILENAME} !-f
 # # # and the requested path and file doesn't directly match a physical folder
-# # RewriteCond %{REQUEST_FILENAME} !-d
+# RewriteCond %{REQUEST_FILENAME} !-d
 
 # # internally rewrite the request to the index.php script
-## RewriteRule .* index.php [L]
+# RewriteRule .* index.php [L]
 # ## End - Index
 
 
@@ -58,7 +58,12 @@ RewriteRule ^(content.+)/($|\?) index.php?page=$1 [L]
 # RewriteRule (content.+)/($|\?) index.php?page=$1 [L]
 # RewriteRule ^(.+)/($|\?) index.php?page=$1 [L]
 
+# BAN domains
+# (urmsosh-komsml|shigsosh-batyr|3izbshem-shemur|chemur-rcheb|sosh8-gkan|sosh5-nowch|obrazov-yaltch)\.edu21\.cap
+RewriteCond %{HTTP_REFERER} ^https?://(www\.)?(((sch46-saratov|mdou26kms|mydetsad18)\.ucoz|.+\.edu21\.cap|gluhovskaya|lotos-med24|bugrovka4|azovo-school|school16\.mmc24421\.cross-edu|shipskazka|vrsport\.hostedu|uproviaz|licei39)\.ru|(oo875|uglscool)\.edu22\.info|(xn----7sbbdrrbdnopdaeif6gsbl1joc.xn--55-jlcd8a)\.xn--p1ai) [NC]
+RewriteRule .* error [F,L]
 </IfModule>
+
 
 # Begin - Prevent Browsing and Set Default Resources
 Options -Indexes

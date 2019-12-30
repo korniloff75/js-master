@@ -202,7 +202,7 @@ class MailPlain extends PHPMailer
 		$tg = new TG(self::TG_TOKEN);
 		$chat_id = $chat_id ?? self::TG_CHAT_ID;
 
-		return $tg->request([
+		return $tg->apiRequest([
 			'chat_id' => $chat_id,
 			'parse_mode' => 'html',
 			'text' => $text,
