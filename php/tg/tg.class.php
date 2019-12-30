@@ -5,8 +5,10 @@ ini_set('display_startup_errors', 1);
 
 // ob_start();
 
-interface iTG
+# Для дочерних классов
+interface iBotTG
 {
+	# protected $botFileInfo;
 	public function init();
 }
 
@@ -99,7 +101,7 @@ class TG {
 	} // getData
 
 
-	public function getCallback($key, $data=null)
+	public function getMessage($key, $data=null)
 	{
 		if(!$this->getData()->inputData) return;
 
@@ -120,7 +122,7 @@ class TG {
 					return false;
 					break;
 			}
-			return $this->getCallback(0, $data);
+			return $this->getMessage(0, $data);
 		}
 
 
@@ -146,7 +148,7 @@ class TG {
 
 		// $this->log->add("");
 
-		$cb = $this->getCallback($cbn);
+		$cb = $this->getMessage($cbn);
 		$this->chat_id = $cb['chat']['id'];
 		$this->text = $cb['text'];
 
@@ -165,11 +167,13 @@ class TG {
 				break;
 		} */
 
-		$this->log->add("\$cbn = $cbn\n\$this->chat_id = {$this->chat_id}");
+		$this->log->add("
+		\$cbn = $cbn\n
+		\$this->chat_id = {$this->chat_id}");
 
 		return $cb;
 
-	}
+	} // findCallback
 
 
 	/**
@@ -177,22 +181,22 @@ class TG {
 	 */
 	protected function webHook()
 	{
-		# Full URI
-		$botURL = \BASE_URL . $this->botDir . '/' . $this->botFileInfo->getBaseName();
-
 		# path to bot is incorrect
-		if(!file_exists($this->botFileInfo->getRealPath()))
+		if(!$this->botFileInfo || !file_exists($this->botFileInfo->getRealPath()))
 		{
 			// $this->__destruct();
 			$this->log->add("\$botURL is NOT exist! - ", E_USER_WARNING, $botURL);
 			return $this;
 		}
+
+		# Full URI
+		$botURL = \BASE_URL . $this->botDir . '/' . $this->botFileInfo->getBaseName();
 		$trigger = \HOME . $this->botDir . "/webHookRegistered.trigger";
 
 		# Однократно запускаем webHook
 		if(file_exists($trigger))
 		{
-			$this->log->add("Webhook уже зарегистрирован", E_USER_WARNING);
+			$this->log->add("Webhook уже зарегистрирован.\nEND of webHook.", E_USER_WARNING);
 		}
 		else
 		{
@@ -201,6 +205,7 @@ class TG {
 				'parse_mode' => null,
 			], 'setWebhook') ?? [];
 
+			$this->log->add("\$botURL = {$botURL}");
 			$this->log->add("response after setWebhook", null, [$responseSetWebhook]);
 
 			if(
@@ -210,7 +215,6 @@ class TG {
 			$this->log->add("Был создан файл - $trigger", E_USER_WARNING);
 		}
 
-		$this->log->add("\$botURL = {$botURL}\n\nEND of webHook");
 		return $this;
 	} // webHook
 
@@ -253,16 +257,22 @@ class TG {
 		return false;
 	}
 
-	public function apiRequestWebhook(array $postFields = [], string $method = 'sendMessage')
-	{
-		if(headers_sent())
-		{
-			$this->log->add("The headers were sent earlier", E_USER_ERROR);
-		}
-		$postFields["method"] = $method;
 
+	# Выводим JSON по запросу от TG
+	# Работает без proxy
+	public function apiResponseJSON(array $postFields = [], string $method = 'sendMessage')
+	{
+		if(headers_sent() || !$this->inputData)
+		{
+			$this->log->add("The headers were sent previously or not an external request. The request was made to TG.", E_USER_WARNING);
+			return $this->apiRequest($postFields, $method);
+		}
+
+		ob_start();
+		$postFields["method"] = $method;
 		header("Content-Type: application/json");
 		echo json_encode($postFields, JSON_UNESCAPED_UNICODE);
+		return ob_end_flush();
 	}
 
 
@@ -289,7 +299,7 @@ class TG {
 		], $postFields);
 
 		foreach ($postFields as &$val) {
-			// encoding to JSON array parameters, for example reply_markup
+			# encoding to JSON array parameters, for example reply_markup
 			if (!is_numeric($val) && !is_string($val)) {
 				$val = json_encode($val);
 			}
@@ -301,7 +311,6 @@ class TG {
 			$ch,
 			[
 				CURLOPT_URL => $this->api . $method,
-				// CURLOPT_URL => "https://api.telegram.org/bot{$this->token}/{$method}",
 				CURLOPT_HEADER => 0,
 
 				CURLOPT_POST => TRUE,
@@ -325,7 +334,7 @@ class TG {
 		);
 
 		return $this->execCurl($ch);
-	}
+	} // apiRequest
 
 
 	function execCurl($ch) {
@@ -336,6 +345,7 @@ class TG {
 			$error = curl_error($ch);
 			$this->log->add("Curl returned error $errno: $error", E_USER_WARNING);
 			curl_close($ch);
+
 			return false;
 		}
 
@@ -351,12 +361,12 @@ class TG {
 		} else if ($http_code != 200) {
 			$this->log->add("apiRequest has failed with error {$response['error_code']}: {$response['description']}", E_USER_WARNING);
 			if ($http_code == 401) {
-				$this->log->add('Invalid access token provided', E_USER_ERROR);
+				$this->log->add('Invalid access token provided', E_USER_WARNING);
 			}
 			return false;
 		} else {
 			if (isset($response['description'])) {
-				$this->log->add("apiRequest was successful: {$response['description']}");
+				$this->log->add("apiRequest was SUCCESSFUL: {$response['description']}");
 			}
 			$response = $response['result'];
 		}
@@ -365,7 +375,7 @@ class TG {
 	} // execCurl
 
 
-	public function getKeyboard($data)
+	public function setKeyboard($data)
 	{
 	 $keyboard = [
 		 "keyboard" => $data,
@@ -376,7 +386,7 @@ class TG {
 	}
 
 	// not use
-	public function getInlineKeyboard(array $data)
+	public function setInlineKeyboard(array $data)
 	: string
 	{
 		return json_encode( [

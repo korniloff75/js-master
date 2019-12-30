@@ -22,7 +22,7 @@ class Logger
 	/**
 	 * @name - name of the log file
 	 * optional @dir - realpath to the directory
-	 * optional @rewriteLog - bool. If == true (default) then log file should rewriting
+	 * optional bool @rewriteLog - If == true (default) then log file should rewriting
 	 */
 	public function __construct($name, $dir='.', $rewriteLog=true)
 	{
@@ -71,20 +71,23 @@ class Logger
 	protected function _formatLog($fileName, $line, $message, $level=null)
 	:string
 	{
+		$errorLevel = (bool) $level ? "code:$level" : '';
+
 		switch ($level) {
-			case E_WARNING:
 			case E_USER_WARNING:
-				$errorLevel = ' WARNING';
+				$errorLevel = " WARNING";
+			break;
+			case E_WARNING:
+				$errorLevel = "$errorLevel WARNING";
 				break;
 			case E_ERROR:
 			case E_USER_ERROR:
-				$errorLevel = ' ERROR';
+				$errorLevel = "$errorLevel ERROR";
 				break;
 			default:
-				$errorLevel = (bool) $level ? " code:$level " : '';
 				break;
 		}
-		return "[{$fileName}: {$line} - " . date('D M d H:i:s Y',time()) . "$errorLevel] $message";
+		return "[{$fileName}: {$line} - " . date('D Y M d H:i:s',time()) . " $errorLevel] $message";
 	}
 
 	public function print()
@@ -105,30 +108,27 @@ class Logger
 			// return false;
 		}
 
+		if(strpos($errstr, "DOMDocument::loadHTMLFile()") !== false)
+			return false;
+
 		$fileName = basename($errfile);
 
 		switch ($errno) {
-		case E_ERROR:
-		case E_USER_ERROR:
-			$this->_addToLog($fileName, $errline, $errstr, $errno);
-			$this->__destruct();
-			die("Завершение работы.<br />\n");
-			break;
-
-		/* case E_USER_WARNING:
-			$this->_addToLog($fileName, $errline, $errstr, $errno);
-			// $this->_addToLog($fileName, $errline, $errstr, E_USER_WARNING);
-		break;
-
-		case E_USER_NOTICE:
-			$this->_addToLog($fileName, $errline, $errstr, $errno);
-			// $this->_addToLog($fileName, $errline, $errstr, E_USER_NOTICE);
+			/* case 2:
+				return false;
 			break; */
+			case E_ERROR:
+			case E_USER_ERROR:
+			case E_COMPILE_ERROR:
+			case E_PARSE:
+				$this->_addToLog($fileName, $errline, $errstr, $errno);
+				$this->__destruct();
+				die("Завершение работы.<br />\n");
+				break;
 
-		default:
-			// echo "\nНеизвестная ошибка: [$errno] $fileName: $errline<br />\n";
-			$this->_addToLog($fileName, $errline, $errstr, $errno);
-			break;
+			default:
+				$this->_addToLog($fileName, $errline, $errstr, $errno);
+				break;
 		}
 
 		# На серьёзных ошибках запускаем системный обработчик

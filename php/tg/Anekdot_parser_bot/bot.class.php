@@ -1,36 +1,18 @@
-<meta charset="UTF-8">
-<style>
-pre {
-	box-sizing: border-box;
-	white-space: pre-wrap;
-	border: inset 1px #eee;
-}
-</style>
-
 <?php
-// define("TG_TEST", 1);
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(-1);
 
-# Ловим входящий поток
-// $inputJson = file_get_contents('php://input');
-// file_put_contents('__inputData.json', $inputJson);
-// die();
-
 require_once $_SERVER['DOCUMENT_ROOT'] . "/Helper.php";
 
-// set_error_handler('\H::userErrorHandler');
-
 require_once \HOME . "php/Path.php";
-// define("BOT_DIR", Path::fromRootStat(__DIR__));
 
 # TG
 require_once __DIR__ . "/../tg.class.php";
 
 
-class AnekdotBot extends TG implements iTG
+class AnekdotBot extends TG implements iBotTG
 {
 	protected
 		# Test mode, bool
@@ -40,15 +22,19 @@ class AnekdotBot extends TG implements iTG
 		$addTime = 12 * 3600,
 		$baseDir = 'base/',
 		$lastBase = [],
-		$base = [],
+		$baseId = [],
+		$baseSource = [],
 		$DOMNodeList,
+		// $contentSum = [],
 		$content = [],
+		# Счётчик обновлений
+		$countDiff = 0,
 		$botDir,
 		$id = [
 			'anekdoty' => -1001393900792,
 			 'tome' => 673976740,
 		],
-		$lastBaseItem,
+		$currentBaseItem,
 		$respTG=[];
 
 	public static
@@ -67,7 +53,7 @@ class AnekdotBot extends TG implements iTG
 		$noUdates = "Обновлений пока нет. Попробуйте позже.";
 
 	protected static
-		$remoteSourse = [
+		$remoteSource = [
 			'https://anekdot.ru/',
 			'http://anekdotov.net/',
 		];
@@ -82,6 +68,7 @@ class AnekdotBot extends TG implements iTG
 		require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
 		$this->log = new Logger('tg.log', $this->botFileInfo->getPathInfo()->getRealPath());
 
+		# Запускаем скрипт
 		parent::__construct()->init();
 
 	} //__construct
@@ -91,48 +78,32 @@ class AnekdotBot extends TG implements iTG
 	 */
 	public function init()
 	{
+		/* if(empty($this->inputData)) die ('Нет входящего запроса');
+		else $this->log->add('$this->inputData', null, [empty($this->inputData), $this->inputData]); */
+
 		if(!is_dir($this->baseDir))
 			mkdir($this->baseDir);
 		else
 		{
 			# Сканируем базу в массив из json-файлов
-			foreach ((new DirectoryIterator($this->baseDir)) as $fileinfo) {
-				// echo "{$fileinfo->getFilename()}\n";
-				if($fileinfo->getExtension() === 'json')
-					$this->base[$fileinfo->getMTime()] = $fileinfo->getFilename();
+			$it = new FilesystemIterator($this->baseDir, FilesystemIterator::SKIP_DOTS | FilesystemIterator::UNIX_PATHS);
+			$it = new RegexIterator($it, "/\.json$/i");
+
+			foreach ($it as $fileinfo) {
+				$name = explode('.', $fileinfo->getBasename());
+				$source = $name[1] . ".{$name[2]}";
+				$this->baseSource[$source] = $this->baseSource[$source] ?? [];
+				$this->baseSource[$source][$name[0]] = $fileinfo->getFilename();
 			}
-			# Дата создания - по убыванию
-			krsort($this->base);
-			$this->base = array_values($this->base);
+			// $this->baseId = glob("*.json");
 
-			$this->log->add('$this->base', null, [$this->base]);
+			$this->log->add('$this->baseSource', null, [$this->baseSource]);
 		}
 
+		# Завершаем скрипт без входящего JSON
+		if(empty($this->inputData)) die ('Нет входящего запроса');
 
-		# Имена файлов по убыванию - SCANDIR_SORT_DESCENDING
-		// $this->base = scandir($this->baseDir);
-		// natsort($this->base);
-
-		// $this->base = array_reverse($this->base);
-
-		/* $this->base = array_filter($this->base, function($i) use ($this->baseDir) {
-			return pathinfo($this->baseDir . $i, PATHINFO_EXTENSION) === 'json';
-		});
-		$this->base = array_values($this->base); */
-
-
-		# Получаем содержимое последнего файла в массив
-		if(!empty($this->base[0]))
-		{
-			$this->lastBaseItem = $this->baseDir . $this->base[0];
-			$this->content = $this->lastBase = \H::json($this->lastBaseItem);
-
-		}
-
-		$this->log->add('$lastBaseItem = ' . $this->lastBaseItem);
-
-		# Парсим сайт из self::$remoteSourse
-		$this->parser(0);
+		$this->parser();
 
 		$this->log->add("count(\$this->content) = " . count($this->content));
 
@@ -142,28 +113,60 @@ class AnekdotBot extends TG implements iTG
 
 
 	/**
-	 * @ind - индекс в массиве self::$remoteSourse
+	 * @ind - индекс в массиве self::$remoteSource
 	 */
-	public function parser(int $ind)
+	public function parser()
 
 	{
-		$doc = new DOMDocument();
-		@$doc->loadHTMLFile(self::$remoteSourse[$ind]);
+		foreach (self::$remoteSource as $source) {
+			$bSource = basename($source);
+			$base = $this->baseSource[$bSource] ?? [];
 
-		// $docEl = $doc->documentElement;
+		// foreach ($this->baseSource as $source => $base) {
+			# Получаем файл для текущего chat_id
+			if(isset($base[$this->chat_id]))
+			{
+				$currentItem = $this->baseDir . $base[$this->chat_id];
+				$this->log->add('$currentItem = ' . $currentItem);
+				$this->content = $this->lastBase = \H::json($currentItem);
 
-		# Подключаем частный парсер
-		// план - перенести частные в дочерний класс
-		$parserName = "parser$ind";
+			}
 
-		# use custom parser
-		if(method_exists(get_class($this), $parserName))
-		{
-			# rewrite $this->content
+			$s = str_replace('.', '_', $bSource);
+			$parserName = "parser_$s";
+
+			# use custom parser if EXIST =====
+			if(!method_exists(get_class($this), $parserName)) continue;
+
+			$this->log->add("\$bSource, \$base = ", null, [$bSource, $base]);
+
+			# Парсим сайт из self::$remoteSource
+			$doc = new DOMDocument();
+			@$doc->loadHTMLFile($source);
+
+			# Обнуляем контент
 			$this->content = [];
-			$this->{$parserName}($doc);
+
+			# Подключаем локальный парсер
+			// план - перенести частные в дочерний класс
+			$this->{$parserName}($doc)->_findUnical($bSource);
+
+			$this->log->add("count(\$this->content) - $source = " . count($this->content));
 		}
-		else return;
+
+		# If not exist new content
+		if (!$this->countDiff && array_key_exists('callback_query', $this->inputData))
+		{
+			$r = $this->apiResponseJSON([
+			// return $this->apiRequest([
+			'callback_query_id' => $this->inputData['callback_query']['id'],
+			'text' => self::$noUdates,
+			], 'answerCallbackQuery');
+
+			$this->log->add("NOT exist new content.", null, $r);
+			return $r;
+
+		}
 
 		/* $scripts = $doc->getElementsByTagName("script");
 		var_dump($scripts);
@@ -172,29 +175,37 @@ class AnekdotBot extends TG implements iTG
 			$docEl->removeChild($scripts->item($i));
 		} */
 
-		$this->log->add("count(\$this->content) = " . count($this->content));
+	} // parser
 
-		# Ислючаем дубли
+
+	/**
+	 * Получаем неопубликованный контент
+	 */
+	private function _findUnical($bSource)
+	{
+		# $this->content предварительно пропущен через локальный парсер
 		if(count($diff = array_diff($this->content, $this->lastBase)))
 		{
-			// Пишем файл без редакции
-			\H::json($this->baseDir . basename(self::$remoteSourse[$ind]) . '.json', $this->content);
+			# Пишем файл без редакции
+			\H::json($this->baseDir . "{$this->chat_id}.$bSource.json", $this->content);
+
 
 			# Чистим для MD
 			$diff = array_filter($diff, function($i) {
 				return strpos($i, 'читать дальше', -30) === false;
 			});
 
-			$this->log->add("\$diff = " . json_encode($diff, JSON_UNESCAPED_UNICODE));
+			// $this->log->add("\$diff = " . json_encode($diff, JSON_UNESCAPED_UNICODE));
+			$this->log->add("\$this->countDiff = " . ++$this->countDiff);
 
 			shuffle($diff);
 
 			$diff = str_replace(["\r", '\r', '_', '*', '=', ], ["\n", "\n", ' ', ''], $diff);
 
 			# создаём .md
-			file_put_contents($this->baseDir . time() . basename(self::$remoteSourse[$ind]) . '.md', array_map(function($i) {
+			/* file_put_contents($this->baseDir . time() . basename(self::$remoteSource[$ind]) . '.md', array_map(function($i) {
 				return $i . "\n\n---\n";
-			}, $diff));
+			}, $diff)); */
 
 			$bus = '';
 			$diffLength = count($diff);
@@ -219,39 +230,27 @@ class AnekdotBot extends TG implements iTG
 			# Test server response
 			$this->log->add("\$this->respTG", null, [$this->respTG]);
 
-
 		}
 
-		# If not exist new content
-		elseif ($data = $this->getCallback('callback_query'))
-		{
-			return $this->apiRequest([
-			'callback_query_id' => $this->inputData['callback_query']['id'],
-			'text' => self::$noUdates,
-			], 'answerCallbackQuery');
-
-		}
-
-
-	} // parser
+	} // _findUnical
 
 
 	public function requestTG($bus)
 	{
 		# Отправляем в канал.
-		if(!$this->chat_id)
+		/* if(!$this->chat_id)
 		{
 			return $this->log->add("\$this->chat_id =", E_USER_WARNING, $this->chat_id);
-		}
+		} */
 
 		return $this->respTG[]= $this->apiRequest([
 			'chat_id' => $this->chat_id, // anekdoty | tome
 			// 'chat_id' => $this->__test ? $this->id['tome'] : $this->id['anekdoty'], // anekdoty | tome
 			'parse_mode' => 'markdown',
 			'text' => $bus,
-			'reply_markup' => $this->getInlineKeyboard([[
+			'reply_markup' => $this->setInlineKeyboard([[
 				# Row
-				$this->getAdvButton(),
+				$this->setAdvButton(),
 				[
 					"text" => "Хочу ещё",
 					"callback_data" => '/more',
@@ -260,28 +259,51 @@ class AnekdotBot extends TG implements iTG
 		]);
 	}
 
-	public function parser0($doc)
+	protected function parser_anekdot_ru($doc)
 
 	{
 		$this->DOMNodeList = $doc->getElementsByTagName("div");
 
-		$this->log->add("\$DOMNodeList", null, [$this->DOMNodeList]);
+		$this->log->add(__METHOD__ . " - \$DOMNodeList", null, [$this->DOMNodeList]);
 
 		if(!$this->DOMNodeList->length) return;
 
 		foreach($this->DOMNodeList as $t) {
 			$class = $t->attributes->getNamedItem('class');
 
-			// if(!is_object($class) || $class->nodeValue !== 'text') {
-				// continue;
 			if(is_object($class) && $class->nodeValue === 'text') {
 				$this->content[]= $t->textContent;
 			}
 		}
-	} // parser0
+
+		# Required
+		return $this;
+	} // parser_anekdot_ru
+
+	protected function parser_anekdotov_net($doc)
+
+	{
+		$this->DOMNodeList = $doc->getElementsByTagName("div");
+
+		$this->log->add(__METHOD__ . " - \$DOMNodeList", null, [$this->DOMNodeList]);
+
+		if(!$this->DOMNodeList->length) return;
+
+		foreach($this->DOMNodeList as $t) {
+			$class = $t->attributes->getNamedItem('align');
+
+			if(is_object($class) && $class->nodeValue === 'justify') {
+				if(strpos($t->textContent, 'а н е к д о т о в . n е t') !== false) continue;
+				$this->content[]= $t->textContent;
+			}
+		}
+
+		# Required
+		return $this;
+	} // parser_anekdotov_net
 
 
-	public function getAdvButton()
+	public function setAdvButton()
 	{
 		# Advert
 		$text = array_keys(self::$adv);
@@ -323,6 +345,20 @@ class AnekdotBot extends TG implements iTG
 
 		$this->apiRequest(self::$postFields);
 	} */
+
+	public function __destruct()
+	{
+		?>
+		<meta charset="UTF-8">
+		<style>
+		pre {
+			box-sizing: border-box;
+			white-space: pre-wrap;
+			border: inset 1px #eee;
+		}
+		</style>
+		<?php
+	}
 
 }
 
