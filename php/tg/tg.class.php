@@ -1,7 +1,7 @@
 <?php
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-// error_reporting(-1);
+error_reporting(-1);
 
 // ob_start();
 
@@ -9,8 +9,10 @@ ini_set('display_startup_errors', 1);
 interface iBotTG
 {
 	# protected $botFileInfo;
-	public function init();
+	// protected function init();
 }
+
+require_once $_SERVER['DOCUMENT_ROOT'] . '/Helper.php';
 
 
 class TG {
@@ -22,21 +24,24 @@ class TG {
 		$api,
 		$headers = ["Content-Type:multipart/form-data"],
 		$proxyList = [
-			"socks4://89.190.120.116:52941",
-			"socks4://188.93.238.17:51565",
-			"socks4://159.224.226.164:40856",
+			"http://5.172.153.140:8080",
+			"http://54.36.246.74:80",
+			"https://185.107.106.68:3128",
 			"http://190.242.119.194:3128",
 			"http://89.165.218.82:47886",
 			"http://183.91.33.41:91",
 			"http://183.91.33.41:8081",
+			"socks4://89.190.120.116:52941",
+			"socks4://188.93.238.17:51565",
+			"socks4://159.224.226.164:40856",
 		],
 		# define in child classes
 		$botFileInfo,
 		$log, # instanceof Logger
 
 		$botDir,
-		# define callback
-		$callback,
+		# take object message
+		$message,
 		$inputData = null,
 		$chat_id;
 
@@ -51,14 +56,20 @@ class TG {
 		if(!$this->log)
 		{
 			require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
-			$this->log = new Logger('tg.class.log', __DIR__);
+			if($this->botFileInfo)
+			{
+				// $path = $this->botFileInfo->getPathname();
+				$path = $this->botFileInfo->getPathInfo()->getRealPath();
+				$file = $this->botFileInfo->getBasename() . '.log';
+			}
+			$this->log = new Logger($file ?? 'tg.class.log', $path ?? __DIR__);
 		}
 		$this->log->add("tg.class.php started");
 
 		$this->token = $token ?? $this->token;
 		if(!is_string($this->token))
 		{
-			$this->log->add("There is no TOKEN from child class to continue working!", E_USER_WARNING);
+			$this->log->add("There is no TOKEN from child class to continue execution!", E_USER_WARNING);
 			$this->__destruct();
 			die();
 		}
@@ -76,7 +87,7 @@ class TG {
 		$this->log->add("Init bot.class.php");
 
 		# Обрабатываем входящие данные
-		$this->callback = $this->webHook()->findCallback();
+		$this->message = $this->webHook()->findCallback();
 		return $this;
 	}
 
@@ -92,9 +103,6 @@ class TG {
 			# Кодируем в массив
 			$this->inputData = @json_decode($this->inputJson, true) ?? false;
 
-			if(strlen($this->inputJson))
-				file_put_contents($this->botFileInfo->getPath() . '/inputData.json', $this->inputJson);
-			else $this->log->add("Нет callback!");
 		}
 
 		return $this;
@@ -124,9 +132,6 @@ class TG {
 			}
 			return $this->getMessage(0, $data);
 		}
-
-
-		// return array_key_exists('message', $data) ? $data['message'] : false;
 
 	}
 
@@ -260,7 +265,7 @@ class TG {
 
 	# Выводим JSON по запросу от TG
 	# Работает без proxy
-	public function apiResponseJSON(array $postFields = [], string $method = 'sendMessage')
+	protected function apiResponseJSON(array $postFields = [], string $method = 'sendMessage')
 	{
 		if(headers_sent() || !$this->inputData)
 		{
@@ -268,8 +273,10 @@ class TG {
 			return $this->apiRequest($postFields, $method);
 		}
 
-		ob_start();
 		$postFields["method"] = $method;
+		$this->log->add('$postFields in ' . __METHOD__, null, [$postFields]);
+
+		ob_start();
 		header("Content-Type: application/json");
 		echo json_encode($postFields, JSON_UNESCAPED_UNICODE);
 		return ob_end_flush();
@@ -305,7 +312,7 @@ class TG {
 			}
 		}
 
-		$this->log->add("URL - {$this->api}$method\n\$postFields", null, [$postFields]);
+		$this->log->add("URL - {$this->api}$method\n\$postFields in " . __METHOD__, null, [$postFields]);
 
 		curl_setopt_array(
 			$ch,

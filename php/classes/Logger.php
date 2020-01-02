@@ -108,15 +108,13 @@ class Logger
 			// return false;
 		}
 
+		# Убираем ошибки парсера
 		if(strpos($errstr, "DOMDocument::loadHTMLFile()") !== false)
 			return false;
 
 		$fileName = basename($errfile);
 
 		switch ($errno) {
-			/* case 2:
-				return false;
-			break; */
 			case E_ERROR:
 			case E_USER_ERROR:
 			case E_COMPILE_ERROR:
@@ -156,7 +154,8 @@ class Logger
 			ini_set('memory_limit', (intval(ini_get('memory_limit'))+64)."M");
 		}
 
-		$this->add("PHP Fatal: ".$error['message']." in ".$error['file'].":".$error['line']);
+		$this->_addToLog($error['file'], $error['line'],$error['message'], $error['type']);
+		// $this->add("PHP Fatal: ".$error['message']." in ".$error['file'].":".$error['line']);
 
 		$this->__destruct();
 		$this->print();

@@ -4,9 +4,6 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/' . "CONST.php";
 
 class kffFileInfo extends SplFileInfo
 {
-	const
-		ROOT = \BASE_URL;
-
 	public
 		$path;
 
