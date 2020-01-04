@@ -24,16 +24,19 @@ class TG {
 		$api,
 		$headers = ["Content-Type:multipart/form-data"],
 		$proxyList = [
-			"http://5.172.153.140:8080",
-			"http://54.36.246.74:80",
-			"https://185.107.106.68:3128",
+
 			"http://190.242.119.194:3128",
 			"http://89.165.218.82:47886",
+			"https://118.140.150.74:3128",
+			"http://185.186.77.244:80",
+			"http://88.199.21.75:80",
 			"http://183.91.33.41:91",
-			"http://183.91.33.41:8081",
+			"socks5://139.99.104.233:15895",
 			"socks4://89.190.120.116:52941",
 			"socks4://188.93.238.17:51565",
 			"socks4://159.224.226.164:40856",
+			"https://185.107.106.68:3128",
+			"http://66.90.255.99:8080",
 		],
 		# define in child classes
 		$botFileInfo,
@@ -47,7 +50,7 @@ class TG {
 
 
 	protected static
-		$textLimit = 3500;
+		$textLimit = 3900;
 
 
 	public function __construct($token=null)
@@ -89,7 +92,7 @@ class TG {
 		# Обрабатываем входящие данные
 		$this->message = $this->webHook()->findCallback();
 		return $this;
-	}
+	} // __construct
 
 
 	public function getData()
@@ -109,33 +112,6 @@ class TG {
 	} // getData
 
 
-	public function getMessage($key, $data=null)
-	{
-		if(!$this->getData()->inputData) return;
-
-		$data = $data ?? $this->inputData;
-
-		if(array_key_exists('message', $data))
-			return $data['message'];
-		else
-		{
-			switch ($key) {
-				case 'result':
-					$data = $data['result'][0];
-				case 'callback_query':
-					$data = $data['callback_query'];
-					break;
-
-				default:
-					return false;
-					break;
-			}
-			return $this->getMessage(0, $data);
-		}
-
-	}
-
-
 	/**
 	 * returned current callback array || false
 	 */
@@ -148,29 +124,26 @@ class TG {
 		}
 
 		$cbn = array_values(
-			array_intersect(['message', 'callback_query', 'result'], array_keys($this->inputData))
+			array_intersect(['message', 'channel_post', 'callback_query', 'result'], array_keys($this->inputData))
 		)[0] ?? false;
 
 		// $this->log->add("");
 
-		$cb = $this->getMessage($cbn);
-		$this->chat_id = $cb['chat']['id'];
-		$this->text = $cb['text'];
-
-		/* switch ($cbn) {
+		switch ($cbn) {
 			case 'message':
-				$this->chat_id = $cb['chat']['id'];
-				$this->text = $cb['text'];
+			case 'channel_post':
+				$cb = $this->inputData[$cbn];
 				break;
 			case 'callback_query':
-				$this->chat_id = $cb['message']['chat']['id'];
-				$this->text = $cb['message']['text'];
-				break;
+				$cb = $this->inputData['callback_query']['message'];
 
 			default:
-				$this->chat_id = null;
+
 				break;
-		} */
+		}
+
+		$this->chat_id = $cb['chat']['id'];
+		$this->text = $cb['text'];
 
 		$this->log->add("
 		\$cbn = $cbn\n
@@ -305,10 +278,12 @@ class TG {
 
 		], $postFields);
 
+		// if(!strlen($postFields))
+
 		foreach ($postFields as &$val) {
-			# encoding to JSON array parameters, for example reply_markup
+			# encoding to JSON not primitive parameters
 			if (!is_numeric($val) && !is_string($val)) {
-				$val = json_encode($val);
+				$val = json_encode($val, JSON_UNESCAPED_UNICODE);
 			}
 		}
 
@@ -403,6 +378,70 @@ class TG {
 
 
 	/**
+	 *
+	 */
+	public function sendMessage(array $content)
+	{
+		# Делим на шины по self::$textLimit символов
+		$bus = '';
+		$diffLength = count($content);
+
+		foreach($content as $i) {
+			--$diffLength;
+			# Разбиваем на строки фикс. размера
+			if(strlen($bus) + strlen($i) < self::$textLimit)
+			{
+				$bus .= "$i\n\n\n";
+				if($diffLength) continue;
+			}
+
+			if(!strlen(trim($bus)))
+				continue;
+
+			# Отправляем в канал.
+			$respTG[]= $this->apiRequest([
+				'chat_id' => $this->chat_id,
+				'parse_mode' => 'html',
+				'text' => $bus,
+				'reply_markup' => $this->setInlineKeyboard([[
+					# Row
+					class_exists('CommonBot') ? CommonBot::setAdvButton() : null,
+					[
+						"text" => "Хочу ещё",
+						"callback_data" => '/more',
+					],
+				]]),
+			]);
+
+			$bus = '';
+			usleep(10);
+
+		}
+
+		# Test server response
+		$this->log->add("\$respTG", null, [$respTG]);
+	}
+
+	/**
+	 * @photos - https://core.telegram.org/bots/api#sendmediagroup
+	 */
+	public function sendMediaGroup(array $photos)
+	{
+		$this->log->add('$photos = ', null, [$photos]);
+
+		$photos = array_chunk($photos, 10);
+
+		foreach ($photos as $lim) {
+			$this->apiRequest([
+				'chat_id' => $this->message['chat']['id'],
+				'media' => $lim,
+			], 'sendMediaGroup');
+			usleep(10);
+		}
+
+	}
+
+	/**
 	 * В разработке
 	 */
 	function sendPhoto($chat_id, $url) {
@@ -427,8 +466,7 @@ class TG {
 		file_put_contents($this->botFileInfo->getPath() . '/buffer.log', strip_tags($this->bufferLog)); */
 
 		# Выводим логи
-		// print_r("<h3>Buffer Log</h3><pre>{$this->bufferLog}</pre>");
-		if($this->__test) $this->log->print();
+		// if($this->__test) $this->log->print();
 
 	}
 

@@ -87,14 +87,24 @@ class Logger
 			default:
 				break;
 		}
-		return "[{$fileName}: {$line} - " . date('D Y M d H:i:s',time()) . " $errorLevel] $message";
+		return "[{$fileName}:{$line} " . date('Y M d H:i:s',time()) . " $errorLevel] $message";
 	}
 
 	public function print()
 	{
+		?>
+		<meta charset="UTF-8">
+		<style>
+		pre {
+			box-sizing: border-box;
+			white-space: pre-wrap;
+			border: inset 1px #eee;
+		}
+		</style>
+		<?php
 		print_r("<h3>Log</h3><pre>");
 		foreach ($this->log as &$string) {
-			print_r($string);
+			print_r($string . "\n");
 		}
 		echo "</pre>";
 	}

@@ -14,10 +14,18 @@ _H.ADs = {
 		]
 	},
 	/* https://ad.admitad.com/g/npsw06cnp5a4ec867dbe369ea22811/?i=4
-	<!-- admitad.banner: ugv2rqjiica4ec867dbe16525dc3e8 Aliexpress WW -->
-	<a target="_blank" rel="nofollow" href="https://alitems.com/g/ugv2rqjiica4ec867dbe16525dc3e8/?i=4"><img width="468" height="60" border="0" src="https://ad.admitad.com/b/ugv2rqjiica4ec867dbe16525dc3e8/" alt="Aliexpress WW"/></a>
-	<!-- /admitad.banner -->
+	<!-- admitad.banner: 7n27paepuva4ec867dbefcdd16745e Samsung [CPS] IN -->
+<a target="_blank" rel="nofollow" href="https://ad.admitad.com/g/7n27paepuva4ec867dbefcdd16745e/?i=4"><img width="160" height="600" border="0" src="https://ad.admitad.com/b/7n27paepuva4ec867dbefcdd16745e/" alt="Samsung [CPS] IN"/></a>
+<!-- /admitad.banner -->
 	 */
+	Samsung: {
+		uri: 'content',
+		alt: 'Samsung [CPS] IN',
+		links: [
+			'7n27paepuva4ec867dbefcdd16745e',
+		]
+	},
+
 	Timeweb: { //== Хост
 		uri: 'Javascripts|content',
 		alt: 'хостинг Timeweb',

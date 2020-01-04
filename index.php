@@ -17,10 +17,10 @@ require_once 'Helper.php';
 // if(array_key_exists('login', $_REQUEST))
 // 	H::includeModule('Login');
 
-\H::log([
+/* \H::log([
 	'echo "\$_REQUEST =" ', 'var_dump($_REQUEST)',
 	'echo "H::\$Dir = " . H::$Dir ',
-], __FILE__, __LINE__);
+], __FILE__, __LINE__); */
 // exit;
 
 # Fork on modules || AJAX || full page

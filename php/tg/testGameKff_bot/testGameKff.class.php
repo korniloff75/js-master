@@ -9,12 +9,15 @@ error_reporting(-1);
 require_once "../CommonBot.class.php";
 
 
-class AntimatKFF extends CommonBot implements iBotTG
+class testGameKff extends CommonBot implements iBotTG
 {
 	protected
 		# Test mode, bool
 		$__test = 1 ,
 		$token = '1017974908:AAERu1qQlpZCVEgmK8BIsEZRyNgIsMaS3fk',
+		$license = [
+			-1001251056203 => "3000-12-31",
+		],
 
 		$maxTry = 3,
 		$protecText = "Вы пытаетесь воспользоваться частным ботом.\nДля его разблокировки свяжитесь с автором *@korniloff75*";
@@ -36,6 +39,7 @@ class AntimatKFF extends CommonBot implements iBotTG
 
 	public function __construct()
 	{
+		// \H::json('license.json', $this->license);
 		# Set local data
 		$this->botFileInfo = new kffFileInfo(__FILE__);
 
@@ -58,45 +62,8 @@ class AntimatKFF extends CommonBot implements iBotTG
 		}
 		else $this->log->add('$this->message', null, [$this->message]);
 
-		$text = $this->message['text'];
-		$censure = preg_replace(self::$patterns, " <b>[<a href='https://js-master.ru/content/5.Razrabotki/Antimat_plus/'>цензура</a>]</b> ", $text);
 
-		# Мата нет
-		if(!strcmp($text, $censure))
-		{
-			$this->log->add("censure FAIL", null, [$text, $censure]);
-			return;
-		}
-		else
-		{
-			$this->log->add("censure SUCCESS");
-		}
-
-		$user = $this->message['from']['username'];
-		$base = \H::json('base.json');
-		$base[$user] = $base[$user] ?? ['count'=>0];
-
-		if(++$base[$user]['count'] > $this->maxTry)
-		{
-			$censure = "Всё, пиздец тебе, <b>@{$user}</b>!\n\nВсе твои посты с матом впредь будут удаляться. Переходи на литературный язык.";
-		}
-		else
-		{
-			$censure = "Отредактировано сообщение от @{$user}\n\n$censure\n\nПользователю <b>@{$user}</b> выдано <b>{$base[$user]['count']}</b>-е предупреждение от администрации.";
-
-		}
-
-		# Отключаем предпросмотр ссылок
-		$this->responseData['disable_web_page_preview'] = true;
-
-		if($base[$user]['count'] <= ($this->maxTry + 1))
-		{
-			\H::json('base.json', $base);
-			$this->responseData['text'] = $censure;
-			$this->log->add("apiRequest = ", null, [$this->apiRequest($this->responseData)]);
-		}
-
-		$this->log->add("apiResponseJSON = ", null, [$this->apiResponseJSON($this->responseData, 'deleteMessage')]);
+		$this->log->add("apiResponseJSON = ", null);
 
 		die('OK');
 
@@ -104,4 +71,4 @@ class AntimatKFF extends CommonBot implements iBotTG
 
 }
 
-new AntimatKFF;
+new testGameKff;
