@@ -1,9 +1,3 @@
 Helper.php : 56
 Helper started from ROOT
-OK index.php : 23
-$_REQUEST =
-OK array(0) {
-}
-
-OK H::$Dir = content/1.Primery/Blokirovka_reklamy_v_Ukoz/
 OK 

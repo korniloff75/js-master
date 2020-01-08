@@ -45,6 +45,9 @@ class KorniloFF_news extends CommonBot implements iBotTG
 			'http://m.allcrimea.net/',
 		];
 
+	private
+		$imgXpath;
+
 
 
 	public function __construct()
@@ -102,12 +105,12 @@ class KorniloFF_news extends CommonBot implements iBotTG
 				$links []= $source . substr($href, 1);
 			}
 
-			$this->log->add("href = $href", null, $href);
 		}
 
 		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
 			// $doc,
-			$mainLinks, $links
+			$mainLinks,
+			// $links
 		]);
 
 		# Required $this->definedBase in CommonBot
@@ -148,19 +151,18 @@ class KorniloFF_news extends CommonBot implements iBotTG
 	/**
 	 * Обрабатываем неопубликованный контент
 	 */
-	protected function handler_crimea_news_com(array $diff)
+	protected function handler_crimea_news_com(array &$diff, $xpathToNode = "//*[@class=\"news_c\"][1]")
 	{
 		$photos = [];
 		$content = [];
+		$imgXpath = $this->imgXpath ?? $xpathToNode;
 		# Перебираем все новые ссылки и грузим из них в контент
 		foreach ($diff as &$link) {
 			$docLink = new DOMDocument();
 			@$docLink->loadHTMLFile($link);
 			$xpath = new DOMXpath($docLink);
 
-			$xpathToNode = "//*[@class=\"news_c\"][1]";
-
-			if(!is_object($xnews = $xpath->query($xpathToNode)))
+			if(!is_object($xnews = $xpath->query($xpathToNode)->item(0)))
 				continue;
 
 			# Собираем для добавления в $content
@@ -169,7 +171,7 @@ class KorniloFF_news extends CommonBot implements iBotTG
 			// $this->log->add('$imgs', null, [$news->getElementsByTagName("img")->item(0)]);
 
 			if(
-				is_object($img = $xpath->query($xpathToNode . "//img")->item(0))
+				is_object($img = $xpath->query($imgXpath . "//img")->item(0))
 				&& strlen($src = $img->getAttribute('src'))
 			)
 			{
@@ -183,8 +185,8 @@ class KorniloFF_news extends CommonBot implements iBotTG
 			$addContent = "<b>$addContent</b>" . PHP_EOL . PHP_EOL;
 
 			// $addContent .= $xnews->item(0)->textContent;
-			$addContent .= $this->DOMinnerHTML(
-				$xnews->item(0)
+			$addContent .= CommonBot::DOMinnerHTML(
+				$xnews
 			);
 
 			$content[]= $addContent;
@@ -202,64 +204,11 @@ class KorniloFF_news extends CommonBot implements iBotTG
 	} // handler_crimea_news_com
 
 
-	protected function handler_m_allcrimea_net(array $diff)
+	protected function handler_m_allcrimea_net(array &$diff)
 	{
-		$photos = [];
-		$content = [];
-		# Перебираем все новые ссылки и грузим из них в контент
-		foreach ($diff as &$link) {
-			$docLink = new DOMDocument();
-			@$docLink->loadHTMLFile($link);
-			$xpath = new DOMXpath($docLink);
-
-			$xpathToNode = "//*[@id=\"newscont\"]";
-
-			if(!is_object($xnews = $xpath->query($xpathToNode)->item(0)))
-				continue;
-
-			# Собираем для добавления в $content
-			$addContent = $docLink->getElementsByTagName("h1")->item(0)->textContent;
-
-			// $this->log->add('$imgs', null, [$news->getElementsByTagName("img")->item(0)]);
-
-			if(
-				is_object($img = $xpath->query($xpathToNode . "//img")->item(0))
-				&& strlen($src = $img->getAttribute('src'))
-			)
-			{
-				$photos[]= [
-					'type' => 'photo',
-					'media' => $src,
-					'caption' => $addContent,
-				];
-			}
-
-			$addContent = "<b>$addContent</b>" . PHP_EOL . PHP_EOL;
-
-			$pars = $xpath->query($xpathToNode . '//p[@class="txtnews"]');
-
-			foreach($pars as $p) {
-				if($p->getElementsByTagName('a')->length)
-					continue;
-
-				# Filter
-				$filter = str_ireplace(['Полная версия сайта', 'Обратная связь', 'Политика конфидициальности', 'Отказ от ответственности',], '', $p->nodeValue);
-				// $this->log->add('$p = ', null, [$p]);
-				if(strlen($filter))
-					$addContent .= "{$filter}\n";
-			}
-
-			$content[]= $addContent;
-
-		}
-
-		$this->log->add('count($photos) = ' . count($photos));
-
-		# На отсылку
-		return [
-			'sendMediaGroup' => $photos,
-			'sendMessage' => $content,
-		];
+		# На сайте 2 id=newscont В первом - изображение, во втором - текст.
+		$this->imgXpath = "//*[@id=\"newscont\"][1]";
+		return $this->handler_crimea_news_com($diff, "//*[@id=\"newscont\"][2]");
 
 	} // handler_m_allcrimea_net
 

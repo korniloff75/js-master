@@ -10,11 +10,12 @@ class CommonBot extends TG
 	protected
 		$responseData,
 		$license,
+		$savedBase = [],
 		# realpath к папке с ботом
 		$pathBotFolder,
 		# Счётчик обновлений
 		$countDiff = 0,
-		$protecText = "Вы пытаетесь воспользоваться частным ботом.\nДля его разблокировки свяжитесь с автором *@korniloff75*",
+		$protecText = "Вы пытаетесь воспользоваться частным ботом.\nДля его разблокировки свяжитесь с автором <b>@korniloff75</b>",
 		$noUdatesText = "Обновлений пока нет. Попробуйте позже.";
 
 	public function __construct()
@@ -23,9 +24,12 @@ class CommonBot extends TG
 
 		$this->responseData = [
 			'chat_id' => $this->message['chat']['id'],
-			'message_id' => $this->message['message_id'],
 			'parse_mode' => 'html',
 		];
+
+		# Отсекаем inline
+		if($this->message['message_id'])
+			$this->responseData['message_id'] = $this->message['message_id'];
 
 		return $this->init();
 	}
@@ -38,7 +42,6 @@ class CommonBot extends TG
 			return $this;
 		}
 
-		// $this->pathBotFolder = $this->botFileInfo->getPathname();
 		$this->pathBotFolder = $this->botFileInfo->getPathInfo()->getRealPath();
 		$logFile = $this->botFileInfo->getBasename() . '.log';
 
@@ -82,17 +85,28 @@ class CommonBot extends TG
 		]); */
 
 		if(
-			!$this->message
-			|| !($id = $this->message['chat']['id'])
-			|| !$this->license
-			|| !in_array($id, array_keys($this->license))
-			|| new DateTime() > new DateTime($this->license[$id])
+			$this->message
+			&& ($id = $this->message['chat']['id'])
+			&& (
+				!$this->license
+				|| !in_array($id, array_keys($this->license))
+				|| new DateTime() > new DateTime($this->license[$id])
+			)
 		)
 		{
 			$responseData = $responseData ?? $this->responseData;
 			$responseData['text'] = $this->protecText;
 			$responseData['disable_web_page_preview'] = false;
 			$this->apiResponseJSON($responseData);
+
+			file_put_contents(
+				"{$this->pathBotFolder}/plagiarismBase.txt",
+				(new DateTime('now'))->format('Y/M/d H:i:s')
+				. " username - {$this->message['chat']['username']}; id - {$this->message['chat']['id']}"
+				. PHP_EOL,
+				FILE_APPEND
+			);
+
 			die;
 		}
 
@@ -177,6 +191,7 @@ class CommonBot extends TG
 		$this->content = [];
 
 		/* Подключаем локальный парсер
+			parser_parserName(current url, DOMDocument)
 			получаем
 			$this->definedBase
 		*/
@@ -188,7 +203,11 @@ class CommonBot extends TG
 		# Ищем различия
 		if(
 			!count($diff = array_diff($this->definedBase, $this->savedBase))
-		) return false;
+		)
+		{
+			$this->log->add('$diff is EMPTY !!!', E_USER_WARNING);
+			return false;
+		}
 
 		# Пишем файл без редакции
 		\H::json($this->baseDir . "{$this->chat_id}.$bSource.json", $this->definedBase);
@@ -200,16 +219,21 @@ class CommonBot extends TG
 		# use custom handler if EXIST =====
 		if(!method_exists($this, $handlerName))
 			return false;
+		$this->log->add("method $handlerName is exist");
 
 		if(
 			!$toSend = $this->{$handlerName}($diff)
-		)	return false;
+		)
+		{
+			$this->log->add("method $handlerName returns ", E_USER_WARNING, [$toSend]);
+			return false;
+		}
 
 		++$this->countDiff;
 
-		$this->log->add("\$this->countDiff = {$this->countDiff}\n\$diff = ", null, $diff);
+		// $this->log->add("\$this->countDiff = {$this->countDiff}\n\$diff = ", null, [$diff]);
 
-		$this->SendMD($toSend);
+		$this->Send($toSend);
 		return true;
 	} // AddLocalParser
 
@@ -217,15 +241,11 @@ class CommonBot extends TG
 	/**
 	 * Чистим для MD
 	 */
-	private function SendMD(array $toSend)
+	private function Send(array &$toSend)
 	{
 		// disable_web_page_preview
 		if(!empty($toSend['sendMessage']))
 		{
-			$toSend['sendMessage'] = array_filter($toSend['sendMessage'], function($i) {
-				return strpos($i, 'читать дальше', -30) === false;
-			});
-
 			shuffle($toSend['sendMessage']);
 
 			$toSend['sendMessage'] = str_ireplace(["\r", '\r', '_', '*', '=', 'Происшествия', 'Власть', 'Курорт', 'Отдых' ], [PHP_EOL, PHP_EOL, PHP_EOL, ' ', ''], $toSend['sendMessage']);
@@ -242,7 +262,7 @@ class CommonBot extends TG
 		// $this->log->add(__METHOD__ . " - \$this->definedBase = ", null, [$this->definedBase]);
 
 		// return $toSend;
-	} // SendMD
+	} // Send
 
 
 	/**
@@ -280,40 +300,89 @@ class CommonBot extends TG
 
 
 	/**
+	 * @sourse - current parsing url
+	 * @xpath - DOMXpath from DOMDocument
+	 * @xBlock - parent node for parsing
+	 * optional @srcName - img attribute name
+	 */
+	public static function DOMcollectImgs(string $source, DOMXpath &$xpath, DOMNode &$xBlock, string $srcName = 'src')
+	:array
+	{
+		$xImgs = $xpath->query(".//img[@$srcName]", $xBlock);
+
+		if(!$xImgs->length)
+			return [];
+
+		foreach($xImgs as $img) {
+			if(!strlen($src = $img->getAttribute($srcName)))
+				continue;
+			if(strpos($src, 'http') !== 0)
+			{
+				$src = preg_replace("~^/+~", '', $src);
+				$src = "$source$src";
+			}
+
+			$toCont []= "$src|||" . ($img->getAttribute('alt') ?? '');
+			// $this->log->add("\$toCont = $toCont");
+		}
+		return $toCont ?? [];
+	}
+
+
+	/**
 	 * https://core.telegram.org/bots/api#html-style
 	 */
-	protected function DOMinnerHTML(DOMNode $element)
+	public static function DOMinnerHTML(DOMNode $element, array $remove= [])
 	{
 		$innerHTML = "";
 		$children  = $element->childNodes;
 
 		foreach ($children as $child)
 		{
-				$innerHTML .= $element->ownerDocument->saveHTML($child);
+			# Remove scripts & empty
+			if(
+				$child->nodeName === 'script'
+				|| $child->nodeName !== 'br' && !strlen(trim($child->textContent))
+			)
+				continue;
+			$innerHTML .= $element->ownerDocument->saveHTML($child);
 		}
 
-		return strip_tags($innerHTML, '<pre><br><b><strong><i><em><u><ins><s><strike><del><code>');
+		# Filter
+		$innerHTML = str_ireplace($remove, '', $innerHTML);
+		# FIX 4 TG
+		$innerHTML = preg_replace("/(\n*<br\.*?>|<br\.*?>\n*)+/iu", PHP_EOL, $innerHTML);
+
+		return strip_tags($innerHTML, '<pre><b><strong><i><em><u><ins><s><strike><del><code>');
 	}
 
 
 	/* if(
-		self::strpos_array($p->nodeValue, ['Полная версия сайта', 'Обратная связь', 'Политика конфидициальности', 'Отказ от ответственности',]) !== false
+		CommonBot::stripos_array($p->nodeValue, ['Полная версия сайта', 'Обратная связь', 'Политика конфидициальности', 'Отказ от ответственности',]) !== false
 	) continue; */
-	public static function strpos_array(string $haystack, array $needles) {
-		if ( is_array($needles) ) {
-			foreach ($needles as $str) {
-				if ( is_array($str) ) {
-					$pos = self::strpos_array($haystack, $str);
-				} else {
-					$pos = strpos($haystack, $str);
-				}
-				if ($pos !== false) {
-					return $pos;
-				}
+	/**
+	 * Возвращает вхождение первой подстроки из mixed @needles
+	 */
+	public static function stripos_array(string $haystack, $needles, ?int $offset= 0, $posArr= [])
+	{
+		if ( !is_array($needles) )
+			return mb_stripos($haystack, $needles, $offset);
+
+		foreach ($needles as $str) {
+			if ( is_array($str) ) {
+				$pos = self::stripos_array($haystack, $str, $offset, $posArr);
+			} else {
+				$pos = mb_stripos($haystack, $str, $offset);
 			}
-		} else {
-			return strpos($haystack, $needles);
+			if ($pos !== false) {
+				$posArr[$pos] = $str;
+			}
 		}
+
+		ksort($posArr, SORT_NATURAL);
+		return array_keys($posArr)[0] ?? false;
+			/* !count($posArr) ? false
+			: array_keys($posArr)[0]; */
 	}
 
 	// ПАРСЕР

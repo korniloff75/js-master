@@ -24,19 +24,15 @@ class TG {
 		$api,
 		$headers = ["Content-Type:multipart/form-data"],
 		$proxyList = [
-
+			"http://proxy-nossl.antizapret.prostovpn.org:29976",
+			"http://CCAHIHA.antizapret.prostovpn.org:3128",
 			"http://190.242.119.194:3128",
 			"http://89.165.218.82:47886",
 			"https://118.140.150.74:3128",
 			"http://185.186.77.244:80",
 			"http://88.199.21.75:80",
-			"http://183.91.33.41:91",
 			"socks5://139.99.104.233:15895",
 			"socks4://89.190.120.116:52941",
-			"socks4://188.93.238.17:51565",
-			"socks4://159.224.226.164:40856",
-			"https://185.107.106.68:3128",
-			"http://66.90.255.99:8080",
 		],
 		# define in child classes
 		$botFileInfo,
@@ -124,7 +120,7 @@ class TG {
 		}
 
 		$cbn = array_values(
-			array_intersect(['message', 'channel_post', 'callback_query', 'result'], array_keys($this->inputData))
+			array_intersect(['message', 'channel_post', 'inline_query', 'callback_query', 'result'], array_keys($this->inputData))
 		)[0] ?? false;
 
 		// $this->log->add("");
@@ -132,22 +128,33 @@ class TG {
 		switch ($cbn) {
 			case 'message':
 			case 'channel_post':
+			case 'inline_query':
 				$cb = $this->inputData[$cbn];
 				break;
 			case 'callback_query':
 				$cb = $this->inputData['callback_query']['message'];
+			break;
 
 			default:
-
+				$cb = $this->inputData;
 				break;
 		}
 
-		$this->chat_id = $cb['chat']['id'];
-		$this->text = $cb['text'];
+		if($cbn === 'inline_query')
+		{
+			$this->chat_id = $cb['from']['id'];
+			$cb['text'] = $this->text = $cb['query'];
+			$cb['chat'] = $cb['from'];
+		}
+		else
+		{
+			$this->chat_id = $cb['chat']['id'];
+			$this->text = $cb['text'];
+		}
 
 		$this->log->add("
 		\$cbn = $cbn\n
-		\$this->chat_id = {$this->chat_id}");
+		\$this->chat_id = {$this->chat_id}\n\$cb= ", null, [$cb]);
 
 		return $cb;
 
@@ -403,6 +410,7 @@ class TG {
 				'chat_id' => $this->chat_id,
 				'parse_mode' => 'html',
 				'text' => $bus,
+				'disable_web_page_preview' => true,
 				'reply_markup' => $this->setInlineKeyboard([[
 					# Row
 					class_exists('CommonBot') ? CommonBot::setAdvButton() : null,
@@ -419,7 +427,7 @@ class TG {
 		}
 
 		# Test server response
-		$this->log->add("\$respTG", null, [$respTG]);
+		$this->log->add("\$respTG", null, [$respTG ?? null]);
 	}
 
 	/**
@@ -429,7 +437,9 @@ class TG {
 	{
 		$this->log->add('$photos = ', null, [$photos]);
 
-		$photos = array_chunk($photos, 10);
+		if(count($photos))
+			$photos = array_chunk($photos, 10);
+		else return;
 
 		foreach ($photos as $lim) {
 			$this->apiRequest([

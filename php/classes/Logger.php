@@ -15,7 +15,8 @@ class Logger
 
 	protected
 		# realpath to the log file
-		$file,
+		$file;
+	public
 		# array with a current log
 		$log = [];
 
@@ -87,7 +88,7 @@ class Logger
 			default:
 				break;
 		}
-		return "[{$fileName}:{$line} " . date('Y M d H:i:s',time()) . " $errorLevel] $message";
+		return "[{$fileName}:{$line} " . date('Y/M/d H:i:s',time()) . " $errorLevel] $message";
 	}
 
 	public function print()
@@ -102,11 +103,18 @@ class Logger
 		}
 		</style>
 		<?php
-		print_r("<h3>Log</h3><pre>");
+		print_r("<h3>Log</h3><pre>\n");
 		foreach ($this->log as &$string) {
 			print_r($string . "\n");
 		}
 		echo "</pre>";
+	}
+
+	public function printTG()
+	{
+		ob_start();
+			$this->print();
+		return strip_tags(ob_get_clean());
 	}
 
 

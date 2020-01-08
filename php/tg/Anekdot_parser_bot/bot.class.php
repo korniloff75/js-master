@@ -21,7 +21,6 @@ class AnekdotBot extends CommonBot implements iBotTG
 		$lastBase = [],
 		$baseId = [],
 		$baseSource = [],
-		$DOMNodeList,
 		// $contentSum = [],
 		$content = [],
 		# Счётчик обновлений
@@ -52,6 +51,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 		$remoteSource = [
 			'https://anekdot.ru/',
 			'http://anekdotov.net/',
+			'https://shutok.ru/',
 		];
 
 
@@ -73,12 +73,12 @@ class AnekdotBot extends CommonBot implements iBotTG
 	public function init()
 	{
 		# Collect $this->baseSource
-		$this->baseSource = $this->CollectBaseArray(__DIR__ . "/{$this->baseDir}");
+		// $this->baseSource = $this->CollectBaseArray(__DIR__ . "/{$this->baseDir}");
 
 		# Завершаем скрипт без входящего JSON
 		if(empty($this->inputData)) die ('Нет входящего запроса');
 
-		$this->parser();
+		$this->Parser();
 
 		$this->log->add("count(\$this->content) = " . count($this->content));
 
@@ -87,151 +87,171 @@ class AnekdotBot extends CommonBot implements iBotTG
 	} // init
 
 
-	/**
-	 * @ind - индекс в массиве self::$remoteSource
-	 */
-	public function parser()
+	protected function parser_shutok_ru($source, $doc)
 
 	{
-		foreach (self::$remoteSource as $source) {
-			$bSource = basename($source);
-			$base = $this->baseSource[$bSource] ?? [];
+		$xpath = new DOMXpath($doc);
 
-		// foreach ($this->baseSource as $source => $base) {
-			# Получаем файл для текущего chat_id
-			if(isset($base[$this->chat_id]))
-			{
-				$currentItem = $this->baseDir . $base[$this->chat_id];
-				$this->log->add('$currentItem = ' . $currentItem);
-				$this->content = $this->lastBase = \H::json($currentItem);
+		$xpathBlock = "//div[@id=\"dle-content\"][1]";
+		$xpathText = "//div[@class=\"box_in\"]";
+		// $xpathText = "//div[@class=\"text\"]";
 
-			}
+		$xBlock = $xpath->query($xpathBlock)->item(0);
 
-			$s = str_replace('.', '_', $bSource);
-			$parserName = "parser_$s";
+		$xTexts = $xpath->query($xpathText, $xBlock);
 
-			# use custom parser if EXIST =====
-			if(!method_exists(get_class($this), $parserName)) continue;
+		$this->log->add(__METHOD__ . " - \$xTexts = ", null, [$xTexts]);
 
-			$this->log->add("\$bSource, \$base = ", null, [$bSource, $base]);
+		foreach($xTexts as $node) {
+			$title = $xpath->query("h2", $node)->item(0)->textContent;
+			$text = $xpath->query("div[@class=\"text\"]", $node)->item(0);
+			if(strlen($text->textContent) < 30)
+				continue;
 
-			# Парсим сайт из self::$remoteSource
-			$doc = new DOMDocument();
-			@$doc->loadHTMLFile($source);
-
-			# Обнуляем контент
-			$this->content = [];
-
-			# Подключаем локальный парсер
-			// план - перенести частные в дочерний класс
-			$this->{$parserName}($doc)->_findUnical($bSource);
-
-			$this->log->add("count(\$this->content) - $source = " . count($this->content));
+			$this->content[]= "<b>$title</b>\n\n" . CommonBot::DOMinnerHTML($text);
 		}
 
-		# If not exist new content
-		if (!$this->countDiff && array_key_exists('callback_query', $this->inputData))
-		{
-			$r = $this->apiResponseJSON([
-			// return $this->apiRequest([
-			'callback_query_id' => $this->inputData['callback_query']['id'],
-			'text' => $this->noUdatesText,
-			], 'answerCallbackQuery');
+		$imgArr = CommonBot::DOMcollectImgs($source, $xpath, $xBlock, 'src');
+		$imgArr = array_filter($imgArr, function(&$img) {
+			return CommonBot::stripos_array($img, ['Podrobnee.png']) === false;
+		});
 
-			$this->log->add("NOT exist new content.", null, $r);
-			return $r;
-
-		}
-
-		/* $scripts = $doc->getElementsByTagName("script");
-		var_dump($scripts);
-
-		for ($i = 0; $i < $scripts->length; $i++){
-			$docEl->removeChild($scripts->item($i));
-		} */
-
-	} // parser
-
-
-	/**
-	 * Получаем неопубликованный контент
-	 */
-	private function _findUnical($bSource)
-	{
-		# $this->content предварительно пропущен через локальный парсер
-		if(count($diff = array_diff($this->content, $this->lastBase)))
-		{
-			# Пишем файл без редакции
-			\H::json($this->baseDir . "{$this->chat_id}.$bSource.json", $this->content);
-
-
-			# Чистим для MD
-			$diff = array_filter($diff, function($i) {
-				return strpos($i, 'читать дальше', -30) === false;
-			});
-
-			// $this->log->add("\$diff = " . json_encode($diff, JSON_UNESCAPED_UNICODE));
-			$this->log->add("\$this->countDiff = " . ++$this->countDiff);
-
-			shuffle($diff);
-
-			$diff = str_replace(["\r", '\r', '_', '*', '=', ], ["\n", "\n", ' ', ''], $diff);
-
-			# создаём .md
-			/* file_put_contents($this->baseDir . time() . basename(self::$remoteSource[$ind]) . '.md', array_map(function($i) {
-				return $i . "\n\n---\n";
-			}, $diff)); */
-
-			$this->sendMessage($diff);
-
-		}
-
-	} // _findUnical
-
-
-	protected function parser_anekdot_ru($doc)
-
-	{
-		$this->DOMNodeList = $doc->getElementsByTagName("div");
-
-		$this->log->add(__METHOD__ . " - \$DOMNodeList", null, [$this->DOMNodeList]);
-
-		if(!$this->DOMNodeList->length) return;
-
-		foreach($this->DOMNodeList as $t) {
-			$class = $t->attributes->getNamedItem('class');
-
-			if(is_object($class) && $class->nodeValue === 'text') {
-				$this->content[]= $t->textContent;
-			}
-		}
+		$this->log->add(__METHOD__ . " - \$imgArr = ", null, [$imgArr]);
 
 		# Required
-		return $this;
+		return array_merge($this->content, $imgArr);
+	} // parser_shutok_ru
+
+
+	protected function parser_anekdot_ru($source, $doc)
+
+	{
+		$xpath = new DOMXpath($doc);
+
+		$xpathBlock = "//div[@class=\"texts\"][1]";
+		$xpathText = ".//div[@class=\"text\"]";
+
+		$xBlock = $xpath->query($xpathBlock)->item(0);
+		$xTexts = $xpath->query($xpathText, $xBlock);
+
+		// $this->log->add(__METHOD__ . " - \$xTexts, xImgs = ", null, [$xTexts, $xImgs]);
+
+		foreach($xTexts as $node) {
+			$this->content[]= CommonBot::DOMinnerHTML($node);
+		}
+
+		$imgArr = CommonBot::DOMcollectImgs($source, $xpath, $xBlock, 'data-src');
+
+		$out = array_merge($this->content, $imgArr);
+
+		$this->log->add(__METHOD__ . " - \$imgArr = ", null, [$imgArr]);
+		// $this->log->add(__METHOD__ . " - \$out = ", null, [$out]);
+
+		# Required
+		return $out;
 	} // parser_anekdot_ru
 
-	protected function parser_anekdotov_net($doc)
+
+	protected function parser_anekdotov_net($source, $doc)
 
 	{
-		$this->DOMNodeList = $doc->getElementsByTagName("div");
+		$xpath = new DOMXpath($doc);
 
-		$this->log->add(__METHOD__ . " - \$DOMNodeList", null, [$this->DOMNodeList]);
+		$xpathBlock = "//td[@rowspan='2'][1]";
+		$xpathText = ".//div[@align=\"justify\"]";
 
-		if(!$this->DOMNodeList->length) return;
+		$xBlock = $xpath->query($xpathBlock)->item(0);
 
-		foreach($this->DOMNodeList as $t) {
-			$class = $t->attributes->getNamedItem('align');
+		$xTexts = $xpath->query($xpathText, $xBlock);
 
-			if(is_object($class) && $class->nodeValue === 'justify') {
-				if(strpos($t->textContent, 'а н е к д о т о в . n е t') !== false) continue;
-				$this->content[]= $t->textContent;
-			}
+		if(
+			!$xTexts->length
+		)
+			return [];
+
+
+		// $this->DOMNodeList = $doc->getElementsByTagName("div");
+
+		$this->log->add(__METHOD__ . " - \$xTexts", null, [$xTexts]);
+
+		// if(!$this->DOMNodeList->length) return;
+
+		foreach($xTexts as $node) {
+			if(CommonBot::stripos_array($node->textContent, 'а н е к д о т о в . n е t') !== false) continue;
+
+			$content[]= CommonBot::DOMinnerHTML($node);
 		}
 
 		# Required
-		return $this;
+		return $content ?? [];
 	} // parser_anekdotov_net
 
+
+	/**
+	 * Handlers
+	 */
+	protected function handler_shutok_ru(array &$diff)
+	{
+		foreach($diff as $k=>&$str) {
+			if(
+				strpos($str, 'http') === 0
+			)
+			{
+				$img = explode('|||', $str);
+				$src = $img[0];
+
+				if(!strlen($src)) continue;
+
+				$photos[]= [
+					'type' => 'photo',
+					'media' => $src,
+					'caption' => $img[1],
+				];
+				unset($diff[$k]);
+			}
+
+			if(CommonBot::stripos_array($str, [
+				'Комментарии', 'Карикатуры', 'Анекдоты в картинках', 'Картинки'
+			]) !== false)
+				unset($diff[$k]);
+		}
+
+		return [
+			'sendMessage' => $diff,
+			'sendMediaGroup' => $photos ?? [],
+		];
+	} // handler_shutok_ru
+
+
+	protected function handler_anekdot_ru(array &$diff)
+	{
+		foreach($diff as $k=>&$str) {
+			if(
+				strpos($str, 'http') === 0
+			)
+			{
+				$img = explode('|||', $str);
+				$src = $img[0];
+				if(!strlen($src)) continue;
+				$photos[]= [
+					'type' => 'photo',
+					'media' => $src,
+					'caption' => $img[1],
+				];
+				unset($diff[$k]);
+			}
+		}
+
+		return [
+			'sendMessage' => preg_replace(['/^.*(Показать полностью|читать дальше).*$|\s+\d+(>|&gt;)/ium'], '', $diff),
+			'sendMediaGroup' => $photos ?? [],
+		];
+	}
+
+	protected function handler_anekdotov_net(array &$diff)
+	{
+		return $this->handler_anekdot_ru($diff);
+	}
 
 	// Делаем АШИПКУ
 

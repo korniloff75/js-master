@@ -66,6 +66,9 @@ _H.ADs = {
 		],
 	},
 
+	// https://linkslot.ru/account.php
+	LinkSlot: '<center><div style="overflow: hidden;"><div style="display:inline-block;"><a href="https://linkslot.ru/link.php?id=273742" target="_blank" rel="noopener">Купить ссылку здесь за <span id="linprice_273742"></span> руб.</a></div><div style="display:inline-block; margin: 0 10px;" id="linkslot_273742"><script src="https://linkslot.ru/lincode.php?id=273742" async></script></div><div style="display:inline-block;"><a href="https://linkslot.ru/?ref=KorniloFF" target="_blank" rel="noopener">Поставить к себе на сайт</a></div></center>',
+
 	init: function addContent() {
 		var
 			that = this,
@@ -102,6 +105,7 @@ _H.ADs = {
 			init : { enumerable: false},
 			$img : { enumerable: false, writable: true},
 			$pars : { enumerable: false},
+			LinkSlot : { enumerable: false},
 		});
 		// console.log("this = ", this);
 
@@ -121,6 +125,7 @@ _H.ADs = {
 		//== Создаем рекламный блок после случайного <p> и наполняем его
 		this['$img'] = $($.rnd(this['$pars'])).cr('div', { class: 'Adv center pointer' }, 'after').cr('img', { src: b, alt: sel.alt });
 		this['$img'].parent().on('click', e => location.href = g);
+		this['$img'].parent().after(this.LinkSlot);
 
 		// Отлов блокировщиков
 		setTimeout(function() {
