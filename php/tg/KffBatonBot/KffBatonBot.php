@@ -19,14 +19,18 @@ class KffBatonBot extends CommonBot implements iBotTG
 
 		$baseDir = 'base/',
 		$rhyme = [
+			'батон' => 'Натяни себе гандон!',
 			'да' => 'Пизда!',
+			'нет' => 'Сделай сам себе минет!',
 			'ладно' => 'В пизде прохладно',
 			'давай' => 'Пошёл нахуй, или наливай!',
 			'пойду' => 'Иди в пизду!',
 			'пошел' => 'На хуй?',
 			'пошёл' => 'На хуй?',
 			'ок' => 'У пиндоса хуй промок!',
+			'бал' => 'Пиши правильно, ты заебал!',
 			'пока' => 'Пиздуй, пока не намяли бока!',
+			'поздравляю' => 'С Новым Годом, пошёл нахуй!',
 		],
 		$replace = ['а'=>'Хуя','я'=>'Хуя','о'=>'Хуё','ё'=>'Хуё','е'=>'Хуе','э'=>'Хуе','и'=>'Хуи','ы'=>'Хуи','у'=>'Хую','ю'=>'Хую'];
 
@@ -56,7 +60,7 @@ class KffBatonBot extends CommonBot implements iBotTG
 	/**
 	 *
 	 */
-	public function init()
+	private function init()
 	{
 		# Завершаем скрипт без входящего JSON
 		if(empty($this->inputData)) die ('Нет входящего запроса');
@@ -139,13 +143,7 @@ class KffBatonBot extends CommonBot implements iBotTG
 		# Если нет букв
 		elseif(!strlen($clearText))
 			return null;
-		/* $rhyme = preg_filter("~^$text[!?]*~iu", $this->rhyme[mb_strtolower($text)], array_keys($this->rhyme));
-		$rhyme = array_values($rhyme);
-		$this->log->add('$rhyme = ', null, [$rhyme]);
 
-		# Ищем рифму
-		if(	$rhyme[0] )
-			return $rhyme[0]; */
 		elseif(
 			# Отключаем на женских именах _beta
 			($fl = mb_substr($text, 0, 1))
@@ -157,14 +155,15 @@ class KffBatonBot extends CommonBot implements iBotTG
 		)
 			return null;
 
-		$posLetter = CommonBot::stripos_array($text, $this->glas);
-		$fLetter = mb_strtolower(mb_substr($text, $posLetter, 1));
+		# Коверкаем очищенный текст
+		$posLetter = CommonBot::stripos_array($clearText, $this->glas);
+		$fLetter = mb_strtolower(mb_substr($clearText, $posLetter, 1));
 
 		// $this->log->add('$posLetter = ', null, [ $posLetter, ]);
 
 		$repl = $this->replace[$fLetter];
 
-		$rest = mb_substr($text, $posLetter);
+		$rest = mb_substr($clearText, $posLetter);
 
 		// $this->log->add("1 Гласная = " . CommonBot::stripos_array($rest, $this->glas));
 

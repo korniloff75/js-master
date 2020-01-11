@@ -23,7 +23,7 @@ class TG {
 		$token,
 		$api,
 		$headers = ["Content-Type:multipart/form-data"],
-		$proxyList = [
+		/* $proxyList = [
 			"http://proxy-nossl.antizapret.prostovpn.org:29976",
 			"http://CCAHIHA.antizapret.prostovpn.org:3128",
 			"http://190.242.119.194:3128",
@@ -33,7 +33,9 @@ class TG {
 			"http://88.199.21.75:80",
 			"socks5://139.99.104.233:15895",
 			"socks4://89.190.120.116:52941",
-		],
+		], */
+		# findAnzProxy()
+		$proxy,
 		# define in child classes
 		$botFileInfo,
 		$log, # instanceof Logger
@@ -42,10 +44,12 @@ class TG {
 		# take object message
 		$message,
 		$inputData = null,
+		$cbn,
 		$chat_id;
 
 
 	protected static
+		$proxyPath = __DIR__ . '/Common/db.proxy',
 		$textLimit = 3900;
 
 
@@ -85,6 +89,14 @@ class TG {
 
 		$this->log->add("Init bot.class.php");
 
+		if(
+			!$this->proxy = $this->findAnzProxy()
+		)
+		{
+			$this->log->add("Available proxy NOT found!", E_USER_WARNING);
+			die('Прокси не найден!');
+		}
+
 		# Обрабатываем входящие данные
 		$this->message = $this->webHook()->findCallback();
 		return $this;
@@ -123,13 +135,13 @@ class TG {
 			array_intersect(['message', 'channel_post', 'inline_query', 'callback_query', 'result'], array_keys($this->inputData))
 		)[0] ?? false;
 
-		// $this->log->add("");
+		$this->cbn = $this->inputData[$cbn];
 
 		switch ($cbn) {
 			case 'message':
 			case 'channel_post':
 			case 'inline_query':
-				$cb = $this->inputData[$cbn];
+				$cb = $this->cbn;
 				break;
 			case 'callback_query':
 				$cb = $this->inputData['callback_query']['message'];
@@ -154,7 +166,7 @@ class TG {
 
 		$this->log->add("
 		\$cbn = $cbn\n
-		\$this->chat_id = {$this->chat_id}\n\$cb= ", null, [$cb]);
+		\$this->chat_id = {$this->chat_id}\n\$this->cbn= ", null, [$this->cbn]);
 
 		return $cb;
 
@@ -222,7 +234,7 @@ class TG {
 
 	}
 
-	public function findProxy()
+	/* public function findProxy()
 	{
 		$timeoutInSeconds = 1.5;
 
@@ -239,6 +251,58 @@ class TG {
 			// fclose($fp);
 		}
 
+		return false;
+	} */
+
+	/**
+	 * new
+	 */
+	public function findAnzProxy(?string $proxy=null, bool $stop=false)
+	{
+		$timeoutInSeconds = 1;
+
+		if(file_exists(self::$proxyPath))
+		{
+			$proxy = $proxy ?? file_get_contents(self::$proxyPath);
+
+			$p = parse_url($proxy);
+			// $p['scheme'].'://'.
+
+			# Если прокси из файла доступен - возвращаем его
+			if($fp = fsockopen($p['host'], $p['port'], $errCode, $errStr, $timeoutInSeconds))
+			{
+				$this->log->add("Proxy $proxy - is AVAILABLE\n");
+				return $proxy;
+			}
+			# Если недоступен - удаляем файл + рекурсия
+			else
+			{
+				$this->log->add("$proxy - ERROR: $errCode - $errStr", E_USER_WARNING);
+				unlink(self::$proxyPath);
+				return $this->findAnzProxy(null, false);
+			}
+		}
+		# Если нет файла
+		else
+		{
+			if(
+				# Если повторная рекурсия - тормозим
+				!$stop
+				# Ищем обновлённый прокси
+				&& ($anz = file_get_contents('https://cloudflare-ipfs.com/ipns/pacipfs2.antizapret.prostovpn.org/proxy-nossl.js'))
+				&& preg_match(
+				"~return \"PROXY\s+(.+); DIRECT\";$~im", $anz, $proxy)
+			)
+			{
+				$proxy = "http://{$proxy[1]}";
+				file_put_contents(self::$proxyPath, $proxy);
+
+				# Рекурсия с новым прокси
+				return $this->findAnzProxy($proxy, true);
+			}
+
+		}
+		# Полный провал
 		return false;
 	}
 
@@ -268,13 +332,6 @@ class TG {
 	 */
 	public  function apiRequest(array $postFields = [], string $method = 'sendMessage')
 	{
-		# Find available proxy from proxyList
-		if (!$proxy = $this->findProxy())
-		{
-			$this->log->add("Available proxy NOT found!", E_USER_WARNING);
-			return;
-		}
-
 		$ch = curl_init();
 
 		$postFields = array_merge([
@@ -306,15 +363,8 @@ class TG {
 				CURLOPT_RETURNTRANSFER => TRUE,
 				CURLOPT_TIMEOUT => 30,
 
-				// CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V6,
-				// CURLOPT_INTERFACE => '2001:67c:4e8:f004::9',
-
-				CURLOPT_PROXY =>  $proxy, // Worked !
-				/* CURLOPT_COOKIESESSION => true,
-				CURLOPT_COOKIEJAR => 'cookies',
-				CURLOPT_COOKIEFILE => is_file('cookies') ? 'cookies' : '', */
+				CURLOPT_PROXY =>  $this->proxy, // Worked !
 				CURLOPT_HTTPHEADER => $this->headers,
-				// CURLOPT_FOLLOWLOCATION => true,
 				// CURLOPT_SSL_VERIFYPEER => false,
 				// CURLOPT_SSL_VERIFYHOST => false,
 
@@ -374,7 +424,7 @@ class TG {
 	 return json_encode($keyboard);
 	}
 
-	// not use
+
 	public function setInlineKeyboard(array $data)
 	: string
 	{
@@ -385,10 +435,16 @@ class TG {
 
 
 	/**
-	 *
+	 * Wrapper 4 $this->apiRequest
 	 */
 	public function sendMessage(array $content)
 	{
+		$postFields = [
+			'chat_id' => $this->chat_id,
+			'parse_mode' => 'html',
+			'disable_web_page_preview' => true,
+		];
+
 		# Делим на шины по self::$textLimit символов
 		$bus = '';
 		$diffLength = count($content);
@@ -405,21 +461,22 @@ class TG {
 			if(!strlen(trim($bus)))
 				continue;
 
-			# Отправляем в канал.
-			$respTG[]= $this->apiRequest([
-				'chat_id' => $this->chat_id,
-				'parse_mode' => 'html',
-				'text' => $bus,
-				'disable_web_page_preview' => true,
-				'reply_markup' => $this->setInlineKeyboard([[
+			$postFields['text'] = $bus;
+
+			if(class_exists('CommonBot'))
+			{
+				$postFields['reply_markup'] = $this->setInlineKeyboard([[
 					# Row
-					class_exists('CommonBot') ? CommonBot::setAdvButton() : null,
+					CommonBot::setAdvButton(),
 					[
-						"text" => "Хочу ещё",
+						"text" => "More",
 						"callback_data" => '/more',
 					],
-				]]),
-			]);
+				]]);
+			}
+
+			# Отправляем в канал.
+			$respTG[]= $this->apiRequest($postFields);
 
 			$bus = '';
 			usleep(10);
@@ -454,13 +511,11 @@ class TG {
 	/**
 	 * В разработке
 	 */
-	function sendPhoto($chat_id, $url) {
-
-		file_put_contents(basename($url), file_get_contents($url));
-
+	function sendPhoto(string $path)
+	{
 		return $this->apiRequest([
-			'chat_id' => $chat_id,
-			'photo' => new CURLFile(realpath("image.jpg"))
+			'chat_id' => $this->chat_id,
+			'photo' => new CURLFile(realpath($path))
 		], 'sendPhoto');
 
 	}

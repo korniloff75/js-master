@@ -70,7 +70,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 	/**
 	 *
 	 */
-	public function init()
+	private function init()
 	{
 		# Collect $this->baseSource
 		// $this->baseSource = $this->CollectBaseArray(__DIR__ . "/{$this->baseDir}");
@@ -80,20 +80,18 @@ class AnekdotBot extends CommonBot implements iBotTG
 
 		$this->Parser();
 
-		$this->log->add("count(\$this->content) = " . count($this->content));
-
 		die('OK');
 
 	} // init
 
 
-	protected function parser_shutok_ru($source, $doc)
+	protected function parser_shutok_ru($source, DOMDocument &$doc)
 
 	{
 		$xpath = new DOMXpath($doc);
 
 		$xpathBlock = "//div[@id=\"dle-content\"][1]";
-		$xpathText = "//div[@class=\"box_in\"]";
+		$xpathText = ".//div[@class=\"box_in\"]";
 		// $xpathText = "//div[@class=\"text\"]";
 
 		$xBlock = $xpath->query($xpathBlock)->item(0);
@@ -113,7 +111,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 
 		$imgArr = CommonBot::DOMcollectImgs($source, $xpath, $xBlock, 'src');
 		$imgArr = array_filter($imgArr, function(&$img) {
-			return CommonBot::stripos_array($img, ['Podrobnee.png']) === false;
+			return CommonBot::stripos_array($img, ['Podrobnee.png', 'Istochnik.png', 'top-fwz1.mail.ru', 'counter', 'mc.yandex.ru']) === false;
 		});
 
 		$this->log->add(__METHOD__ . " - \$imgArr = ", null, [$imgArr]);
@@ -123,7 +121,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 	} // parser_shutok_ru
 
 
-	protected function parser_anekdot_ru($source, $doc)
+	protected function parser_anekdot_ru($source, DOMDocument &$doc)
 
 	{
 		$xpath = new DOMXpath($doc);
@@ -152,7 +150,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 	} // parser_anekdot_ru
 
 
-	protected function parser_anekdotov_net($source, $doc)
+	protected function parser_anekdotov_net($source, &$doc)
 
 	{
 		$xpath = new DOMXpath($doc);

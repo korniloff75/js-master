@@ -8,6 +8,7 @@ require_once __DIR__ . "/tg.class.php";
 class CommonBot extends TG
 {
 	protected
+		$is_owner = false,
 		$responseData,
 		$license,
 		$savedBase = [],
@@ -21,6 +22,8 @@ class CommonBot extends TG
 	public function __construct()
 	{
 		parent::__construct();
+
+		$this->is_owner = $this->cbn['from']['id'] === 673976740;
 
 		$this->responseData = [
 			'chat_id' => $this->message['chat']['id'],
@@ -53,20 +56,6 @@ class CommonBot extends TG
 			$this->log = new Logger($logFile ?? 'tg.class.log', $this->pathBotFolder ?? __DIR__);
 		}
 
-		# Если нет лицензии, создаём ее
-		$this->license = \H::json("$this->pathBotFolder/license.json");
-		if(!count($this->license))
-		{
-			$this->license = [$this->message['chat']['id'] => "3000-01-01"];
-			\H::json("$this->pathBotFolder/license.json", $this->license);
-		}
-
-		$this->log->add("$this->pathBotFolder/license.json", null, [$this->license]);
-
-		if(strlen($this->inputJson))
-			file_put_contents($this->botFileInfo->getPath() . '/inputData.json', $this->inputJson);
-		else $this->log->add("Нет callback!");
-
 		return $this;
 	} // init
 
@@ -78,6 +67,16 @@ class CommonBot extends TG
 	 */
 	protected function checkLicense($responseData = null)
 	{
+		$this->license = \H::json("$this->pathBotFolder/license.json");
+		# Если нет лицензии, создаём ее
+		if($this->is_owner && !count($this->license))
+		{
+			$this->license = [$this->message['chat']['id'] => "3000-01-01"];
+			\H::json("$this->pathBotFolder/license.json", $this->license);
+		}
+
+		$this->log->add("$this->pathBotFolder/license.json", null, [$this->license]);
+
 		/* $this->log->add("checkLicense ===", null, [
 			($id = $this->message['chat']['id']),
 			new DateTime(),
@@ -123,6 +122,12 @@ class CommonBot extends TG
 	public function Parser()
 
 	{
+		if(!$this->is_owner)
+		{
+			$this->NoUpdates();
+			die;
+		}
+
 		$baseDir = "{$this->pathBotFolder}/" . basename($this->baseDir);
 
 		# Collect $this->baseSource
@@ -149,25 +154,15 @@ class CommonBot extends TG
 		}
 
 		# If not exist new content
-		if (!$this->countDiff && array_key_exists('callback_query', $this->inputData))
-		{
-			$r = $this->apiResponseJSON([
-			// return $this->apiRequest([
-			'callback_query_id' => $this->inputData['callback_query']['id'],
-			'text' => $this->noUdatesText,
-			], 'answerCallbackQuery');
 
-			$this->log->add("NOT exist new content.", null, $r);
-			return $r;
-
-		}
-
+		if (!$this->countDiff)
+			return $this->NoUpdates();
 	} // Parser
 
 
 	/**
-	 * @bSource
-	 * Для каждого $bSource в дочернем классе требуются методы parse_bSource и handler_bSource
+	 * @source
+	 * Для каждого $source в дочернем классе требуются методы parser_$name4Local и handler_$name4Local
 	 */
 	public function AddLocalParser(string $source)
 	:bool
@@ -326,6 +321,25 @@ class CommonBot extends TG
 			// $this->log->add("\$toCont = $toCont");
 		}
 		return $toCont ?? [];
+	}
+
+
+	protected function NoUpdates()
+	{
+		if (!array_key_exists('callback_query', $this->inputData)) return;
+
+		$text = $this->noUdatesText . ($this->is_owner ? "\nСкоро обязательно появятся, хозяин!" : '');
+
+		$r = $this->apiResponseJSON([
+		// return $this->apiRequest([
+		'callback_query_id' => $this->cbn['id'],
+		'text' => $text,
+		], 'answerCallbackQuery');
+
+		$this->log->add("NOT exist new content.", null, $r);
+		return $r;
+
+
 	}
 
 
