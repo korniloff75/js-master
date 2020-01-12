@@ -1,0 +1,4 @@
+<Files "token.json">
+	Require all denied
+	Deny from all
+</Files>

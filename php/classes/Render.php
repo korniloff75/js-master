@@ -11,7 +11,7 @@ class Render
 
 
 	public static function meta()
-	: string
+	:string
 	{
 		global $Data;
 
@@ -192,6 +192,11 @@ class Render
 			die (\H::shead(404));
 		else
 		{
+			# Microtemplater
+			$content = str_replace(
+				['{DIR}'],
+				['/' . \H::$Dir],
+			$content);
 			$content = "<div class=\"content\">\n{$content}\n</div>\n<!-- /.content -->\n";
 			# Add comments & return
 			#
@@ -213,7 +218,7 @@ class Render
 				foreach(\H::$log as $log) {
 					$content .= "<pre class='core warning' style='max-height: 200px; overflow: auto;'>$log</pre>";
 				}
-				
+
 			}
 			$content .= \H::profile('base', basename(__FILE__) . ' : ' . __LINE__);
 			$content .= '</div> <!--/.DA_del-->';

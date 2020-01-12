@@ -14,7 +14,7 @@ class AntimatKFF extends CommonBot implements iBotTG
 	protected
 		# Test mode, bool
 		$__test = 1 ,
-		$token = '1017974908:AAERu1qQlpZCVEgmK8BIsEZRyNgIsMaS3fk',
+		// $token = '',
 
 		$maxTry = 3,
 		$protecText = "Вы пытаетесь воспользоваться частным ботом.\nДля его разблокировки свяжитесь с автором *@korniloff75*";

@@ -23,6 +23,7 @@ class CommonBot extends TG
 	{
 		parent::__construct();
 
+		# Определяем владельца скрипта
 		$this->is_owner = $this->cbn['from']['id'] === 673976740;
 
 		$this->responseData = [
@@ -35,7 +36,7 @@ class CommonBot extends TG
 			$this->responseData['message_id'] = $this->message['message_id'];
 
 		return $this->init();
-	}
+	} // __construct
 
 	private function init()
 	{
@@ -148,8 +149,11 @@ class CommonBot extends TG
 
 			}
 
+
 			if(!$this->AddLocalParser($source))
 				continue;
+			// $this->log->add(__METHOD__ . " - \$this->savedBase = ", null, [$this->savedBase]);
+			// $this->log->add(__METHOD__ . " - \$this->definedBase = ", null, [$this->definedBase]);
 
 		}
 
@@ -174,9 +178,12 @@ class CommonBot extends TG
 
 		# use custom Parser if EXIST =====
 		if(!method_exists($this, $parserName))
+		{
+			$this->log->add("$parserName DO NOT exist!");
 			return false;
+		}
 
-		$this->log->add("\$bSource = $bSource");
+		$this->log->add("$parserName is exist\n\$bSource = $bSource");
 
 		# Парсим сайт из self::$remoteSource
 		$doc = new DOMDocument();
@@ -234,11 +241,11 @@ class CommonBot extends TG
 
 
 	/**
-	 * Чистим для MD
+	 * Чистка и отправка
+	 * todo вынести фильтры в локал
 	 */
 	private function Send(array &$toSend)
 	{
-		// disable_web_page_preview
 		if(!empty($toSend['sendMessage']))
 		{
 			shuffle($toSend['sendMessage']);
@@ -252,9 +259,6 @@ class CommonBot extends TG
 		{
 			$this->sendMediaGroup($toSend['sendMediaGroup']);
 		}
-
-		// $this->log->add(__METHOD__ . " - \$this->savedBase = ", null, [$this->savedBase]);
-		// $this->log->add(__METHOD__ . " - \$this->definedBase = ", null, [$this->definedBase]);
 
 		// return $toSend;
 	} // Send
@@ -295,10 +299,10 @@ class CommonBot extends TG
 
 
 	/**
-	 * @sourse - current parsing url
-	 * @xpath - DOMXpath from DOMDocument
-	 * @xBlock - parent node for parsing
-	 * optional @srcName - img attribute name
+	 * @param sourse - current parsing url
+	 * @param xpath - DOMXpath from DOMDocument
+	 * @param xBlock - parent node for parsing
+	 * optional @param srcName - img attribute name
 	 */
 	public static function DOMcollectImgs(string $source, DOMXpath &$xpath, DOMNode &$xBlock, string $srcName = 'src')
 	:array
@@ -324,11 +328,72 @@ class CommonBot extends TG
 	}
 
 
+	/**
+	 * @param sourse - current parsing url
+	 * @param xpath - DOMXpath from DOMDocument
+	 * @param xBlock - parent node for parsing
+	 * optional @param srcName - img attribute name
+	 */
+	public static function ExtractImages(string $source, DOMXpath &$xpath, DOMNode &$xBlock, string $srcName = 'src', array $excludes=[])
+	:array
+	{
+		//* Extract images
+		$imgArr = CommonBot::DOMcollectImgs($source, $xpath, $xBlock, $srcName);
+
+		if(count($excludes))
+			$imgArr = array_filter($imgArr, function(&$img) {
+				return CommonBot::stripos_array($img, $excludes) === false;
+			});
+
+		return array_map(function($i) {
+			$img = explode('|||', $i);
+			$src = $img[0];
+
+			$imgToSend = [
+				'type' => 'photo',
+				'media' => $src,
+			];
+			if(!empty($img[1]))
+				$imgToSend['caption'] = $img[1];
+
+			return $imgToSend;
+		}, $imgArr);
+	} //* ExtractImages
+
+
+	/**
+	 * @param sourse - current parsing url
+	 * @param mainLinks - DOMNodeList with links
+	 * optional @param excludes
+	 */
+	public static function DOMcollectLinks(string $source, DOMNodeList &$mainLinks, array $excludes = [])
+	:array
+	{
+		if(!is_object($mainLinks))
+			return [];
+
+		$links = [];
+		foreach($mainLinks as $link) {
+			$href = $link->getAttribute("href");
+			if(!strlen($href))
+				continue;
+
+			$href = (stripos($href, 'http') === false) ? $source . preg_replace("~^/+~", '', $href) : $href;
+
+			if(!self::stripos_array($href, $excludes))
+			$links []= $href;
+		}
+
+		# Required $this->definedBase in CommonBot
+		return array_unique($links);
+	}
+
+
 	protected function NoUpdates()
 	{
 		if (!array_key_exists('callback_query', $this->inputData)) return;
 
-		$text = $this->noUdatesText . ($this->is_owner ? "\nСкоро обязательно появятся, хозяин!" : '');
+		$text = ($this->is_owner ? "Хозяин! \n" : '') . $this->noUdatesText;
 
 		$r = $this->apiResponseJSON([
 		// return $this->apiRequest([
@@ -337,9 +402,8 @@ class CommonBot extends TG
 		], 'answerCallbackQuery');
 
 		$this->log->add("NOT exist new content.", null, $r);
-		return $r;
 
-
+		die;
 	}
 
 
@@ -371,10 +435,10 @@ class CommonBot extends TG
 	}
 
 
-	/* if(
-		CommonBot::stripos_array($p->nodeValue, ['Полная версия сайта', 'Обратная связь', 'Политика конфидициальности', 'Отказ от ответственности',]) !== false
-	) continue; */
 	/**
+	 * @param haystack
+	 * @param (string|array) needles
+	 * service posArr
 	 * Возвращает вхождение первой подстроки из mixed @needles
 	 */
 	public static function stripos_array(string $haystack, $needles, ?int $offset= 0, $posArr= [])
@@ -389,14 +453,15 @@ class CommonBot extends TG
 				$pos = mb_stripos($haystack, $str, $offset);
 			}
 			if ($pos !== false) {
-				$posArr[$pos] = $str;
+				$posArr[] = $str;
+				// $posArr[$pos] = $str;
 			}
 		}
 
-		ksort($posArr, SORT_NATURAL);
-		return array_keys($posArr)[0] ?? false;
-			/* !count($posArr) ? false
-			: array_keys($posArr)[0]; */
+		sort($posArr, SORT_NATURAL);
+		// ksort($posArr, SORT_NATURAL);
+		return $posArr[0] ?? false;
+		// return array_keys($posArr)[0] ?? false;
 	}
 
 	// ПАРСЕР

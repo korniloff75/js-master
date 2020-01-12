@@ -16,10 +16,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 	protected
 		# Test mode, bool
 		$__test = 1 ,
-		$token = '1052237188:AAESfJXhbZLxBiZTb7m0CDy-3ZkGgoO9YrU',
 		$baseDir = 'base/',
-		$lastBase = [],
-		$baseId = [],
 		$baseSource = [],
 		// $contentSum = [],
 		$content = [],
@@ -85,39 +82,23 @@ class AnekdotBot extends CommonBot implements iBotTG
 	} // init
 
 
+	//todo Доработать проходы по оригиналам сокращенных текстов
 	protected function parser_shutok_ru($source, DOMDocument &$doc)
 
 	{
 		$xpath = new DOMXpath($doc);
 
-		$xpathBlock = "//div[@id=\"dle-content\"][1]";
-		$xpathText = ".//div[@class=\"box_in\"]";
-		// $xpathText = "//div[@class=\"text\"]";
+		# Собираем ссылки с гл. страницы
+		$mainLinks = $xpath->query("//div[@id=\"dle-content\"][1]//div[@class=\"story_tools\"]/a");
 
-		$xBlock = $xpath->query($xpathBlock)->item(0);
+		$links = CommonBot::DOMcollectLinks($source, $mainLinks);
+		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
+			$mainLinks,
+			$links
+		]);
 
-		$xTexts = $xpath->query($xpathText, $xBlock);
+		return $links;
 
-		$this->log->add(__METHOD__ . " - \$xTexts = ", null, [$xTexts]);
-
-		foreach($xTexts as $node) {
-			$title = $xpath->query("h2", $node)->item(0)->textContent;
-			$text = $xpath->query("div[@class=\"text\"]", $node)->item(0);
-			if(strlen($text->textContent) < 30)
-				continue;
-
-			$this->content[]= "<b>$title</b>\n\n" . CommonBot::DOMinnerHTML($text);
-		}
-
-		$imgArr = CommonBot::DOMcollectImgs($source, $xpath, $xBlock, 'src');
-		$imgArr = array_filter($imgArr, function(&$img) {
-			return CommonBot::stripos_array($img, ['Podrobnee.png', 'Istochnik.png', 'top-fwz1.mail.ru', 'counter', 'mc.yandex.ru']) === false;
-		});
-
-		$this->log->add(__METHOD__ . " - \$imgArr = ", null, [$imgArr]);
-
-		# Required
-		return array_merge($this->content, $imgArr);
 	} // parser_shutok_ru
 
 
@@ -190,34 +171,57 @@ class AnekdotBot extends CommonBot implements iBotTG
 	 */
 	protected function handler_shutok_ru(array &$diff)
 	{
-		foreach($diff as $k=>&$str) {
+		$photos = [];
+		$content = [];
+		$out = [];
+
+		# Перебираем все новые ссылки и грузим из них в контент
+		foreach ($diff as &$link) {
+			$s = parse_url($link);
+			$source = "{$s['scheme']}://{$s['host']}/";
+
+			$docLink = new DOMDocument();
+			@$docLink->loadHTMLFile($link);
+			$xpath = new DOMXpath($docLink);
+
+			// if(!is_object($xBlock = $xpath->query("//article[@class=\"fullstory\"][1]")->item(0)))
+			if(!is_object($xBlock = $xpath->query("//article[1]")->item(0)))
+				continue;
+
+			# Extract text
+			$xTexts = $xpath->query(".//div[@class=\"text\"][1]", $xBlock);
+			$text = $xTexts->item(0);
+			// $this->log->add(__METHOD__ . " - \$xTexts = ", null, [$xTexts]);
+
 			if(
-				strpos($str, 'http') === 0
+				strlen($text->textContent) > 30
+				&& CommonBot::stripos_array($text->textContent, [
+					'Комментарии', 'Карикатуры', 'Анекдоты в картинках', 'Картинки'
+				]) === false
 			)
 			{
-				$img = explode('|||', $str);
-				$src = $img[0];
-
-				if(!strlen($src)) continue;
-
-				$photos[]= [
-					'type' => 'photo',
-					'media' => $src,
-					'caption' => $img[1],
-				];
-				unset($diff[$k]);
+				$toContent = CommonBot::DOMinnerHTML($text);
+				# Убираем лишние пустые строки
+				$content[]= preg_replace(["/^\s*\d+.*$/m", "/([\r\n]){2,}/"], ['',"$1"], $toContent);
 			}
 
-			if(CommonBot::stripos_array($str, [
-				'Комментарии', 'Карикатуры', 'Анекдоты в картинках', 'Картинки'
-			]) !== false)
-				unset($diff[$k]);
+			//* Extract images
+			$imgArr = CommonBot::ExtractImages($source, $xpath, $xBlock, 'src', ['Podrobnee.png', 'Istochnik.png', 'top-fwz1.mail.ru', 'counter', 'mc.yandex.ru']);
+
+			$photos = array_merge_recursive($photos, $imgArr);
+			// $this->log->add(__METHOD__ . " - \$imgArr = ", null, [$imgArr]);
+
 		}
 
-		return [
-			'sendMessage' => $diff,
-			'sendMediaGroup' => $photos ?? [],
-		];
+		// $this->log->add(__METHOD__ . " - \$photos = ", null, [$photos]);
+
+		if(count($content))
+			$out['sendMessage'] = $content;
+		if(count($photos))
+			$out['sendMediaGroup'] = $photos;
+
+		return $out;
+
 	} // handler_shutok_ru
 
 

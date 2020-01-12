@@ -15,12 +15,30 @@ class KorniloFF_news extends CommonBot implements iBotTG
 	protected
 		# Test mode, bool
 		$__test = 1 ,
-		$token = '943870959:AAFdJgZhROOVsevhaXEUYxGr-BL-yorNueY',
 
 		$baseDir = 'base/',
-		$savedContent = [],
-		$savedBase = [],
-		$baseId = [],
+		// $savedContent = [],
+		// $savedBase = [],
+		// $baseId = [],
+		// Specify headers
+		$stream_context_options = [
+			'www_yalta_24_ru' => [
+				'http' => [
+					"Accept"=> "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+					"Accept-Encoding"=> "gzip, deflate",
+					"Accept-Language"=> "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+					"Cache-Control"=> "no-cache",
+					"Connection"=> "keep-alive",
+					"User-Agent"=> "Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0",
+
+					'Host' => 'www.yalta-24.ru',
+					'Upgrade-Insecure-Requests'=> 1,
+
+					/* {"Заголовки запроса (407 б)":{"headers":[{
+						,"value":},{"name":,"value":},{"name":,"value":},{"name":,"value":},{"name":,"value":},{"name":"DNT","value":"1"},{"name":"Host","value":"www.yalta-24.ru"},{"name":"Pragma","value":"no-cache"},{"name":"Upgrade-Insecure-Requests","value":"1"},{"name":,"value":}]}} */
+				]
+			]
+		],
 		$baseSource = [],
 		$DOMNodeList,
 		// $contentSum = [],
@@ -43,6 +61,7 @@ class KorniloFF_news extends CommonBot implements iBotTG
 		$remoteSource = [
 			'https://crimea-news.com/',
 			'http://m.allcrimea.net/',
+			'http://www.yalta-24.ru/',
 		];
 
 	private
@@ -77,92 +96,82 @@ class KorniloFF_news extends CommonBot implements iBotTG
 	} // init
 
 
-	protected function parser_crimea_news_com($source, $doc)
+	protected function parser_crimea_news_com($source, &$doc)
 	:array
 	{
-		$links = [];
 		$xpath = new DOMXpath($doc);
 
-		$xpathToNode = "//div[@class=\"top-day\"][1]//a";
-
 		# Собираем ссылки с гл. страницы
-		if(!is_object($mainLinks = $xpath->query($xpathToNode)))
-			return [];
+		$mainLinks = $xpath->query("//div[@class=\"top-day\"][1]//a");
 
-		// $mainLinks = $doc->getElementById("container")->getElementsByTagName("a");
-
-		// if(!$mainLinks->length) return $this;
-
-		# array_unique($mainLinks)
-		foreach($mainLinks as $link) {
-			$href = $link->getAttribute("href");
-			if(
-				strlen($href)
-				&& strpos($href, 'http') === false
-				// && strcasecmp($href, $source)
-			)
-			{
-				$links []= $source . substr($href, 1);
-			}
-
-		}
-
+		$links = CommonBot::DOMcollectLinks($source, $mainLinks);
 		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
-			// $doc,
 			$mainLinks,
-			// $links
 		]);
 
-		# Required $this->definedBase in CommonBot
-		return array_unique($links);
+		return $links;
 	} // parser_crimea_news_com
 
 
-	protected function parser_m_allcrimea_net($source, $doc)
+	protected function parser_m_allcrimea_net($source, &$doc)
 	:array
 	{
-		# Собираем ссылки с гл. страницы
-		$mainLinks = $doc->getElementById("container")->getElementsByTagName("a");
-		$links = [];
+		$xpath = new DOMXpath($doc);
 
-		$this->log->add(__METHOD__ . " - \$mainLinks", null, [
-			// $doc,
-			$mainLinks
+		$mainLinks = $xpath->query("//div[@id=\"container\"][1]//a");
+
+		$links = CommonBot::DOMcollectLinks($source, $mainLinks);
+		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
+			$mainLinks,
 		]);
 
-		// if(!$mainLinks->length) return $this;
-
-		# array_unique($mainLinks)
-		foreach($mainLinks as $link) {
-			$href = $link->getAttribute("href");
-			if(
-				strlen($href)
-				&& strpos($href, 'http') !== 0
-				&& strcasecmp($href, $source)
-			)
-				$links []= $source . $href;
-		}
-
-		# Required $this->definedBase in CommonBot
-		return array_unique($links);
+		return $links;
 	} // parser_m_allcrimea_net
 
 
+	protected function _parser_www_yalta_24_ru($source, &$doc)
+	:array
+	{
+		$xpath = new DOMXpath($doc);
+
+		$mainLinks = $xpath->query("//p[@class=\"readmore\"]/a[1]");
+		// $main = $xpath->query("//div[contains(@class, \"content-top-in\")][3]");
+
+		// todo START
+		foreach($xpath->query("//p[1]") as $p) {
+			@$t .= "{$p->textContent}\n\n";
+		}
+		// todo END
+
+		$links = CommonBot::DOMcollectLinks($source, $mainLinks, ['za-predelami-yalty']);
+		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
+			mb_detect_encoding($t),
+			// $t,
+			$mainLinks,
+			count($links),
+			// $xpath->query("//p[@class=\"readmore\"]"),
+		]);
+
+		return $links;
+	} // parser_www_yalta_24_ru
+
+
 	/**
-	 * Обрабатываем неопубликованный контент
+	 ** Обрабатываем неопубликованный контент
 	 */
-	protected function handler_crimea_news_com(array &$diff, $xpathToNode = "//*[@class=\"news_c\"][1]")
+	protected function handler_crimea_news_com(array &$diff, $xpathToBlock = "//*[@class=\"news_c\"][1]")
 	{
 		$photos = [];
 		$content = [];
-		$imgXpath = $this->imgXpath ?? $xpathToNode;
+		$imgXpath = $this->imgXpath ?? $xpathToBlock;
 		# Перебираем все новые ссылки и грузим из них в контент
 		foreach ($diff as &$link) {
-			$docLink = new DOMDocument();
-			@$docLink->loadHTMLFile($link);
+			// $docLink = new DOMDocument();
+			// @$docLink->loadHTMLFile($link);
+			$docLink = @DOMDocument::loadHTMLFile($link);
 			$xpath = new DOMXpath($docLink);
 
-			if(!is_object($xnews = $xpath->query($xpathToNode)->item(0)))
+			if(!is_object($xBlock = $xpath->query($xpathToBlock)->item(0)))
 				continue;
 
 			# Собираем для добавления в $content
@@ -184,9 +193,9 @@ class KorniloFF_news extends CommonBot implements iBotTG
 
 			$addContent = "<b>$addContent</b>" . PHP_EOL . PHP_EOL;
 
-			// $addContent .= $xnews->item(0)->textContent;
+			// $addContent .= $xBlock->item(0)->textContent;
 			$addContent .= CommonBot::DOMinnerHTML(
-				$xnews
+				$xBlock
 			);
 
 			$content[]= $addContent;
@@ -196,11 +205,12 @@ class KorniloFF_news extends CommonBot implements iBotTG
 		$this->log->add('count($photos) = ' . count($photos));
 
 		# На отсылку
-		return [
-			'sendMediaGroup' => $photos,
-			'sendMessage' => $content,
-		];
+		if(count($content))
+			$out['sendMessage'] = $content;
+		if(count($photos))
+			$out['sendMediaGroup'] = $photos;
 
+		return $out;
 	} // handler_crimea_news_com
 
 
@@ -211,6 +221,62 @@ class KorniloFF_news extends CommonBot implements iBotTG
 		return $this->handler_crimea_news_com($diff, "//*[@id=\"newscont\"][2]");
 
 	} // handler_m_allcrimea_net
+
+
+	protected function handler_www_yalta_24_ru(array &$diff)
+	{
+		$photos = [];
+		$content = [];
+		$xpathToBlock = $imgXpath = "//div[@class=\"item-page\"][1]";
+		//* Перебираем все новые ссылки и грузим из них в контент
+		foreach ($diff as &$link) {
+			$s = parse_url($link);
+			$source = "{$s['scheme']}://{$s['host']}/";
+			// $docLink = new DOMDocument();
+
+			// @$docLink->loadHTMLFile($link);
+
+			if($chunkedContent = $this->getChunkedContent($link))
+				$docLink = @DOMDocument::loadHTML($chunkedContent);
+			else
+				continue;
+
+			$xpath = new DOMXpath($docLink);
+
+			if(!is_object($xBlock = $xpath->query($xpathToBlock)->item(0)))
+				continue;
+
+			//* Собираем для добавления в $content
+			$header = 'Ялта: ' . $xpath->query(".//h1[1]", $xBlock)->item(0)->textContent;
+
+			// $addContent .= $xBlock->item(0)->textContent;
+			$addContent = CommonBot::DOMinnerHTML(
+				// div[@itemprop='articleBody']
+				// $xpath->query("./*", $xBlock)->item(0),
+				$xBlock,
+				['Опубликовано']
+			);
+
+			if(strlen(trim($addContent)))
+				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
+
+			$imgArr = CommonBot::ExtractImages($source, $xpath, $xBlock, 'src', []);
+			// $this->log->add('$imgArr', null, [$imgArr]);
+			$photos = array_merge_recursive($photos, $imgArr);
+		}
+
+		$this->log->add(__METHOD__ . ' count($content) = ' . count($content));
+		$this->log->add(__METHOD__ . ' count($photos) = ' . count($photos));
+
+		# На отсылку
+		if(count($content))
+			$out['sendMessage'] = $content;
+		if(count($photos))
+			$out['sendMediaGroup'] = $photos;
+
+		return $out;
+
+	} // handler_www_yalta_24_ru
 
 
 

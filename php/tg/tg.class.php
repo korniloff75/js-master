@@ -21,19 +21,9 @@ class TG {
 		$__test = 0 ,
 		$inputJson = null,
 		$token,
+		$tokens = [],
 		$api,
 		$headers = ["Content-Type:multipart/form-data"],
-		/* $proxyList = [
-			"http://proxy-nossl.antizapret.prostovpn.org:29976",
-			"http://CCAHIHA.antizapret.prostovpn.org:3128",
-			"http://190.242.119.194:3128",
-			"http://89.165.218.82:47886",
-			"https://118.140.150.74:3128",
-			"http://185.186.77.244:80",
-			"http://88.199.21.75:80",
-			"socks5://139.99.104.233:15895",
-			"socks4://89.190.120.116:52941",
-		], */
 		# findAnzProxy()
 		$proxy,
 		# define in child classes
@@ -69,20 +59,21 @@ class TG {
 		}
 		$this->log->add("tg.class.php started");
 
-		$this->token = $token ?? $this->token;
-		if(!is_string($this->token))
-		{
-			$this->log->add("There is no TOKEN from child class to continue execution!", E_USER_WARNING);
-			$this->__destruct();
-			die();
-		}
-
 		if($this->botFileInfo)
 		{
 			# Relative from root
 			$this->botDir = $this->botFileInfo->getPathInfo()->fromRoot();
-
 			$this->log->add("\$this->botDir = {$this->botDir}");
+		}
+
+		$this->getTokens();
+
+		$this->token = $token ?? $this->tokens['tg'] ?? $this->token;
+		if(!is_string($this->token))
+		{
+			$this->log->add("There is no TOKEN from child class to continue execution!", E_USER_ERROR, [$this->token]);
+			$this->__destruct();
+			die();
 		}
 
 		$this->api = "https://api.telegram.org/bot{$this->token}/";
@@ -93,7 +84,7 @@ class TG {
 			!$this->proxy = $this->findAnzProxy()
 		)
 		{
-			$this->log->add("Available proxy NOT found!", E_USER_WARNING);
+			$this->log->add("Available proxy NOT found!", E_USER_ERROR);
 			die('Прокси не найден!');
 		}
 
@@ -101,6 +92,17 @@ class TG {
 		$this->message = $this->webHook()->findCallback();
 		return $this;
 	} // __construct
+
+
+	private function getTokens($file= null)
+	{
+		$file = $file ?? $this->botFileInfo->getPath() . "/token.json";
+		// $file = $file ?? "{$this->botDir}/token.json";
+		$this->tokens = file_exists($file) ? json_decode(
+			file_get_contents($file), true
+		) : ['tg' => $this->token];
+		$this->log->add(__METHOD__, null, [$file, $this->tokens]);
+	}
 
 
 	public function getData()
@@ -234,50 +236,40 @@ class TG {
 
 	}
 
-	/* public function findProxy()
-	{
-		$timeoutInSeconds = 1.5;
-
-		foreach($this->proxyList as $proxy) {
-			$p = parse_url($proxy);
-			// $p['scheme'].'://'.
-			if($fp = fsockopen($p['host'], $p['port'], $errCode, $errStr, $timeoutInSeconds))
-			{
-				$this->log->add("Proxy $proxy - is AVAILABLE\n");
-				return $proxy; break;
-			} else {
-				$this->log->add("$proxy - ERROR: $errCode - $errStr", E_USER_WARNING);
-			}
-			// fclose($fp);
-		}
-
-		return false;
-	} */
-
 	/**
 	 * new
+	 * ! Required
+	 * @param proxy - полная строка для вывода в js
+	 * @param stop - service stop recursion
 	 */
 	public function findAnzProxy(?string $proxy=null, bool $stop=false)
 	{
 		$timeoutInSeconds = 1;
+		$parsePath = 'https://cloudflare-ipfs.com/ipns/pacipfs2.antizapret.prostovpn.org/proxy-nossl.js';
 
 		if(file_exists(self::$proxyPath))
 		{
 			$proxy = $proxy ?? file_get_contents(self::$proxyPath);
 
-			$p = parse_url($proxy);
+			preg_match("~PROXY\s+(.+); DIRECT~i", $proxy, $proxyURL);
+
+			$proxyURL = "http://{$proxyURL[1]}";
+			trigger_error("\$proxyURL = $proxyURL");
+
+			// $p = parse_url("http://$proxy");
+			$p = parse_url($proxyURL);
 			// $p['scheme'].'://'.
 
 			# Если прокси из файла доступен - возвращаем его
 			if($fp = fsockopen($p['host'], $p['port'], $errCode, $errStr, $timeoutInSeconds))
 			{
-				$this->log->add("Proxy $proxy - is AVAILABLE\n");
-				return $proxy;
+				$this->log->add("Proxy $proxyURL - is <font color=green size=4><b>AVAILABLE</b></font>\n");
+				return $proxyURL;
 			}
 			# Если недоступен - удаляем файл + рекурсия
 			else
 			{
-				$this->log->add("$proxy - ERROR: $errCode - $errStr", E_USER_WARNING);
+				trigger_error("$proxyURL - ERROR: $errCode - $errStr", E_USER_WARNING);
 				unlink(self::$proxyPath);
 				return $this->findAnzProxy(null, false);
 			}
@@ -289,12 +281,12 @@ class TG {
 				# Если повторная рекурсия - тормозим
 				!$stop
 				# Ищем обновлённый прокси
-				&& ($anz = file_get_contents('https://cloudflare-ipfs.com/ipns/pacipfs2.antizapret.prostovpn.org/proxy-nossl.js'))
+				&& ($anz = file_get_contents($parsePath))
 				&& preg_match(
-				"~return \"PROXY\s+(.+); DIRECT\";$~im", $anz, $proxy)
+					"~return \"(PROXY.+DIRECT)\";$~im", $anz, $proxy)
 			)
 			{
-				$proxy = "http://{$proxy[1]}";
+				$proxy = $proxy[1];
 				file_put_contents(self::$proxyPath, $proxy);
 
 				# Рекурсия с новым прокси
@@ -406,6 +398,7 @@ class TG {
 		} else {
 			if (isset($response['description'])) {
 				$this->log->add("apiRequest was SUCCESSFUL: {$response['description']}");
+				usleep(10);
 			}
 			$response = $response['result'];
 		}
@@ -435,15 +428,23 @@ class TG {
 
 
 	/**
-	 * Wrapper 4 $this->apiRequest
+	 ** Wrapper 4 $this->apiRequest
+	 * @param content - array with content strings
+	 * optional:
+	 * @param postFields - array with custom settings
+	 * @param break - break between message in bus
+	 *
+	 * Проверяет длину каждого элемента из @content
+	 * Если превышает лимит - создаёт массив из строк и передаёт в рекурсию
+	 * Если нет - собирает шину элементов до лимита и отправляет в ТГ
 	 */
-	public function sendMessage(array $content)
+	public function sendMessage(array &$content, array $postFields= [], string $break="\n\n")
 	{
-		$postFields = [
+		$postFields = array_merge([
 			'chat_id' => $this->chat_id,
 			'parse_mode' => 'html',
 			'disable_web_page_preview' => true,
-		];
+		], $postFields);
 
 		# Делим на шины по self::$textLimit символов
 		$bus = '';
@@ -451,10 +452,18 @@ class TG {
 
 		foreach($content as $i) {
 			--$diffLength;
-			# Разбиваем на строки фикс. размера
-			if(strlen($bus) + strlen($i) < self::$textLimit)
+			# Если один элемент больше лимита
+			if(strlen($i) > self::$textLimit)
 			{
-				$bus .= "$i\n\n\n";
+				$content = explode("\n", $i);
+				if(count($content) < 2) continue;
+				$this->sendMessage($content, $postFields, "\n");
+				continue;
+			}
+			# Разбиваем на строки фикс. размера
+			elseif(strlen($bus) + strlen($i) < self::$textLimit)
+			{
+				$bus .= "{$i}{$break}";
 				if($diffLength) continue;
 			}
 
@@ -479,7 +488,6 @@ class TG {
 			$respTG[]= $this->apiRequest($postFields);
 
 			$bus = '';
-			usleep(10);
 
 		}
 
@@ -503,7 +511,6 @@ class TG {
 				'chat_id' => $this->message['chat']['id'],
 				'media' => $lim,
 			], 'sendMediaGroup');
-			usleep(10);
 		}
 
 	}
@@ -526,9 +533,6 @@ class TG {
 		// if(!$this->__test) return;
 
 		$this->log->add('EVALUATE __destruct');
-
-		/* $this->bufferLog = ob_get_clean();
-		file_put_contents($this->botFileInfo->getPath() . '/buffer.log', strip_tags($this->bufferLog)); */
 
 		# Выводим логи
 		// if($this->__test) $this->log->print();
