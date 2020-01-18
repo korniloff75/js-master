@@ -39,6 +39,7 @@ class TG {
 
 
 	protected static
+		$allowedTags = '<pre><b><strong><i><em><u><ins><s><strike><del><code>',
 		$proxyPath = __DIR__ . '/Common/db.proxy',
 		$textLimit = 3900;
 
@@ -68,15 +69,9 @@ class TG {
 
 		$this->getTokens();
 
-		$this->token = $token ?? $this->tokens['tg'] ?? $this->token;
-		if(!is_string($this->token))
-		{
-			$this->log->add("There is no TOKEN from child class to continue execution!", E_USER_ERROR, [$this->token]);
-			$this->__destruct();
-			die();
-		}
+		// $this->token = $token ?? $this->tokens['tg'] ?? $this->token;
 
-		$this->api = "https://api.telegram.org/bot{$this->token}/";
+		$this->api = "https://api.telegram.org/bot{$this->tokens['tg']}/";
 
 		$this->log->add("Init bot.class.php");
 
@@ -101,7 +96,14 @@ class TG {
 		$this->tokens = file_exists($file) ? json_decode(
 			file_get_contents($file), true
 		) : ['tg' => $this->token];
-		$this->log->add(__METHOD__, null, [$file, $this->tokens]);
+		$this->log->add(__METHOD__, null, [$file]);
+
+		if(!is_string($this->tokens['tg']))
+		{
+			$this->log->add(__METHOD__ . " There is no TOKEN from child class to continue execution!", E_USER_ERROR, [$this->tokens]);
+			$this->__destruct();
+			die();
+		}
 	}
 
 
@@ -452,6 +454,8 @@ class TG {
 
 		foreach($content as $i) {
 			--$diffLength;
+			if(!strlen(trim($i)))
+				continue;
 			# Если один элемент больше лимита
 			if(strlen($i) > self::$textLimit)
 			{
@@ -467,10 +471,10 @@ class TG {
 				if($diffLength) continue;
 			}
 
-			if(!strlen(trim($bus)))
-				continue;
+			// if(!strlen(trim($bus)))
+			// 	continue;
 
-			$postFields['text'] = $bus;
+			$postFields['text'] = strip_tags($bus, self::$allowedTags);
 
 			if(class_exists('CommonBot'))
 			{
@@ -500,7 +504,7 @@ class TG {
 	 */
 	public function sendMediaGroup(array $photos)
 	{
-		$this->log->add('$photos = ', null, [$photos]);
+		$this->log->add(__METHOD__ . 'count($photos) = ', null, [count($photos)]);
 
 		if(count($photos))
 			$photos = array_chunk($photos, 10);

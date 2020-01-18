@@ -16,7 +16,8 @@ class Logger
 	protected
 		# realpath to the log file
 		$file;
-	public
+	private
+		$rewriteLog,
 		# array with a current log
 		$log = [];
 
@@ -61,6 +62,7 @@ class Logger
 
 		$this->log[]= $log . PHP_EOL . PHP_EOL;
 	}
+
 
 	protected function _addToLog($fileName, $line, $message, $level=null)
 	:string
@@ -184,6 +186,9 @@ class Logger
 
 	public function __destruct()
 	{
+		$this->log = array_map(function($i) {
+			return strip_tags($i);
+		}, $this->log );
 		file_put_contents($this->file, $this->log, !$this->rewriteLog ? FILE_APPEND : null);
 	}
 } // Logger

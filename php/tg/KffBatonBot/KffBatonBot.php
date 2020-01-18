@@ -15,8 +15,6 @@ class KffBatonBot extends CommonBot implements iBotTG
 	protected
 		# Test mode, bool
 		$__test = 1 ,
-		$token = '961791860:AAERB11tHXkv3lJP3hbQsszB454kFdjCmiU',
-
 		$baseDir = 'base/',
 		$rhyme = [
 			'батон' => 'Натяни себе гандон!',
@@ -114,7 +112,7 @@ class KffBatonBot extends CommonBot implements iBotTG
 			&& $this->__test
 		)
 		{
-			$content = &$this->log->log;
+			$content = $this->log->log;
 			$content []= "\n\$mess = $mess";
 			return $this->sendMessage($content);
 		}

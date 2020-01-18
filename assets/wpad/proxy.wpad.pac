@@ -83,6 +83,7 @@ ob_start();
 		'.googleapis',
 		'telegram', 't.me',
 		'kinorai',
+		'spotify',
 		// test https://suip.biz/ru/?act=proxy-checker
 		'suip\.biz',
 		'nvidia.ru',

@@ -1,11 +1,5 @@
 <?php
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(-1);
-
-// require_once $_SERVER['DOCUMENT_ROOT'] . "/Helper.php";
-
 require_once "../CommonBot.class.php";
 
 
@@ -14,19 +8,15 @@ class UniKffBot extends CommonBot implements iBotTG
 	protected
 		# Test mode, bool
 		$__test = 1 ,
-		$token,
-		$gismeteoToken;
+		$token;
 
 
 	public function __construct()
 	{
-		// \H::json('license.json', $this->license);
-		# Set local data
+		//* Set local data
 		$this->botFileInfo = new kffFileInfo(__FILE__);
 
-		# Запускаем скрипт
-		# Protect from CommonBot
-		// $this->checkLicense();
+		//* Запускаем скрипт
 		parent::__construct()->checkLicense()->init();
 
 	} //__construct
@@ -36,14 +26,10 @@ class UniKffBot extends CommonBot implements iBotTG
 	 */
 	private function init()
 	{
-		# Set local data
-		$this->botFileInfo = new kffFileInfo(__FILE__);
+		//* Завершаем скрипт без входящего JSON
+		if(empty($this->inputData)) die ('Нет входящего запроса');
 
-		
-
-		# Запускаем скрипт
-		# Protect from CommonBot
-		parent::__construct()->checkLicense()->init();
+		$this->Router();
 
 		die('OK');
 
@@ -52,7 +38,16 @@ class UniKffBot extends CommonBot implements iBotTG
 
 	private function Router()
 	{
-		$responseData = $this->responseData;
+		switch ($this->cbn["data"]) {
+			case '/gismeteo':
+				require_once('gismeteo.php');
+				break;
+
+			default:
+				# code...
+				break;
+		}
+
 
 	}
 } // UniKffBot

@@ -34,8 +34,6 @@ class KorniloFF_news extends CommonBot implements iBotTG
 					'Host' => 'www.yalta-24.ru',
 					'Upgrade-Insecure-Requests'=> 1,
 
-					/* {"Заголовки запроса (407 б)":{"headers":[{
-						,"value":},{"name":,"value":},{"name":,"value":},{"name":,"value":},{"name":,"value":},{"name":"DNT","value":"1"},{"name":"Host","value":"www.yalta-24.ru"},{"name":"Pragma","value":"no-cache"},{"name":"Upgrade-Insecure-Requests","value":"1"},{"name":,"value":}]}} */
 				]
 			]
 		],
@@ -44,10 +42,6 @@ class KorniloFF_news extends CommonBot implements iBotTG
 		// $contentSum = [],
 		// $content = [],
 		$botDir,
-		$id = [
-			'anekdoty' => -1001393900792,
-			 'tome' => 673976740,
-		],
 		$currentBaseItem,
 		$respTG=[];
 
@@ -86,7 +80,7 @@ class KorniloFF_news extends CommonBot implements iBotTG
 	 */
 	public function init()
 	{
-		# Завершаем скрипт без входящего JSON
+		//* Завершаем скрипт без входящего JSON
 		if(empty($this->inputData)) die ('Нет входящего запроса');
 
 		$this->Parser();
@@ -159,47 +153,42 @@ class KorniloFF_news extends CommonBot implements iBotTG
 	/**
 	 ** Обрабатываем неопубликованный контент
 	 */
-	protected function handler_crimea_news_com(array &$diff, $xpathToBlock = "//*[@class=\"news_c\"][1]")
+	// protected function handler_crimea_news_com(array &$diff, $xpathToBlock = "//*[@class=\"news_c\"][1]")
+	protected function handler_crimea_news_com(array &$diff, $xpathToBlock = "//div[@class=\"js-mediator-article\"][1]")
 	{
 		$photos = [];
 		$content = [];
-		$imgXpath = $this->imgXpath ?? $xpathToBlock;
+
+		$imgXpath = $this->imgXpath ?? "//div[@class=\"news_c\"][1]";
 		# Перебираем все новые ссылки и грузим из них в контент
 		foreach ($diff as &$link) {
-			// $docLink = new DOMDocument();
-			// @$docLink->loadHTMLFile($link);
+			$s = parse_url($link);
+			$source = "{$s['scheme']}://{$s['host']}/";
+
 			$docLink = @DOMDocument::loadHTMLFile($link);
 			$xpath = new DOMXpath($docLink);
 
-			if(!is_object($xBlock = $xpath->query($xpathToBlock)->item(0)))
+			if(
+				!is_object($xBlock = $xpath->query($xpathToBlock)->item(0))
+			)
 				continue;
 
-			# Собираем для добавления в $content
-			$addContent = $docLink->getElementsByTagName("h1")->item(0)->textContent;
+			$xImg = $imgXpath === $xpathToBlock ? $xBlock : $xpath->query($imgXpath)->item(0);
 
-			// $this->log->add('$imgs', null, [$news->getElementsByTagName("img")->item(0)]);
+			$imgArr = CommonBot::ExtractImages($source, $xpath, $xImg, 'src');
+			// $this->log->add('$imgArr', null, [$imgArr]);
+			$photos = array_merge_recursive($photos, $imgArr);
 
-			if(
-				is_object($img = $xpath->query($imgXpath . "//img")->item(0))
-				&& strlen($src = $img->getAttribute('src'))
-			)
-			{
-				$photos[]= [
-					'type' => 'photo',
-					'media' => $src,
-					'caption' => $addContent,
-				];
-			}
+			//* Собираем для добавления в $content
+			$header = $xpath->query(".//h1[1]")->item(0)->textContent;
 
-			$addContent = "<b>$addContent</b>" . PHP_EOL . PHP_EOL;
+			$addContent = "<b>$header</b>" . PHP_EOL . PHP_EOL;
 
-			// $addContent .= $xBlock->item(0)->textContent;
 			$addContent .= CommonBot::DOMinnerHTML(
-				$xBlock
+				$xBlock, ['Новости за:', 'Читайте:', 'Новости Крыма', 'сообщали ранее:', 'Источник:']
 			);
 
 			$content[]= $addContent;
-
 		}
 
 		$this->log->add('count($photos) = ' . count($photos));
@@ -216,7 +205,7 @@ class KorniloFF_news extends CommonBot implements iBotTG
 
 	protected function handler_m_allcrimea_net(array &$diff)
 	{
-		# На сайте 2 id=newscont В первом - изображение, во втором - текст.
+		//* На сайте 2 id=newscont В первом - изображение, во втором - текст.
 		$this->imgXpath = "//*[@id=\"newscont\"][1]";
 		return $this->handler_crimea_news_com($diff, "//*[@id=\"newscont\"][2]");
 
@@ -260,7 +249,7 @@ class KorniloFF_news extends CommonBot implements iBotTG
 			if(strlen(trim($addContent)))
 				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
 
-			$imgArr = CommonBot::ExtractImages($source, $xpath, $xBlock, 'src', []);
+			$imgArr = CommonBot::ExtractImages($source, $xpath, $xBlock, 'src');
 			// $this->log->add('$imgArr', null, [$imgArr]);
 			$photos = array_merge_recursive($photos, $imgArr);
 		}

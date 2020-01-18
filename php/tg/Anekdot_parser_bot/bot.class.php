@@ -156,9 +156,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 		// if(!$this->DOMNodeList->length) return;
 
 		foreach($xTexts as $node) {
-			if(CommonBot::stripos_array($node->textContent, 'а н е к д о т о в . n е t') !== false) continue;
-
-			$content[]= CommonBot::DOMinnerHTML($node);
+			$content[]= CommonBot::DOMinnerHTML($node, ['а н е к д о т о в . n е t']);
 		}
 
 		# Required
@@ -180,8 +178,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 			$s = parse_url($link);
 			$source = "{$s['scheme']}://{$s['host']}/";
 
-			$docLink = new DOMDocument();
-			@$docLink->loadHTMLFile($link);
+			$docLink = DOMDocument::loadHTMLFile($link);
 			$xpath = new DOMXpath($docLink);
 
 			// if(!is_object($xBlock = $xpath->query("//article[@class=\"fullstory\"][1]")->item(0)))
@@ -195,18 +192,15 @@ class AnekdotBot extends CommonBot implements iBotTG
 
 			if(
 				strlen($text->textContent) > 30
-				&& CommonBot::stripos_array($text->textContent, [
-					'Комментарии', 'Карикатуры', 'Анекдоты в картинках', 'Картинки'
-				]) === false
 			)
 			{
-				$toContent = CommonBot::DOMinnerHTML($text);
-				# Убираем лишние пустые строки
-				$content[]= preg_replace(["/^\s*\d+.*$/m", "/([\r\n]){2,}/"], ['',"$1"], $toContent);
+				$content[]= CommonBot::DOMinnerHTML($text, [
+					'Комментарии', 'Карикатуры', 'Анекдоты в картинках', 'Картинки'
+				]);
 			}
 
 			//* Extract images
-			$imgArr = CommonBot::ExtractImages($source, $xpath, $xBlock, 'src', ['Podrobnee.png', 'Istochnik.png', 'top-fwz1.mail.ru', 'counter', 'mc.yandex.ru']);
+			$imgArr = CommonBot::ExtractImages($source, $xpath, $xBlock, 'src', ['Podrobnee.png', 'Istochnik.png', 'Default', 'top-fwz1.mail.ru', 'counter', 'mc.yandex.ru']);
 
 			$photos = array_merge_recursive($photos, $imgArr);
 			// $this->log->add(__METHOD__ . " - \$imgArr = ", null, [$imgArr]);
@@ -248,7 +242,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 			'sendMessage' => preg_replace(['/^.*(Показать полностью|читать дальше).*$|\s+\d+(>|&gt;)/ium'], '', $diff),
 			'sendMediaGroup' => $photos ?? [],
 		];
-	}
+	} //* handler_anekdot_ru
 
 	protected function handler_anekdotov_net(array &$diff)
 	{
