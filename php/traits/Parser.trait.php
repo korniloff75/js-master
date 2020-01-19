@@ -16,6 +16,7 @@ trait Parser {
 			$this->NoUpdates();
 			die;
 		}
+		$this->pathBotFolder = $this->pathBotFolder ?? __DIR__;
 
 		$baseDir = "{$this->pathBotFolder}/" . basename($this->baseDir);
 

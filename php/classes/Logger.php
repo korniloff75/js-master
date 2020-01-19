@@ -11,7 +11,8 @@
 class Logger
 {
 	const
-		FATALS = [E_ERROR, E_PARSE, E_COMPILE_ERROR];
+		FATALS = [E_ERROR, E_PARSE, E_COMPILE_ERROR],
+		STR_LEN = 100;
 
 	protected
 		# realpath to the log file
@@ -53,6 +54,7 @@ class Logger
 		if(count($dump))
 		{
 			foreach ($dump as $d) {
+				$d = $this->CutLength($d);
 				ob_start();
 				echo PHP_EOL;
 				var_dump($d);
@@ -61,6 +63,26 @@ class Logger
 		}
 
 		$this->log[]= $log . PHP_EOL . PHP_EOL;
+	}
+
+	public function get()
+	{
+		return $this->log;
+	}
+
+	private function CutLength($item)
+	{
+		if(is_string($item) && strlen($item) > self::STR_LEN * 1.1)
+			return mb_substr($item, 0, self::STR_LEN) . "\n.....[Обрезано]";
+
+		if(is_array($item))
+		{
+			foreach($item as &$i)
+			{
+				$i = $this->CutLength($i);
+			}
+		}
+		return $item;
 	}
 
 

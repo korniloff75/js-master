@@ -123,7 +123,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 
 		$out = array_merge($this->content, $imgArr);
 
-		$this->log->add(__METHOD__ . " - \$imgArr = ", null, [$imgArr]);
+		$this->log->add(__METHOD__ . " count($imgArr) = ", null, [count($imgArr)]);
 		// $this->log->add(__METHOD__ . " - \$out = ", null, [$out]);
 
 		# Required

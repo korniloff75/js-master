@@ -13,6 +13,7 @@ interface iBotTG
 }
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Helper.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Curl.trait.php";
 
 
 class TG {
@@ -40,9 +41,9 @@ class TG {
 
 	protected static
 		$allowedTags = '<pre><b><strong><i><em><u><ins><s><strike><del><code>',
-		$proxyPath = __DIR__ . '/Common/db.proxy',
 		$textLimit = 3900;
 
+	use Curl;
 
 	public function __construct($token=null)
 	{
@@ -74,14 +75,6 @@ class TG {
 		$this->api = "https://api.telegram.org/bot{$this->tokens['tg']}/";
 
 		$this->log->add("Init bot.class.php");
-
-		if(
-			!$this->proxy = $this->findAnzProxy()
-		)
-		{
-			$this->log->add("Available proxy NOT found!", E_USER_ERROR);
-			die('Прокси не найден!');
-		}
 
 		# Обрабатываем входящие данные
 		$this->message = $this->webHook()->findCallback();
@@ -238,68 +231,6 @@ class TG {
 
 	}
 
-	/**
-	 * new
-	 * ! Required
-	 * @param proxy - полная строка для вывода в js
-	 * @param stop - service stop recursion
-	 */
-	public function findAnzProxy(?string $proxy=null, bool $stop=false)
-	{
-		$timeoutInSeconds = 1;
-		$parsePath = 'https://cloudflare-ipfs.com/ipns/pacipfs2.antizapret.prostovpn.org/proxy-nossl.js';
-
-		if(file_exists(self::$proxyPath))
-		{
-			$proxy = $proxy ?? file_get_contents(self::$proxyPath);
-
-			preg_match("~PROXY\s+(.+); DIRECT~i", $proxy, $proxyURL);
-
-			$proxyURL = "http://{$proxyURL[1]}";
-			trigger_error("\$proxyURL = $proxyURL");
-
-			// $p = parse_url("http://$proxy");
-			$p = parse_url($proxyURL);
-			// $p['scheme'].'://'.
-
-			# Если прокси из файла доступен - возвращаем его
-			if($fp = fsockopen($p['host'], $p['port'], $errCode, $errStr, $timeoutInSeconds))
-			{
-				$this->log->add("Proxy $proxyURL - is <font color=green size=4><b>AVAILABLE</b></font>\n");
-				return $proxyURL;
-			}
-			# Если недоступен - удаляем файл + рекурсия
-			else
-			{
-				trigger_error("$proxyURL - ERROR: $errCode - $errStr", E_USER_WARNING);
-				unlink(self::$proxyPath);
-				return $this->findAnzProxy(null, false);
-			}
-		}
-		# Если нет файла
-		else
-		{
-			if(
-				# Если повторная рекурсия - тормозим
-				!$stop
-				# Ищем обновлённый прокси
-				&& ($anz = file_get_contents($parsePath))
-				&& preg_match(
-					"~return \"(PROXY.+DIRECT)\";$~im", $anz, $proxy)
-			)
-			{
-				$proxy = $proxy[1];
-				file_put_contents(self::$proxyPath, $proxy);
-
-				# Рекурсия с новым прокси
-				return $this->findAnzProxy($proxy, true);
-			}
-
-		}
-		# Полный провал
-		return false;
-	}
-
 
 	# Выводим JSON по запросу от TG
 	# Работает без proxy
@@ -326,7 +257,7 @@ class TG {
 	 */
 	public  function apiRequest(array $postFields = [], string $method = 'sendMessage')
 	{
-		$ch = curl_init();
+		// $ch = curl_init();
 
 		$postFields = array_merge([
 			// 'chat_id' => $chat_id,
@@ -336,77 +267,54 @@ class TG {
 
 		], $postFields);
 
-		// if(!strlen($postFields))
-
-		foreach ($postFields as &$val) {
-			# encoding to JSON not primitive parameters
-			if (!is_numeric($val) && !is_string($val)) {
-				$val = json_encode($val, JSON_UNESCAPED_UNICODE);
-			}
-		}
-
 		$this->log->add("URL - {$this->api}$method\n\$postFields in " . __METHOD__, null, [$postFields]);
 
-		curl_setopt_array(
-			$ch,
-			[
-				CURLOPT_URL => $this->api . $method,
-				CURLOPT_HEADER => 0,
+		//* Выполняем Curl
+		$response = $this->CurlRequestProxy($this->api . $method, [
+			'sendMethod' => 'post',
+			'headers' => $this->headers,
+			'params' => $postFields
+		]);
 
-				CURLOPT_POST => TRUE,
-				CURLOPT_RETURNTRANSFER => TRUE,
-				CURLOPT_TIMEOUT => 30,
-
-				CURLOPT_PROXY =>  $this->proxy, // Worked !
-				CURLOPT_HTTPHEADER => $this->headers,
-				// CURLOPT_SSL_VERIFYPEER => false,
-				// CURLOPT_SSL_VERIFYHOST => false,
-
-				CURLOPT_POSTFIELDS => $postFields,
-			]
-		);
-
-		return $this->execCurl($ch);
-	} // apiRequest
+		//* Обрабатываем результаты
+		return $this->apiExecCurl($response);
+	} //* apiRequest
 
 
-	function execCurl($ch) {
-		$response = curl_exec($ch);
-
-		if ($response === false) {
-			$errno = curl_errno($ch);
-			$error = curl_error($ch);
-			$this->log->add("Curl returned error $errno: $error", E_USER_WARNING);
-			curl_close($ch);
-
-			return false;
+	/**
+	 ** Исполнение Curl, вывод и логирование результатов
+	 */
+	private function apiExecCurl($response)
+	{
+		if(
+			!$response
+			|| empty($this->curlInfo)
+		)
+		{
+			$this->log->add(__METHOD__ . ' $response = ', null, $response);
+			return $response;
 		}
 
-		$http_code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-		curl_close($ch);
+		//* $this->curlInfo - определяется в $this->execCurl
+		$http_code = intval($this->curlInfo['http_code']);
 
-		$response = json_decode($response, true);
-
-		if ($http_code >= 500) {
-			// do not wat to DDOS server if something goes wrong
-			sleep(5);
-			return false;
-		} else if ($http_code != 200) {
-			$this->log->add("apiRequest has failed with error {$response['error_code']}: {$response['description']}", E_USER_WARNING);
-			if ($http_code == 401) {
+		if ($http_code != 200)
+		{
+			$this->log->add(__METHOD__ . " has failed with error {$response['error_code']}: {$response['description']}", E_USER_WARNING);
+			if ($http_code == 401)
+			{
 				$this->log->add('Invalid access token provided', E_USER_WARNING);
 			}
 			return false;
 		} else {
-			if (isset($response['description'])) {
-				$this->log->add("apiRequest was SUCCESSFUL: {$response['description']}");
+			if (isset($response['description']))
+			{
+				$this->log->add(__METHOD__ . " was SUCCESSFUL: {$response['description']}");
 				usleep(10);
 			}
-			$response = $response['result'];
+			return $response['result'];
 		}
-
-		return $response;
-	} // execCurl
+	} // apiExecCurl
 
 
 	public function setKeyboard($data)

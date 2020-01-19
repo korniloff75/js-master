@@ -46,21 +46,21 @@ class KffBatonBot extends CommonBot implements iBotTG
 
 	public function __construct()
 	{
-		# Set local data
+		//* Set local data
 		$this->botFileInfo = new kffFileInfo(__FILE__);
 
-		# Запускаем скрипт
+		//* Запускаем скрипт
 		# Protect from CommonBot checkLicense()->
 		parent::__construct()->init();
 
-	} //__construct
+	} //*__construct
 
 	/**
 	 *
 	 */
 	private function init()
 	{
-		# Завершаем скрипт без входящего JSON
+		//* Завершаем скрипт без входящего JSON
 		if(empty($this->inputData)) die ('Нет входящего запроса');
 
 		$text = $this->message['text'] = trim($this->message['text']);
@@ -112,7 +112,7 @@ class KffBatonBot extends CommonBot implements iBotTG
 			&& $this->__test
 		)
 		{
-			$content = $this->log->log;
+			$content = $this->log->get();
 			$content []= "\n\$mess = $mess";
 			return $this->sendMessage($content);
 		}
