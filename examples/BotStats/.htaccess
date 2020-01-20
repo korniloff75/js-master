@@ -2,6 +2,6 @@
 
 RewriteEngine On
 # RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^(.+)/(\d+)($|\?) $1/index.php?user=$2 [L]
+RewriteRule /(\d+?)/?($|\?) ?user=$1 [L]
 
 </IfModule>

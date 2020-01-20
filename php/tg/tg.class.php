@@ -68,7 +68,7 @@ class TG {
 			$this->log->add("\$this->botDir = {$this->botDir}");
 		}
 
-		$this->getTokens();
+		$this->getTokens(null, $token);
 
 		// $this->token = $token ?? $this->tokens['tg'] ?? $this->token;
 
@@ -82,14 +82,20 @@ class TG {
 	} // __construct
 
 
-	private function getTokens($file= null)
+	protected function getTokens($file= null, $token= null)
 	{
-		$file = $file ?? $this->botFileInfo->getPath() . "/token.json";
+		if(!$file && !empty($this->botFileInfo))
+			$file = $this->botFileInfo->getPath() . "/token.json";
+
 		// $file = $file ?? "{$this->botDir}/token.json";
-		$this->tokens = file_exists($file) ? json_decode(
+		$this->tokens = $token ? (
+			['tg' => $token]
+		) : (file_exists($file) ? json_decode(
 			file_get_contents($file), true
-		) : ['tg' => $this->token];
-		$this->log->add(__METHOD__, null, [$file]);
+		) : ['tg' => $this->token]);
+
+		$this->log->add(__METHOD__ . ' $this->tokens', null, [$this->tokens]);
+
 
 		if(!is_string($this->tokens['tg']))
 		{
@@ -232,8 +238,10 @@ class TG {
 	}
 
 
-	# Выводим JSON по запросу от TG
-	# Работает без proxy
+	/**
+	** Выводим JSON по запросу от TG
+	** Работает без proxy
+	*/
 	protected function apiResponseJSON(array $postFields = [], string $method = 'sendMessage')
 	{
 		if(headers_sent() || !$this->inputData)
@@ -260,7 +268,7 @@ class TG {
 		// $ch = curl_init();
 
 		$postFields = array_merge([
-			// 'chat_id' => $chat_id,
+			'chat_id' => $this->message['chat']['id'],
 			// 'text' => $text,
 			'parse_mode' => 'html',
 			'certificate' => '@' . realpath('/etc/ssl/certs/dhparam.pem'),
@@ -408,17 +416,17 @@ class TG {
 	}
 
 	/**
-	 * @photos - https://core.telegram.org/bots/api#sendmediagroup
+	 * @param media - https://core.telegram.org/bots/api#sendmediagroup
 	 */
-	public function sendMediaGroup(array $photos)
+	public function sendMediaGroup(array $media)
 	{
-		$this->log->add(__METHOD__ . 'count($photos) = ', null, [count($photos)]);
+		$this->log->add(__METHOD__ . 'count($media) = ', null, [count($media)]);
 
-		if(count($photos))
-			$photos = array_chunk($photos, 10);
+		if(count($media))
+			$media = array_chunk($media, 10);
 		else return;
 
-		foreach ($photos as $lim) {
+		foreach ($media as $lim) {
 			$this->apiRequest([
 				'chat_id' => $this->message['chat']['id'],
 				'media' => $lim,

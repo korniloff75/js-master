@@ -33,7 +33,7 @@ function findAnzProxySSL(?string $proxyWpad=null, bool $stop=false)
 		{
 			trigger_error("$proxyURL - ERROR: $errCode - $errStr", E_USER_WARNING);
 			unlink($proxyPath);
-			return findAnzProxySSL(null, false);
+			return findAnzProxySSL(null, $stop);
 		}
 	}
 	# Если нет файла
@@ -79,10 +79,12 @@ ob_start();
 
 <script>
 	var enHosts = [
-		'code.google',
+		'.google\.com',
+		'.withgoogle\.com',
+		'.appspot\.com',
 		'.googleapis',
-		'telegram', 't.me',
-		'kinorai',
+		'telegram\.org', 't.me',
+		'kinorai\.net',
 		'spotify',
 		// test https://suip.biz/ru/?act=proxy-checker
 		'suip\.biz',

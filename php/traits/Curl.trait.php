@@ -1,8 +1,5 @@
 <?php
 
-/**
- *
- */
 trait Curl
 {
 	protected static
@@ -76,8 +73,7 @@ trait Curl
 			'headers' => ["Content-Type:multipart/form-data"]
 		], $opts);
 
-		$this->log->add(__METHOD__ . " \$opts['sendMethod'] = ", null, [$opts['sendMethod'], 'post' === strtolower(@$opts['sendMethod'])]);
-		$this->log->add(__METHOD__ . " \$opts = ", null, [$opts]);
+		$this->log->add(__METHOD__ . " \$url, \$opts = ", null, [$url, $opts]);
 
 		$ch = curl_init();
 
@@ -116,9 +112,6 @@ trait Curl
 			if(is_array(@$opts['params']))
 				$url.= '?' . http_build_query($opts['params']);
 		}
-
-		// if(in_array(strtolower(@$opts['sendMethod']), ['post', 'get']))
-		// 	unset($opts['sendMethod']);
 
 		curl_setopt($ch, CURLOPT_URL, $url);
 
@@ -168,15 +161,19 @@ trait Curl
 		$http_code = intval($this->curlInfo['http_code']);
 		curl_close($ch);
 
-		$response = json_decode($response, true);
+		if(!is_string($response)) $this->log->add(__METHOD__ . ' $response_orig NOT STRING! = ', null, [$response]);
 
-		$this->log->add(__METHOD__ . ' $response = ', null, [$response]);
+		$response = json_decode($response, true) ?? [
+			'description' => 'cURL is failed in ' . __METHOD__ . __LINE__,
+			'curlInfo' => $this->curlInfo
+		];
+
+		$this->log->add(__METHOD__ . ' $http_code = ', null, [$http_code, /* $response, $this->curlInfo */]);
 
 		if ($http_code >= 500)
 		{
 			// do not wat to DDOS server if something goes wrong
 			usleep(500);
-			// return false;
 		}
 		elseif ($http_code != 200)
 		{
@@ -187,7 +184,7 @@ trait Curl
 		}
 		else
 		{
-			$this->log->add(__METHOD__ . " was SUCCESSFUL", null, [$response]);
+			$this->log->add(__METHOD__ . " was SUCCESSFUL", null, [count($response)]);
 		}
 
 		return $response;

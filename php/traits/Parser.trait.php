@@ -3,15 +3,26 @@
 trait Parser {
 
 	protected
-		$is_owner = false,
 		$baseDir = 'base/',
 		$pathBotFolder;
 
 
+	/* private function get($pname)
+	{
+		$this->log->add(__METHOD__ . 'test', null, [
+			__CLASS__, method_exists($this, 'get'), method_exists(__CLASS__, 'get')
+		]);
+		if(method_exists(__CLASS__, 'get'))
+			return $this->get($pname);
+		else
+			return $this->{$pname};
+			// return true;
+	} */
+
 	public function Parser()
 
 	{
-		if(!$this->is_owner)
+		if(!$this->get('is_owner'))
 		{
 			$this->NoUpdates();
 			die;
@@ -221,18 +232,19 @@ trait Parser {
 	 * @param sourse - current parsing url
 	 * @param xpath - DOMXpath from DOMDocument
 	 * @param xBlock - parent node for parsing
-	 * optional @param srcName - img attribute name
+	 * optional:
+	 * @param srcName - img attribute name
+	 * @param excludes - array with excludes words in src
+	 * Возвращает массив, пригодный для отправки в ТГ методом sendMediaGroup
 	 */
 	public static function ExtractImages(string $source, DOMXpath &$xpath, DOMNode &$xBlock, string $srcName = 'src', array $excludes=[])
 	:array
 	{
-		//* Extract images
-		$imgArr = CommonBot::DOMcollectImgs($source, $xpath, $xBlock, $srcName);
+		$imgArr = self::DOMcollectImgs($source, $xpath, $xBlock, $srcName);
 
 		if(count($excludes))
 			$imgArr = array_filter($imgArr, function(&$img) use($excludes) {
-
-				return CommonBot::stripos_array($img, $excludes) === false;
+				return self::stripos_array($img, $excludes) === false;
 			});
 
 		return array_map(function($i) {
@@ -283,7 +295,7 @@ trait Parser {
 	{
 		if (!array_key_exists('callback_query', $this->inputData)) return;
 
-		$text = ($this->is_owner ? "Хозяин! \n" : '') . $this->noUdatesText;
+		$text = ($this->get('is_owner') ? "Хозяин! \n" : '') . $this->noUdatesText;
 
 		$r = $this->apiResponseJSON([
 		// return $this->apiRequest([
@@ -312,15 +324,8 @@ trait Parser {
 			if(
 				//* Скрипты
 				$child->nodeName === 'script'
-				/*
-				* Нет потомков, тип - тэг(1) или коммент(12)
-				note Удаление тега br невозможно (глюк)!
-				*/
-				|| !$child->hasChildNodes()
-					&& in_array($child->nodeType, [1,12]) && !in_array($child->nodeName, ['br']) && (
-					self::stripos_array($child->textContent, $excludes) !== false
-					|| empty(trim($child->textContent))
-				)
+				//* комменты
+				|| $child->nodeType === 12
 			)
 			{
 				$rm = $element->removeChild($child);
@@ -328,12 +333,29 @@ trait Parser {
 				continue;
 			}
 
+			//* Удаляем пустые текстовые узлы, etc...
+			$child->normalize();
+
+			if(
+				//* Текстовые узлы с $excludes
+				$child->nodeType === 3 && (
+					self::stripos_array($child->textContent, $excludes) !== false
+				)
+			)
+			{
+				$rm = $element->removeChild($child->parentNode);
+				trigger_error(__METHOD__ . ' = ' . $rm->nodeName . ' =!= ' . $rm->textContent);
+				continue;
+			}
+
+
 			$innerHTML .= $element->ownerDocument->saveHTML($child);
 		}
 
 		// $innerHTML = str_ireplace($remove, '', $innerHTML);
 		//* FIX 4 TG
 		$innerHTML = preg_replace(["/^\s*\d+.*$/m", "/\s*[\r\n]{2,}/"], ['', PHP_EOL], $innerHTML);
+		trigger_error(__METHOD__ . ' $innerHTML= ' . $innerHTML);
 
 		return strip_tags($innerHTML, self::$allowedTags);
 	}

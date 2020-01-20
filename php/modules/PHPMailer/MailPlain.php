@@ -273,7 +273,7 @@ class MailPlain extends PHPMailer
 			'var_dump(self::$tmp[\'tg\'][\'response\'])',
 		]); */
 
-		file_put_contents('response.json', json_encode($response, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK), LOCK_EX);
+		file_put_contents(__DIR__ . '/response.json', json_encode($response, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK), LOCK_EX);
 
 		/* var_dump(
 			$response

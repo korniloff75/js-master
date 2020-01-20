@@ -2,13 +2,11 @@
 
 require_once "../CommonBot.class.php";
 
-
-class UniKffBot extends CommonBot implements iBotTG
+class UniKffBot extends CommonBot
 {
 	protected
 		# Test mode, bool
-		$__test = 1 ,
-		$token;
+		$__test = 1;
 
 
 	public function __construct()
@@ -17,7 +15,7 @@ class UniKffBot extends CommonBot implements iBotTG
 		$this->botFileInfo = new kffFileInfo(__FILE__);
 
 		//* Запускаем скрипт
-		parent::__construct()->checkLicense()->init();
+		parent::__construct()->checkLicense()->Router();
 
 	} //__construct
 
@@ -33,24 +31,43 @@ class UniKffBot extends CommonBot implements iBotTG
 
 		die('OK');
 
-	} // init
+	} //* init
 
 
 	private function Router()
 	{
-		switch ($this->cbn["data"]) {
-			case '/gismeteo':
-				require_once('gismeteo.php');
-				break;
+		$inputData = $this->cbn['data'] ?? $this->message["text"];
 
-			default:
-				# code...
-				break;
+		//* FIX multibots
+		$inputData= explode('@', $inputData)[0];
+		//* Define command
+		list($cmdName, $cmd) = array_values(array_filter(explode('/', $inputData)));
+
+		$this->log->add(__METHOD__ . ' input = ', null, [$inputData]);
+
+		//* Приходит локация
+		if(!empty($this->message['location']))
+			list($cmdName, $cmd) = ['gismeteo', 'setLocation'];
+
+		if(!empty($cmdName))
+		{
+			$cmdName = ucfirst($cmdName);
+			switch ($cmdName)
+			{
+				case 'Gismeteo':
+				case 'Youtube':
+					require_once("$cmdName.php");
+					new $cmdName($this, $cmd);
+					break;
+
+				default:
+					$this->log->add(__METHOD__ . ' switch default', E_USER_WARNING);
+					break;
+			}
 		}
 
-
 	}
-} // UniKffBot
+} //* UniKffBot
 
 
-new UniKffBot;
+$UKB = new UniKffBot;

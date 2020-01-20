@@ -9,9 +9,13 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/Helper.php";
 require_once \HOME . "php/Path.php";
 
 require_once "../CommonBot.class.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Parser.trait.php";
 
 class KorniloFF_news extends CommonBot implements iBotTG
 {
+	//* Include Parser trait
+	use Parser;
+
 	protected
 		# Test mode, bool
 		$__test = 1 ,
@@ -98,7 +102,7 @@ class KorniloFF_news extends CommonBot implements iBotTG
 		# Собираем ссылки с гл. страницы
 		$mainLinks = $xpath->query("//div[@class=\"top-day\"][1]//a");
 
-		$links = CommonBot::DOMcollectLinks($source, $mainLinks);
+		$links = self::DOMcollectLinks($source, $mainLinks);
 		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
 			$mainLinks,
 		]);
@@ -114,7 +118,7 @@ class KorniloFF_news extends CommonBot implements iBotTG
 
 		$mainLinks = $xpath->query("//div[@id=\"container\"][1]//a");
 
-		$links = CommonBot::DOMcollectLinks($source, $mainLinks);
+		$links = self::DOMcollectLinks($source, $mainLinks);
 		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
 			$mainLinks,
 		]);
@@ -137,7 +141,7 @@ class KorniloFF_news extends CommonBot implements iBotTG
 		}
 		// todo END
 
-		$links = CommonBot::DOMcollectLinks($source, $mainLinks, ['za-predelami-yalty']);
+		$links = self::DOMcollectLinks($source, $mainLinks, ['za-predelami-yalty']);
 		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
 			mb_detect_encoding($t),
 			// $t,
@@ -153,7 +157,6 @@ class KorniloFF_news extends CommonBot implements iBotTG
 	/**
 	 ** Обрабатываем неопубликованный контент
 	 */
-	// protected function handler_crimea_news_com(array &$diff, $xpathToBlock = "//*[@class=\"news_c\"][1]")
 	protected function handler_crimea_news_com(array &$diff, $xpathToBlock = "//div[@class=\"js-mediator-article\"][1]")
 	{
 		$photos = [];
@@ -164,6 +167,7 @@ class KorniloFF_news extends CommonBot implements iBotTG
 		foreach ($diff as &$link) {
 			$s = parse_url($link);
 			$source = "{$s['scheme']}://{$s['host']}/";
+			$addContent = '';
 
 			$docLink = @DOMDocument::loadHTMLFile($link);
 			$xpath = new DOMXpath($docLink);
@@ -175,20 +179,22 @@ class KorniloFF_news extends CommonBot implements iBotTG
 
 			$xImg = $imgXpath === $xpathToBlock ? $xBlock : $xpath->query($imgXpath)->item(0);
 
-			$imgArr = CommonBot::ExtractImages($source, $xpath, $xImg, 'src');
-			// $this->log->add('$imgArr', null, [$imgArr]);
-			$photos = array_merge_recursive($photos, $imgArr);
+			if(is_object($xImg))
+			{
+				$imgArr = self::ExtractImages($source, $xpath, $xImg, 'src', ['crimeanews.jpg', 'size100/']);
+				// $this->log->add('$imgArr', null, [$imgArr]);
+				$photos = array_merge_recursive($photos, $imgArr);
+			}
 
 			//* Собираем для добавления в $content
 			$header = $xpath->query(".//h1[1]")->item(0)->textContent;
 
-			$addContent = "<b>$header</b>" . PHP_EOL . PHP_EOL;
-
-			$addContent .= CommonBot::DOMinnerHTML(
+			$addContent .= self::DOMinnerHTML(
 				$xBlock, ['Новости за:', 'Читайте:', 'Новости Крыма', 'сообщали ранее:', 'Источник:']
 			);
 
-			$content[]= $addContent;
+			if(strlen(trim($addContent)))
+				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
 		}
 
 		$this->log->add('count($photos) = ' . count($photos));
@@ -200,14 +206,14 @@ class KorniloFF_news extends CommonBot implements iBotTG
 			$out['sendMediaGroup'] = $photos;
 
 		return $out;
-	} // handler_crimea_news_com
+	} //* handler_crimea_news_com
 
 
 	protected function handler_m_allcrimea_net(array &$diff)
 	{
 		//* На сайте 2 id=newscont В первом - изображение, во втором - текст.
-		$this->imgXpath = "//*[@id=\"newscont\"][1]";
-		return $this->handler_crimea_news_com($diff, "//*[@id=\"newscont\"][2]");
+		$this->imgXpath = "//div[@id=\"newscont\"]/..";
+		return $this->handler_crimea_news_com($diff, "//div[@id=\"newscont\"][2]");
 
 	} // handler_m_allcrimea_net
 
@@ -239,7 +245,7 @@ class KorniloFF_news extends CommonBot implements iBotTG
 			$header = 'Ялта: ' . $xpath->query(".//h1[1]", $xBlock)->item(0)->textContent;
 
 			// $addContent .= $xBlock->item(0)->textContent;
-			$addContent = CommonBot::DOMinnerHTML(
+			$addContent = self::DOMinnerHTML(
 				// div[@itemprop='articleBody']
 				// $xpath->query("./*", $xBlock)->item(0),
 				$xBlock,
@@ -249,7 +255,7 @@ class KorniloFF_news extends CommonBot implements iBotTG
 			if(strlen(trim($addContent)))
 				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
 
-			$imgArr = CommonBot::ExtractImages($source, $xpath, $xBlock, 'src');
+			$imgArr = self::ExtractImages($source, $xpath, $xBlock, 'src');
 			// $this->log->add('$imgArr', null, [$imgArr]);
 			$photos = array_merge_recursive($photos, $imgArr);
 		}

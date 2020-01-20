@@ -1,15 +1,21 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . "/php/Path.php";
-require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Parser.trait.php";
+
 require_once $_SERVER['DOCUMENT_ROOT'] . "/Helper.php";
 # TG
 require_once __DIR__ . "/tg.class.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Get_set.trait.php";
 
 
 class CommonBot extends TG
 {
+	use Get_set {}
+
+	private
+		$is_owner = false;
+
 	protected
-		$is_owner = false,
+		// $is_owner = false,
 		$responseData,
 		$license,
 		$savedBase = [],
@@ -23,9 +29,11 @@ class CommonBot extends TG
 	public function __construct()
 	{
 		parent::__construct();
+		$GLOBALS['_bot'] = &$this;
 
 		# Определяем владельца скрипта
-		$this->is_owner = $this->cbn['from']['id'] === 673976740;
+		// $this->is_owner = $this->cbn['from']['id'] === 673976740;
+		$this->is_owner = $this->set('is_owner', $this->cbn['from']['id'] === 673976740);
 
 		$this->responseData = [
 			'chat_id' => $this->message['chat']['id'],
@@ -72,7 +80,7 @@ class CommonBot extends TG
 	{
 		$this->license = \H::json("$this->pathBotFolder/license.json");
 		# Если нет лицензии, создаём ее
-		if($this->is_owner && !count($this->license))
+		if($this->get('is_owner') && !count($this->license))
 		{
 			$this->license = [$this->message['chat']['id'] => "3000-01-01"];
 			\H::json("$this->pathBotFolder/license.json", $this->license);
@@ -116,9 +124,6 @@ class CommonBot extends TG
 
 	}
 
-	//* Include Parser trait
-	use Parser;
-
 
 	/**
 	 ** Кнопка с рекламой
@@ -141,6 +146,12 @@ class CommonBot extends TG
 			"url" => $adv[$text[0]],
 		];
 	}
+
+
+	/* public function get($pname)
+	{
+		return $this->{$pname};
+	} */
 
 
 	public function __destruct()

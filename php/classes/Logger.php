@@ -54,7 +54,7 @@ class Logger
 		if(count($dump))
 		{
 			foreach ($dump as $d) {
-				$d = $this->CutLength($d);
+				$d = $this->CutLength($d, $message);
 				ob_start();
 				echo PHP_EOL;
 				var_dump($d);
@@ -70,16 +70,16 @@ class Logger
 		return $this->log;
 	}
 
-	private function CutLength($item)
+	private function CutLength($item, $message)
 	{
-		if(is_string($item) && strlen($item) > self::STR_LEN * 1.1)
-			return mb_substr($item, 0, self::STR_LEN) . "\n.....[Обрезано]";
+		if(is_string($item) && (strpos($message, 'response') === false) && strlen($item) > self::STR_LEN * 1.1)
+			return mb_substr($item, 0, self::STR_LEN) . " ...[Обрезано]";
 
 		if(is_array($item))
 		{
 			foreach($item as &$i)
 			{
-				$i = $this->CutLength($i);
+				$i = $this->CutLength($i, $message);
 			}
 		}
 		return $item;
@@ -115,6 +115,9 @@ class Logger
 		return "[{$fileName}:{$line} " . date('Y/M/d H:i:s',time()) . " $errorLevel] $message";
 	}
 
+	/**
+	 ** Печать в браузер
+	 */
 	public function print()
 	{
 		?>
@@ -136,6 +139,9 @@ class Logger
 
 	public function printTG()
 	{
+		/* array_map(function($i) {
+			return strip_tags($i);
+		}, $this->log ); */
 		ob_start();
 			$this->print();
 		return strip_tags(ob_get_clean());
@@ -208,6 +214,14 @@ class Logger
 
 	public function __destruct()
 	{
+		$this->add('check bot->is_owner =',null,[$GLOBALS['_bot']->is_owner ?? '_bot NOT exist!!!']);
+
+		if(
+			is_object($GLOBALS['_bot'])
+			&& !$GLOBALS['_bot']->is_owner
+		)
+		return;
+
 		$this->log = array_map(function($i) {
 			return strip_tags($i);
 		}, $this->log );

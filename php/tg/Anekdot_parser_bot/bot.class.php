@@ -9,10 +9,14 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/Helper.php";
 require_once \HOME . "php/Path.php";
 
 require_once "../CommonBot.class.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Parser.trait.php";
 
 
 class AnekdotBot extends CommonBot implements iBotTG
 {
+	//* Include Parser trait
+	use Parser;
+
 	protected
 		# Test mode, bool
 		$__test = 1 ,
@@ -91,7 +95,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 		# Собираем ссылки с гл. страницы
 		$mainLinks = $xpath->query("//div[@id=\"dle-content\"][1]//div[@class=\"story_tools\"]/a");
 
-		$links = CommonBot::DOMcollectLinks($source, $mainLinks);
+		$links = self::DOMcollectLinks($source, $mainLinks);
 		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
 			$mainLinks,
 			$links
@@ -106,6 +110,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 
 	{
 		$xpath = new DOMXpath($doc);
+		$content = [];
 
 		$xpathBlock = "//div[@class=\"texts\"][1]";
 		$xpathText = ".//div[@class=\"text\"]";
@@ -116,12 +121,12 @@ class AnekdotBot extends CommonBot implements iBotTG
 		// $this->log->add(__METHOD__ . " - \$xTexts, xImgs = ", null, [$xTexts, $xImgs]);
 
 		foreach($xTexts as $node) {
-			$this->content[]= CommonBot::DOMinnerHTML($node);
+			$content[]= self::DOMinnerHTML($node);
 		}
 
-		$imgArr = CommonBot::DOMcollectImgs($source, $xpath, $xBlock, 'data-src');
+		$imgArr = self::DOMcollectImgs($source, $xpath, $xBlock, 'data-src');
 
-		$out = array_merge($this->content, $imgArr);
+		$out = array_merge($content, $imgArr);
 
 		$this->log->add(__METHOD__ . " count($imgArr) = ", null, [count($imgArr)]);
 		// $this->log->add(__METHOD__ . " - \$out = ", null, [$out]);
@@ -148,15 +153,12 @@ class AnekdotBot extends CommonBot implements iBotTG
 		)
 			return [];
 
-
-		// $this->DOMNodeList = $doc->getElementsByTagName("div");
-
 		$this->log->add(__METHOD__ . " - \$xTexts", null, [$xTexts]);
 
 		// if(!$this->DOMNodeList->length) return;
 
 		foreach($xTexts as $node) {
-			$content[]= CommonBot::DOMinnerHTML($node, ['а н е к д о т о в . n е t']);
+			$content[]= self::DOMinnerHTML($node);
 		}
 
 		# Required
@@ -194,13 +196,13 @@ class AnekdotBot extends CommonBot implements iBotTG
 				strlen($text->textContent) > 30
 			)
 			{
-				$content[]= CommonBot::DOMinnerHTML($text, [
+				$content[]= self::DOMinnerHTML($text, [
 					'Комментарии', 'Карикатуры', 'Анекдоты в картинках', 'Картинки'
 				]);
 			}
 
 			//* Extract images
-			$imgArr = CommonBot::ExtractImages($source, $xpath, $xBlock, 'src', ['Podrobnee.png', 'Istochnik.png', 'Default', 'top-fwz1.mail.ru', 'counter', 'mc.yandex.ru']);
+			$imgArr = self::ExtractImages($source, $xpath, $xBlock, 'src', ['Podrobnee.png', 'Istochnik.png', 'Default', 'top-fwz1.mail.ru', 'counter', 'mc.yandex.ru']);
 
 			$photos = array_merge_recursive($photos, $imgArr);
 			// $this->log->add(__METHOD__ . " - \$imgArr = ", null, [$imgArr]);
@@ -239,7 +241,10 @@ class AnekdotBot extends CommonBot implements iBotTG
 		}
 
 		return [
-			'sendMessage' => preg_replace(['/^.*(Показать полностью|читать дальше).*$|\s+\d+(>|&gt;)/ium'], '', $diff),
+			'sendMessage' => array_filter($diff, function($i) {
+				return preg_match('/Показать полностью|читать дальше|а н е к д о т о в \. n е t|\s+\d+(>|&gt;)/iu', $i) === 0;
+			}),
+
 			'sendMediaGroup' => $photos ?? [],
 		];
 	} //* handler_anekdot_ru
