@@ -217,7 +217,7 @@ class Logger
 		$this->add('check bot->is_owner =',null,[$GLOBALS['_bot']->is_owner ?? '_bot NOT exist!!!']);
 
 		if(
-			is_object($GLOBALS['_bot'])
+			is_object(@$GLOBALS['_bot'])
 			&& !$GLOBALS['_bot']->is_owner
 		)
 		return;
@@ -228,3 +228,18 @@ class Logger
 		file_put_contents($this->file, $this->log, !$this->rewriteLog ? FILE_APPEND : null);
 	}
 } // Logger
+
+
+// Не работает...
+// Нужно передать аргументы.
+/* require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Singleton.trait.php";
+
+class Log extends Logger
+{
+	use Singleton;
+	public function __construct($name, $dir='.', $rewriteLog=true)
+	{
+		parent::__construct($name, $dir, $rewriteLog);
+	}
+}
+ */

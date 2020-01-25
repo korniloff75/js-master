@@ -79,18 +79,19 @@ ob_start();
 
 <script>
 	var enHosts = [
-		'.google\.com',
-		'.withgoogle\.com',
-		'.appspot\.com',
-		'.googleapis',
-		'telegram\.org', 't.me',
-		'kinorai\.net',
+		'\\.google\\.com',
+		'\\.withgoogle\\.com',
+		'\\.appspot\\.com',
+		'\\.googleapis',
+		'\\.gstatic.com',
+		'telegram\\.org', 't\\.me',
+		'kinorai\\.net',
 		'spotify',
 		// test https://suip.biz/ru/?act=proxy-checker
-		'suip\.biz',
-		'nvidia.ru',
+		'suip\\.biz',
+		'nvidia\.ru',
 		// ВадимZ
-		'kinozal', 'pornolab', 'erokomiksixxx', 'svscomics', 'abook-club', 'nnm\-club', 'rutracker', '4pna', 'rutor', '7\-zip',
+		'kinozal\\.', 'pornolab\\.', 'erokomiksixxx\\.', 'svscomics\\.', 'abook-club\\.', 'nnm\-club', 'rutracker', '4pna\\.', 'rutor\.', '7\-zip',
 	];
 
 	function FindProxyForURL(url, host)

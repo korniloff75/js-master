@@ -34,7 +34,8 @@ class AuthKffBot extends CommonBot
 			die ('Нет входящего запроса');
 		}
 
-		$siteUrl = "https://js-master.ru";
+		// $siteUrl = "https://js-master.ru";
+		$siteUrl = "http://invs.js-master.ru";
 
 		// $respTG = $this->apiResponseJSON([
 		$respTG = $this->apiRequest([

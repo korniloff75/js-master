@@ -38,7 +38,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 		# Input stream
 		$json,
 		// $contentMD,
-		$postFields,
+		$postFields/* ,
 		$adv = [
 			'Зарабатывай без вложений' => 'https://t.me/CapitalistGameBot?start=673976740',
 			'Учись инвестировать играя' => 'https://t.me/CapitalistGameBot?start=673976740',
@@ -46,7 +46,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 			'Сайт на AJAX с поддержкой SEO!' => 'https://js-master.ru/content/1000.Contacts/Zakazchiku/',
 			'Дешевый хостинг' => 'https://invs.ru?utm_source=partner&ref=ueQYF',
 			'Хостинг от 49р' => 'https://invs.ru?utm_source=partner&ref=ueQYF',
-		];
+		] */;
 
 	protected static
 		$remoteSource = [
@@ -86,7 +86,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 	} // init
 
 
-	//todo Доработать проходы по оригиналам сокращенных текстов
+
 	protected function parser_shutok_ru($source, DOMDocument &$doc)
 
 	{

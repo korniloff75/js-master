@@ -1,102 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<title>BotStats</title>
-
-	<link rel="stylesheet" href="tchart.css">
-	<style>
-	h3{
-		text-align: center;
-	}
-	#response {
-		min-width: 50%;
-		min-height: 100px;
-		border: inset 2px red;
-		white-space: pre-line;
-		word-break: break-all;
-	}
-	#preloader {
-		position: absolute;
-		left: 50%;
-		top: 50%;
-		width: 48px;
-		height: 48px;
-		margin-left: -24px;
-		margin-top: -24px;
-		border: #31a9df 3px solid;
-		border-left: none;
-		border-radius: 100%;
-	}
-	.rotate {
-		animation-name: rotating;
-		animation-duration: 1s;
-		animation-iteration-count: infinite;
-		animation-timing-function: linear;
-	}
-	@keyframes rotating {
-		from {
-		transform:rotate(0deg);
-		}
-		to {
-		transform:rotate(360deg);
-		}
-	}
-	#chartbox {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: space-around;
-	}
-	#chartbox > div {
-		box-sizing: border-box;
-		position: relative;
-		margin-left: 0;
-		margin-right: 0;
-		margin-bottom: 64px;
-		width: 45%;
-		min-width: 400px;
-		float: left;
-	}
-	#chartbox > div:last-child {
-		width: 90%;
-	}
-	.tchart canvas{
-		width: 100%;
-	}
-	</style>
-
-	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.1/axios.min.js"></script> -->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-	<script src="tchart_kff.js"></script>
-	<!-- <script src="tchart.min.js" type="application/javascript" defer></script> -->
-</head>
-
-
-<body>
-<div id="preloader" class="rotate"></div>
-
-
-<form action="http://51.15.11.82:8225/api/v1/" method="get" hidden>
-<!-- <button data-method="get_user_data" data-params="user=303986717">get_user_data</button> -->
-</form>
-
-<h3>Ответ сервера</h3>
-<pre id="response"></pre>
-
-<h4>Auth</h4>
-<a href="tg://AuthKffBot">Авторизироваться</a>
-
-<div id="chartbox">
-<!-- Charts -->
-</div>
-
-
-<script src="BotStats.js"></script>
-</body>
-</html>
-
 <?php
 /**
  * Полезные ссылки:
@@ -104,14 +5,190 @@
  ** https://coding.studio/tchart/
 */
 
-/* [
-	[
-		array unix time
-		// даты/время по Х в секундах
-	],
-	[
-		array values
-		// Ось игрек
-	]
-] */
-// $data = file_get_contents('');
+session_start();
+$_SESSION['DEV'] = $_GET['_dev'] ?? $_SESSION['DEV'] ?? false;
+
+/* $_SESSION['DEV'] = empty($_REQUEST['DEV']) ? (
+	$_SERVER['HTTP_HOST'] === 'js-master'
+	|| $_SESSION['DEV'] ?? ($_GET['id'] ?? $_SESSION['authData']['id'] ?? null) == 673976740
+) : $_REQUEST['DEV'] */;
+
+define('DEV', $_SESSION['DEV']);
+define('REMOTE', [
+	'url' => 'http://51.15.11.82:8225/api/v1/'
+]);
+
+//* Data from TGLogin
+if(!empty($_GET['id']))
+{
+	$proofUrl = REMOTE['url'] . 'login';
+
+	$_SESSION['GETstring'] = http_build_query($_GET);
+	$_SESSION['authData'] = $_GET;
+
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_HEADER, 0);
+	curl_setopt($ch, CURLOPT_POST, 1);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $_GET);
+	curl_setopt($ch, CURLOPT_URL, $proofUrl);
+	$response = curl_exec($ch);
+	curl_close($ch);
+
+	$respArr = json_decode($response, 1);
+
+	//* Бэк вернул данные
+	if($respArr['status'] && empty($respArr['bots']))
+	{
+		die("\nДля этой учётной записи зарегистрированных ботов нет.");
+	}
+	elseif($respArr['status'] && $respArr['bots'])
+	{
+		$_SESSION['bots'] = json_encode($respArr['bots'], JSON_UNESCAPED_UNICODE);
+
+		if(!empty($respArr['authData']))
+			setcookie('authData',json_encode($respArr['authData'], JSON_UNESCAPED_UNICODE));
+
+		// var_dump(json_encode($respArr['bots'], JSON_UNESCAPED_UNICODE));
+		// var_dump($respArr['bots']);
+	}
+	//* Fail
+	else
+	{
+		echo '<b>Response</b> = ' . $response;
+		die("Данных по ботам нет!");
+	}
+
+	// todo 4 test
+	// file_put_contents('proof.json', $response);
+	// echo "Бэк вернул:";
+	// var_dump($response);
+
+	// var_dump($_SERVER);
+
+	$collectURL = $_SERVER["REQUEST_SCHEME"] . '://' . $_SERVER["HTTP_HOST"] . dirname($_SERVER["SCRIPT_NAME"]);
+
+	//! Redirect
+	header("Location: $collectURL");
+
+	die('Редирект с очисткой гетов');
+}
+
+
+//* Выводим после редиректа
+
+define('LOCAL', stripos($_SERVER['HTTP_HOST'], '\.ru', -4) === false);
+// define('ROOT', stripos($_SERVER['HTTP_HOST'], '\.ru') === false);
+
+require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
+$log = new Logger(basename(__DIR__));
+function L(string $message, $level=null, $dump=[])
+{
+	global $log;
+	$log->add($message, $level, $dump);
+}
+// Log::getInstance(;
+
+//* Collect server data 4 template
+ob_start();
+?>
+
+<script>
+var _remoteUrl = "<?=REMOTE['url']?>";
+<?php
+if(!empty($_SESSION['bots'])):
+	echo 'var _bots = ' . urldecode($_SESSION['bots']) . '; var _authData = ' . urldecode(json_encode($_SESSION['authData'], JSON_UNESCAPED_UNICODE));
+?>
+	;console.log('_bots = ', _bots, "\n_authData = ", _authData);
+<?php endif;?>
+</script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.2.3/js/uikit.min.js"></script> -->
+<script src="lib/uikit3.3.0/uikit.min.js"></script>
+<!-- https://hammerjs.github.io/touch-action/ -->
+<script src="lib/hammer.min.js"></script>
+
+<?php
+//* Compress header JS
+
+if(DEV):
+	include_once 'js_compress.php';
+	js_compress('js_compress_header');
+?>
+	<script src="js_compress_header/1.hammerPluginJq.js"></script>
+<?php else:?>
+	<script src="js_compress_header.js"></script>
+<?php endif;
+$_servData = ob_get_clean();
+
+
+function getCurrentTemplate ($name)
+{
+	list($n, $ext) = explode('.', $name);
+	return "templates/{$n}" . (!empty($_GET["_t"])? "_{$_GET["_t"]}": '') . ".{$ext}";
+}
+
+
+//* Switch Render
+$_curJsRender = getCurrentTemplate('Render.js');
+//* Switch template
+$_curTemplate = getCurrentTemplate('template.php');
+
+if(!file_exists($_curTemplate))
+	die('Template <b>' . basename($_curTemplate) . '</b> NOT exist!');
+
+//* Compress defer JS
+ob_start();
+?>
+	<script src="<?=$_curJsRender?>"></script>
+	<script src="BotList.js"></script>
+	<pre style="white-space:pre-wrap;">
+<?php
+if(DEV):
+	js_compress('js_compress');
+	echo @"\n?{$_SESSION['GETstring']}\n";
+	// echo "\$_SESSION['respArr']";
+	// var_dump($_SESSION['respArr']);
+?>
+
+	<h3>Ответ сервера</h3>
+	<pre id="response"></pre>
+	</pre>
+	<script src="js_compress/1.BotStats.js" defer></script>
+	<script src="js_compress/10.tchart_kff.js" defer></script>
+<?php else:?>
+	<script src="js_compress.js" defer></script>
+<?php endif;?>
+
+<div id="preloader" class="uk-position-center" uk-spinner="ratio: 2"></div>
+
+<!-- UIkit CSS -->
+<link rel="stylesheet" href="lib/uikit3.3.0/uikit.min.css" />
+
+<script defer src="lib/uikit3.3.0/uikit-icons.min.js" async></script>
+<!-- /UIkit JS -->
+
+<!-- tchart.css -->
+<link rel="stylesheet" href="tchart.css">
+<!-- /tchart.css -->
+<?php
+$_js_compress = ob_get_clean();
+
+
+//* Collect content
+ob_start();
+
+// var_dump($_SERVER);
+// require_once 'BotList.php';
+$content = ob_get_clean();
+
+
+
+/* if(!file_exists($_curTemplate))
+	die('Template <b>' . basename($_curTemplate) . '</b> NOT exist!'); */
+
+
+//* Output buffer in template
+header('Content-type: text/html; charset=utf-8');
+require_once $_curTemplate;
+
+die;

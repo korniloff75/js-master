@@ -359,35 +359,4 @@ trait Parser {
 
 		return strip_tags($innerHTML, self::$allowedTags);
 	}
-
-
-	/**
-	 * @param haystack
-	 * @param string||array needles
-	 * @param service posArr
-	 * Возвращает вхождение первой подстроки из mixed @needles
-	 */
-	public static function stripos_array(string $haystack, $needles, ?int $offset= 0, $posArr= [])
-	{
-		if ( !is_array($needles) )
-			return mb_stripos($haystack, $needles, $offset);
-		elseif (!count($needles))
-			return false;
-
-		foreach ($needles as $str) {
-			if ( is_array($str) ) {
-				$pos = self::stripos_array($haystack, $str, $offset, $posArr);
-			} else {
-				$pos = mb_stripos($haystack, $str, $offset);
-			}
-
-			if ($pos !== false)
-				$posArr[] = $pos;
-		}
-
-		sort($posArr, SORT_NATURAL);
-		// ksort($posArr, SORT_NATURAL);
-		return $posArr[0] ?? false;
-		// return array_keys($posArr)[0] ?? false;
-	}
 }

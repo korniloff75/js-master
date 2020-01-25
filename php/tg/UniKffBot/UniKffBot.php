@@ -56,6 +56,7 @@ class UniKffBot extends CommonBot
 			{
 				case 'Gismeteo':
 				case 'Youtube':
+				case 'Zen':
 					require_once("$cmdName.php");
 					new $cmdName($this, $cmd);
 					break;

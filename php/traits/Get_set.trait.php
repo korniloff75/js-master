@@ -5,16 +5,16 @@
  */
 trait Get_set
 {
-	private $data = [];
+	protected $data = [];
 
 	public function get($pname)
 	{
-		return $this->data[$pname];
+		return $this->data[$pname] ?? null;
 	}
 
 	public function __get($pname)
 	{
-		return $this->data[$pname];
+		return $this->{$pname} ?? $this->get($pname);
 	}
 
 	protected function set($pname, $pval)

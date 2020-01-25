@@ -63,6 +63,25 @@ trait Curl
 		}
 		//* Полный провал
 		return false;
+	} //* findAnzProxy
+
+
+	public function browsEmul()
+	{
+		return [
+			// "Content-Type: application/json; charset=utf-8",
+			'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+			'Accept-Encoding: gzip, deflate',
+			'Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
+			'Cache-Control: no-cache',
+			'Connection: keep-alive',
+			'DNT: 1',
+			'Host: kfftg.22web.org',
+			'Pragma: no-cache',
+			"Cookie: __test=4dff14837c8240634dc1565329ba5274",
+			'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0',
+		];
+
 	}
 
 

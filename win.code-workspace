@@ -5,6 +5,8 @@
 		}
 	],
 	"settings": {
-		"editor.fontSize": 17
+		"editor.fontSize": 17,
+		"workbench.enableExperiments": false,
+		"telemetry.enableTelemetry": false
 	}
 }

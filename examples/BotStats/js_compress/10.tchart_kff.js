@@ -1,7 +1,28 @@
-function TChart(container) {
+/**
+ *
+ * @param {Node|jQ} container
+ * note container.caption - родительский блок, включающий название чертежа
+ * @param {Node|jQ} eventContainer
+ */
+function TChart(container, eventContainer) {
+
+	extractMainNodes();
+
 	var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 	var DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-		parentContainer = container.parentNode;
+		eventBounds = eventContainer.getBoundingClientRect();
+
+	// console.log('eventBounds = ', eventBounds, eventContainer);
+	function extractMainNodes() {
+		container = extractFromJQ(container);
+		eventContainer = extractFromJQ(eventContainer) || container.parentNode;
+		container.caption = extractFromJQ(container.caption);
+		// console.log('container= ', container,  container.caption);
+	}
+
+	function extractFromJQ(obj) {
+		return obj ? obj[0] || obj : false;
+	}
 
 	function formatDate(time, short) {
 		var date = new Date(time);
@@ -12,9 +33,9 @@ function TChart(container) {
 
 	function formatNumber(n, short) {
 		var abs = Math.abs(n);
-		if (abs > 1000000000 && short) return (n / 1000000000).toFixed(2) + 'B';
-		if (abs > 1000000 && short) return (n / 1000000).toFixed(2) + 'M';
-		if (abs > 1000 && short) return (n / 1000).toFixed(1) + 'K';
+		if (abs > 1e9 && short) return (n / 1e9).toFixed(2) + 'B';
+		if (abs > 1e6 && short) return (n / 1e6).toFixed(2) + 'M';
+		if (abs > 1e3 && short) return (n / 1e3).toFixed(1) + 'K';
 
 		if (abs > 1) {
 			var s = abs.toFixed(0);
@@ -47,6 +68,7 @@ function TChart(container) {
 	}
 
 	function removeEventListener(element, event, listener) {
+		// console.log('element= ', element);
 		element.removeEventListener(event, listener);
 	}
 
@@ -183,6 +205,9 @@ function TChart(container) {
 	var mouseMode = NONE;
 
 	function onMouseDown(e) {
+		// e.stopPropagation();
+
+		// e.currentTarget.clicked = 1;
 		newMouseX = mouseX = (e.clientX - canvasBounds.left) * pixelRatio;
 		newMouseY = mouseY = (e.clientY - canvasBounds.top) * pixelRatio;
 
@@ -206,6 +231,16 @@ function TChart(container) {
 	}
 
 	function onMouseMove(e) {
+		// e.stopPropagation();
+		// e.preventDefault();
+
+		//* Fix outside click
+		if (Math.sign(e.clientX - eventBounds.left) < 0) {
+			// console.log('eventBounds.left = ', eventBounds.left, e.clientX);
+			onMouseUp(e);
+			return;
+		}
+
 		newMouseX = (e.clientX - canvasBounds.left) * pixelRatio;
 		newMouseY = (e.clientY - canvasBounds.top) * pixelRatio;
 	}
@@ -215,28 +250,48 @@ function TChart(container) {
 	}
 
 	function onMouseUp(e) {
+		// e.currentTarget.clicked = 0;
 		mouseMode = NONE;
 	}
 
-	addEventListener(parentContainer, 'mousedown', onMouseDown);
-	addEventListener(parentContainer, 'touchstart', onTouchDown);
-	addEventListener(parentContainer, 'mousemove', onMouseMove);
-	addEventListener(parentContainer, 'touchmove', onTouchMove);
-	addEventListener(parentContainer, 'mouseup', onMouseUp);
-	addEventListener(parentContainer, 'touchend', onMouseUp);
-	addEventListener(parentContainer, 'touchcancel', onMouseUp);
+	function prevent(e) {
+		if(window.Hummer&&!Hammer.Swipe({
+			direction: Hammer.DIRECTION_VERTICAL,
+		})) return;
+
+		// e.preventDefault();
+	}
+
+	addEventListener(container.caption||container, 'mousedown', prevent);
+	addEventListener(container.caption||container, 'touchstart', prevent);
+
+	addEventListener(eventContainer, 'mousedown', onMouseDown);
+	addEventListener(eventContainer, 'touchstart', onTouchDown);
+	addEventListener(eventContainer, 'mousemove', onMouseMove);
+	addEventListener(eventContainer, 'touchmove', onTouchMove);
+	addEventListener(eventContainer, 'mouseup', onMouseUp);
+	addEventListener(eventContainer, 'touchend', onMouseUp);
+	addEventListener(eventContainer, 'touchcancel', onMouseUp);
 
 	var destroyed = false;
+
 	this.destroy = function () {
 		destroyed = true;
-		removeAllChild(container);
-		removeEventListener(document, 'mousedown', onMouseDown);
-		removeEventListener(document, 'touchstart', onTouchDown);
-		removeEventListener(document, 'mousemove', onMouseMove);
-		removeEventListener(document, 'touchmove', onTouchMove);
-		removeEventListener(document, 'mouseup', onMouseUp);
-		removeEventListener(document, 'touchend', onMouseUp);
-		removeEventListener(document, 'touchcancel', onMouseUp);
+		extractMainNodes();
+
+		container.caption && container.caption.remove() || removeAllChild(container);
+
+		removeEventListener(container.caption||container, 'mousedown', prevent);
+		removeEventListener(container.caption||container, 'touchstart', prevent);
+
+		removeEventListener( eventContainer, 'mousedown', onMouseDown);
+		removeEventListener( eventContainer, 'touchstart', onTouchDown);
+		removeEventListener( eventContainer, 'mousemove', onMouseMove);
+		removeEventListener( eventContainer, 'touchmove', onTouchMove);
+		removeEventListener( eventContainer, 'mouseup', onMouseUp);
+		removeEventListener( eventContainer, 'touchend', onMouseUp);
+		removeEventListener( eventContainer, 'touchcancel', onMouseUp);
+		container && container.remove();
 	};
 
 	requestAnimationFrame(render);
@@ -481,6 +536,7 @@ function TChart(container) {
 	}
 
 	function select(mouseX, mouseY) {
+		var popupBounds;
 		if (selectX !== mouseX) {
 			selectX = mouseX;
 			needRedrawMain = true;
@@ -508,7 +564,7 @@ function TChart(container) {
 					}
 				}
 
-				var popupBounds = popup.getBoundingClientRect();
+				popupBounds = popup.getBoundingClientRect();
 				var popupX = (mainToScreenX(mouseX) / pixelRatio) + popupLeftMargin;
 				if (popupX < 0) popupX = 0;
 				if (popupX + popupBounds.width > canvasBounds.width) popupX = canvasBounds.width - popupBounds.width;
@@ -518,7 +574,7 @@ function TChart(container) {
 
 		if (selectY !== mouseY) {
 			selectY = mouseY;
-			if (!popupBounds) popupBounds = popup.getBoundingClientRect();
+			popupBounds = popupBounds || popup.getBoundingClientRect();
 			var popupY = mouseY / pixelRatio + 39 - popupBounds.height - popupTopMargin;
 			if (popupY < 0) popupY = mouseY / pixelRatio + 39 + popupTopMargin;
 			popup.style.top = popupY + 'px';
@@ -538,7 +594,7 @@ function TChart(container) {
 			textCountY = Math.max(1, Math.floor(mainHeight / textYHeight));
 
 			canvas.setAttribute('width', width);
-			canvas.setAttribute('height', height);
+			canvas.setAttribute('height', height || 'auto');
 			updateMainRangeX();
 			updateMainRangeY();
 			updatePreviewRangeX();
@@ -554,8 +610,7 @@ function TChart(container) {
 
 		if (data !== null) {
 
-			// resize
-
+			//* resize
 			onResize();
 
 			if (width > 0 && height > 0) {

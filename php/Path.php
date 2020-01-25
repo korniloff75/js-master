@@ -9,7 +9,7 @@ class kffFileInfo extends SplFileInfo
 
 	public function __construct($path)
 	{
-		# Методы родительского класса возвращают объекты - экземпляры дочернего класса.
+		//*Методы родительского класса возвращают объекты - экземпляры дочернего класса.
 		parent::setInfoClass(__CLASS__);
 
 		return is_object($path) && in_array('SplFileInfo', class_parents($path)) ? $path : parent::__construct($path);
