@@ -2,7 +2,7 @@
 require_once "UniConstruct.trait.php";
 
 
-class Gismeteo extends UniKffBot {
+class Gismeteo extends CommonBot {
 	use UniConstruct;
 
 	private
@@ -59,7 +59,7 @@ class Gismeteo extends UniKffBot {
 				]];
 
 				$this->apiRequest([
-					'chat_id' => $this->id,
+					'chat_id' => $this->chat_id,
 					'text' => "Показать прогноз?",
 					'reply_markup' => [
 						"inline_keyboard" => $forecastButs,
@@ -91,14 +91,14 @@ class Gismeteo extends UniKffBot {
 		}
 		else
 		{
-			$this->location = $this->locations[$this->id][0] ?? null;
+			$this->location = $this->locations[$this->chat_id][0] ?? null;
 		}
 		return $this;
 	}
 
 	private function setLocation()
 	{
-		$this->locations[$this->id] = [
+		$this->locations[$this->chat_id] = [
 			"0" => $this->location
 		];
 
@@ -113,7 +113,7 @@ class Gismeteo extends UniKffBot {
 		$text = $text ?? "Уточните свою геолокацию?\nБез данных о вашем местоположении бот не сможет отобразить для вас погоду.";
 
 		$pf = [
-			'chat_id' => $this->id,
+			'chat_id' => $this->chat_id,
 			'text' => $text,
 			'reply_markup' => [
 				"keyboard" => [[[
@@ -136,7 +136,7 @@ class Gismeteo extends UniKffBot {
 		//* Кеширование
 		$limHours = 1;
 		//* Имя файла с кешем
-		$cacheFilename = "{$this->base}/{$this->id}.{$method}_" . implode('_', $this->cmd[1]) . ".json";
+		$cacheFilename = "{$this->base}/{$this->chat_id}.{$method}_" . implode('_', $this->cmd[1]) . ".json";
 		if(!file_exists($this->base))
 			mkdir($this->base, 0664);
 
@@ -255,7 +255,11 @@ class Gismeteo extends UniKffBot {
 
 		$gm = ['Нет','Небольшие','Слабая геомагнитная буря','Малая геомагнитная буря','Умеренная геомагнитная буря','Сильная геомагнитная буря','Пиздец какой шторм','Всё, полный пиздец, зашкалило!'];
 
-		$w= "<strong>Погода на {$data['date']['local']}</strong>
+		$date = (new DateTime($data['date']['local']))->format('l - d M');
+
+		$this->numDecor($data);
+
+		$w= "<strong>Погода на {$date} ({$data['date']['local']})</strong>
 		{$data['description']['full']} " . $this->collectIcons($data['icon']) . "\n
 		<b>Температура</b>";
 
@@ -297,13 +301,16 @@ class Gismeteo extends UniKffBot {
 
 		}
 
-		return $w . "\n
+		$w .= "\n
 		<b>Осадки</b> - {$precipitation['intensity'][$data['precipitation']['intensity']]} {$precipitation['type'][$data['precipitation']['type']]}
 		({$data['precipitation']['type']} мм)
 
 		<b>Геомагнитные возмущения</b> - {$gm[$data['gm']]}
 		<a href='{$this->urlDIR}/gismeteo-newicons/{$data['icon']}.png' title='www.gismeteo.ru'>&#8205;</a>
 		www.gismeteo.ru";
+
+		return $w;
+		// return $this->numDecor($w);
 	}
 
 	/**
@@ -319,9 +326,23 @@ class Gismeteo extends UniKffBot {
 		$this->apiRequest([
 			'parse_mode' => 'html',
 			'disable_web_page_preview' => false,
-			'chat_id' => $this->id,
+			'chat_id' => $this->chat_id,
 			'text' => $this->collectWeather($data)
 		]);
+	}
+
+	private function numDecor(&$str)
+	{
+		/* $num = ['0','1','2','3','4','5','6','7','8','9'];
+		$dec = ['𝟎','𝟏','𝟐','𝟑','𝟒','𝟓','𝟔','𝟕','𝟖','𝟗'];
+
+		array_walk_recursive($arr, function(&$i) use($num,$dec) {
+			$i = str_replace($num, $dec, '<b>'. $i .'</b>');
+		}); */
+
+		$this->log->add(__METHOD__.' ',null, [$arr]);
+
+		return preg_replace("~(?<=[^&#])(\d+?)(?! [;])~", "<b>$1</b>", $str);
 	}
 
 } //* Gismeteo

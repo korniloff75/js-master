@@ -45,7 +45,7 @@ class H {
 		);
 
 		// var_dump(\ADMIN, $_SESSION, self::realIP(), (strpos(self::realIP(), \ADM) === 0));
-		define('BASE_URL', (self::is('https') ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/');
+		define('BASE_URL', (self::is('https') ? 'https' : 'http') . '://' . \HOST . '/');
 
 		# Для подключение не через ROOT
 		if (realpath('') !== realpath(\HOME))

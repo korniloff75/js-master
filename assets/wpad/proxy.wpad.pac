@@ -87,6 +87,7 @@ ob_start();
 		'telegram\\.org', 't\\.me',
 		'kinorai\\.net',
 		'spotify',
+		'dot\\.tk',
 		// test https://suip.biz/ru/?act=proxy-checker
 		'suip\\.biz',
 		'nvidia\.ru',

@@ -6,9 +6,9 @@ define('HOME', $_SERVER['DOCUMENT_ROOT'] . '/');
 
 define('TEST', 0);
 
-define('LOCALHOST', $_SERVER['SERVER_ADDR'] === '127.0.0.1');
+define('LOCALHOST', @$_SERVER['SERVER_ADDR'] === '127.0.0.1');
 
-define('HOST', $_SERVER['HTTP_HOST']);
+define('HOST', $_SERVER['HTTP_HOST'] ?? 'js-master.ru');
 
 define('DEMO', 0);
 

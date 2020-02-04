@@ -1,0 +1,31 @@
+{
+	"current draws": {
+		"owner": {
+			"id": 673976740,
+			"is_bot": false,
+			"first_name": "Павел 🧘‍♂️",
+			"last_name": "Корнилов",
+			"username": "korniloff75",
+			"language_code": "ru"
+		},
+		"prizes_count": "2",
+		"participants": [
+			{
+				"id": 673976740,
+				"is_bot": false,
+				"first_name": "Павел 🧘‍♂️",
+				"last_name": "Корнилов",
+				"username": "korniloff75",
+				"language_code": "ru"
+			},
+			{
+				"id": 455490909,
+				"is_bot": false,
+				"first_name": "Лидия",
+				"last_name": "Мутовкина",
+				"username": "lilimyt",
+				"language_code": "ru"
+			}
+		]
+	}
+}

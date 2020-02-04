@@ -43,11 +43,15 @@ class UniKffBot extends CommonBot
 		//* Define command
 		list($cmdName, $cmd) = array_values(array_filter(explode('/', $inputData)));
 
-		$this->log->add(__METHOD__ . ' input = ', null, [$inputData]);
+		$this->log->add(__METHOD__ . ' input = ', null, [$inputData, $cmdName, $cmd]);
 
 		//* Приходит локация
 		if(!empty($this->message['location']))
 			list($cmdName, $cmd) = ['gismeteo', 'setLocation'];
+
+		//* GAME
+		if(in_array($cmdName, self::GAME))
+			list($cmdName, $cmd) = ['GameTest', array_flip(self::GAME)[$cmdName]];
 
 		if(!empty($cmdName))
 		{
@@ -57,7 +61,8 @@ class UniKffBot extends CommonBot
 				case 'Gismeteo':
 				case 'Youtube':
 				case 'Zen':
-					require_once("$cmdName.php");
+				case 'GameTest':
+					require_once("extensions/$cmdName.php");
 					new $cmdName($this, $cmd);
 					break;
 
@@ -68,6 +73,22 @@ class UniKffBot extends CommonBot
 		}
 
 	}
+
+	const
+		GAME = [
+			'general'=>'⬅️Главная',
+			'balance'=>'💰Баланс',
+			'info'=>'💡Информация',
+			'help'=>'❓Помощь',
+			'settings'=>'⚙️Настройки',
+			'community'=>'💬Community',
+			'new draw'=>'Создать розыгрыш',
+			'play draw'=>'Разыграть',
+			'show participates'=>'Участники',
+			'participate'=>'Участвовать',
+			'advanced'=>'Дополнительно',
+		];
+
 } //* UniKffBot
 
 

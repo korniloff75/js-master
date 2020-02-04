@@ -4,15 +4,11 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(-1);
 
-require_once $_SERVER['DOCUMENT_ROOT'] . "/Helper.php";
-
-require_once \HOME . "php/Path.php";
-
-require_once "../CommonBot.class.php";
+require_once __DIR__ . "/../CommonBot.class.php";
 require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Parser.trait.php";
+// echo "\$_SERVER['DOCUMENT_ROOT'] = ". $_SERVER['DOCUMENT_ROOT'];
 
-
-class AnekdotBot extends CommonBot implements iBotTG
+class AnekdotBot extends CommonBot
 {
 	//* Include Parser trait
 	use Parser;
@@ -26,10 +22,10 @@ class AnekdotBot extends CommonBot implements iBotTG
 		$content = [],
 		# Счётчик обновлений
 		$countDiff = 0,
-		$botDir,
-		$id = [
-			'anekdoty' => -1001393900792,
-			 'tome' => 673976740,
+		$cron = [
+			'chat'=> ['id' => -1001393900792,],
+			// 'chat'=> ['id' => 673976740,],
+			'from'=> ['id' => 673976740],
 		],
 		$currentBaseItem,
 		$respTG=[];
@@ -38,15 +34,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 		# Input stream
 		$json,
 		// $contentMD,
-		$postFields/* ,
-		$adv = [
-			'Зарабатывай без вложений' => 'https://t.me/CapitalistGameBot?start=673976740',
-			'Учись инвестировать играя' => 'https://t.me/CapitalistGameBot?start=673976740',
-			'Заказать быстрый сайт' => 'https://js-master.ru/content/1000.Contacts/Zakazchiku/',
-			'Сайт на AJAX с поддержкой SEO!' => 'https://js-master.ru/content/1000.Contacts/Zakazchiku/',
-			'Дешевый хостинг' => 'https://invs.ru?utm_source=partner&ref=ueQYF',
-			'Хостинг от 49р' => 'https://invs.ru?utm_source=partner&ref=ueQYF',
-		] */;
+		$postFields;
 
 	protected static
 		$remoteSource = [
@@ -56,17 +44,15 @@ class AnekdotBot extends CommonBot implements iBotTG
 		];
 
 
-
 	public function __construct()
 	{
-		# Set local data
+		//* Set local data
 		$this->botFileInfo = new kffFileInfo(__FILE__);
-		// $this->botDir = \Path::fromRootStat(__DIR__);
 
 		# Запускаем скрипт
 		parent::__construct()->checkLicense()->init();
 
-	} //__construct
+	} //* __construct
 
 	/**
 	 *
@@ -128,7 +114,7 @@ class AnekdotBot extends CommonBot implements iBotTG
 
 		$out = array_merge($content, $imgArr);
 
-		$this->log->add(__METHOD__ . " count($imgArr) = ", null, [count($imgArr)]);
+		$this->log->add(__METHOD__ . " count(\$imgArr) = ", null, [count($imgArr)]);
 		// $this->log->add(__METHOD__ . " - \$out = ", null, [$out]);
 
 		# Required

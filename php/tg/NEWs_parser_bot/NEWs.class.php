@@ -4,11 +4,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(-1);
 
-require_once $_SERVER['DOCUMENT_ROOT'] . "/Helper.php";
-
-require_once \HOME . "php/Path.php";
-
-require_once "../CommonBot.class.php";
+require_once __DIR__ . "/../CommonBot.class.php";
 require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Parser.trait.php";
 
 class KorniloFF_news extends CommonBot implements iBotTG
@@ -21,9 +17,11 @@ class KorniloFF_news extends CommonBot implements iBotTG
 		$__test = 1 ,
 
 		$baseDir = 'base/',
-		// $savedContent = [],
-		// $savedBase = [],
-		// $baseId = [],
+		$cron = [
+			'chat'=> ['id' => -1001223951491,],
+			// 'chat'=> ['id' => 673976740,],
+			'from'=> ['id' => 673976740],
+		],
 		// Specify headers
 		$stream_context_options = [
 			'www_yalta_24_ru' => [
@@ -42,10 +40,7 @@ class KorniloFF_news extends CommonBot implements iBotTG
 			]
 		],
 		$baseSource = [],
-		$DOMNodeList,
-		// $contentSum = [],
-		// $content = [],
-		$botDir,
+
 		$currentBaseItem,
 		$respTG=[];
 

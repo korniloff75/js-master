@@ -8,7 +8,14 @@
 	<title>BotStats</title>
 
 	<style>
-	body {background: #eee;}
+	html {
+		background: url('templates/space.jpg') center/cover fixed !important;
+	}
+	body {background: #eeee;}
+	/* body {background: #eee;} */
+	.wrapper{
+
+	}
 	/* body, body * {max-width: 100%;} */
 	h3{text-align: center;}
 	li {
@@ -47,6 +54,13 @@
 		width: 100%;
 		min-height: 100px;
 		font-size: 1.1em;
+	}
+	.uk-list {
+		margin-top:0;
+	}
+	.uk-form-danger{
+		color: red;
+		border: 1px solid red;
 	}
 	</style>
 

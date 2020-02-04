@@ -1,5 +1,4 @@
 /**
- *
  * @param {Node|jQ} container
  * note container.caption - родительский блок, включающий название чертежа
  * @param {Node|jQ} eventContainer
@@ -133,7 +132,7 @@ function TChart(container, eventContainer) {
 	var previewLineWidth = 1 * pixelRatio;
 	var mainLineWidth = 2 * pixelRatio;
 	var circleRadius = 3 * pixelRatio;
-	var circleLineWidth = 4 * pixelRatio;
+	var circleLineWidth = 3 * pixelRatio;
 	var font = (10 * pixelRatio) + 'px Arial';
 	var textYMargin = -6 * pixelRatio;
 	var textXMargin = 16 * pixelRatio;
@@ -141,8 +140,10 @@ function TChart(container, eventContainer) {
 	var textYHeight = 45 * pixelRatio;
 	var mainPaddingTop = 21 * pixelRatio;
 	var paddingHor = 11 * pixelRatio;
-	var popupLeftMargin = -25;
-	var popupTopMargin = !('ontouchstart' in window) ? 8 : 40;
+	var popupLeftMargin = -5;
+	// var popupLeftMargin = -25;
+	var popupTopMargin = !('ontouchstart' in window) ? 0 : 10;
+	// var popupTopMargin = !('ontouchstart' in window) ? 8 : 40;
 
 	var intervalX = 0;
 	var forceMinY = 0;
@@ -565,8 +566,10 @@ function TChart(container, eventContainer) {
 				}
 
 				popupBounds = popup.getBoundingClientRect();
+				// var dx = 20;
 				var popupX = (mainToScreenX(mouseX) / pixelRatio) + popupLeftMargin;
-				if (popupX < 0) popupX = 0;
+				if (popupX < paddingHor) popupX = paddingHor;
+				// if (popupX < 0) popupX = 0;
 				if (popupX + popupBounds.width > canvasBounds.width) popupX = canvasBounds.width - popupBounds.width;
 				popup.style.left = popupX + 'px';
 			}

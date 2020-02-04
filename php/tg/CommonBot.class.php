@@ -1,4 +1,12 @@
 <?php
+//* FIX cron
+if(empty($_SERVER['DOCUMENT_ROOT']))
+{
+	$_SERVER = [
+		'DOCUMENT_ROOT' => realpath(__DIR__ . '/../..'),
+	];
+}
+
 require_once $_SERVER['DOCUMENT_ROOT'] . "/php/Path.php";
 
 require_once $_SERVER['DOCUMENT_ROOT'] . "/Helper.php";
@@ -12,15 +20,15 @@ class CommonBot extends TG
 	use Get_set {}
 
 	private
-		$is_owner = false;
+		$is_owner = null;
 
 	protected
 		// $is_owner = false,
 		$responseData,
 		$license,
 		$savedBase = [],
-		# realpath к папке с ботом
-		$pathBotFolder,
+		//* from tg.class.php
+		$botDir,
 		# Счётчик обновлений
 		$countDiff = 0,
 		$protecText = "Вы пытаетесь воспользоваться частным ботом.\nДля его разблокировки свяжитесь с автором <b>@korniloff75</b>",
@@ -32,16 +40,22 @@ class CommonBot extends TG
 		$GLOBALS['_bot'] = &$this;
 
 		# Определяем владельца скрипта
-		// $this->is_owner = $this->cbn['from']['id'] === 673976740;
 		$this->is_owner = $this->set('is_owner', $this->cbn['from']['id'] === 673976740);
 
+		if(!empty($this->cron))
+		{
+			// var_dump($this->cron, $this->cbn);
+			// echo "\$this->cbn['from']['id'] = " . $this->cbn['from']['id'];
+			// $this->is_owner = 1;
+		}
+
 		$this->responseData = [
-			'chat_id' => $this->message['chat']['id'],
+			'chat_id' => $this->chat_id,
 			'parse_mode' => 'html',
 		];
 
 		# Отсекаем inline
-		if($this->message['message_id'])
+		if(isset($this->message['message_id']))
 			$this->responseData['message_id'] = $this->message['message_id'];
 
 		return $this->init();
@@ -56,7 +70,7 @@ class CommonBot extends TG
 			return $this;
 		}
 
-		$this->pathBotFolder = $this->botFileInfo->getPathInfo()->getRealPath();
+		$this->botDir = $this->botDir ?? $this->botFileInfo->getPathInfo()->getRealPath();
 		$logFile = $this->botFileInfo->getBasename() . '.log';
 
 		# Если не логируется из дочернего класса
@@ -64,7 +78,7 @@ class CommonBot extends TG
 		{
 			require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
 
-			$this->log = new Logger($logFile ?? 'tg.class.log', $this->pathBotFolder ?? __DIR__);
+			$this->log = new Logger($logFile ?? 'tg.class.log', $this->botDir ?? __DIR__);
 		}
 
 		return $this;
@@ -78,15 +92,15 @@ class CommonBot extends TG
 	 */
 	protected function checkLicense($responseData = null)
 	{
-		$this->license = \H::json("$this->pathBotFolder/license.json");
+		$this->license = \H::json("{$this->botDir}/license.json");
 		# Если нет лицензии, создаём ее
 		if($this->get('is_owner') && !count($this->license))
 		{
 			$this->license = [$this->message['chat']['id'] => "3000-01-01"];
-			\H::json("$this->pathBotFolder/license.json", $this->license);
+			\H::json("{$this->botDir}/license.json", $this->license);
 		}
 
-		$this->log->add("$this->pathBotFolder/license.json", null, [$this->license]);
+		$this->log->add("$this->botDir/license.json", null, [$this->license]);
 
 		/* $this->log->add("checkLicense ===", null, [
 			($id = $this->message['chat']['id']),
@@ -110,7 +124,7 @@ class CommonBot extends TG
 			$this->apiResponseJSON($responseData);
 
 			file_put_contents(
-				"{$this->pathBotFolder}/plagiarismBase.txt",
+				"{$this->botDir}/plagiarismBase.txt",
 				(new DateTime('now'))->format('Y/M/d H:i:s')
 				. " username - {$this->message['chat']['username']}; id - {$this->message['chat']['id']}"
 				. PHP_EOL,

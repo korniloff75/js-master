@@ -3,23 +3,13 @@
 //* use jQ
 var Render = function Render($bot_box, $chartbox, $main)
 {
-	Object.assign(this, {
+	Object.assign(this, _g.RenderDefaults, {
 		//* Блок с ботами
 		$bot_box: $bot_box || _g.$bot_box,
 		//* Блок с графиками
 		$chartbox: $chartbox || _g.$chartbox,
 		//* Общий блок
 		$main: $main || _g.$main,
-		data: {},
-		DEFAULT_TXT: '<p>Данные по этому боту в настоящий момент отсутствуют. Попробуйте позже.</p>',
-		CHART_NAMES: {
-			msgs: 'Статистика сообщений',
-			chats: 'Статистика чатов',
-			users: 'Статистика пользователей',
-		},
-		STYLES: `button {box-sizing:border-box}
-		button.uk-button {margin:.5em; margin-left:0;}
-		.menu>button:hover {box-shadow: #79a 1px -1px 2px -1px;}`,
 	});
 
 
@@ -143,23 +133,34 @@ var Render = function Render($bot_box, $chartbox, $main)
 		});
 	} //* titleEventsRouter
 
+	this.drawSettings = drawSettings.bind(this);
 
-	this.getSettings = function (e,promise) {
+	//* Получаем настройки
+	this.getSettings = function (e,setDFR) {
 		var cache = this.$cont_block[0].render;
 		console.log('getSettings= ', cache.getSettings);
 
 		if(!cache.getSettings) {
-			new Promise((resolve, reject)=> {
-
-			})
-			.then();
+			this.responseData = new GetResponse('get_bot_settings', {
+				bot_id: this.info.bot_id,
+			});
+			this.responseData.promise.then(
+				(resolve, reject) => {
+					// console.log('this= ', this);
+					setDFR(this.drawSettings());
+					cache.getSettings = resolve;
+				}
+			);
 		} else {
+			Object.assign(this.responseData, cache.getSettings);
 
+			setDFR(this.drawSettings());
 		}
 	}
 
 
-	this.getCharts = function (e,promise) {
+	//* Получаем данные для графиков
+	this.getCharts = function (e,getDFR) {
 		var cache = this.$cont_block[0].render;
 		console.log('getCharts= ', cache.getCharts);
 
@@ -176,34 +177,156 @@ var Render = function Render($bot_box, $chartbox, $main)
 
 			// console.log('Date = ', period.from.value, new Date(from).toISOString(), _H.formatDate(new Date(from).toISOString()));
 
-			var promiseStat = new Promise((resolve, reject) => {
-					this.responseData = new GetResponse('get_bot_stats', {
-						bot_id: this.info.bot_id,
-						from: Math.floor(from / 1000),
-						to: Math.floor(to / 1000),
-					}, resolve, reject);
-				})
-				.then(
-					(resolve, reject) => {
-						// console.log('this= ', this);
-						promise(this.drawCharts());
-						cache.getCharts = resolve;
+			this.drawCharts = drawCharts.bind(this);
 
-					}
-				);
+			this.responseData = new GetResponse('get_bot_stats', {
+				bot_id: this.info.bot_id,
+				from: Math.floor(from / 1000),
+				to: Math.floor(to / 1000),
+			});
+			this.responseData.promise.then(
+				(resolve, reject) => {
+					// console.log('this= ', this);
+					getDFR(
+						resolve ?
+							this.drawCharts():
+							this.NO_DATA_TXT
+					);
+					cache.getCharts = resolve;
+				}
+			);
 
 			// console.log('promiseStat = ', promiseStat);
 		}
 		else {
 			Object.assign(this.responseData, cache.getCharts);
 
-			promise(this.drawCharts());
+			getDFR(this.drawCharts());
 		}
 		console.log('showStat_2= ', cache.getCharts);
 	} //* getCharts
 
 
-	this.drawCharts = function() {
+	//* Отрисовываем настройки
+	function drawSettings() {
+		var $dfr = $(document.createDocumentFragment()),
+			data = Object.setPrototypeOf(this.responseData.data, this.info),
+		// $dfr.append(JSON.stringify(data) + JSON.stringify(this.info)),
+			$stsBox = $('<div class="uk-flex uk-flex-wrap uk-flex-around uk-flex-1"/>').appendTo($dfr);
+
+		//* Checkboxes
+		// uk-list-large
+		var $ulChbs = $('<ul class="ulChbs uk-width uk-width-1-2@s uk-list uk-list-striped uk-padding-small"/>').appendTo($stsBox);
+
+		Object.keys(data).forEach(i=>{
+			var $label = $(`<label class="uk-flex uk-flex-wrap uk-flex-middle uk-form-label"><input class="uk-checkbox uk-margin-right" type="checkbox" data-name="${i}" ${data[i]? 'checked': ''}></label>`).appendTo($ulChbs);
+			$label.append(this.SETTINGS_NAMES.chbs[i]).wrap(`<li class="${i}">`);
+			// console.log(data[i]);
+
+		});
+
+		var $stats_open = $ulChbs.find('.stats_open');
+		if(!$stats_open.find('input.uk-checkbox')[0].checked)
+		{
+			$stats_open.siblings().prop('hidden', 1);
+		}
+
+		//* Toggle from stats_open
+		$stats_open.on('click', e=>{
+			var ct = e.currentTarget,
+				chb = ct.querySelector('input.uk-checkbox');
+			// console.log(ct, $stats_open.length);
+			// $stats_open.siblings().attr('hidden', !chb.checked? 1: null);
+			$stats_open.siblings().prop('hidden', !chb.checked? 1: 0);
+		});
+
+		//* Inputs
+		var $ulInps = $($ulChbs[0].cloneNode(false)).appendTo($stsBox),
+			dataInps = ['queue_limit', 'check_interval'];
+
+		$ulInps.removeClass('ulChbs');
+		$ulInps.addClass('ulInps');
+
+		dataInps.forEach(i=>{
+			var $label = $(`<label class="uk-flex uk-flex-wrap uk-flex-middle uk-form-label"><input class="uk-input uk-width-1-4@s uk-margin-right" type="number" data-name="${i}" value="${this.info[i]}" min=0></label>`).appendTo($ulInps);
+			$label.append(this.SETTINGS_NAMES.inps[i]).wrap(`<li class="${i}">`);
+			// console.log(data[i]);
+		});
+
+		$('<input type="button" class="uk-button uk-button-primary send" value="Save" disabled>').appendTo($ulInps);
+
+		// var $ulSts = $ulChbs.clone().empty().appendTo($dfr);
+
+		$stsBox.on('input', 'input', handlerSettings.bind(this));
+		$stsBox.on('click', 'input.send', handlerSettings.bind(this));
+
+		console.log($ulInps);
+
+		return $dfr;
+	} //* drawSettings
+
+
+	//* Обрабатываем события на настройках
+	function handlerSettings(e)
+	{
+		var t = e.target,
+			main = e.delegateTarget,
+			sendButt = main.querySelector('.send'),
+			dataFields = main.querySelectorAll('input[data-name]'),
+			data = this.responseData.data;
+
+		sendButt.classList.remove('uk-form-danger','uk-form-success');
+
+		//* set_bot_settings
+		if(e.type === 'click')
+		{
+			if(t === sendButt)
+			{
+				var newSts = {stats:{}, bot_id:this.info.bot_id};
+
+				[].forEach.call(dataFields, i=> {
+					var name= i.getAttribute('data-name');
+
+					if(i.closest('.ulChbs')) newSts.stats[name] = i.checked? 1: 0;
+					else if(i.value != data[name])
+					{
+						newSts[name] = i.value;
+					}
+				});
+
+				console.log('newSts= ', newSts);
+
+				var Send = new GetResponse('set_bot_settings', newSts);
+				Send.promise.then(resolve=> {
+					if(!resolve) sendButt.classList.add('uk-form-danger');
+					else {
+						sendButt.disabled = true;
+						sendButt.classList.add('uk-form-success');
+					}
+				});
+			}
+			return;
+		} //* click
+
+		//* Check input data
+		if(
+			[].every.call(dataFields, i=> {
+				if(i.type === 'checkbox')
+					i.value = i.checked? 1: 0;
+				return i.value == data[i.getAttribute('data-name')]
+			})
+		) {
+			sendButt.disabled = true;
+		} else {
+			sendButt.disabled = false;
+		}
+
+		console.log(t, t.value);
+	} //* handlerSettings
+
+
+	//* Отрисовываем графики
+	function drawCharts() {
 		//* use this.responseData
 		var $dfr = $(document.createDocumentFragment());
 		// console.log("response__ = ", this.responseData, this.responseData.ords);
@@ -238,8 +361,14 @@ var Render = function Render($bot_box, $chartbox, $main)
 			$curChartbox[0].tchart.setData(data[0]);
 
 			$dfr.append($curChartbox);
-			$curChartbox[0].caption = $curChartbox.wrap('<div class="uk-padding-small"/>').parent();
+			var $wrap = $curChartbox.wrap('<div/>');
+			//todo $curChartbox.data.caption
+			$curChartbox[0].caption = $wrap.parent();
 			$curChartbox.before('<h3>' + chartboxName + '</h3>');
+			if(this.$window.width() > 600)
+				$wrap.addClass('uk-padding-small');
+
+			// console.log('$curChartbox[0].caption=', $curChartbox[0].caption);
 
 			$curChartbox[0].caption.hammer({direction: Hammer.DIRECTION_HORIZONTAL}).on('tap click pan swipe', (e)=>{
 				e.preventDefault();

@@ -157,7 +157,10 @@ class Logger
 		}
 
 		# Убираем ошибки парсера
-		if(strpos($errstr, "DOMDocument::loadHTMLFile()") !== false)
+		if(
+			class_exists('CommonBot') &&
+			CommonBot::stripos_array($errstr, ["loadHTML"]) !== false
+		)
 			return false;
 
 		$fileName = basename($errfile);
@@ -220,11 +223,15 @@ class Logger
 			is_object(@$GLOBALS['_bot'])
 			&& !$GLOBALS['_bot']->is_owner
 		)
-		return;
+		{
+			echo __METHOD__ . "  = {$GLOBALS['_bot']->is_owner}";
+			return;
+		}
 
 		$this->log = array_map(function($i) {
 			return strip_tags($i);
 		}, $this->log );
+		// echo __METHOD__ . " {$this->file} " . realpath($this->file);
 		file_put_contents($this->file, $this->log, !$this->rewriteLog ? FILE_APPEND : null);
 	}
 } // Logger
