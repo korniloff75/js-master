@@ -316,7 +316,6 @@ class TG {
 	 return json_encode($keyboard);
 	}
 
-
 	public function setInlineKeyboard(array $data)
 	: string
 	{
