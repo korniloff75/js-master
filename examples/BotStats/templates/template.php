@@ -25,6 +25,9 @@
 	#bot_box div[id] > div {
 		box-sizing: border-box;
 		position: relative;
+	}
+
+	/* #bot_box div[id] > div {
 		margin-left: 0;
 		margin-right: 0;
 		margin-bottom: 64px;
@@ -34,9 +37,11 @@
 	}
 	#bot_box div[id] > div:last-child {
 		width: 90%;
-	}
-	.tchart canvas{
+	} */
+	.tchart canvas {
 		width: 100%;
+		min-height: 200px;
+		max-height: 350px;
 	}
 	.note{
 		width: 100%;

@@ -153,7 +153,7 @@ if(DEV):
 	<h3>Ответ сервера</h3>
 	<pre id="response"></pre>
 	</pre>
-	<script src="js_compress/1.BotStats.js" defer></script>
+	<script src="js_compress/1.GetResponse.js" defer></script>
 	<script src="js_compress/10.tchart_kff.js" defer></script>
 <?php else:?>
 	<script src="js_compress.js" defer></script>

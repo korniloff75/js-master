@@ -63,17 +63,7 @@ function GetResponse (method, params, resolve, reject) {
 
 		$responseNode.text(JSON.stringify(response));
 
-		if(!response.stats.dates)
-		{
-			resolve(false);
-			// reject('response.stats.dates is missing');
-			return;
-		}
-
-		this.absc = response.stats.dates.map(i=>i*1000);
-		delete response.stats.dates;
-		//* Вытаскиваем ординаты графиков
-		this.ords = response.stats;
+		this[method](response, resolve);
 
 		console.log('this', this);
 		resolve(this);
@@ -88,38 +78,57 @@ function GetResponse (method, params, resolve, reject) {
 		reject(this);
 	});
 
+
+	if(method === 'get_bot_stats') this.get_bot_stats = function(response, resolve) {
+		if(!response.stats.dates)
+		{
+			resolve(false);
+			// reject('response.stats.dates is missing');
+			return;
+		}
+		this.absc = response.stats.dates.map(i=>i*1000);
+		delete response.stats.dates;
+		//* Вытаскиваем ординаты графиков
+		this.ords = response.stats;
+
+		this.parseInputData = parseInputData;
+	}
+
+
+	function parseInputData(json, name) {
+		var addFields= ["x", "y0"];
+
+		// console.log("parseInputData = ", json, name);
+
+		//* Выкидываем тест
+		if(json[0].columns)
+			return json;
+
+		json = [
+			// response.absc,
+			this.absc,
+			json
+		].map((i, ind) => {
+			return [addFields[ind]].concat(i);
+		});
+
+		return [{
+			columns: json,
+			types: {
+				"y0": "line",
+				"x": "x"
+			},
+			names: {
+				"y0": name
+			},
+			colors: {
+				"y0": "#5544EE"
+			}
+		}];
+	}
+
 } //* GetResponse
 
 
-GetResponse.prototype.parseInputData =	function(json, name) {
-	var addFields= ["x", "y0"];
 
-	// console.log("parseInputData = ", json, name);
-
-	//* Выкидываем тест
-	if(json[0].columns)
-		return json;
-
-	json = [
-		// response.absc,
-		this.absc,
-		json
-	].map((i, ind) => {
-		return [addFields[ind]].concat(i);
-	});
-
-	return [{
-		columns: json,
-		types: {
-			"y0": "line",
-			"x": "x"
-		},
-		names: {
-			"y0": name
-		},
-		colors: {
-			"y0": "#5544EE"
-		}
-	}];
-}
 

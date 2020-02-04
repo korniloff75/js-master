@@ -21,18 +21,13 @@ var Render = function Render($bot_box, $chartbox, $main)
 		button.uk-button {margin:.5em; margin-left:0;}
 		.menu>button:hover {box-shadow: #79a 1px -1px 2px -1px;}`,
 	});
-	/*
-	this.$bot_box = $bot_box || _g.$bot_box;
-	this.$chartbox = $chartbox || _g.$chartbox;
-	this.$main = $main || _g.$main;
-	this.DEFAULT_TXT = '<p>Данные по этому боту в настоящий момент отсутствуют. Попробуйте позже.</p>'; */
 
 
 	this.create = function () {
 		this.BTNS= [
 			{
 				html: '<button class="settings" style="color:#eee;background:red;">Настройки</button>',
-				event: null,
+				event: this.getSettings,
 			},
 			{
 				html: '<button class="stat" style="color:#eee;background:#008080;">Статистика</button>',
@@ -76,7 +71,7 @@ var Render = function Render($bot_box, $chartbox, $main)
 			$title_block.wrap('<div>');
 
 			//* create content blocks
-			var $cont_block = $(`<div id=${info.bot_id} class="uk-accordion-content uk-flex uk-flex-wrap uk-flex-around uk-flex-wrap-around uk-animation-fade uk-animation-slide-bottom-medium"/>`).insertAfter($title_block).html(this.DEFAULT_TXT);
+			var $cont_block = $(`<div id=${info.bot_id} class="uk-accordion-content uk-flex uk-flex-wrap uk-flex-around uk-flex-wrap-around uk-child-width-1-2@m uk-child-width-1-3@l uk-animation-fade uk-animation-slide-bottom-medium"/>`).insertAfter($title_block).html(this.DEFAULT_TXT);
 
 			$cont_block[0].render = {};
 			// console.log('this = ',this);
@@ -146,6 +141,21 @@ var Render = function Render($bot_box, $chartbox, $main)
 			this.$cont_block.empty().append($dfr||this.DEFAULT_TXT);
 			// console.log(this.$cont_block, $dfr);
 		});
+	} //* titleEventsRouter
+
+
+	this.getSettings = function (e,promise) {
+		var cache = this.$cont_block[0].render;
+		console.log('getSettings= ', cache.getSettings);
+
+		if(!cache.getSettings) {
+			new Promise((resolve, reject)=> {
+
+			})
+			.then();
+		} else {
+
+		}
 	}
 
 
@@ -190,7 +200,7 @@ var Render = function Render($bot_box, $chartbox, $main)
 			promise(this.drawCharts());
 		}
 		console.log('showStat_2= ', cache.getCharts);
-	}
+	} //* getCharts
 
 
 	this.drawCharts = function() {
@@ -228,7 +238,7 @@ var Render = function Render($bot_box, $chartbox, $main)
 			$curChartbox[0].tchart.setData(data[0]);
 
 			$dfr.append($curChartbox);
-			$curChartbox[0].caption = $curChartbox.wrap('<div/>').parent();
+			$curChartbox[0].caption = $curChartbox.wrap('<div class="uk-padding-small"/>').parent();
 			$curChartbox.before('<h3>' + chartboxName + '</h3>');
 
 			$curChartbox[0].caption.hammer({direction: Hammer.DIRECTION_HORIZONTAL}).on('tap click pan swipe', (e)=>{
@@ -236,7 +246,10 @@ var Render = function Render($bot_box, $chartbox, $main)
 				// console.log(e.type);
 			});
 
-		});
+		}); //* each
+
+		$dfr.find('.tchart').last().parent().addClass('uk-width uk-width-1-3@l');
+
 		return $dfr;
 	} //* drawCharts
 }
