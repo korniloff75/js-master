@@ -38,7 +38,13 @@ if(!empty($_GET['id']))
 	$respArr = json_decode($response, 1);
 
 	//* Бэк вернул данные
-	if($respArr['status'] && empty($respArr['bots']))
+	echo "<pre>";
+	if(!$respArr)
+	{
+		var_dump($response);
+		die('Нет ответа сервера с базами данных');
+	}
+	elseif($respArr['status'] && empty($respArr['bots']))
 	{
 		die("\nДля этой учётной записи зарегистрированных ботов нет.");
 	}
@@ -78,7 +84,6 @@ if(!empty($_GET['id']))
 //* Выводим после редиректа
 
 define('LOCAL', stripos($_SERVER['HTTP_HOST'], '\.ru', -4) === false);
-// define('ROOT', stripos($_SERVER['HTTP_HOST'], '\.ru') === false);
 
 require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
 $log = new Logger(basename(__DIR__));
@@ -100,7 +105,12 @@ if(!empty($_SESSION['bots'])):
 	echo 'var _bots = ' . urldecode($_SESSION['bots']) . '; var _authData = ' . urldecode(json_encode($_SESSION['authData'], JSON_UNESCAPED_UNICODE));
 ?>
 	;console.log('_bots = ', _bots, "\n_authData = ", _authData);
-<?php endif;?>
+
+	<?php if(!DEV):?>
+		Object.keys(console).forEach(i=>{console[i] = ()=>{}});
+	<?php endif?>
+
+<?php endif?>
 </script>
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.2.3/js/uikit.min.js"></script> -->
 <script src="lib/uikit3.3.0/uikit.min.js"></script>
@@ -140,7 +150,7 @@ if(!file_exists($_curTemplate))
 ob_start();
 ?>
 	<script src="<?=$_curJsRender?>"></script>
-	<script src="BotList.js"></script>
+	<script src="Common.js"></script>
 	<pre style="white-space:pre-wrap;">
 <?php
 if(DEV):
@@ -178,7 +188,7 @@ $_js_compress = ob_get_clean();
 ob_start();
 
 // var_dump($_SERVER);
-// require_once 'BotList.php';
+
 $content = ob_get_clean();
 
 

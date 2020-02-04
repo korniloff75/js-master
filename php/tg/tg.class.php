@@ -30,8 +30,11 @@ class TG {
 		# define in child classes
 		$botFileInfo,
 		$log, # instanceof Logger
+		//*
+		$cron=[],
 
 		$botDir,
+		$botDirFromRoot,
 		# take object message
 		$message,
 		$inputData = null,
@@ -63,9 +66,10 @@ class TG {
 
 		if($this->botFileInfo)
 		{
+			$this->botDir = $this->botFileInfo->getPath();
 			# Relative from root
-			$this->botDir = $this->botFileInfo->getPathInfo()->fromRoot();
-			$this->log->add("\$this->botDir = {$this->botDir}");
+			$this->botDirFromRoot = $this->botFileInfo->getPathInfo()->fromRoot();
+			$this->log->add("\$this->botDirFromRoot = {$this->botDirFromRoot}\n\$this->botDir = {$this->botDir}");
 		}
 
 		$this->getTokens(null, $token);
@@ -74,7 +78,7 @@ class TG {
 
 		$this->api = "https://api.telegram.org/bot{$this->tokens['tg']}/";
 
-		$this->log->add("Init bot.class.php");
+		$this->log->add(basename(__FILE__) . ' inited');
 
 		# Обрабатываем входящие данные
 		$this->message = $this->webHook()->findCallback();
@@ -87,7 +91,7 @@ class TG {
 		if(!$file && !empty($this->botFileInfo))
 			$file = $this->botFileInfo->getPath() . "/token.json";
 
-		// $file = $file ?? "{$this->botDir}/token.json";
+		// $file = $file ?? "{$this->botDirFromRoot}/token.json";
 		$this->tokens = $token ? (
 			['tg' => $token]
 		) : (file_exists($file) ? json_decode(
@@ -130,28 +134,39 @@ class TG {
 	{
 		if(!$this->getData()->inputData)
 		{
-			$this->log->add("inputData is EMPTY!", E_USER_WARNING, [$this->inputData]);
-			return null;
+			// Проверяем cron
+			if(empty($this->cron))
+			{
+				$this->log->add("inputData is EMPTY!", E_USER_WARNING, [$this->inputData]);
+				return null;
+			}
+			else
+			{
+				$this->inputData['cron'] = $this->cron;
+				$this->log->add("inputData from \$this->cron", E_USER_WARNING, [$this->inputData]);
+			}
 		}
 
 		$cbn = array_values(
-			array_intersect(['message', 'channel_post', 'inline_query', 'callback_query', 'result'], array_keys($this->inputData))
+			array_intersect(['message', 'channel_post', 'inline_query', 'callback_query', 'result', 'cron'], array_keys($this->inputData))
 		)[0] ?? false;
 
 		$this->cbn = $this->inputData[$cbn];
+		$this->cbn['query_name'] = $cbn;
 
 		switch ($cbn) {
 			case 'message':
 			case 'channel_post':
 			case 'inline_query':
-				$cb = $this->cbn;
+			case 'cron':
+				$cb = &$this->cbn;
 				break;
 			case 'callback_query':
-				$cb = $this->inputData['callback_query']['message'];
+				$cb = &$this->inputData['callback_query']['message'];
 			break;
 
 			default:
-				$cb = $this->inputData;
+				$cb = &$this->inputData;
 				break;
 		}
 
@@ -190,8 +205,10 @@ class TG {
 		}
 
 		# Full URI
-		$botURL = \BASE_URL . $this->botDir . '/' . $this->botFileInfo->getBaseName();
-		$trigger = \HOME . $this->botDir . "/webHookRegistered.trigger";
+		$botURL = \BASE_URL . $this->botDirFromRoot . '/' . $this->botFileInfo->getBaseName();
+		$trigger = \HOME . $this->botDirFromRoot . "/webHookRegistered.trigger";
+
+		$this->log->add("\$trigger= $trigger",null, [file_exists($trigger)]);
 
 		# Однократно запускаем webHook
 		if(file_exists($trigger))
@@ -378,12 +395,16 @@ class TG {
 					//* Rows
 					[
 						CommonBot::setAdvButton(),
-						[
-							"text" => "More",
-							"callback_data" => '/more',
-						],
 					]
 				]];
+
+				if(empty($this->cron) && $this->is_owner)
+				{
+					$postFields['reply_markup']["inline_keyboard"][]= [
+						"text" => "More",
+						"callback_data" => '/more',
+					];
+				}
 			}
 
 			# Отправляем в канал.

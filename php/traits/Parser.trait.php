@@ -4,35 +4,38 @@ trait Parser {
 
 	protected
 		$baseDir = 'base/',
-		$pathBotFolder;
+		$botDir;
 
 
-	/* private function get($pname)
-	{
-		$this->log->add(__METHOD__ . 'test', null, [
-			__CLASS__, method_exists($this, 'get'), method_exists(__CLASS__, 'get')
-		]);
-		if(method_exists(__CLASS__, 'get'))
-			return $this->get($pname);
-		else
-			return $this->{$pname};
-			// return true;
-	} */
-
-	public function Parser()
+	/**
+	 * $opts = []
+	 */
+	public function Parser(array $opts=[])
 
 	{
-		if(!$this->get('is_owner'))
+		$opts = array_merge([
+			'onlyOwner'=>1,
+			'browsEmul'=>null,
+			'chunked'=>null
+		], $opts);
+
+		$this->log->add(__METHOD__.' $opts',null,[$opts]);
+
+		if($opts['onlyOwner'] && !$this->is_owner)
 		{
 			$this->NoUpdates();
+			$this->log->add(__METHOD__.' not OWNER',E_USER_ERROR);
 			die;
 		}
-		$this->pathBotFolder = $this->pathBotFolder ?? __DIR__;
 
-		$baseDir = "{$this->pathBotFolder}/" . basename($this->baseDir);
+		$this->botDir = $this->botDir ?? __DIR__;
+
+		if(substr($this->baseDir, 0, 1) !== DIRECTORY_SEPARATOR)
+			$this->baseDir = "{$this->botDir}/" . basename($this->baseDir);
+		// $baseDir = "{$this->botDir}/" . basename($this->baseDir);
 
 		# Collect $this->baseSource
-		$this->baseSource = $this->CollectBaseArray($baseDir);
+		$this->baseSource = $this->CollectBaseArray();
 
 		# Перебираем ссылки
 		foreach (static::$remoteSource as $source) {
@@ -43,18 +46,16 @@ trait Parser {
 			# Получаем файл для текущего chat_id
 			if(isset($base[$this->chat_id]))
 			{
-				$currentItem = "$baseDir/" . $base[$this->chat_id];
+				$currentItem = "{$this->baseDir}/" . $base[$this->chat_id];
 				$this->log->add(__METHOD__ . ' - $currentItem = ' . $currentItem);
 				$this->savedBase = \H::json($currentItem);
 
 			}
 
 
-			if(!$this->AddLocalParser($source))
+			if(!$this->AddLocalParser($source, $opts))
 				continue;
 			// $this->log->add(__METHOD__ . " - \$this->savedBase = ", null, [$this->savedBase]);
-			// $this->log->add(__METHOD__ . " - \$this->definedBase = ", null, [$this->definedBase]);
-
 		}
 
 		# If not exist new content
@@ -68,7 +69,7 @@ trait Parser {
 	 * @source
 	 * Для каждого $source в дочернем классе требуются методы parser_$name4Local и handler_$name4Local
 	 */
-	public function AddLocalParser(string $source)
+	public function AddLocalParser(string $source, array $opts=[])
 	:bool
 	{
 		$bSource = basename($source);
@@ -76,7 +77,7 @@ trait Parser {
 		$name4Local = str_replace(['.', '-'], '_', $bSource);
 		$parserName = "parser_$name4Local";
 
-		# use custom Parser if EXIST =====
+		//* use custom Parser if EXIST =====
 		if(!method_exists($this, $parserName))
 		{
 			$this->log->add("$parserName DO NOT exist!");
@@ -85,9 +86,15 @@ trait Parser {
 
 		$this->log->add("$parserName is exist\n\$bSource = $bSource");
 
-		# Парсим сайт из self::$remoteSource
+		//* Парсим сайт из self::$remoteSource
 		$doc = new DOMDocument();
-		@$doc->loadHTMLFile($source);
+
+		if($opts['browsEmul'] || $opts['chunked'])
+		{
+			$opts = array_merge(['sendMethod' => 'get', 'json' => 0], $opts);
+			@$doc->loadHTML($this->CurlRequestBrows($source, $opts));
+		}
+		else @$doc->loadHTMLFile($source);
 
 		# Обнуляем контент
 		$this->content = [];
@@ -112,13 +119,15 @@ trait Parser {
 		}
 
 		# Пишем файл без редакции
-		\H::json($this->baseDir . "{$this->chat_id}.$bSource.json", $this->definedBase);
+		\H::json("{$this->baseDir}/{$this->chat_id}.$bSource.json", $this->definedBase);
+
+		$this->log->add(__METHOD__ . " \$this->baseDir = {$this->baseDir}/{$this->chat_id}.$bSource.json");
 
 		$diff = array_unique($diff);
 
 		$handlerName = "handler_$name4Local";
 
-		# use custom handler if EXIST =====
+		//* use custom handler if EXIST =====
 		if(!method_exists($this, $handlerName))
 			return false;
 		$this->log->add("method $handlerName is exist");
@@ -165,19 +174,19 @@ trait Parser {
 
 
 	/**
-	 * Строим дерево файлов из $baseDir
+	 * Строим дерево файлов из $this->baseDir
 	 */
-	public function CollectBaseArray(string $baseDir)
+	public function CollectBaseArray()
 	:array
 	{
 		$baseArray = [];
 
-		if(!is_dir($baseDir))
-			mkdir($baseDir);
+		if(!is_dir($this->baseDir))
+			mkdir($this->baseDir);
 		else
 		{
 			# Сканируем базу в массив из json-файлов
-			$it = new FilesystemIterator($baseDir, FilesystemIterator::SKIP_DOTS);
+			$it = new FilesystemIterator($this->baseDir, FilesystemIterator::SKIP_DOTS);
 			$it = new RegexIterator($it, "/\.json$/iu");
 
 			foreach ($it as $fileinfo) {
@@ -295,7 +304,7 @@ trait Parser {
 	{
 		if (!array_key_exists('callback_query', $this->inputData)) return;
 
-		$text = ($this->get('is_owner') ? "Хозяин! \n" : '') . $this->noUdatesText;
+		$text = ($this->is_owner ? "Хозяин! \n" : '') . $this->noUdatesText;
 
 		$r = $this->apiResponseJSON([
 		// return $this->apiRequest([
@@ -355,7 +364,7 @@ trait Parser {
 		// $innerHTML = str_ireplace($remove, '', $innerHTML);
 		//* FIX 4 TG
 		$innerHTML = preg_replace(["/^\s*\d+.*$/m", "/\s*[\r\n]{2,}/"], ['', PHP_EOL], $innerHTML);
-		trigger_error(__METHOD__ . ' $innerHTML= ' . $innerHTML);
+		// trigger_error(__METHOD__ . ' $innerHTML= ' . $innerHTML);
 
 		return strip_tags($innerHTML, self::$allowedTags);
 	}

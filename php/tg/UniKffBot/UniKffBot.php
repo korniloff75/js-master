@@ -49,6 +49,9 @@ class UniKffBot extends CommonBot
 		if(!empty($this->message['location']))
 			list($cmdName, $cmd) = ['gismeteo', 'setLocation'];
 
+		if(in_array($cmdName, ['💰Баланс', 'ℹ️Информация', '⬅️ Главная', '❓ Помощь']))
+			list($cmdName, $cmd) = ['GameTest', $cmdName];
+
 		if(!empty($cmdName))
 		{
 			$cmdName = ucfirst($cmdName);
@@ -57,7 +60,8 @@ class UniKffBot extends CommonBot
 				case 'Gismeteo':
 				case 'Youtube':
 				case 'Zen':
-					require_once("$cmdName.php");
+				case 'GameTest':
+					require_once("extensions/$cmdName.php");
 					new $cmdName($this, $cmd);
 					break;
 

@@ -48,6 +48,13 @@
 		min-height: 100px;
 		font-size: 1.1em;
 	}
+	.uk-list {
+		margin-top:0;
+	}
+	.uk-form-danger{
+		color: red;
+		border: 1px solid red;
+	}
 	</style>
 
 	<script src=<?= LOCAL ? "/js/3.jquery-3.3.1.min.js" : "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"?>></script>

@@ -7,7 +7,7 @@ class Zen extends UniKffBot {
 
 	protected static
 	$remoteSource = [
-		'https://zen.yandex.ru',
+		'https://lenta.ru/',
 	];
 
 	/**
@@ -19,23 +19,24 @@ class Zen extends UniKffBot {
 		$this->baseDir = 'base_Zen/';
 
 		// $this->init();
-		$this->Parser();
+		$this->Parser(['browsEmul'=>1, 'onlyOwner'=>0]);
+		// $this->Parser();
 	} //* __construct
 
 
-	protected function parser_zen_yandex_ru($source, &$doc)
+	protected function parser_lenta_ru($source, &$doc)
 	:array
 	{
 		$xpath = new DOMXpath($doc);
 
 		# Собираем ссылки с гл. страницы
-		// $mainLinks = $xpath->query("//div[@class=\"card-image-view\"]//a[@class=\"card-image-view__clickable\"]");
 
 		//tag[@class='clName' and starts-with(@attr, 'begin')]
 
-		$mainLinks = $xpath->query("//a[@class='card-image-view__clickable' and starts-with(@href, 'https://zen.yandex.ru')]");
+		$mainLinks = $xpath->query("//section[contains(@class,'b-top7-for-main')]//div[@class='item']/a");
 
-		/* $linksTest = self::DOMcollectLinks($source, $xpath->query("//a[@class='card-image-view__clickable']"));
+		/* $linksTest = $xpath->query("//a[@class='card-image-view__clickable']");
+		$linksTest = self::DOMcollectLinks($source, $linksTest);
 		$this->log->add(__METHOD__ . " - \$linksTest, \$links", null, [
 			$linksTest,
 		]); */
@@ -46,10 +47,10 @@ class Zen extends UniKffBot {
 		]);
 
 		return $links;
-	} // parser_zen_yandex_ru
+	} // parser_lenta_ru
 
 
-	protected function handler_zen_yandex_ru(array &$diff, $xpathToBlock = "//div[@itemprop=\"articleBody\"][1]")
+	protected function handler_lenta_ru(array &$diff, $xpathToBlock = "//div[@class=\"b-topic__content\"][1]")
 	{
 		$photos = [];
 		$content = [];
@@ -61,7 +62,9 @@ class Zen extends UniKffBot {
 			$source = "{$s['scheme']}://{$s['host']}/";
 			$addContent = '';
 
-			$docLink = @DOMDocument::loadHTMLFile($link);
+			$docLink = @DOMDocument::loadHTML($this->CurlRequestBrows($link, ['chunked'=>1,  'json' => 0]));
+
+			// $docLink = @DOMDocument::loadHTMLFile($link);
 			$xpath = new DOMXpath($docLink);
 
 			if(
@@ -73,7 +76,7 @@ class Zen extends UniKffBot {
 
 			if(is_object($xImg))
 			{
-				$imgArr = self::ExtractImages($source, $xpath, $xImg, 'src', ['crimeanews.jpg', 'size100/']);
+				$imgArr = self::ExtractImages($source, $xpath, $xImg, 'src', []);
 				// $this->log->add('$imgArr', null, [$imgArr]);
 				$photos = array_merge_recursive($photos, $imgArr);
 			}
@@ -82,12 +85,15 @@ class Zen extends UniKffBot {
 			$header = $xpath->query("//h1[1]")->item(0)->textContent;
 
 			$addContent .= self::DOMinnerHTML(
-				$xBlock, ['Новости за:', 'Читайте:', 'Новости Крыма', 'сообщали ранее:', 'Источник:']
+				$xBlock, []
 			);
 
 			if(strlen(trim($addContent)))
 				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
-		}
+
+			// todo
+			break;
+		} //*each
 
 		$this->log->add('count($photos) = ' . count($photos));
 
@@ -98,6 +104,6 @@ class Zen extends UniKffBot {
 			$out['sendMediaGroup'] = $photos;
 
 		return $out;
-	} //* handler_zen_yandex_ru
+	} //* handler_lenta_ru
 
 } //* Zen

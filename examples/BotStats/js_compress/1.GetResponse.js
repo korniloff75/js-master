@@ -12,13 +12,18 @@ var _GET = location.search.replace( '?', '')
 
 
 // GetResponse ('get_bot_stats')
-function GetResponse (method, params, resolve, reject) {
+function GetResponse (method, params) {
 	method = method || "get_bot_stats";
+
+	var url = test ? 'responseData.json' : window._remoteUrl + method,
+		$preloader = $('#preloader'),
+		$responseNode = $('#response'),
+		test = method === 'test';
 	/* Object.assign(params, {
 		authData: _authData,
 	}); */
 
-	this.LIGHT_COLORS = {
+	/* this.LIGHT_COLORS = {
 		circleFill: '#ffffff',
 		line: '#f2f4f5',
 		zeroLine: '#ecf0f3',
@@ -40,58 +45,77 @@ function GetResponse (method, params, resolve, reject) {
 		previewAlpha: 0.8,
 		previewBorder: '#5a7e9f',
 		previewBorderAlpha: 0.5
-	};
+	}; */
 
-	this.url = test ? 'responseData.json' : window._remoteUrl + method;
-
-	var $responseNode = $('#response'),
-		test = method === 'test';
+	// this.url = test ? 'responseData.json' : window._remoteUrl + method;
 
 	// console.log('BotStat.js ', method, test, this.url, params);
 
-	$('#preloader').show();
+	$preloader.show();
 
-	$.ajax({
-		method: 'post',
-		url: this.url,
-		contentType: 'text/plain',
-		dataType: "json",
-		data: JSON.stringify(params),
-	})
-	.done(response => {
-		$('#preloader').hide();
+	//*
+	this.promise = new Promise((resolve, reject)=> {
+		$.ajax({
+			method: 'post',
+			url: url,
+			contentType: 'text/plain',
+			dataType: "json",
+			data: JSON.stringify(params),
+			complete: ()=> {
+				$preloader.hide();
+			},
+		})
+		.done(response => {
+			$preloader.attr('style',null);
+			$responseNode.text(JSON.stringify(response));
 
-		$responseNode.text(JSON.stringify(response));
+			this[method] && this[method](response, resolve);
 
-		this[method](response, resolve);
+			console.log('this', this);
+			resolve(this);
 
-		console.log('this', this);
-		resolve(this);
-
-	})
-	.fail((jqXHR, status, errorThrown ) => {
-		$('#preloader').css({borderColor: 'red'});
-		console.log("jqXHR", jqXHR);
-		$responseNode.text(`${status} - ${errorThrown || 'unknown'};
-		${JSON.stringify(jqXHR.responseJSON)}
-		`);
-		reject(this);
+		})
+		.fail((jqXHR, status, errorThrown ) => {
+			$preloader.css({color: 'red', borderColor: 'red'});
+			console.log("jqXHR", jqXHR);
+			$responseNode.text(`${status} - ${errorThrown || 'unknown'};
+			${JSON.stringify(jqXHR.responseJSON)}
+			`);
+			reject(this);
+		});
 	});
 
 
-	if(method === 'get_bot_stats') this.get_bot_stats = function(response, resolve) {
-		if(!response.stats.dates)
-		{
-			resolve(false);
-			// reject('response.stats.dates is missing');
-			return;
-		}
-		this.absc = response.stats.dates.map(i=>i*1000);
-		delete response.stats.dates;
-		//* Вытаскиваем ординаты графиков
-		this.ords = response.stats;
+	if(method === 'get_bot_stats') {
+		Object.assign(this, _g.get_bot_stats);
+		this.get_bot_stats = function(response, resolve) {
+			if(!response.stats.dates)
+			{
+				resolve(false);
+				// reject('response.stats.dates is missing');
+				return;
+			}
+			this.absc = response.stats.dates.map(i=>i*1000);
+			delete response.stats.dates;
+			//* Вытаскиваем ординаты графиков
+			this.ords = response.stats;
 
-		this.parseInputData = parseInputData;
+			this.parseInputData = parseInputData;
+		}
+	}
+	else if(method === 'get_bot_settings') {
+		this.get_bot_settings = function(response, resolve) {
+			if(!response.status || !response.__initialised__)
+			{
+				resolve(false);
+				console.log('response= ', response);
+				return;
+			}
+			delete response.status;
+			delete response.__initialised__;
+
+			this.data = response;
+		}
 	}
 
 
