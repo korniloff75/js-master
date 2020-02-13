@@ -118,9 +118,9 @@ class GameTest extends CommonBot {
 			case 'new draw':
 				if(!empty($data))
 				{
-					$o = [
-						'text' => 'Вы не можете создать розыгрыш, пока не разыгран предыдущий.'
-					];
+					$o = $this->showMainMenu([
+						'text' => 'Вы не можете создать розыгрыш, пока не разыгран предыдущий. Но вы можете участвовать в существующем!'
+					]);
 				break;
 				}
 
@@ -137,6 +137,17 @@ class GameTest extends CommonBot {
 				break;
 
 			case 'prizes_count':
+				if(
+					isset($data['owner'])
+					&& $this->chat_id !== $data['owner']['id']
+				)
+				{
+					$this->showMainMenu([
+						'text'=> 'Менять количество призов может только спонсор розыгрыша!',
+					]);
+					break;
+				}
+
 				$this->data['change']++;
 				$data = [
 					'owner' => $this->cbn['from'],
@@ -148,50 +159,49 @@ class GameTest extends CommonBot {
 					'reply_markup' => [
 						"keyboard" => [
 							[
-								['text' => self::GAME['play draw']],
-								['text' => self::GAME['show participates']],
-							],
-							[
-								['text' => self::GAME['balance']],
-								['text' => self::GAME['info']],
-							],
-							[
 								['text' => self::GAME['general']],
 							],
 				],],];
 				$this->addSelf = 1;
 				break;
 
-			case 'show participates':
-				$ps = '';
-				foreach($data['participants'] as $p)
-				{
-					$ps .= $this->showUsername($p);
-				}
-				$o = [
-					'text' => "<u>Зарегистрировались:</u> " . count($data['participants']) . " чел.\n\n$ps"
-				];
+			case 'show participants':
+				$o = $this->showParticipants();
+				$o['text'] .= "\n<a href='{$this->urlDIR}/assets/Zorro_300.png' title='ZorroClan'>&#8205;</a>";
 				break;
 
 			//* Розыгрыш
 			case 'play draw':
+				if(!count($data['participants']))
+				{
+					$o = $this->showMainMenu([
+						'text' => "Кого разыгрывать собираемся, товагисч {$data['owner']['first_name']}?\n\nРегистрируйте новый розыгрыш!",
+					]);
+					break;
+				}
+
 				shuffle($data['participants']);
 				$winners = []; $winStr = '';
 
 				for($i=0; $i < $data['prizes_count']; $i++)
 				{
+					if(empty($data['participants'][$i]))
+						break;
+
 					$winners[] = $data['participants'][$i];
 					$winStr .= $this->showUsername($winners[$i]);
 				}
 
 				$o = [
-					'text' => "<u>Победители:</u>\n\n$winStr",
+					'text' => "<u>Победители:</u>\n\n$winStr\n<a href='{$this->urlDIR}/assets/Zorro_300.png' title='ZorroClan'>&#8205;</a>",
 					'reply_markup' => [
 						"keyboard" => [
 							[
 								['text' => self::GAME['general']],
 							],
 				],],];
+
+				$o = array_merge_recursive($this->showParticipants(), $o);
 
 				// unset($data);
 				unset($data, $this->data['current draws']);
@@ -219,28 +229,25 @@ class GameTest extends CommonBot {
 					];
 					$this->sendToOwner = 1;
 				}
-				else $o = [
+				else $o = $this->showMainMenu([
 					'text' => 'Для вас нет доступных розыгрышей в настоящий момент.',
-					'reply_markup' => [
-						"keyboard" => [
-							[
-								['text' => self::GAME['new draw']],
-							],
-							[
-								['text' => self::GAME['balance']],
-								['text' => self::GAME['info']],
-							],
-							[
-								['text' => self::GAME['general']],
-							],
-				],],];
+				]);
 				break;
 
 			default:
-				$o = $this->showMainMenu();
+				//todo Оповещать о созданном розыгрыше!
+				$draw= [
+					'text' => isset($data['owner'])
+					? "Создан розыгрыш от {$data['owner']['first_name']}. Спешите принять участие!"
+					: "На данный момент созданных розыгрышей нет. Вы можете создать свой."
+				];
+
+				$o = $this->showMainMenu($draw);
 				break;
 		} //*switch
 
+
+		//* Подготовка и отправка
 		if($o)
 		{
 			//* Кнопки для организатора
@@ -252,14 +259,21 @@ class GameTest extends CommonBot {
 			{
 				$o['reply_markup']['keyboard'] = array_merge_recursive($o['reply_markup']['keyboard'] ?? [], [[
 					['text' => self::GAME['play draw']],
-					['text' => self::GAME['show participates']],
+					['text' => self::GAME['show participants']],
 				]]);
 				$this->log->add(__METHOD__.' reply_markup=',null, [$o['reply_markup'],]);
 			}
 
+			//* add keyboard options
 			if(!empty($o['reply_markup']['keyboard']))
 			{
 				$o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
+			}
+
+			//* Склеиваем текст перед отправкой
+			if(is_array($o['text']))
+			{
+				$o['text'] = implode("\n\n", $o['text']);
 			}
 
 			//*
@@ -274,7 +288,7 @@ class GameTest extends CommonBot {
 			}
 
 			//* Отправляем владельцу розыгрыша
-			if(!empty($this->sendToOwner) && $this->chat_id !== $data['owner']['id'])
+			if(!empty($this->sendToOwner) && $this->chat_id != $data['owner']['id'])
 			{
 				$this->sendToOwner = null;
 				$o['chat_id'] = $data['owner']['id'];
@@ -283,15 +297,26 @@ class GameTest extends CommonBot {
 		}
 
 		return $this;
-	} //* routerCmd
+	} //* routerCmd 💡
 
+
+	private function showParticipants()
+	{
+		$data = &$this->data['current draws'];
+		$ps = '';
+		foreach($data['participants'] as $p)
+		{
+			$ps .= $this->showUsername($p);
+		}
+		return [
+			'text' => "<u>Зарегистрировались:</u> " . count($data['participants']) . " чел.\n\n$ps\n<a href='{$this->urlDIR}/assets/Zorro_300.png' title='ZorroClan'>&#8205;</a>"
+		];
+	}
 
 	private function showUsername($user)
 	{
 		return "<b>{$user['first_name']}</b> @{$user['username']} ({$user['id']})\n";
 	}
-
-	// 💡
 
 	private function showMainMenu($o=[])
 	{
@@ -311,9 +336,10 @@ class GameTest extends CommonBot {
 		}
 
 		$arr = [
+			//* Чат или бот?
 			'text' => is_numeric(substr($this->chat_id,0,1))?
 				'Вы находитесь в тестовом игровом боте. Это главное меню. Оно будет появляться при старте бота, а также во всех недоработанных функциях по умолчанию.'
-			:	"Бот запущен из группы, где не имеет возможности интерактивного диалога с вами.\n\nДля продолжения использования - пеерейдите в сам бот по ссылке @UniKffBot",
+			: "Бот запущен из группы, где не имеет возможности интерактивного диалога с вами.\n\nДля продолжения использования - пеерейдите в сам бот по ссылке @UniKffBot",
 			'reply_markup' => [
 				"keyboard" => $keyboard,
 			]
