@@ -31,6 +31,7 @@ class GameTest extends CommonBot {
 		if(!file_exists(self::FOLDER))
 			mkdir(self::FOLDER, 0755);
 
+		//* set data
 		$this->data = file_exists(self::BASE)?
 			json_decode(
 				file_get_contents(self::BASE), 1
@@ -50,7 +51,7 @@ class GameTest extends CommonBot {
 
 		file_put_contents(
 			self::BASE,
-			json_encode($this->data, JSON_UNESCAPED_UNICODE)
+			json_encode($this->data, JSON_UNESCAPED_UNICODE), LOCK_EX
 		);
 
 			return $this;
@@ -77,6 +78,24 @@ class GameTest extends CommonBot {
 								['text' => self::GAME['general']],
 							],
 				],],];
+				break;
+
+			case 'balance':
+				$o = [
+					'text' => 'У нас - коммунизм, товагисчи!!! Какие деньги?',
+				];
+				break;
+
+			case 'settings':
+				$o = [
+					'text' => 'Какие нужны индивидуальные настройки? Пишите @korniloff75',
+				];
+				break;
+
+			case 'advanced':
+				$o = [
+					'text' => 'Что тут можно разместить? Нужен ли этот раздел? Пишите @korniloff75',
+				];
 				break;
 
 			case 'help':
@@ -140,13 +159,14 @@ class GameTest extends CommonBot {
 								['text' => self::GAME['general']],
 							],
 				],],];
+				$this->addSelf = 1;
 				break;
 
 			case 'show participates':
 				$ps = '';
 				foreach($data['participants'] as $p)
 				{
-					$ps .= "{$p['first_name']}({$p['id']})\n";
+					$ps .= $this->showUsername($p);
 				}
 				$o = [
 					'text' => "<u>Зарегистрировались:</u> " . count($data['participants']) . " чел.\n\n$ps"
@@ -161,15 +181,20 @@ class GameTest extends CommonBot {
 				for($i=0; $i < $data['prizes_count']; $i++)
 				{
 					$winners[] = $data['participants'][$i];
-					$winStr .= "<b>{$winners[$i]['first_name']}</b>({$winners[$i]['id']})\n";
+					$winStr .= $this->showUsername($winners[$i]);
 				}
 
-				$o = array_merge_recursive($this->showMainMenu(), [[
+				$o = [
 					'text' => "<u>Победители:</u>\n\n$winStr",
-				]]);
+					'reply_markup' => [
+						"keyboard" => [
+							[
+								['text' => self::GAME['general']],
+							],
+				],],];
 
 				// unset($data);
-				unset($this->data['current draws']);
+				unset($data, $this->data['current draws']);
 				$this->data['change']++;
 				break;
 
@@ -177,9 +202,9 @@ class GameTest extends CommonBot {
 			case 'participate':
 				if(in_array($this->cbn['from'], $data['participants']))
 				{
-					$o = [
-						'text' => "Ты уже в регистрации на розыгрыш. Кончай сервер мучать, а то - забаню нах!"
-					];
+					$o = $this->showMainMenu([
+						'text' => "Ты уже в регистрации на розыгрыш. Кончай сервер мучать, а то - забаню нах!\n\n"
+					]);
 					break;
 				}
 				elseif(
@@ -187,12 +212,12 @@ class GameTest extends CommonBot {
 				) {
 					$this->data['change']++;
 					$data['participants'][]= $this->cbn['from'];
-
-					$btns = [['text' => "draw", 'callback_data'=>'']];
+					$count = count($data['participants']);
 
 					$o = [
-						'text' => "Вы зарегистрировались в розыгрыше от {$owner['first_name']}."
+						'text' => "Участник " . $this->showUsername($this->cbn['from']) . " зарегистрировался в розыгрыше от {$owner['first_name']}.\nНа данный момент зарегистрировано {$count} чел."
 					];
+					$this->sendToOwner = 1;
 				}
 				else $o = [
 					'text' => 'Для вас нет доступных розыгрышей в настоящий момент.',
@@ -220,15 +245,16 @@ class GameTest extends CommonBot {
 		{
 			//* Кнопки для организатора
 			if(
-				$this->chat_id === $data['owner']['id']
-			&& empty($o['reply_markup']['inline_keyboard'])
+				isset($data['owner'])
+				&& $this->chat_id === $data['owner']['id']
+				&& empty($o['reply_markup']['inline_keyboard'])
 			)
 			{
 				$o['reply_markup']['keyboard'] = array_merge_recursive($o['reply_markup']['keyboard'] ?? [], [[
 					['text' => self::GAME['play draw']],
 					['text' => self::GAME['show participates']],
 				]]);
-				$this->log->add('reply_markup=',null, [$o['reply_markup']]);
+				$this->log->add(__METHOD__.' reply_markup=',null, [$o['reply_markup'],]);
 			}
 
 			if(!empty($o['reply_markup']['keyboard']))
@@ -236,31 +262,63 @@ class GameTest extends CommonBot {
 				$o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
 			}
 
+			//*
 			$this->apiRequest($o);
+
+			//* Добавляем себя в розыгрыш при создании
+			if(!empty($this->addSelf))
+			{
+				$this->addSelf = null;
+				$this->cmd[0] = 'participate';
+				return $this->routerCmd();
+			}
+
+			//* Отправляем владельцу розыгрыша
+			if(!empty($this->sendToOwner) && $this->chat_id !== $data['owner']['id'])
+			{
+				$this->sendToOwner = null;
+				$o['chat_id'] = $data['owner']['id'];
+				$this->apiRequest($o);
+			}
 		}
 
 		return $this;
 	} //* routerCmd
 
+
+	private function showUsername($user)
+	{
+		return "<b>{$user['first_name']}</b> @{$user['username']} ({$user['id']})\n";
+	}
+
 	// 💡
 
-	private function showMainMenu()
+	private function showMainMenu($o=[])
 	{
-		// $this->apiResponseJSON([
-		// $this->apiRequest([
-		return [
-			'text' => 'Вы находитесь в тестовом игровом боте. Это главное меню. Оно будет появляться на всех недоработанных функциях по умолчанию.',
+		$keyboard = [
+			[
+				['text' => self::GAME['new draw']],
+			],
+			[
+				['text' => self::GAME['balance']],
+				['text' => self::GAME['info']],
+			],
+		];
+
+		if(isset($this->data['current draws']))
+		{
+			$keyboard[0][0] = ['text' => self::GAME['participate']];
+		}
+
+		$arr = [
+			'text' => is_numeric(substr($this->chat_id,0,1))?
+				'Вы находитесь в тестовом игровом боте. Это главное меню. Оно будет появляться при старте бота, а также во всех недоработанных функциях по умолчанию.'
+			:	"Бот запущен из группы, где не имеет возможности интерактивного диалога с вами.\n\nДля продолжения использования - пеерейдите в сам бот по ссылке @UniKffBot",
 			'reply_markup' => [
-				"keyboard" => [
-					[
-						['text' => self::GAME['new draw']],
-						['text' => self::GAME['participate']],
-					],
-					[
-						['text' => self::GAME['balance']],
-						['text' => self::GAME['info']],
-					],
-		],],];
+				"keyboard" => $keyboard,
+			]
+		];
+		return array_merge_recursive($arr,$o);
 	} //* showMainMenu
 
 } //* GameTest
