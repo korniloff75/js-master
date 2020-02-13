@@ -100,13 +100,17 @@ class CommonBot extends TG
 			\H::json("{$this->botDir}/license.json", $this->license);
 		}
 
-		$this->log->add("$this->botDir/license.json", null, [$this->license]);
-
 		/* $this->log->add("checkLicense ===", null, [
 			($id = $this->message['chat']['id']),
 			new DateTime(),
 			new DateTime($this->license[$id])
 		]); */
+
+		$this->license = array_filter($this->license, function($date){
+			return new DateTime() < new DateTime($date);
+		});
+
+		$this->log->add("$this->botDir/license.json", null, [$this->license]);
 
 		if(
 			$this->message

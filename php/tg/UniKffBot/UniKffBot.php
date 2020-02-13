@@ -56,6 +56,9 @@ class UniKffBot extends CommonBot
 		if(!empty($cmdName))
 		{
 			$cmdName = ucfirst($cmdName);
+			//* Aliases
+			if($cmdName === 'Draws') $cmdName = 'GameTest';
+
 			switch ($cmdName)
 			{
 				case 'Gismeteo':
@@ -65,6 +68,9 @@ class UniKffBot extends CommonBot
 					require_once("extensions/$cmdName.php");
 					new $cmdName($this, $cmd);
 					break;
+				case 'All':
+					$this->sendToAll($cmd);
+					break;
 
 				default:
 					$this->log->add(__METHOD__ . ' switch default', E_USER_WARNING);
@@ -72,6 +78,17 @@ class UniKffBot extends CommonBot
 			}
 		}
 
+	} //* Router
+
+	private function sendToAll($txt)
+	{
+		foreach(array_keys($this->license) as $id)
+		{
+			$this->apiRequest([
+				'chat_id'=> $id,
+				'text'=> "$txt",
+			]);
+		}
 	}
 
 	const
