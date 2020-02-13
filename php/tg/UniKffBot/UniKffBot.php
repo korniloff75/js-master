@@ -84,7 +84,7 @@ class UniKffBot extends CommonBot
 			'community'=>'💬Community',
 			'new draw'=>'Создать розыгрыш',
 			'play draw'=>'Разыграть',
-			'show participates'=>'Участники',
+			'show participants'=>'Участники',
 			'participate'=>'Участвовать',
 			'advanced'=>'Дополнительно',
 		];
