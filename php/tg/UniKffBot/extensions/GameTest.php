@@ -30,11 +30,14 @@ class GameTest extends CommonBot implements Game,Draws {
 			mkdir(self::FOLDER, 0755);
 
 		//* set data
-		$this->data = file_exists(self::BASE)?
-			json_decode(
+		$this->data = file_exists(self::BASE)
+			? json_decode(
 				file_get_contents(self::BASE), 1
-			):
-			[];
+			)
+			: [];
+
+		//* Pumps
+		$this->data['pumps'] = $this->data['pumps'] ?? [];
 		$this->data['change'] = 0;
 
 			return $this;
@@ -132,17 +135,35 @@ class GameTest extends CommonBot implements Game,Draws {
 					'reply_markup' => [
 						"keyboard" => [
 							[
-								['text' => self::BTNS['sale blue pump']],
-								['text' => self::BTNS['sale gold pump']],
-							],
-							[
 								['text' => self::BTNS['pump market']],
 								['text' => self::BTNS['general']],
 							],
 				],],];
 				break;
 
-			//* Новый розыгрыш
+			case 'sale':
+				list($type,$date,$number)= $this->cmd[1];
+				if(empty($date) || empty($number))
+				{
+					$o = [
+						'text' => self::INFO['sale']['fail']
+					];
+				}
+				else
+				{
+					$pumps[$type] = array_merge_recursive($pumps[$type], [$type=> [
+						$date=> ["@{$this->cbn['from']['username']}"=> $number]
+						// $date=> "$number - @{$this->cbn['from']['username']}"
+					]]);
+					// $pumps[$type][$date][]= "$number - @{$this->cbn['from']['username']}";
+					$this->cmd[0]= 'pump market';
+					$this->data['change']++;
+					return $this->routerCmd();
+				}
+				break;
+
+
+			//*** Новый розыгрыш ***
 			case 'new draw':
 				if(!empty($data))
 				{
