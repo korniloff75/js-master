@@ -196,7 +196,23 @@ class CommonBot extends TG
 		// return array_keys($posArr)[0] ?? false;
 	}
 
+	//* Общая рассылка
+	protected function sendToAll($txt)
+	{
+		$txt = str_replace(
+			['!','синий','жёлтый'],
+			['❗️','синий🔷','рыжий🔶'],
+			$txt
+		);
 
+		foreach(array_keys($this->license) as $id)
+		{
+			$this->apiRequest([
+				'chat_id'=> $id,
+				'text'=> "❗️❗️❗️\n$txt",
+			]);
+		}
+	}
 
 	public function __destruct()
 	{

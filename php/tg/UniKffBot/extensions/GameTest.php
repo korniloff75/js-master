@@ -60,6 +60,7 @@ class GameTest extends CommonBot implements Game,Draws {
 	{
 		$o=null;
 		$data = &$this->data['current draws'];
+		$pumps = &$this->data['pumps'];
 
 		switch ($this->cmd[0]) {
 			case 'info':
@@ -73,6 +74,7 @@ class GameTest extends CommonBot implements Game,Draws {
 								['text' => self::BTNS['settings']],
 							],
 							[
+								['text' => self::BTNS['pump market']],
 								['text' => self::BTNS['general']],
 							],
 				],],];
@@ -105,6 +107,39 @@ class GameTest extends CommonBot implements Game,Draws {
 							],
 						],
 				],];
+				break;
+
+			//* Биржа насосов
+			case 'pump market':
+				$o = [
+					'text' => self::INFO['pump market'],
+					'reply_markup' => [
+						"keyboard" => [
+							[
+								['text' => self::BTNS['sale blue pump']],
+								['text' => self::BTNS['sale gold pump']],
+							],
+							[
+								['text' => self::BTNS['pump market']],
+								['text' => self::BTNS['general']],
+							],
+				],],];
+				break;
+
+			case 'sale blue pump':
+				$o = [
+					'text' => self::INFO['sale blue pump'],
+					'reply_markup' => [
+						"keyboard" => [
+							[
+								['text' => self::BTNS['sale blue pump']],
+								['text' => self::BTNS['sale gold pump']],
+							],
+							[
+								['text' => self::BTNS['pump market']],
+								['text' => self::BTNS['general']],
+							],
+				],],];
 				break;
 
 			//* Новый розыгрыш
