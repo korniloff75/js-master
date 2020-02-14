@@ -2,7 +2,7 @@
 
 require_once "../CommonBot.class.php";
 
-class UniKffBot extends CommonBot
+class UniKffBot extends CommonBot implements Game
 {
 	protected
 		# Test mode, bool
@@ -50,8 +50,8 @@ class UniKffBot extends CommonBot
 			list($cmdName, $cmd) = ['gismeteo', 'setLocation'];
 
 		//* GAME
-		if(in_array($cmdName, self::GAME))
-			list($cmdName, $cmd) = ['GameTest', array_flip(self::GAME)[$cmdName]];
+		if(in_array($cmdName, self::BTNS))
+			list($cmdName, $cmd) = ['GameTest', array_flip(self::BTNS)[$cmdName]];
 
 		if(!empty($cmdName))
 		{
@@ -82,31 +82,48 @@ class UniKffBot extends CommonBot
 
 	private function sendToAll($txt)
 	{
+		$txt = str_replace(
+			['!','синий','жёлтый'],
+			['❗️','синий🔷','рыжий🔶'],
+			$txt
+		);
+
 		foreach(array_keys($this->license) as $id)
 		{
 			$this->apiRequest([
 				'chat_id'=> $id,
-				'text'=> "$txt",
+				'text'=> "❗️❗️❗️\n$txt",
 			]);
 		}
 	}
-
-	const
-		GAME = [
-			'general'=>'⬅️Главная',
-			'balance'=>'💰Баланс',
-			'info'=>'💡Информация',
-			'help'=>'❓Помощь',
-			'settings'=>'⚙️Настройки',
-			'community'=>'💬Community',
-			'new draw'=>'Создать розыгрыш',
-			'play draw'=>'Разыграть',
-			'show participants'=>'Участники',
-			'participate'=>'Участвовать',
-			'advanced'=>'Дополнительно',
-		];
-
 } //* UniKffBot
+
+
+interface Game {
+	//* Command list
+	const BTNS = [
+		'general'=>'⬅️Главная',
+		'balance'=>'💰Баланс',
+		'info'=>'💡Информация',
+		'help'=>'❓Помощь',
+		'settings'=>'⚙️Настройки',
+		'community'=>'💬Community',
+		'new draw'=>'Создать розыгрыш',
+		'play draw'=>'Разыграть',
+		'show participants'=>'Участники',
+		'participate'=>'Участвовать',
+		'advanced'=>'Дополнительно',
+	];
+}
+
+interface Draws {
+	const INFO = [
+		'about'=>"Бот имеет расширенный функционал.\n<b>Основные команды:</b>\n/gismeteo - Показ текущей погоды по вашей геолокации с возможностью посмотреть прогноз на ближайшие дни.\n/draws - Группа с розыгрышами, где любой участник может создавать розыгрыши, а также участвовать в существующих.",
+		'balance'=>'У нас - коммунизм, товагисчи!!! Какие деньги?',
+		'settings'=>'Какие нужны индивидуальные настройки? Пишите @korniloff75',
+		'advanced'=>'',
+	];
+}
 
 
 $UKB = new UniKffBot;

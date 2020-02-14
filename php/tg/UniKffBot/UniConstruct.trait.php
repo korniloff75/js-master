@@ -17,6 +17,7 @@ trait UniConstruct
 		{
 			$this->$key = $value;
 		}
+		$this->log->add(__METHOD__.'',null,[get_object_vars($UKB)]);
 	}
 
 

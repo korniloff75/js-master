@@ -257,7 +257,7 @@ class Gismeteo extends CommonBot {
 
 		$date = (new DateTime($data['date']['local']))->format('l - d M');
 
-		$this->numDecor($data);
+		// $this->numDecor($data);
 
 		$w= "<strong>Погода на {$date} ({$data['date']['local']})</strong>
 		{$data['description']['full']} " . $this->collectIcons($data['icon']) . "\n

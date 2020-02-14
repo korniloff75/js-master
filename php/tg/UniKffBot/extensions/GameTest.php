@@ -1,14 +1,12 @@
 <?php
 require_once "UniConstruct.trait.php";
 
-class GameTest extends CommonBot {
+class GameTest extends CommonBot implements Game,Draws {
 	use UniConstruct;
 
 	const
 		FOLDER = 'Game',
-		BASE = self::FOLDER . '/base.json',
-		//* Command list
-		GAME = UniKffBot::GAME;
+		BASE = self::FOLDER . '/base.json';
 
 	protected
 		$data;
@@ -26,7 +24,7 @@ class GameTest extends CommonBot {
 
 	private function init()
 	{
-		// $this->log->add('self::GAME=',null,[self::GAME]);
+		// $this->log->add('self::BTNS=',null,[self::BTNS]);
 
 		if(!file_exists(self::FOLDER))
 			mkdir(self::FOLDER, 0755);
@@ -45,7 +43,7 @@ class GameTest extends CommonBot {
 
 	private function saveData()
 	{
-		// $this->log->add('self::GAME=',null,[self::GAME]);
+		// $this->log->add('self::BTNS=',null,[self::BTNS]);
 		if(!$this->data['change']) return;
 		unset($this->data['change']);
 
@@ -66,35 +64,35 @@ class GameTest extends CommonBot {
 		switch ($this->cmd[0]) {
 			case 'info':
 				$o = [
-					'text' => 'Тут будет ну оооочень нужная информация... Можете помочь её составить.',
+					'text' => self::INFO['about'],
 					'reply_markup' => [
 						"keyboard" => [
 							[
-								['text' => self::GAME['advanced']],
-								['text' => self::GAME['help']],
-								['text' => self::GAME['settings']],
+								['text' => self::BTNS['advanced']],
+								['text' => self::BTNS['help']],
+								['text' => self::BTNS['settings']],
 							],
 							[
-								['text' => self::GAME['general']],
+								['text' => self::BTNS['general']],
 							],
 				],],];
 				break;
 
 			case 'balance':
 				$o = [
-					'text' => 'У нас - коммунизм, товагисчи!!! Какие деньги?',
+					'text' => self::INFO['balance'],
 				];
 				break;
 
 			case 'settings':
 				$o = [
-					'text' => 'Какие нужны индивидуальные настройки? Пишите @korniloff75',
+					'text' => self::INFO['settings'],
 				];
 				break;
 
 			case 'advanced':
 				$o = [
-					'text' => 'Что тут можно разместить? Нужен ли этот раздел? Пишите @korniloff75',
+					'text' => self::INFO['about'],
 				];
 				break;
 
@@ -159,7 +157,7 @@ class GameTest extends CommonBot {
 					'reply_markup' => [
 						"keyboard" => [
 							[
-								['text' => self::GAME['general']],
+								['text' => self::BTNS['general']],
 							],
 				],],];
 				$this->addSelf = 1;
@@ -175,7 +173,7 @@ class GameTest extends CommonBot {
 				if(!count($data['participants']))
 				{
 					$o = $this->showMainMenu([
-						'text' => "Кого разыгрывать собираемся, товагисч {$data['owner']['first_name']}?\n\nРегистрируйте новый розыгрыш!",
+						'text' => "Кого разыгрывать собираемся, товагисч?\n\nРегистрируйте новый розыгрыш!",
 					]);
 					break;
 				}
@@ -197,7 +195,7 @@ class GameTest extends CommonBot {
 					'reply_markup' => [
 						"keyboard" => [
 							[
-								['text' => self::GAME['general']],
+								['text' => self::BTNS['general']],
 							],
 				],],];
 
@@ -256,8 +254,8 @@ class GameTest extends CommonBot {
 			)
 			{
 				$o['reply_markup']['keyboard'] = array_merge_recursive($o['reply_markup']['keyboard'] ?? [], [[
-					['text' => self::GAME['play draw']],
-					['text' => self::GAME['show participants']],
+					['text' => self::BTNS['play draw']],
+					['text' => self::BTNS['show participants']],
 				]]);
 				$this->log->add(__METHOD__.' reply_markup=',null, [$o['reply_markup'],]);
 			}
@@ -333,17 +331,17 @@ class GameTest extends CommonBot {
 	{
 		$keyboard = [
 			[
-				['text' => self::GAME['new draw']],
+				['text' => self::BTNS['new draw']],
 			],
 			[
-				['text' => self::GAME['balance']],
-				['text' => self::GAME['info']],
+				['text' => self::BTNS['balance']],
+				['text' => self::BTNS['info']],
 			],
 		];
 
 		if(isset($this->data['current draws']))
 		{
-			$keyboard[0][0] = ['text' => self::GAME['participate']];
+			$keyboard[0][0] = ['text' => self::BTNS['participate']];
 		}
 
 		$arr = [
