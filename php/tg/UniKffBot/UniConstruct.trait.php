@@ -50,4 +50,21 @@ trait UniConstruct
 		}
 		return $this;
 	}
+
+	protected function sendToAll($txt)
+	{
+		$txt = str_replace(
+			['!','синий','жёлтый'],
+			['❗️','синий🔷','рыжий🔶'],
+			$txt
+		);
+
+		foreach(array_keys($this->license) as $id)
+		{
+			$this->apiRequest([
+				'chat_id'=> $id,
+				'text'=> "❗️❗️❗️\n$txt",
+			]);
+		}
+	}
 }

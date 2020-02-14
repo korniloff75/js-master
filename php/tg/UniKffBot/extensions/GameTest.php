@@ -79,14 +79,9 @@ class GameTest extends CommonBot implements Game,Draws {
 				break;
 
 			case 'balance':
-				$o = [
-					'text' => self::INFO['balance'],
-				];
-				break;
-
 			case 'settings':
 				$o = [
-					'text' => self::INFO['settings'],
+					'text' => self::INFO[$this->cmd[0]],
 				];
 				break;
 
@@ -98,7 +93,7 @@ class GameTest extends CommonBot implements Game,Draws {
 
 			case 'help':
 				$o = [
-					'text' => "Поможем всем!\nТут будут ссылки на поддержку. Скорее всего, инлайн-кнопками.",
+					'text' => self::INFO['help'],
 					'reply_markup' => [
 						"inline_keyboard" => [
 							[
@@ -161,6 +156,8 @@ class GameTest extends CommonBot implements Game,Draws {
 							],
 				],],];
 				$this->addSelf = 1;
+
+				$this->sendToAll("Создан розыгрыш от <b>{$this->cbn['from']['first_name']}</b>. Спешите принять участие!");
 				break;
 
 			case 'show participants':
