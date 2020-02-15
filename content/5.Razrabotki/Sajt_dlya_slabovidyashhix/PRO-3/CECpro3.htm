@@ -1,4 +1,21 @@
 <!-- <script type="text/javascript" src="/js/tools/mootools-core.js"></script> -->
+<style>
+#altObj #altBody{
+	position: static;
+}
+#altObj #altBody #body_main{
+	position: static;
+}
+#altObj #altBody #body_main>*:not(aside),
+#altObj #comments{
+	display: none;
+}
+#altObj #altBody #sidebar {
+	display: block;
+	position: static;
+	width: 100%;
+}
+</style>
 <div>
 		<input class="imgPU no-size btn min700 DA_del" style="padding: 3px 5px 3px 50px; margin:0 auto; font-size:20px; background: url('/<?=\H::$Dir ?>assets/eye.gif') no-repeat scroll 3px center, #ddd linear-gradient(#ccc, #eee, #ccc) repeat scroll 0 0;border: 1px solid #58a; border-radius:5px; z-index:9949; position:static; left:5px; top:20px; cursor: url('/<?=\H::$Dir ?>assets/glasses.png'), pointer;" id="RDS" value="Для слабовидящих" title="Для слабовидящих" type="button">
 </div>

@@ -6,6 +6,8 @@ div#altBody {
 	z-index: 5;
 }
 
+*[hidden] { display: none; }
+
 div#altObj, div#altBody, div#altBody *, div#altBody *::before, div#altBody *::after {
 	background-image: none !important;
 	box-sizing: border-box;
@@ -37,7 +39,6 @@ div#altObj #mask {
 div#altBody * {
 	/* z-index: 50; */
 }
-div#altBody *[hidden] { display: none; }
 
 div#altBody input, div#altBody textarea {border:1px solid;}
 div#altBody {background: #fafafa;}

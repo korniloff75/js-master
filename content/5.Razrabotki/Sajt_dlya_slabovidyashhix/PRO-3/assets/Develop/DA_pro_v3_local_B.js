@@ -354,9 +354,14 @@ window.DizSel = window.DizSel || !!_K && {
 		if (DizSel.v.DAlt) DizSel.PUopacity();
 
 		// Обрываем события
-		DizSel.altBody.onwheel =
+		/* DizSel.altBody.onwheel =
+			DizSel.altBody.onscroll =
 			DizSel.altBody.onclick =
-			DizSel.altBody.onmouseup =
+			DizSel.altBody.onmouseup = */
+		DizSel.altObj.onwheel =
+			DizSel.altObj.onscroll =
+			DizSel.altObj.onclick =
+			DizSel.altObj.onmouseup =
 			function (e) {
 				_K.e.fix(e).stopPropagation();
 			}

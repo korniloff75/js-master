@@ -1,6 +1,7 @@
 <?php
 
-require_once "../CommonBot.class.php";
+require_once __DIR__."/../CommonBot.class.php";
+
 
 class UniKffBot extends CommonBot implements Game
 {
@@ -50,20 +51,24 @@ class UniKffBot extends CommonBot implements Game
 			list($cmdName, $cmd) = ['gismeteo', 'setLocation'];
 
 		//* GAME
-		$btns_val = array_flip(self::BTNS);
-
 		if(in_array($cmdName, self::BTNS))
+		{
+			$btns_val = array_flip(self::BTNS);
+
 			list($cmdName, $cmd) = [
 				'GameTest', !is_numeric($btns_val[$cmdName])
 				? $btns_val[$cmdName]
 				: "{$cmdName}__{$cmd}"
 			];
+		}
+
 
 		if(!empty($cmdName))
 		{
 			$cmdName = ucfirst($cmdName);
 			//* Aliases
 			if($cmdName === 'Draws') $cmdName = 'GameTest';
+			if($cmdName === 'DrawsB') $cmdName = 'Draws';
 
 			switch ($cmdName)
 			{
@@ -71,6 +76,7 @@ class UniKffBot extends CommonBot implements Game
 				case 'Youtube':
 				case 'Zen':
 				case 'GameTest':
+				case 'Draws':
 					require_once("extensions/$cmdName.php");
 					new $cmdName($this, $cmd);
 					break;
@@ -98,11 +104,13 @@ interface Game {
 		'help'=>'❓Помощь',
 		'settings'=>'⚙️Настройки',
 		'community'=>'💬Community',
+		'advanced'=>'Дополнительно',
+		//* draws
 		'new draw'=>'Создать розыгрыш',
 		'play draw'=>'Разыграть',
 		'show participants'=>'Участники',
 		'participate'=>'Участвовать',
-		'advanced'=>'Дополнительно',
+		//*
 		'pump market'=>'Биржа 泵 насосов',
 		'sale blue pump'=>'🔷泵🔷',
 		'sale all'=>'🔷泵🔶',
@@ -114,7 +122,7 @@ interface Game {
 	];
 }
 
-interface Draws {
+interface DrawsInt {
 	const INFO = [
 		'about'=>"Бот имеет расширенный функционал.\n<b>Основные команды:</b>\n/gismeteo - Показ текущей погоды по вашей геолокации с возможностью посмотреть прогноз на ближайшие дни.\n/draws - Группа с розыгрышами, где любой участник может создавать розыгрыши, а также участвовать в существующих.",
 		'balance'=>'У нас - коммунизм, товагисчи!!! Какие деньги?',
@@ -136,6 +144,11 @@ interface Draws {
 		'unsale'=> "Для удаления любого из насосов из списка введите команду в формате unsale/NUMBER[__NUMBER2...]\nГде __ - 2 нижних дефиса, NUMBER - номер насоса.\n<u>Например:</u>\nunsale/5380__6390__2121",
 
 	];
+}
+
+interface DrawsInt_B extends DrawsInt
+{
+
 }
 
 

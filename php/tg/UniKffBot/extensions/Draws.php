@@ -1,15 +1,17 @@
 <?php
-require_once "UniConstruct.trait.php";
+require_once __DIR__."/../UniConstruct.trait.php";
+require_once __DIR__."/../Helper.class.php";
 
-class GameTest extends CommonBot implements Game,DrawsInt {
+class Draws extends Helper implements DrawsInt_B
+{
 	use UniConstruct;
 
 	const
-		FOLDER = __DIR__.'/../Game',
+		FOLDER = __DIR__.'/../Game_B',
 		BASE = self::FOLDER . '/base.json';
 
 	protected
-		$data;
+		$draws;
 
 	private
 		$addSelf,
@@ -20,8 +22,7 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 	 */
 	public function __construct(UniKffBot &$UKB, ?string $cmd=null)
 	{
-		$this->setConstruct($UKB, $cmd)->init()->routerCmd()->saveData();
-
+		$this->setConstruct($UKB, $cmd)->init()->routerCmd()->saveCurData();
 
 	} //* __construct
 
@@ -30,15 +31,7 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 	{
 		// $this->log->add('self::BTNS=',null,[self::BTNS]);
 
-		if(!file_exists(self::FOLDER))
-			mkdir(self::FOLDER, 0755);
-
-		//* set data
-		$this->data = file_exists(self::BASE)
-			? json_decode(
-				file_get_contents(self::BASE), 1
-			)
-			: [];
+		$this->getCurData();
 
 		//* Pumps
 		$this->data['pumps'] = $this->data['pumps'] ?? [];
@@ -48,27 +41,10 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 	} //* init
 
 
-	private function saveData()
-	{
-		// $this->log->add('self::BTNS=',null,[self::BTNS]);
-		if(!$this->data['change']) return;
-		unset($this->data['change']);
-
-		$this->log->add('$this->data[\'pumps\']=',null,[$this->data['pumps']]);
-
-		file_put_contents(
-			self::BASE,
-			json_encode($this->data, JSON_UNESCAPED_UNICODE), LOCK_EX
-		);
-
-			return $this;
-	} //* saveData
-
-
 	private function routerCmd($cmd=null)
 	{
 		$o=null;
-		$data = &$this->data['current draws'];
+		$draws = &$this->data['current draws'];
 		// $pumps = &$this->data['pumps'];
 
 		switch ($cmd ?? $this->cmd[0]) {
@@ -171,7 +147,7 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 
 			//*** Новый розыгрыш ***
 			case 'new draw':
-				if(!empty($data))
+				if(!empty($draws))
 				{
 					$o = $this->showMainMenu([
 						'text' => 'Вы не можете создать розыгрыш, пока не разыгран предыдущий. Но вы можете участвовать в существующем!'
@@ -184,17 +160,17 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 					'reply_markup' => [
 						"inline_keyboard" => [
 							[
-								['text' => 1, 'callback_data' => '/GameTest/prizes_count__1'],
-								['text' => 2, 'callback_data' => '/GameTest/prizes_count__2'],
-								['text' => 3, 'callback_data' => '/GameTest/prizes_count__3'],
+								['text' => 1, 'callback_data' => '/Draws/prizes_count__1'],
+								['text' => 2, 'callback_data' => '/Draws/prizes_count__2'],
+								['text' => 3, 'callback_data' => '/Draws/prizes_count__3'],
 							],
 				],],];
 				break;
 
 			case 'prizes_count':
 				if(
-					isset($data['owner'])
-					&& $this->chat_id !== $data['owner']['id']
+					isset($draws['owner'])
+					&& $this->chat_id !== $draws['owner']['id']
 				)
 				{
 					$this->showMainMenu([
@@ -204,7 +180,7 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 				}
 
 				$this->data['change']++;
-				$data = [
+				$draws = [
 					'owner' => $this->cbn['from'],
 					'prizes_count' => $this->cmd[1][0],
 				];
@@ -229,7 +205,7 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 
 			//* Розыгрыш
 			case 'play draw':
-				if(!count($data['participants']))
+				if(!count($draws['participants']))
 				{
 					$o = $this->showMainMenu([
 						'text' => "Кого разыгрывать собираемся, товагисч?\n\nРегистрируйте новый розыгрыш!",
@@ -237,15 +213,15 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 					break;
 				}
 
-				shuffle($data['participants']);
+				shuffle($draws['participants']);
 				$winners = []; $winStr = '';
 
-				for($i=0; $i < $data['prizes_count']; $i++)
+				for($i=0; $i < $draws['prizes_count']; $i++)
 				{
-					if(empty($data['participants'][$i]))
+					if(empty($draws['participants'][$i]))
 						break;
 
-					$winners[] = $data['participants'][$i];
+					$winners[] = $draws['participants'][$i];
 					$winStr .= $this->showUsername($winners[$i]);
 				}
 
@@ -265,9 +241,9 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 
 			//* Участвовать
 			case 'participate':
-				$count = count($data['participants']);
+				$count = count($draws['participants']);
 
-				if(in_array($this->cbn['from'], $data['participants']))
+				if(in_array($this->cbn['from'], $draws['participants']))
 				{
 					$o = $this->showMainMenu([
 						'text' => "Ты уже в регистрации на розыгрыш. Кончай сервер мучать, а то - забаню нах!\n\nА вообще уже $count чел. в розыгрыше."
@@ -275,10 +251,10 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 					break;
 				}
 				elseif(
-					!empty($owner = $data['owner'])
+					!empty($owner = $draws['owner'])
 				) {
 					$this->data['change']++;
-					$data['participants'][]= $this->cbn['from'];
+					$draws['participants'][]= $this->cbn['from'];
 					$count++;
 
 					$o = [
@@ -292,10 +268,9 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 				break;
 
 			default:
-				//todo Оповещать о созданном розыгрыше!
 				$draw= [
-					'text' => isset($data['owner'])
-					? "Создан розыгрыш от {$data['owner']['first_name']}. Спешите принять участие!"
+					'text' => isset($draws['owner'])
+					? "Создан розыгрыш от {$draws['owner']['first_name']}. Спешите принять участие!"
 					: "На данный момент созданных розыгрышей нет. Вы можете создать свой."
 				];
 
@@ -309,8 +284,8 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 		{
 			//* Кнопки для организатора
 			if(
-				isset($data['owner'])
-				&& $this->chat_id === $data['owner']['id']
+				isset($draws['owner'])
+				&& $this->chat_id === $draws['owner']['id']
 				&& empty($o['reply_markup']['inline_keyboard'])
 			)
 			{
@@ -337,13 +312,13 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 			if(!empty($this->toAllParticipants))
 			{
 				$this->toAllParticipants = null;
-				foreach($data['participants'] as $p)
+				foreach($draws['participants'] as $p)
 				{
 					$o['chat_id'] = $p['id'];
 					$this->apiRequest($o);
 				}
 				//*
-				unset($data, $this->data['current draws']);
+				unset($draws, $this->data['current draws']);
 				$this->data['change']++;
 			}
 			else $this->apiRequest($o);
@@ -356,10 +331,10 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 			}
 
 			//* Отправляем владельцу розыгрыша
-			if(!empty($this->sendToOwner) && $this->chat_id != $data['owner']['id'])
+			if(!empty($this->sendToOwner) && $this->chat_id != $draws['owner']['id'])
 			{
 				$this->sendToOwner = null;
-				$o['chat_id'] = $data['owner']['id'];
+				$o['chat_id'] = $draws['owner']['id'];
 				$this->apiRequest($o);
 			}
 		}
@@ -371,14 +346,14 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 	private function showParticipants()
 	:array
 	{
-		$data = &$this->data['current draws'];
+		$draws = &$this->data['current draws'];
 		$ps = '';
-		foreach($data['participants'] as $p)
+		foreach($draws['participants'] as $p)
 		{
 			$ps .= $this->showUsername($p);
 		}
 		return [
-			'text' => "<u>Зарегистрировались:</u> " . count($data['participants']) . " чел.\n\n$ps\n<a href='{$this->urlDIR}/assets/Zorro_300.png' title='ZorroClan'>&#8205;</a>"
+			'text' => "<u>Зарегистрировались:</u> " . count($draws['participants']) . " чел.\n\n$ps\n<a href='{$this->urlDIR}/assets/Zorro_300.png' title='ZorroClan'>&#8205;</a>"
 		];
 	}
 
@@ -387,175 +362,4 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 		return "<b>{$user['first_name']}</b> @{$user['username']} ({$user['id']})\n";
 	}
 
-
-	/**
-	 * Удаление насосов юзера
-	 */
-	private function removePumpsFromUser($user, $type, &$arr=null)
-	{
-		if(!$arr) $arr = &$this->data['pumps'][$type];
-
-		foreach($arr as $key=>&$val)
-		{
-			if($key!==$user && is_array($val))
-			{
-				$this->removePumpsFromUser($user,$type,$val);
-			}
-			elseif($key===$user)
-			{
-				// $this->log->add(__METHOD__.'$arr',null,[$arr, $arr[$key]]);
-				unset($arr[$key]);
-				$this->data['change']++;
-			}
-		}
-	}
-
-	/**
-	 * Пакетная замена насосов
-	 */
-	private function replacePumps($cmd)
-	{
-		$type= strpos($cmd[0],'нефтяные насосы') !== false ? 'blue' : 'gold';
-		$user= "@{$this->cbn['from']['username']}";
-		$this->removePumpsFromUser($user,$type);
-		$this->parsePumps($cmd);
-	}
-
-	/**
-	 * Пакетное добавление насосов
-	 */
-	private function parsePumps($cmd)
-	{
-		$type= strpos($cmd[0],'нефтяные насосы') !== false ? 'blue' : 'gold';
-
-		preg_match_all("~Серийный номер .+: (\\d+)$|будет работать до ([\\d\\.]+)$~im", $cmd[0], $parse);
-
-		list(,$numbers,$dates) = $parse;
-
-		$numbers= array_values(array_filter($numbers));
-		$dates= array_values(array_filter($dates));
-		$dates= array_map(function(&$i){
-			return DateTime::createFromFormat('j.m.Y', $i)->format('Y-m-j');
-		}, $dates);
-
-		// $pumps= array_combine(,array_filter($dates));
-		$this->log->add(__METHOD__.'',null,[$numbers,$dates]);
-
-		foreach($numbers as $k=>$n)
-		{
-			$this->addPump([$type,$dates[$k],$n]);
-		}
-	}
-
-	/**
-	 * Удаление по номерам
-	 */
-	private function removePump($cmd, &$arr=null)
-	{
-		if(!$arr) $arr = &$this->data['pumps'];
-
-		foreach($arr as $key=>&$val)
-		{
-			if(is_array($val))
-			{
-				$this->removePump($cmd,$val);
-			}
-			elseif(in_array($val, $cmd))
-			{
-				$this->log->add(__METHOD__.'$arr',null,[$arr, $arr[$key]]);
-				unset($arr[$key]);
-				$this->data['change']++;
-			}
-		}
-	}
-
-	private function addPump($cmd)
-	{
-		// list($type,$date,$numbers)= $cmd;
-		list($type,$date,$numbers)= [array_shift($cmd), array_shift($cmd), $cmd];
-
-		if(empty($date) || empty($numbers))
-		{
-			$o = [
-				'text' => self::INFO['sale']['fail']
-			];
-		}
-		else
-		{
-			$this->data['pumps'] = array_merge_recursive($this->data['pumps'], [$type=> [
-				$date=> ["@{$this->cbn['from']['username']}"=> $numbers]
-				// $date=> "$numbers - @{$this->cbn['from']['username']}"
-			]]);
-
-			$uPumps = &$this->data['pumps'][$type][$date]["@{$this->cbn['from']['username']}"];
-			$uPumps = array_unique($uPumps);
-
-			$this->data['change']++;
-			return $this->routerCmd('pump market');
-		}
-	}
-
-	private function showPumps()
-	{
-		$pList = '';
-
-		foreach($this->data['pumps'] as $type=>&$p)
-		{
-			ksort($p, SORT_NATURAL);
-			$pList.= "\n<b>". self::INFO['pumpName'][$type]."</b>\n";
-
-			foreach($p as $date=>&$val)
-			{
-				if(!count($val))
-				{
-					unset($p[$date]);
-					$this->data['change']++;
-				}
-				else $pList.= "{$date}\n";
-
-				foreach($val as $name=>&$num)
-				{
-					if(!count($num))
-					{
-						unset($val[$name]);
-						$this->data['change']++;
-					}
-					else $pList.= "{$name} - " . implode(', ',$num) . "\n";
-				}
-			}
-		}
-		if(strlen($pList))
-			$pList = "<b><u>На продажу будут выставлены:</u></b>\n$pList";
-		return $pList;
-	}
-
-	private function showMainMenu($o=[])
-	{
-		$keyboard = [
-			[
-				['text' => self::BTNS['new draw']],
-			],
-			[
-				['text' => self::BTNS['balance']],
-				['text' => self::BTNS['info']],
-			],
-		];
-
-		if(isset($this->data['current draws']))
-		{
-			$keyboard[0][0] = ['text' => self::BTNS['participate']];
-		}
-
-		$arr = [
-			//* Чат или бот?
-			'text' => is_numeric(substr($this->chat_id,0,1))
-			? 'Вы находитесь в боте для розыгрышей. Это главное меню. Оно будет появляться при старте бота, а также во всех недоработанных функциях по умолчанию.'
-			: "Бот запущен из группы, где не имеет возможности интерактивного диалога с вами.\n\nДля продолжения использования - пеерейдите в бот по ссылке @UniKffBot",
-			'reply_markup' => [
-				"keyboard" => $keyboard,
-			]
-		];
-		return array_merge_recursive($arr,$o);
-	} //* showMainMenu
-
-} //* GameTest
+} //* Draws
