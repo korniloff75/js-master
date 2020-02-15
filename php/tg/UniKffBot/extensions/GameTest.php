@@ -54,6 +54,8 @@ class GameTest extends CommonBot implements Game,Draws {
 		if(!$this->data['change']) return;
 		unset($this->data['change']);
 
+		$this->log->add('$this->data[\'pumps\']=',null,[$this->data['pumps']]);
+
 		file_put_contents(
 			self::BASE,
 			json_encode($this->data, JSON_UNESCAPED_UNICODE), LOCK_EX
@@ -142,7 +144,10 @@ class GameTest extends CommonBot implements Game,Draws {
 				$sale = explode(' ',$this->cmd[0],2);
 				$this->log->add('$sale=',null,[$sale]);
 				$o = [
-					'text' => self::INFO['sale'][$sale[1]],
+					'text' => [
+						self::INFO['sale'][$sale[1]],
+						self::INFO['unsale'],
+					],
 					'reply_markup' => [
 						"keyboard" => [
 							[
@@ -152,8 +157,17 @@ class GameTest extends CommonBot implements Game,Draws {
 				],],];
 				break;
 
+			case 'parsePumps':
+				$this->parsePumps($this->cmd[1]);
+				break;
+
 			case 'sale':
 				$this->addPump($this->cmd[1]);
+				break;
+
+			case 'unsale':
+				$this->removePump($this->cmd[1]);
+				return $this->routerCmd('pump market');
 				break;
 
 
@@ -375,6 +389,52 @@ class GameTest extends CommonBot implements Game,Draws {
 		return "<b>{$user['first_name']}</b> @{$user['username']} ({$user['id']})\n";
 	}
 
+	/**
+	 * Пакетное добавление насосов
+	 */
+	private function parsePumps($cmd)
+	{
+		$type= strpos($cmd[0],'нефтяные насосы') !== false ? 'blue' : 'gold';
+
+		preg_match_all("~Серийный номер .+: (\\d+)$|будет работать до ([\\d\\.]+)$~im", $cmd[0], $parse);
+
+		list(,$numbers,$dates) = $parse;
+
+		$numbers= array_values(array_filter($numbers));
+		$dates= array_values(array_filter($dates));
+		$dates= array_map(function(&$i){
+			return DateTime::createFromFormat('j.m.Y', $i)->format('Y-m-j');
+		}, $dates);
+
+		// $pumps= array_combine(,array_filter($dates));
+		$this->log->add(__METHOD__.'',null,[$numbers,$dates]);
+
+		foreach($numbers as $k=>$n)
+		{
+			$this->addPump([$type,$dates[$k],$n]);
+		}
+	}
+
+
+	private function removePump($cmd, &$arr=null)
+	{
+		if(!$arr) $arr = &$this->data['pumps'];
+
+		foreach($arr as $key=>&$val)
+		{
+			if(is_array($val))
+			{
+					$this->removePump($cmd,$val);
+			}
+			elseif(in_array($val, $cmd))
+			{
+				$this->log->add(__METHOD__.'$arr',null,[$arr, $arr[$key]]);
+				unset($arr[$key]);
+				$this->data['change']++;
+			}
+		}
+	}
+
 	private function addPump($cmd)
 	{
 		// list($type,$date,$numbers)= $cmd;
@@ -403,21 +463,35 @@ class GameTest extends CommonBot implements Game,Draws {
 
 	private function showPumps()
 	{
-		$pList = "<b><u>На продажу будут выставлены:</u></b>\n";
+		$pList = '';
 
 		foreach($this->data['pumps'] as $type=>&$p)
 		{
 			ksort($p, SORT_NATURAL);
 			$pList.= '<b>'. self::INFO['pumpName'][$type]."</b>\n";
+
 			foreach($p as $date=>&$val)
 			{
-				$pList.= "{$date}\n";
+				if(!count($val))
+				{
+					unset($p[$date]);
+					$this->data['change']++;
+				}
+				else $pList.= "{$date}\n";
+
 				foreach($val as $name=>&$num)
 				{
-					$pList.= "{$name} - " . implode(', ',$num) . "\n";
+					if(!count($num))
+					{
+						unset($val[$name]);
+						$this->data['change']++;
+					}
+					else $pList.= "{$name} - " . implode(', ',$num) . "\n";
 				}
 			}
 		}
+		if(strlen($pList))
+			$pList = "<b><u>На продажу будут выставлены:</u></b>\n$pList";
 		return $pList;
 	}
 

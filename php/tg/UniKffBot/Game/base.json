@@ -1,31 +1,47 @@
 {
-	"current draws": {
-		"owner": {
-			"id": 673976740,
-			"is_bot": false,
-			"first_name": "Павел 🧘‍♂️",
-			"last_name": "Корнилов",
-			"username": "korniloff75",
-			"language_code": "ru"
-		},
-		"prizes_count": "1",
-		"participants": [
-			{
-				"id": 673976740,
-				"is_bot": false,
-				"first_name": "Павел 🧘‍♂️",
-				"last_name": "Корнилов",
-				"username": "korniloff75",
-				"language_code": "ru"
-			},
-			{
-				"id": 455490909,
-				"is_bot": false,
-				"first_name": "Лидия",
-				"last_name": "Мутовкина",
-				"username": "lilimyt",
-				"language_code": "ru"
+	"pumps": {
+		"gold": {
+			"2020-02-13": {
+				"@korniloff75": [
+					"1594"
+				]
 			}
-		]
-	}
+		},
+		"blue": {
+			"2020-02-29": {
+				"@korniloff75": [
+					"4087",
+					"4088",
+					"4089",
+					"4090"
+				]
+			},
+			"2020-03-7": {
+				"@korniloff75": [
+					"7593"
+				]
+			},
+			"2020-03-10": {
+				"@korniloff75": [
+					"7736"
+				]
+			},
+			"2020-03-12": {
+				"@korniloff75": [
+					"7804"
+				]
+			},
+			"2020-03-13": {
+				"@korniloff75": [
+					"7828"
+				]
+			},
+			"2020-03-16": {
+				"@korniloff75": [
+					"7976"
+				]
+			}
+		}
+	},
+	"current draws": null
 }
