@@ -130,6 +130,7 @@ class GameTest extends CommonBot implements Game,Draws {
 						"keyboard" => [
 							[
 								['text' => self::BTNS['sale blue pump']],
+								['text' => self::BTNS['sale all']],
 								['text' => self::BTNS['sale gold pump']],
 							],
 							[
@@ -141,24 +142,28 @@ class GameTest extends CommonBot implements Game,Draws {
 
 			case 'sale blue pump':
 			case 'sale gold pump':
+			case 'sale all':
 				$sale = explode(' ',$this->cmd[0],2);
 				$this->log->add('$sale=',null,[$sale]);
 				$o = [
 					'text' => [
 						self::INFO['sale'][$sale[1]],
-						self::INFO['unsale'],
 					],
-					'reply_markup' => [
+					/* 'reply_markup' => [
 						"keyboard" => [
 							[
 								['text' => self::BTNS['pump market']],
 								['text' => self::BTNS['general']],
 							],
-				],],];
+					],], */
+				];
+
+				if($sale[1]!=='all') $o['text'][]= self::INFO['unsale'];
 				break;
 
+			case 'replacePumps':
 			case 'parsePumps':
-				$this->parsePumps($this->cmd[1]);
+				$this->{$this->cmd[0]}($this->cmd[1]);
 				break;
 
 			case 'sale':
@@ -389,6 +394,40 @@ class GameTest extends CommonBot implements Game,Draws {
 		return "<b>{$user['first_name']}</b> @{$user['username']} ({$user['id']})\n";
 	}
 
+
+	/**
+	 * Удаление насосов юзера
+	 */
+	private function removePumpsFromUser($user, $type, &$arr=null)
+	{
+		if(!$arr) $arr = &$this->data['pumps'][$type];
+
+		foreach($arr as $key=>&$val)
+		{
+			if($key!==$user && is_array($val))
+			{
+				$this->removePumpsFromUser($user,$type,$val);
+			}
+			elseif($key===$user)
+			{
+				// $this->log->add(__METHOD__.'$arr',null,[$arr, $arr[$key]]);
+				unset($arr[$key]);
+				$this->data['change']++;
+			}
+		}
+	}
+
+	/**
+	 * Пакетная замена насосов
+	 */
+	private function replacePumps($cmd)
+	{
+		$type= strpos($cmd[0],'нефтяные насосы') !== false ? 'blue' : 'gold';
+		$user= "@{$this->cbn['from']['username']}";
+		$this->removePumpsFromUser($user,$type);
+		$this->parsePumps($cmd);
+	}
+
 	/**
 	 * Пакетное добавление насосов
 	 */
@@ -415,7 +454,9 @@ class GameTest extends CommonBot implements Game,Draws {
 		}
 	}
 
-
+	/**
+	 * Удаление по номерам
+	 */
 	private function removePump($cmd, &$arr=null)
 	{
 		if(!$arr) $arr = &$this->data['pumps'];
@@ -424,7 +465,7 @@ class GameTest extends CommonBot implements Game,Draws {
 		{
 			if(is_array($val))
 			{
-					$this->removePump($cmd,$val);
+				$this->removePump($cmd,$val);
 			}
 			elseif(in_array($val, $cmd))
 			{
@@ -468,7 +509,7 @@ class GameTest extends CommonBot implements Game,Draws {
 		foreach($this->data['pumps'] as $type=>&$p)
 		{
 			ksort($p, SORT_NATURAL);
-			$pList.= '<b>'. self::INFO['pumpName'][$type]."</b>\n";
+			$pList.= "\n<b>". self::INFO['pumpName'][$type]."</b>\n";
 
 			foreach($p as $date=>&$val)
 			{
