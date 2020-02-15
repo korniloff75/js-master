@@ -7,25 +7,22 @@ error_reporting(-1);
 require_once "../CommonBot.class.php";
 
 
-class AntimatKFF extends CommonBot implements iBotTG
+class AntimatKFF extends CommonBot
 {
 	protected
 		# Test mode, bool
-		$__test = 1 ,
-		// $token = '',
-
-		$maxTry = 3,
-		$protecText = "Вы пытаетесь воспользоваться частным ботом.\nДля его разблокировки свяжитесь с автором *@korniloff75*";
+		$__test = 1 ;
 
 
 	protected static
 		$patterns = [
-			'~(?:\\s|^|>|\\]).{0,4}?[хx][\\s_]*?[уy](?![бж])[\\s_]*?[ийеёюя](?![з])~iu',
-			'~п(?![ор]).?[еёиі].{0,2}?[зz3].{0,2}?д[а@]?~iu',
-			'~(?:[^аеор]|\\s|^)[бм]и?ля[дт]ь?|п[еи][дg][ао]?р~iu',
-			'~г[ао]вно?|г[оа]ндон|жоп[аеу]|[^о]мандав?[^лрт]|\\bа\\.?у\\.?е\\.?~iu',
-			'~(?:[^вджл-нр-тч-щ]|^|\\s)[ьъ]?[еёїє]б\\W*?[^ы\\s]~iu',
-			'~сра[лт]ь?|залупа?|дроч~iu',
+			'~(?:\\s|^|>|\\]).{0,4}?[хx][\\s_]*?[уy](?![бж])[\\s_]*?[иuйеeёюя](?![з])~iu',
+			//* пизда
+			'~п(?![ор]).?[еeёиuі].{0,2}?[зz3].{0,2}?д[aа@]?~iu',
+			'~(?:[^аеор]|\\s|^)[бм]и?ля[дт]ь?|п[еeиu][дg][aаоo]?[рp]~iu',
+			'~г[аaоo]вн[оo]?|г[оoаa]ндон|ж[оo]п[аaеeу]|[^о]мандав?[^лрт]|\\b[аa]\\.?[уy]\\.?[еe]\\.?~iu',
+			'~(?:[^вджл-нр-тч-щ]|^|\\s)[ьъ]?[еeёїє]б\\W*?[^ы\\s]~iu',
+			'~сра[лт]ь?|з[аa]лупа?|др[оo]ч~iu',
 			// фразы
 			'~сос[иу] (?:член|хуй|хер)|(?:член|хуй|хер) сос[иу]~iu',
 			# Test
@@ -49,7 +46,7 @@ class AntimatKFF extends CommonBot implements iBotTG
 	/**
 	 *
 	 */
-	protected function init()
+	private function init()
 	{
 		if(empty($this->inputData) || !$this->message)
 		{

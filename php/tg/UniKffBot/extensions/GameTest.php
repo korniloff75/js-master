@@ -11,6 +11,10 @@ class GameTest extends CommonBot implements Game,Draws {
 	protected
 		$data;
 
+	private
+		$addSelf,
+		$toAllParticipants;
+
 	/**
 	 * @param cmd - 'cmdName_opt1_opt2_...etc'
 	 */
@@ -59,13 +63,13 @@ class GameTest extends CommonBot implements Game,Draws {
 	} //* saveData
 
 
-	private function routerCmd()
+	private function routerCmd($cmd=null)
 	{
 		$o=null;
 		$data = &$this->data['current draws'];
-		$pumps = &$this->data['pumps'];
+		// $pumps = &$this->data['pumps'];
 
-		switch ($this->cmd[0]) {
+		switch ($cmd ?? $this->cmd[0]) {
 			case 'info':
 				$o = [
 					'text' => self::INFO['about'],
@@ -112,10 +116,14 @@ class GameTest extends CommonBot implements Game,Draws {
 				],];
 				break;
 
-			//* Биржа насосов
+
+			//*** Биржа насосов ***
 			case 'pump market':
 				$o = [
-					'text' => self::INFO['pump market'],
+					'text' => [
+						self::INFO['pump market'],
+						$this->showPumps(),
+					],
 					'reply_markup' => [
 						"keyboard" => [
 							[
@@ -130,8 +138,11 @@ class GameTest extends CommonBot implements Game,Draws {
 				break;
 
 			case 'sale blue pump':
+			case 'sale gold pump':
+				$sale = explode(' ',$this->cmd[0],2);
+				$this->log->add('$sale=',null,[$sale]);
 				$o = [
-					'text' => self::INFO['sale blue pump'],
+					'text' => self::INFO['sale'][$sale[1]],
 					'reply_markup' => [
 						"keyboard" => [
 							[
@@ -142,24 +153,7 @@ class GameTest extends CommonBot implements Game,Draws {
 				break;
 
 			case 'sale':
-				list($type,$date,$number)= $this->cmd[1];
-				if(empty($date) || empty($number))
-				{
-					$o = [
-						'text' => self::INFO['sale']['fail']
-					];
-				}
-				else
-				{
-					$pumps[$type] = array_merge_recursive($pumps[$type], [$type=> [
-						$date=> ["@{$this->cbn['from']['username']}"=> $number]
-						// $date=> "$number - @{$this->cbn['from']['username']}"
-					]]);
-					// $pumps[$type][$date][]= "$number - @{$this->cbn['from']['username']}";
-					$this->cmd[0]= 'pump market';
-					$this->data['change']++;
-					return $this->routerCmd();
-				}
+				$this->addPump($this->cmd[1]);
 				break;
 
 
@@ -254,15 +248,17 @@ class GameTest extends CommonBot implements Game,Draws {
 
 				$o = array_merge_recursive($this->showParticipants(), $o);
 
-				$this->toAll = 1;
+				$this->toAllParticipants = 1;
 				break;
 
 			//* Участвовать
 			case 'participate':
+				$count = count($data['participants']);
+
 				if(in_array($this->cbn['from'], $data['participants']))
 				{
 					$o = $this->showMainMenu([
-						'text' => "Ты уже в регистрации на розыгрыш. Кончай сервер мучать, а то - забаню нах!\n\n"
+						'text' => "Ты уже в регистрации на розыгрыш. Кончай сервер мучать, а то - забаню нах!\n\nА вообще уже $count чел. в розыгрыше."
 					]);
 					break;
 				}
@@ -271,7 +267,7 @@ class GameTest extends CommonBot implements Game,Draws {
 				) {
 					$this->data['change']++;
 					$data['participants'][]= $this->cbn['from'];
-					$count = count($data['participants']);
+					$count++;
 
 					$o = [
 						'text' => "Участник " . $this->showUsername($this->cbn['from']) . " зарегистрировался в розыгрыше от {$owner['first_name']}.\nНа данный момент зарегистрировано {$count} чел."
@@ -326,9 +322,9 @@ class GameTest extends CommonBot implements Game,Draws {
 			}
 
 			//* Send
-			if(!empty($this->toAll))
+			if(!empty($this->toAllParticipants))
 			{
-				$this->toAll = null;
+				$this->toAllParticipants = null;
 				foreach($data['participants'] as $p)
 				{
 					$o['chat_id'] = $p['id'];
@@ -344,8 +340,7 @@ class GameTest extends CommonBot implements Game,Draws {
 			if(!empty($this->addSelf))
 			{
 				$this->addSelf = null;
-				$this->cmd[0] = 'participate';
-				return $this->routerCmd();
+				return $this->routerCmd('participate');
 			}
 
 			//* Отправляем владельцу розыгрыша
@@ -378,6 +373,52 @@ class GameTest extends CommonBot implements Game,Draws {
 	private function showUsername($user)
 	{
 		return "<b>{$user['first_name']}</b> @{$user['username']} ({$user['id']})\n";
+	}
+
+	private function addPump($cmd)
+	{
+		// list($type,$date,$numbers)= $cmd;
+		list($type,$date,$numbers)= [array_shift($cmd), array_shift($cmd), $cmd];
+
+		if(empty($date) || empty($numbers))
+		{
+			$o = [
+				'text' => self::INFO['sale']['fail']
+			];
+		}
+		else
+		{
+			$this->data['pumps'] = array_merge_recursive($this->data['pumps'], [$type=> [
+				$date=> ["@{$this->cbn['from']['username']}"=> $numbers]
+				// $date=> "$numbers - @{$this->cbn['from']['username']}"
+			]]);
+
+			$uPumps = &$this->data['pumps'][$type][$date]["@{$this->cbn['from']['username']}"];
+			$uPumps = array_unique($uPumps);
+
+			$this->data['change']++;
+			return $this->routerCmd('pump market');
+		}
+	}
+
+	private function showPumps()
+	{
+		$pList = "<b><u>На продажу будут выставлены:</u></b>\n";
+
+		foreach($this->data['pumps'] as $type=>&$p)
+		{
+			ksort($p, SORT_NATURAL);
+			$pList.= '<b>'. self::INFO['pumpName'][$type]."</b>\n";
+			foreach($p as $date=>&$val)
+			{
+				$pList.= "{$date}\n";
+				foreach($val as $name=>&$num)
+				{
+					$pList.= "{$name} - " . implode(', ',$num) . "\n";
+				}
+			}
+		}
+		return $pList;
 	}
 
 	private function showMainMenu($o=[])
