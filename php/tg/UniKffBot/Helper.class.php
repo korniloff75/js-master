@@ -1,6 +1,9 @@
 <?php
-class Helper extends CommonBot implements Game
+class Helper extends CommonBot implements Game,DrawsInt,PumpInt
 {
+	protected
+		$data;
+
 	protected function getCurData()
 	{
 		if(!file_exists(static::FOLDER))
@@ -35,11 +38,71 @@ class Helper extends CommonBot implements Game
 			return $this;
 	} //* saveCurData
 
+	protected function routerCmd($cmd=null)
+	{
+		switch ($cmd ?? $this->cmd[0]) {
+			case 'info':
+				$o = [
+					'text' => self::INFO['about'],
+					'reply_markup' => [
+						"keyboard" => [
+							[
+								['text' => self::BTNS['advanced']],
+								['text' => self::BTNS['help']],
+								['text' => self::BTNS['settings']],
+							],
+							[
+								['text' => static::PUMP_BTNS['pump/market']],
+								['text' => self::BTNS['general']],
+							],
+				],],];
+				break;
+
+			case 'balance':
+			case 'settings':
+				$o = [
+					'text' => self::INFO[$this->cmd[0]],
+				];
+				break;
+
+			case 'advanced':
+				$o = [
+					'text' => self::INFO['about'],
+				];
+				break;
+
+			case 'help':
+				$o = [
+					'text' => self::INFO['help'],
+					'reply_markup' => [
+						"inline_keyboard" => [
+							[
+								['text' => 'Support', 'url' => 'https://t.me/korniloff75'],
+								['text' => 'Поддержка разработчика', 'url' => 'https://t.me/korniloff75'],
+							],
+							[
+								['text' => '💬Community', 'url' => 'https://t.me/korniloff75'],
+							],
+						],
+				],];
+				break;
+
+			default:
+			$o=null;
+		}
+		return $o;
+	}
+
+	protected function showUsername($user)
+	{
+		return "<b>{$user['first_name']}</b> @{$user['username']} ({$user['id']})\n";
+	}
+
 	protected function showMainMenu($o=[])
 	{
 		$keyboard = [
 			[
-				['text' => static::BTNS['new draw']],
+				['text' => static::DRS_BTNS['drs/new draw']],
 			],
 			[
 				['text' => static::BTNS['balance']],
@@ -49,7 +112,7 @@ class Helper extends CommonBot implements Game
 
 		if(isset($this->data['current draws']))
 		{
-			$keyboard[0][0] = ['text' => static::BTNS['participate']];
+			$keyboard[0][0] = ['text' => static::DRS_BTNS['drs/participate']];
 		}
 
 		$arr = [

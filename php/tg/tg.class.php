@@ -3,6 +3,14 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(-1);
 
+//note FIX cron
+if(php_sapi_name() === 'cli')
+{
+	$_SERVER = array_merge($_SERVER, [
+		'DOCUMENT_ROOT' => realpath(__DIR__ . '/../..'),
+	]);
+}
+
 // ob_start();
 
 # Для дочерних классов
@@ -17,6 +25,10 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Curl.trait.php";
 
 
 class TG {
+	public
+		$webHook = true;
+		// $cron=[];
+
 	protected
 		# Test mode, bool
 		$__test = 0 ,
@@ -50,29 +62,24 @@ class TG {
 
 	public function __construct($token=null)
 	{
-		# Если не логируется из дочернего класса
-		if(!$this->log)
-		{
-			require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
-			if($this->botFileInfo)
-			{
-				// $path = $this->botFileInfo->getPathname();
-				$path = $this->botFileInfo->getPathInfo()->getRealPath();
-				$file = $this->botFileInfo->getBasename() . '.log';
-			}
-			$this->log = new Logger($file ?? 'tg.class.log', $path ?? __DIR__);
-		}
+		$this->checkLog();
 		$this->log->add("tg.class.php started");
 
 		if($this->botFileInfo)
 		{
 			$this->botDir = $this->botFileInfo->getPath();
-			# Relative from root
-			$this->botDirFromRoot = $this->botFileInfo->getPathInfo()->fromRoot();
+
+			if($this->botFileInfo instanceof kffFileInfo)
+			{
+				# Relative from root
+				$this->botDirFromRoot = $this->botFileInfo->getPathInfo()->fromRoot();
+			}
+
 			$this->log->add("\$this->botDirFromRoot = {$this->botDirFromRoot}\n\$this->botDir = {$this->botDir}");
 		}
 
-		$this->getTokens(null, $token);
+		if(!count($this->tokens))
+			$this->getTokens(null, $token);
 
 		// $this->token = $token ?? $this->tokens['tg'] ?? $this->token;
 
@@ -86,8 +93,27 @@ class TG {
 	} // __construct
 
 
+	private function checkLog()
+	{
+		if($this->log) return;
+
+		# Если не логируется из дочернего класса
+		require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
+		if($this->botFileInfo)
+		{
+			// $path = $this->botFileInfo->getPathname();
+			$path = $this->botFileInfo->getPathInfo()->getRealPath();
+			$file = $this->botFileInfo->getBasename() . '.log';
+		}
+		$this->log = new Logger($file ?? 'tg.class.log', $path ?? __DIR__);
+		$this->log->add(__METHOD__.' botFileInfo= ',null,[$this->botFileInfo]);
+	}
+
+
 	protected function getTokens($file= null, $token= null)
 	{
+		$this->checkLog();
+
 		if(!$file && !empty($this->botFileInfo))
 			$file = $this->botFileInfo->getPath() . "/token.json";
 
@@ -196,11 +222,16 @@ class TG {
 	 */
 	protected function webHook()
 	{
-		# path to bot is incorrect
-		if(!$this->botFileInfo || !file_exists($this->botFileInfo->getRealPath()))
+		//* path to bot is incorrect
+		if(
+			!$this->botFileInfo
+			|| !file_exists($this->botFileInfo->getRealPath())
+			|| !$this->webHook
+			|| empty($this->botDirFromRoot)
+		)
 		{
 			// $this->__destruct();
-			$this->log->add("\$botURL is NOT exist! - ", E_USER_WARNING, $botURL);
+			$this->log->add(__METHOD__ . " aborted with FAIL", E_USER_WARNING, $botURL);
 			return $this;
 		}
 

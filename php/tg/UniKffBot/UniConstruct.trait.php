@@ -5,11 +5,8 @@
  */
 trait UniConstruct
 {
-	private
-		$cmd;
-
 	protected
-		$urlROOT, $urlDIR;
+		$cmd, $urlROOT, $urlDIR;
 
 	private function import(UniKffBot &$UKB)
 	{

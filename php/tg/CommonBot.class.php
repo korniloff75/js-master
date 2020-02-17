@@ -1,10 +1,10 @@
 <?php
 //* FIX cron
-if(empty($_SERVER['DOCUMENT_ROOT']))
+if(php_sapi_name() === 'cli')
 {
-	$_SERVER = [
+	$_SERVER = array_merge($_SERVER, [
 		'DOCUMENT_ROOT' => realpath(__DIR__ . '/../..'),
-	];
+	]);
 }
 
 require_once $_SERVER['DOCUMENT_ROOT'] . "/php/Path.php";
