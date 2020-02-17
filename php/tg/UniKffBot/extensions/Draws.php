@@ -2,7 +2,7 @@
 require_once __DIR__."/../UniConstruct.trait.php";
 require_once __DIR__."/../Helper.class.php";
 
-class Draws extends Helper implements DrawsInt_B
+class Draws extends Helper implements DrawsInt
 {
 	use UniConstruct;
 
@@ -14,6 +14,7 @@ class Draws extends Helper implements DrawsInt_B
 		$draws;
 
 	private
+		$drawsOwner,
 		$addSelf,
 		$toAllParticipants;
 
@@ -33,118 +34,23 @@ class Draws extends Helper implements DrawsInt_B
 
 		$this->getCurData();
 
-		//* Pumps
-		$this->data['pumps'] = $this->data['pumps'] ?? [];
+		$this->drawsOwner = isset($this->data['current draws']['owner'])
+		&& $this->chat_id === $this->data['current draws']['owner']['id'];
+
 		$this->data['change'] = 0;
 
-			return $this;
+		return $this;
 	} //* init
 
 
-	private function routerCmd($cmd=null)
+	protected function routerCmd($cmd=null)
 	{
-		$o=null;
+		$o = parent::routerCmd($cmd);
+
 		$draws = &$this->data['current draws'];
 		// $pumps = &$this->data['pumps'];
 
-		switch ($cmd ?? $this->cmd[0]) {
-			case 'info':
-				$o = [
-					'text' => self::INFO['about'],
-					'reply_markup' => [
-						"keyboard" => [
-							[
-								['text' => self::BTNS['advanced']],
-								['text' => self::BTNS['help']],
-								['text' => self::BTNS['settings']],
-							],
-							[
-								['text' => self::BTNS['pump market']],
-								['text' => self::BTNS['general']],
-							],
-				],],];
-				break;
-
-			case 'balance':
-			case 'settings':
-				$o = [
-					'text' => self::INFO[$this->cmd[0]],
-				];
-				break;
-
-			case 'advanced':
-				$o = [
-					'text' => self::INFO['about'],
-				];
-				break;
-
-			case 'help':
-				$o = [
-					'text' => self::INFO['help'],
-					'reply_markup' => [
-						"inline_keyboard" => [
-							[
-								['text' => 'Support', 'url' => 'https://t.me/korniloff75'],
-								['text' => 'Поддержка разработчика', 'url' => 'https://t.me/korniloff75'],
-							],
-							[
-								['text' => '💬Community', 'url' => 'https://t.me/korniloff75'],
-							],
-						],
-				],];
-				break;
-
-
-			//*** Биржа насосов ***
-			case 'pump market':
-				$o = [
-					'text' => [
-						self::INFO['pump market'],
-						$this->showPumps(),
-					],
-					'reply_markup' => [
-						"keyboard" => [
-							[
-								['text' => self::BTNS['sale blue pump']],
-								['text' => self::BTNS['sale all']],
-								['text' => self::BTNS['sale gold pump']],
-							],
-							[
-								['text' => self::BTNS['pump market']],
-								['text' => self::BTNS['general']],
-							],
-				],],];
-				break;
-
-			case 'sale blue pump':
-			case 'sale gold pump':
-			case 'sale all':
-				$sale = explode(' ',$this->cmd[0],2);
-				$this->log->add('$sale=',null,[$sale]);
-				$o = [
-					'text' => [
-						self::INFO['sale'][$sale[1]],
-					],
-				];
-
-				if($sale[1]!=='all') $o['text'][]= self::INFO['unsale'];
-				break;
-
-			case 'replacePumps':
-			case 'parsePumps':
-				$this->{$this->cmd[0]}($this->cmd[1]);
-				break;
-
-			case 'sale':
-				$this->addPump($this->cmd[1]);
-				break;
-
-			case 'unsale':
-				$this->removePump($this->cmd[1]);
-				return $this->routerCmd('pump market');
-				break;
-
-
+		if(!$o) switch ($cmd ?? $this->cmd[0]) {
 			//*** Новый розыгрыш ***
 			case 'new draw':
 				if(!empty($draws))
@@ -168,10 +74,8 @@ class Draws extends Helper implements DrawsInt_B
 				break;
 
 			case 'prizes_count':
-				if(
-					isset($draws['owner'])
-					&& $this->chat_id !== $draws['owner']['id']
-				)
+
+				if( !$this->drawsOwner )
 				{
 					$this->showMainMenu([
 						'text'=> 'Менять количество призов может только спонсор розыгрыша!',
@@ -195,7 +99,7 @@ class Draws extends Helper implements DrawsInt_B
 				],],];
 				$this->addSelf = 1;
 
-				$this->sendToAll("Создан розыгрыш от <b>{$this->cbn['from']['first_name']}</b>. Спешите принять участие!");
+				// $this->sendToAll("Создан розыгрыш от <b>{$this->cbn['from']['first_name']}</b>. Спешите принять участие!");
 				break;
 
 			case 'show participants':
@@ -284,14 +188,13 @@ class Draws extends Helper implements DrawsInt_B
 		{
 			//* Кнопки для организатора
 			if(
-				isset($draws['owner'])
-				&& $this->chat_id === $draws['owner']['id']
+				$this->drawsOwner
 				&& empty($o['reply_markup']['inline_keyboard'])
 			)
 			{
 				$o['reply_markup']['keyboard'] = array_merge_recursive($o['reply_markup']['keyboard'] ?? [], [[
-					['text' => self::BTNS['play draw']],
-					['text' => self::BTNS['show participants']],
+					['text' => self::DRS_BTNS['drs/play draw']],
+					['text' => self::DRS_BTNS['drs/show participants']],
 				]]);
 				$this->log->add(__METHOD__.' reply_markup=',null, [$o['reply_markup'],]);
 			}
@@ -331,7 +234,7 @@ class Draws extends Helper implements DrawsInt_B
 			}
 
 			//* Отправляем владельцу розыгрыша
-			if(!empty($this->sendToOwner) && $this->chat_id != $draws['owner']['id'])
+			if(!empty($this->sendToOwner) && !$this->drawsOwner)
 			{
 				$this->sendToOwner = null;
 				$o['chat_id'] = $draws['owner']['id'];
@@ -355,11 +258,6 @@ class Draws extends Helper implements DrawsInt_B
 		return [
 			'text' => "<u>Зарегистрировались:</u> " . count($draws['participants']) . " чел.\n\n$ps\n<a href='{$this->urlDIR}/assets/Zorro_300.png' title='ZorroClan'>&#8205;</a>"
 		];
-	}
-
-	private function showUsername($user)
-	{
-		return "<b>{$user['first_name']}</b> @{$user['username']} ({$user['id']})\n";
 	}
 
 } //* Draws

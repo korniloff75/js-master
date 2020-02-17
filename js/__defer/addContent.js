@@ -91,10 +91,10 @@ _H.ADs = {
 			'this['$pars'] = ', this['$pars']
 		); */
 
-		// Удаляем скрытые
+		//* Удаляем скрытые
 		this['$pars'] = this['$pars'].filter((ind, i) => !i.closest || !i.closest('[hidden]'));
 
-		//== Удаляем из _H.ADs свойства, не соответствующие uri
+		//* Удаляем из _H.ADs свойства, не соответствующие uri
 		Object.keys(this).forEach(function (k) {
 			if (this[k].uri && !new RegExp(this[k].uri, 'i').test(decodeURIComponent(location.href))) {
 				delete this[k];
@@ -111,7 +111,7 @@ _H.ADs = {
 
 		if (!Object.keys(this).length) return;
 
-		//== Выбираем случайный элемент из _H.ADs, берем из него случайный links и конструируем ссылку и баннер
+		//* Выбираем случайный элемент из _H.ADs, берем из него случайный links и конструируем ссылку и баннер
 		var sel = this[$.rnd(Object.keys(this))],
 			r = $.rnd(sel.links),
 			g = (sel.base || 'https://ad.admitad.com') + '/g/' + r + '/?i=4',
@@ -122,7 +122,7 @@ _H.ADs = {
 			'block = ', block
 			); */
 
-		//== Создаем рекламный блок после случайного <p> и наполняем его
+		//* Создаем рекламный блок после случайного <p> и наполняем его
 		this['$img'] = $($.rnd(this['$pars'])).cr('div', { class: 'Adv center pointer' }, 'after').cr('img', { src: b, alt: sel.alt });
 		this['$img'].parent().on('click', e => location.href = g);
 		this['$img'].parent().after(this.LinkSlot);
