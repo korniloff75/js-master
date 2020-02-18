@@ -486,7 +486,7 @@ class TG {
 	{
 		// if(!$this->__test) return;
 
-		$this->log->add('EVALUATE __destruct');
+		$this->log->add(__METHOD__.' EVALUATE');
 
 		# Выводим логи
 		// if($this->__test) $this->log->print();

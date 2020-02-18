@@ -16,7 +16,7 @@ class PumpMarket extends Helper implements PumpInt
 	 */
 	public function __construct(UniKffBot &$UKB, ?string $cmd=null)
 	{
-		$this->setConstruct($UKB, $cmd)->init()->routerCmd()->saveData();
+		$this->setConstruct($UKB, $cmd)->init()->routerCmd()->saveCurData();
 
 
 	} //* __construct

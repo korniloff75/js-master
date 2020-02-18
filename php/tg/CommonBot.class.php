@@ -128,7 +128,7 @@ class CommonBot extends TG
 			$this->apiResponseJSON($responseData);
 
 			file_put_contents(
-				"{$this->botDir}/plagiarismBase.txt",
+				"{$this->botDir}/plagiarism_base.txt",
 				(new DateTime('now'))->format('Y/M/d H:i:s')
 				. " username - {$this->message['chat']['username']}; id - {$this->message['chat']['id']}"
 				. PHP_EOL,

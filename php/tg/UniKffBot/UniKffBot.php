@@ -3,7 +3,7 @@
 require_once __DIR__."/../CommonBot.class.php";
 
 
-class UniKffBot extends CommonBot implements Game
+class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 {
 	protected
 		# Test mode, bool
@@ -58,6 +58,21 @@ class UniKffBot extends CommonBot implements Game
 			list($cmdName, $cmd) = [
 				'GameTest', !is_numeric($btns_val[$cmdName])
 				? $btns_val[$cmdName]
+				: "{$cmdName}__{$cmd}"
+			];
+		}
+
+		//* exp
+		if(
+			$curBtn = constant("self::".strtoupper($cmdName)."_BTNS")
+			&& in_array($cmdName, $curBtn)
+		)
+		{
+			$btns_val = array_flip($curBtn);
+
+			list($cmdName, $cmd) = [
+				'Pump', !is_numeric($btns_val[$cmdName])
+				? $cmd
 				: "{$cmdName}__{$cmd}"
 			];
 		}
