@@ -420,7 +420,7 @@ class TG {
 
 			$postFields['text'] = strip_tags($bus, self::$allowedTags);
 
-			if(class_exists('CommonBot'))
+			/* if(class_exists('CommonBot'))
 			{
 				$postFields['reply_markup'] = ["inline_keyboard" => [
 					//* Rows
@@ -436,9 +436,9 @@ class TG {
 						"callback_data" => '/more',
 					];
 				}
-			}
+			} */
 
-			# Отправляем в канал.
+			//* Отправляем в канал.
 			$respTG[]= $this->apiRequest($postFields);
 
 			$bus = '';

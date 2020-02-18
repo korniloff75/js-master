@@ -26,7 +26,6 @@ class Advert extends TG
 	public $advert = [
 
 		'AliExpress' => [
-			// 'uri' =>'/',
 			'base' =>'https://alitems.com',
 			'alt' =>'Aliexpress INT',
 			'links' =>[
@@ -39,7 +38,6 @@ class Advert extends TG
 		],
 
 		'Samsung' => [
-			'uri' =>'content',
 			'alt' =>'Samsung [CPS] IN',
 			'links' =>[
 				'7n27paepuva4ec867dbefcdd16745e',
@@ -47,7 +45,6 @@ class Advert extends TG
 		],
 
 		'Timeweb' => [ //== Хост
-			'uri' =>'Javascripts|content',
 			'alt' =>'хостинг Timeweb',
 			'links' =>[
 				'n6q5j342fca4ec867dbe5fb557f5d8', 'tpflk1dgaga4ec867dbe5fb557f5d8', 'jsqzs4datla4ec867dbe5fb557f5d8', 'nhp2d1t7mga4ec867dbe5fb557f5d8', 'duvxj343x9a4ec867dbe5fb557f5d8', 'o98bdksin1a4ec867dbe5fb557f5d8'
@@ -55,7 +52,6 @@ class Advert extends TG
 		],
 
 		'Magzter' => [
-			'uri' =>'content',
 			'alt' =>'сервис Magzter [CPS] IN',
 			'src' =>'https://www.magzter.com/static/images/maglogo/magzlogosm.png',
 			'links' =>[
@@ -63,7 +59,6 @@ class Advert extends TG
 			]
 		],
 		'Letyshops' => [ //* Дисконт
-			'uri' =>'Primery|content',
 			'alt' =>'кэшбэк Letyshops',
 			'base' =>'https://homyanus.com',
 			'links' =>[
@@ -74,19 +69,33 @@ class Advert extends TG
 			]
 		],
 		'Tea101' => [
-			'uri' =>'content',
 			'base' =>null,
 			'alt' =>'магазин 500 видов чая',
 			'links' =>[
 				'ipw0vli5fua4ec867dbed55ad7d85a', '8aq5xn9ydsa4ec867dbed55ad7d85a', 'xs3x94yw7ga4ec867dbed55ad7d85a', 'n692sbotrva4ec867dbed55ad7d85a',
 			],
 		],
+		'cap_1'=> [
+			'alt'=> "Учись инвестировать играя",
+			'src'=> '/assets/Cap_300.jpg',
+			'href'=>"https://t.me/CapitalistGameBot?start=673976740"
+		],
+		'invs'=> [
+			'alt'=> "Дешевый хостинг",
+			'src'=> 'https://lk.invs.ru/partner/file/7',
+			'href'=>"https://invs.ru?utm_source=partner&ref=ueQYF"
+		],
+		'js-master'=> [
+			'alt'=> "Заказать быстрый сайт",
+			'src'=> '/assets/Js_ajax_700.jpg',
+			'href'=>"https://js-master.ru/content/1000.Contacts/Zakazchiku/"
+		],
 
 	]; //*
 
 	public function __construct($chat=null)
 	{
-		if($chat) $this->cron['chat'] = $chat;
+		if($chat) $this->cron['chat'] = $this->argv[$chat];
 		elseif (php_sapi_name() == 'cli')
 		{
 			$this->cron['chat'] = $this->argv[$_SERVER['argv'][1]];
@@ -99,6 +108,8 @@ class Advert extends TG
 
 		$this->log->add(__METHOD__.' botFileInfo,$this->cron= ',null,[$this->botFileInfo,$_SERVER['argv']]);
 
+		$this->urlDIR = 'https://js-master.ru/' . str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__);
+
 		parent::__construct();
 
 		$shuffle = array_values($this->advert);
@@ -106,9 +117,12 @@ class Advert extends TG
 		$rnd = $shuffle[0];
 		shuffle($rnd['links']);
 
-		$href = ($rnd['base'] ?? 'https://ad.admitad.com') . '/g/' . $rnd['links'][0] . '/?i=4';
+		$href = $rnd['href'] ?? (($rnd['base'] ?? 'https://ad.admitad.com') . '/g/' . $rnd['links'][0] . '/?i=4');
 
-		$src = $rnd['src'] ?? (($rnd['base'] ?? 'https://ad.admitad.com') . '/b/' . $rnd['links'][0] . '/');
+		if(!empty($rnd['src']))
+			$src = strpos($rnd['src'],'http') === 0 ? $rnd['src'] : ($this->urlDIR . $rnd['src']);
+		else
+			$src = ($rnd['base'] ?? 'https://ad.admitad.com') . '/b/' . $rnd['links'][0] . '/';
 
 		$rnd['alt']= $rnd['alt'] ?? 'Подробнее';
 		// $txt= "<a href='$src'>&#8205;</a>\n<a href='$href'><b>{$rnd['alt']}</b></a>";
@@ -133,10 +147,5 @@ class Advert extends TG
 } //* Advert
 
 
-// $_SERVER['argv'][1]
-
 new Advert;
-/* new Advert([
-	'id' => -1001393900792,
-	'token' => __DIR__.'/../Anekdot_parser_bot/token.json'
-]); */
+/* new Advert('anekdot'); */
