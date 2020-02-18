@@ -8,6 +8,70 @@ class Advert extends TG
 {
 	protected $cron = [];
 
+	public function __construct($chat=null)
+	{
+		$this->addChat($chat);
+
+		// trigger_error(__CLASS__.' inited');
+		$this->botFileInfo = new SplFileInfo(__FILE__);
+
+		$this->log->add(__METHOD__.' botFileInfo,$this->cron= ',null,[$this->botFileInfo,$_SERVER['argv']]);
+
+		$this->urlDIR = 'https://js-master.ru/' . str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__);
+	}
+
+	private function getAdvert()
+	{
+		$shuffle = array_values($this->advert);
+		shuffle($shuffle);
+		$rnd = $shuffle[0];
+		if(!empty($rnd['links'])) shuffle($rnd['links']);
+
+		$href = $rnd['href'] ?? (($rnd['base'] ?? 'https://ad.admitad.com') . '/g/' . $rnd['links'][0] . '/?i=4');
+
+		if(!empty($rnd['src']))
+			$src = strpos($rnd['src'],'http') === 0 ? $rnd['src'] : ($this->urlDIR . $rnd['src']);
+		else
+			$src = ($rnd['base'] ?? 'https://ad.admitad.com') . '/b/' . $rnd['links'][0] . '/';
+
+		$rnd['alt']= $rnd['alt'] ?? 'Подробнее';
+		// $txt= "<a href='$src'>&#8205;</a>\n<a href='$href'><b>{$rnd['alt']}</b></a>";
+		$txt= "<a href='$src'>&#8205;</a>\n<b>{$rnd['alt']}</b>";
+
+		$this->log->add(__METHOD__.' txt=',null,$txt);
+
+		$this->apiRequest([
+			'text' => $txt,
+			'chat_id' => $this->cron['chat']['id'],
+			'disable_web_page_preview' => false,
+			'reply_markup' => [
+				"inline_keyboard" => [
+					[
+						[
+							'text' => $rnd['alt'],
+							'url' => $href
+						],
+					],
+			],]
+		]);
+	}
+
+	public function addChat($chat)
+	{
+		if($chat && !empty($this->argv[$chat])) $this->cron['chat'] = $this->argv[$chat];
+		elseif (php_sapi_name() == 'cli')
+		{
+			$this->cron['chat'] = $this->argv[$_SERVER['argv'][1]];
+		}
+
+		$this->getTokens($this->cron['chat']['token']);
+		$this->webHook = 0;
+
+		parent::__construct();
+
+		$this->getAdvert();
+	}
+
 	private $argv= [
 		'anekdot' => [
 			'id' => -1001393900792,
@@ -75,14 +139,14 @@ class Advert extends TG
 				'ipw0vli5fua4ec867dbed55ad7d85a', '8aq5xn9ydsa4ec867dbed55ad7d85a', 'xs3x94yw7ga4ec867dbed55ad7d85a', 'n692sbotrva4ec867dbed55ad7d85a',
 			],
 		],
-		'cap_1'=> [
+		'cap_my_1'=> [
 			'alt'=> "Учись инвестировать играя",
 			'src'=> '/assets/Cap_300.jpg',
 			'href'=>"https://t.me/CapitalistGameBot?start=673976740"
 		],
 		'invs'=> [
 			'alt'=> "Дешевый хостинг",
-			'src'=> 'https://lk.invs.ru/partner/file/7',
+			'src'=> '/assets/invs_240_lh.png',
 			'href'=>"https://invs.ru?utm_source=partner&ref=ueQYF"
 		],
 		'js-master'=> [
@@ -91,61 +155,9 @@ class Advert extends TG
 			'href'=>"https://js-master.ru/content/1000.Contacts/Zakazchiku/"
 		],
 
-	]; //*
-
-	public function __construct($chat=null)
-	{
-		if($chat) $this->cron['chat'] = $this->argv[$chat];
-		elseif (php_sapi_name() == 'cli')
-		{
-			$this->cron['chat'] = $this->argv[$_SERVER['argv'][1]];
-		}
-
-		// trigger_error(__CLASS__.' inited');
-		$this->botFileInfo = new SplFileInfo(__FILE__);
-		$this->getTokens($this->cron['chat']['token']);
-		$this->webHook = 0;
-
-		$this->log->add(__METHOD__.' botFileInfo,$this->cron= ',null,[$this->botFileInfo,$_SERVER['argv']]);
-
-		$this->urlDIR = 'https://js-master.ru/' . str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__);
-
-		parent::__construct();
-
-		$shuffle = array_values($this->advert);
-		shuffle($shuffle);
-		$rnd = $shuffle[0];
-		shuffle($rnd['links']);
-
-		$href = $rnd['href'] ?? (($rnd['base'] ?? 'https://ad.admitad.com') . '/g/' . $rnd['links'][0] . '/?i=4');
-
-		if(!empty($rnd['src']))
-			$src = strpos($rnd['src'],'http') === 0 ? $rnd['src'] : ($this->urlDIR . $rnd['src']);
-		else
-			$src = ($rnd['base'] ?? 'https://ad.admitad.com') . '/b/' . $rnd['links'][0] . '/';
-
-		$rnd['alt']= $rnd['alt'] ?? 'Подробнее';
-		// $txt= "<a href='$src'>&#8205;</a>\n<a href='$href'><b>{$rnd['alt']}</b></a>";
-		$txt= "<a href='$src'>&#8205;</a>\n<b>{$rnd['alt']}</b>";
-
-		$this->log->add(__METHOD__.' txt=',null,$txt);
-
-		$this->apiRequest([
-			'text' => $txt,
-			'disable_web_page_preview' => false,
-			'reply_markup' => [
-				"inline_keyboard" => [
-					[
-						[
-							'text' => $rnd['alt'],
-							'url' => $href
-						],
-					],
-			],]
-		]);
-	}
+	];
 } //* Advert
 
 
-new Advert;
-/* new Advert('anekdot'); */
+$adv = new Advert('anekdot');
+$adv->addChat('news');
