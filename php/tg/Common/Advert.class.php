@@ -82,7 +82,7 @@ class Advert extends TG
 		],
 		'invs'=> [
 			'alt'=> "Дешевый хостинг",
-			'src'=> 'https://lk.invs.ru/partner/file/7',
+			'src'=> '/assets/invs_240_lh.png',
 			'href'=>"https://invs.ru?utm_source=partner&ref=ueQYF"
 		],
 		'js-master'=> [
