@@ -1,6 +1,6 @@
 <?php
 //* FIX cron
-if(php_sapi_name() === 'cli')
+if(php_sapi_name() === 'cli' && empty($_SERVER['DOCUMENT_ROOT']))
 {
 	$_SERVER = array_merge($_SERVER, [
 		'DOCUMENT_ROOT' => realpath(__DIR__ . '/../..'),

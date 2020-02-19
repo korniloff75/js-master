@@ -1,4 +1,11 @@
 # crontab -u www-data /var/www/js-master.ru/php/tg/Common/Crontab.txt
-0 6-23 * * * /var/www/js-master.ru/php/tg/Anekdot_parser_bot/CronEnterPoint.sh "/bot.class.php" >/var/www/js-master.ru/php/tg/Anekdot_parser_bot/cron.log 2>&1
-*/20 6-23 * * * /var/www/js-master.ru/php/tg/NEWs_parser_bot/CronEnterPoint.sh "/NEWs.class.php" >/var/www/js-master.ru/php/tg/NEWs_parser_bot/cron.log 2>&1
+#
+# 0 6-23 * * * /var/www/js-master.ru/php/tg/Anekdot_parser_bot/CronEnterPoint.sh "/bot.class.php" >/var/www/js-master.ru/php/tg/Anekdot_parser_bot/cron.log 2>&1
+#
+0 6-23 * * * /var/www/js-master.ru/php/tg/Anekdot_parser_bot/bot.class.php "Anekdot.class" >/var/www/js-master.ru/php/tg/Anekdot_parser_bot/cron_multi.log 2>&1
+#
+# News
+*/20 6-23 * * * /var/www/js-master.ru/php/tg/NEWs_parser_bot/CronEnterPoint.sh "/NEWs.class.php" >/var/www/js-master.ru/php/tg/NEWs_parser_bot/cron.log 2>&
+#
+# Advert
 21 8-21 * * * /var/www/js-master.ru/php/tg/Common/Advert.class.php "anekdot" >/var/www/js-master.ru/php/tg/Common/cron.log 2>&1
