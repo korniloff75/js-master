@@ -39,10 +39,11 @@ trait Parser {
 
 		# Перебираем ссылки
 		foreach (static::$remoteSource as $source) {
-			$bSource = basename($source);
+			$bSource = parse_url($source, PHP_URL_HOST);
+			// $bSource = basename($source);
 			$base = $this->baseSource[$bSource] ?? [];
 
-			$this->log->add(__METHOD__ . ' - $base = ', null, $base);
+			$this->log->add(__METHOD__ . ' - $base = ', null, [$base]);
 			# Получаем файл для текущего chat_id
 			if(isset($base[$this->chat_id]))
 			{
@@ -72,7 +73,8 @@ trait Parser {
 	public function AddLocalParser(string $source, array $opts=[])
 	:bool
 	{
-		$bSource = basename($source);
+		$bSource = parse_url($source, PHP_URL_HOST);
+		// $bSource = basename($source);
 
 		$name4Local = str_replace(['.', '-'], '_', $bSource);
 		$parserName = "parser_$name4Local";
@@ -363,7 +365,9 @@ trait Parser {
 
 		// $innerHTML = str_ireplace($remove, '', $innerHTML);
 		//* FIX 4 TG
-		$innerHTML = preg_replace(["/^\s*\d+.*$/m", "/\s*[\r\n]{2,}/"], ['', PHP_EOL], $innerHTML);
+		$innerHTML = preg_replace(
+			["/^\s*\d+\s*$/m", "/\s*[\r\n]{2,}/"
+		], ['', PHP_EOL], $innerHTML);
 		// trigger_error(__METHOD__ . ' $innerHTML= ' . $innerHTML);
 
 		return strip_tags($innerHTML, self::$allowedTags);

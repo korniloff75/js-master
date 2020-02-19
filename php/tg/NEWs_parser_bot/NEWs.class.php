@@ -5,6 +5,13 @@ ini_set('display_startup_errors', 1);
 error_reporting(-1);
 
 require_once __DIR__ . "/../CommonBot.class.php";
+//* FIX cron
+if(php_sapi_name() === 'cli' && empty($_SERVER['DOCUMENT_ROOT']))
+{
+	$_SERVER = array_merge($_SERVER, [
+		'DOCUMENT_ROOT' => realpath(__DIR__ . '/../..'),
+	]);
+}
 require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Parser.trait.php";
 
 class KorniloFF_news extends CommonBot

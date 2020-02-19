@@ -4,7 +4,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(-1);
 
 //note FIX cron
-if(php_sapi_name() === 'cli')
+if(php_sapi_name() === 'cli' && empty($_SERVER['DOCUMENT_ROOT']))
 {
 	$_SERVER = array_merge($_SERVER, [
 		'DOCUMENT_ROOT' => realpath(__DIR__ . '/../..'),

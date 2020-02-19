@@ -8,20 +8,30 @@ class Advert extends TG
 {
 	protected $cron = [];
 
+	private $test;
+
 	public function __construct($chat=null)
 	{
-		$this->addChat($chat);
-
 		// trigger_error(__CLASS__.' inited');
 		$this->botFileInfo = new SplFileInfo(__FILE__);
 
-		$this->log->add(__METHOD__.' botFileInfo,$this->cron= ',null,[$this->botFileInfo,$_SERVER['argv']]);
-
 		$this->urlDIR = 'https://js-master.ru/' . str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__);
+
+		$this->addChat($chat);
+
+		$this->log->add(__METHOD__.' botFileInfo,$this->cron= ',null,[$this->botFileInfo,$_SERVER['argv']]);
 	}
 
 	private function getAdvert()
 	{
+		if($this->test)
+		{
+			//* Оставляем только мою рекламу
+			$this->advert = array_filter($this->advert, function($i){
+				return in_array($i, ['cap_my_1','invs','js-master']);
+			}, ARRAY_FILTER_USE_KEY);
+		}
+
 		$shuffle = array_values($this->advert);
 		shuffle($shuffle);
 		$rnd = $shuffle[0];
@@ -38,7 +48,7 @@ class Advert extends TG
 		// $txt= "<a href='$src'>&#8205;</a>\n<a href='$href'><b>{$rnd['alt']}</b></a>";
 		$txt= "<a href='$src'>&#8205;</a>\n<b>{$rnd['alt']}</b>";
 
-		$this->log->add(__METHOD__.' txt=',null,$txt);
+		$this->log->add(__METHOD__.' src,txt=',null,[$src,$txt]);
 
 		$this->apiRequest([
 			'text' => $txt,
@@ -56,13 +66,18 @@ class Advert extends TG
 		]);
 	}
 
-	public function addChat($chat)
+	public function addChat(?string $chat)
 	{
+		if(is_string($chat)) $chat= strtolower($chat);
+
 		if($chat && !empty($this->argv[$chat])) $this->cron['chat'] = $this->argv[$chat];
 		elseif (php_sapi_name() == 'cli')
 		{
 			$this->cron['chat'] = $this->argv[$_SERVER['argv'][1]];
 		}
+
+		if($chat==='test')
+			$this->test = 1;
 
 		$this->getTokens($this->cron['chat']['token']);
 		$this->webHook = 0;
@@ -81,7 +96,7 @@ class Advert extends TG
 			'id' => -1001223951491,
 			'token' => __DIR__.'/../NEWs_parser_bot/token.json'
 		],
-		'anekdot_parser' => [
+		'test' => [
 			'id' => 673976740,
 			'token' => __DIR__.'/../Anekdot_parser_bot/token.json'
 		],
@@ -159,5 +174,13 @@ class Advert extends TG
 } //* Advert
 
 
-$adv = new Advert('anekdot');
-$adv->addChat('news');
+if (php_sapi_name() == 'cli' && $_SERVER['argv'][1] === 'test')
+{
+	new Advert('test');
+}
+else
+{
+	$adv = new Advert('anekdot');
+	$adv->addChat('news');
+}
+

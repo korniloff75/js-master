@@ -12,7 +12,7 @@ class Logger
 {
 	const
 		FATALS = [E_ERROR, E_PARSE, E_COMPILE_ERROR],
-		STR_LEN = 100;
+		STR_LEN = 1500;
 
 	protected
 		# realpath to the log file
