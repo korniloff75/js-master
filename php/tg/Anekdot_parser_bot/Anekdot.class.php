@@ -157,7 +157,6 @@ class Anekdot extends CommonBot
 			$docLink = DOMDocument::loadHTMLFile($link);
 			$xpath = new DOMXpath($docLink);
 
-			// if(!is_object($xBlock = $xpath->query("//article[@class=\"fullstory\"][1]")->item(0)))
 			if(!is_object($xBlock = $xpath->query("//article[1]")->item(0)))
 				continue;
 
@@ -228,6 +227,4 @@ class Anekdot extends CommonBot
 		return $this->handler_anekdot_ru($diff);
 	}
 
-}
-
-// new Anekdot;
+} //* Anekdot

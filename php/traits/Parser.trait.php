@@ -322,11 +322,21 @@ trait Parser {
 
 	/**
 	 * https://core.telegram.org/bots/api#html-style
+	 *
+	 * @param element - DOMNode || DOMNodeList
 	 */
-	public static function DOMinnerHTML(DOMNode $element, array $excludes= [])
+	public static function DOMinnerHTML($element, array $excludes= [])
 	{
 		$innerHTML = "";
-		$children  = $element->childNodes;
+		$children  = ($element instanceof DOMNodeList)
+		? $element
+		: $element->childNodes;
+
+		if(!($children instanceof DOMNodeList))
+		{
+			trigger_error(__METHOD__, E_USER_WARNING);
+			return "";
+		}
 		// trigger_error(__METHOD__);
 
 		foreach ($children as $child)
@@ -360,7 +370,8 @@ trait Parser {
 			}
 
 
-			$innerHTML .= $element->ownerDocument->saveHTML($child);
+			$innerHTML .= $child->ownerDocument->saveHTML($child);
+			// $innerHTML .= $element->ownerDocument->saveHTML($child);
 		}
 
 		// $innerHTML = str_ireplace($remove, '', $innerHTML);

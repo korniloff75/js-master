@@ -35,7 +35,7 @@ class Sport extends CommonBot
 	{
 		//* Set local data
 		$this->botFileInfo = new kffFileInfo(__FILE__);
-		$this->baseDir = __DIR__.'/sport_base/';
+		$this->baseDir = __DIR__.'/sport_base';
 
 		# Запускаем скрипт
 		parent::__construct()->checkLicense()->init();
@@ -95,7 +95,7 @@ class Sport extends CommonBot
 			$docLink = @DOMDocument::loadHTMLFile($link);
 			$xpath = new DOMXpath($docLink);
 
-			$this->log->add('$xpath', null, [$source, $xpath, $link, $xpath->query($xpathToBlock)->item(0)->textContent]);
+			// $this->log->add('$xpath', null, [$source, $xpath, $link, $xpath->query($xpathToBlock)->item(0)->textContent]);
 
 			if(
 				!is_object($xBlock = $xpath->query($xpathToBlock)->item(0))
@@ -114,12 +114,16 @@ class Sport extends CommonBot
 			//* Собираем для добавления в $content
 			$header = $xpath->query("//h1[1]")->item(0)->textContent;
 
+			$pgs= $xpath->query(".//p[not(@class)]",$xBlock);
+
+			$this->log->add('source,xpath,pgs', null, [$source, $xpath, $pgs, /* $xpath->query($xpathToBlock)->item(0)->textContent, */ self::DOMinnerHTML($pgs)]);
+
 			$addContent .= self::DOMinnerHTML(
-				$xBlock, []
+				$pgs, []
 			);
 
 			if(strlen(trim($addContent)))
-				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
+				$content[]= "<b>$header</b>" . PHP_EOL . $addContent;
 		}
 
 		$this->log->add('content = ',null, [$addContent]);
@@ -133,7 +137,5 @@ class Sport extends CommonBot
 		return $out;
 
 	} // handler_www_sport_express_ru
-
-
 
 } //* Sport
