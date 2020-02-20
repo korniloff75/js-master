@@ -28,7 +28,7 @@ class Advert extends TG
 		{
 			//* Оставляем только мою рекламу
 			$this->advert = array_filter($this->advert, function($i){
-				return in_array($i, ['cap_my_1','invs','js-master']);
+				return in_array($i, ['cap_my_1','wod_my_1','invs','js-master']);
 			}, ARRAY_FILTER_USE_KEY);
 		}
 
@@ -36,6 +36,11 @@ class Advert extends TG
 		shuffle($shuffle);
 		$rnd = $shuffle[0];
 		if(!empty($rnd['links'])) shuffle($rnd['links']);
+		if(is_array($rnd['src']))
+		{
+			shuffle($rnd['src']);
+			$rnd['src']= $rnd['src'][0];
+		}
 
 		$href = $rnd['href'] ?? (($rnd['base'] ?? 'https://ad.admitad.com') . '/g/' . $rnd['links'][0] . '/?i=4');
 
@@ -45,8 +50,9 @@ class Advert extends TG
 			$src = ($rnd['base'] ?? 'https://ad.admitad.com') . '/b/' . $rnd['links'][0] . '/';
 
 		$rnd['alt']= $rnd['alt'] ?? 'Подробнее';
+		$rnd['title']= $rnd['title'] ?? $rnd['alt'];
 		// $txt= "<a href='$src'>&#8205;</a>\n<a href='$href'><b>{$rnd['alt']}</b></a>";
-		$txt= "<a href='$src'>&#8205;</a>\n<b>{$rnd['alt']}</b>";
+		$txt= "<a href='$src'>&#8205;</a>\n<b>{$rnd['title']}</b>";
 
 		$this->log->add(__METHOD__.' src,txt=',null,[$src,$txt]);
 
@@ -95,6 +101,10 @@ class Advert extends TG
 		'news' => [
 			'id' => -1001223951491,
 			'token' => __DIR__.'/../NEWs_parser_bot/token.json'
+		],
+		'sport' => [
+			'id' => -1001365592780,
+			'token' => __DIR__.'/../Anekdot_parser_bot/token.json'
 		],
 		'test' => [
 			'id' => 673976740,
@@ -156,8 +166,32 @@ class Advert extends TG
 		],
 		'cap_my_1'=> [
 			'alt'=> "Учись инвестировать играя",
-			'src'=> '/assets/Cap_300.jpg',
+			'title'=>"🔥 Клановые войны.
+			🏴‍☠️ Рейдерские захваты.
+			💪 Бустеры защиты и увеличения добычи ресурсов.
+			💰 Все эти обновления, а также, оставшаяся неизменной возможность заработать деньги -
+			в игре Капиталист!",
+			'src'=> [
+				'/assets/Cap_300.jpg',
+				'/assets/Cap_1.jpg',
+			],
 			'href'=>"https://t.me/CapitalistGameBot?start=673976740"
+		],
+		'wod_my_1'=> [
+			'alt'=> "RPG в Telegram",
+			'title'=> "Достигни первым максимального лэвела и получи миллион(!!!) рублей.
+
+			Вступай в кланы, ходи в рейды, прокачивай персонажа и продавай кучу вещей на бирже за реальные деньги!
+
+			Всё это ждёт тебя в «World of Dogs»
+
+			Скорее начинай и будь среди первых игроков! ⚔️",
+			'src'=> [
+				'/assets/wod_1.jpg',
+				'/assets/wod_2.jpg',
+				'/assets/wod_3.jpg',
+			],
+			'href'=>"https://t.me/WorldDogs_bot?start=673976740"
 		],
 		'invs'=> [
 			'alt'=> "Дешевый хостинг",
@@ -182,5 +216,6 @@ else
 {
 	$adv = new Advert('anekdot');
 	$adv->addChat('news');
+	$adv->addChat('sport');
 }
 

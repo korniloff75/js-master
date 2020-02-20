@@ -13,7 +13,8 @@ class Sport extends CommonBot
 		# Счётчик обновлений
 		$countDiff = 0,
 		$cron = [
-			'chat'=> ['id' => 673976740],
+			'chat'=> ['id' => -1001365592780],
+			// 'chat'=> ['id' => 673976740],
 			'from'=> ['id' => 673976740],
 		],
 		$currentBaseItem,
@@ -28,6 +29,8 @@ class Sport extends CommonBot
 	protected static
 		$remoteSource = [
 			'https://www.sport-express.ru/news/',
+			// 'https://www.sports.ru/news/',
+			// 'https://www.sport.ru/'
 		];
 
 
@@ -35,7 +38,7 @@ class Sport extends CommonBot
 	{
 		//* Set local data
 		$this->botFileInfo = new kffFileInfo(__FILE__);
-		$this->baseDir = __DIR__.'/sport_base/';
+		$this->baseDir = __DIR__.'/sport_base';
 
 		# Запускаем скрипт
 		parent::__construct()->checkLicense()->init();
@@ -58,6 +61,25 @@ class Sport extends CommonBot
 
 
 
+	protected function parser_www_sport_ru($source, DOMDocument &$doc)
+
+	{
+		$xpath = new DOMXpath($doc);
+
+		# Собираем ссылки с гл. страницы
+		$mainLinks = $xpath->query("//li[contains(@class, 'active-panel')][1]//a[@class='short-text']");
+
+		$links = self::DOMcollectLinks($source, $mainLinks);
+		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
+			$mainLinks,
+			$links
+		]);
+
+		return $links;
+
+	}
+
+
 	protected function parser_www_sport_express_ru($source, DOMDocument &$doc)
 
 	{
@@ -74,20 +96,23 @@ class Sport extends CommonBot
 
 		return $links;
 
-	} // parser_shutok_ru
+	}
 
 
 	/**
 	 * Handlers
 	 */
-	protected function handler_www_sport_express_ru(array &$diff, $xpathToBlock = "//div[contains(@class, 'article_text')][1]")
+	protected function handler_www_sports_ru(array &$diff, $xpathToBlock = "//div[contains(@class, 'news-item__content')][1]")
 	{
 		$photos = [];
 		$content = [];
 
-		$imgXpath = $this->imgXpath ?? $xpathToBlock;
+		// $imgXpath = $this->imgXpath ?? $xpathToBlock;
+		$imgXpath = $xpathToBlock;
 		# Перебираем все новые ссылки и грузим из них в контент
 		foreach ($diff as &$link) {
+			//* Trim the excess
+			$link= str_replace('news/','',$link);
 			$s = parse_url($link);
 			$source = "{$s['scheme']}://{$s['host']}{$s['path']}/";
 			$addContent = '';
@@ -95,7 +120,7 @@ class Sport extends CommonBot
 			$docLink = @DOMDocument::loadHTMLFile($link);
 			$xpath = new DOMXpath($docLink);
 
-			$this->log->add('$xpath', null, [$source, $xpath, $link, $xpath->query($xpathToBlock)->item(0)->textContent]);
+			// $this->log->add('$xpath', null, [$source, $xpath, $link, $xpath->query($xpathToBlock)->item(0)->textContent]);
 
 			if(
 				!is_object($xBlock = $xpath->query($xpathToBlock)->item(0))
@@ -114,6 +139,10 @@ class Sport extends CommonBot
 			//* Собираем для добавления в $content
 			$header = $xpath->query("//h1[1]")->item(0)->textContent;
 
+			// $pgs= $xpath->query(".//p[not(@class)]",$xBlock);
+
+			// $this->log->add('source,xpath,pgs', null, [$source, $xpath, $pgs, /* $xpath->query($xpathToBlock)->item(0)->textContent, */ self::DOMinnerHTML($pgs)]);
+
 			$addContent .= self::DOMinnerHTML(
 				$xBlock, []
 			);
@@ -122,7 +151,68 @@ class Sport extends CommonBot
 				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
 		}
 
-		$this->log->add('content = ',null, [$addContent]);
+		$this->log->add(__METHOD__.' content = ',null, [gzdecode($addContent)]);
+
+		# На отсылку
+		if(count($content))
+			$out['sendMessage'] = $content;
+		if(count($photos))
+			$out['sendMediaGroup'] = $photos;
+
+		// return $out;
+		return null;
+
+	} // handler_www_sports_ru
+
+
+	protected function handler_www_sport_express_ru(array &$diff, $xpathToBlock = "//div[contains(@class, 'article_text')][1]")
+	{
+		$photos = [];
+		$content = [];
+
+		// $imgXpath = $this->imgXpath ?? $xpathToBlock;
+		$imgXpath = "//div[contains(@id, 'slideshow')][1]";
+		# Перебираем все новые ссылки и грузим из них в контент
+		foreach ($diff as &$link) {
+			$s = parse_url($link);
+			$source = "{$s['scheme']}://{$s['host']}{$s['path']}/";
+			$addContent = '';
+
+			$docLink = @DOMDocument::loadHTMLFile($link);
+			$xpath = new DOMXpath($docLink);
+
+			// $this->log->add('$xpath', null, [$source, $xpath, $link, $xpath->query($xpathToBlock)->item(0)->textContent]);
+
+			if(
+				!is_object($xBlock = $xpath->query($xpathToBlock)->item(0))
+			)
+				continue;
+
+			$xImg = $imgXpath === $xpathToBlock ? $xBlock : $xpath->query($imgXpath)->item(0);
+
+			if(is_object($xImg))
+			{
+				$imgArr = self::ExtractImages($source, $xpath, $xImg, 'src', []);
+				// $this->log->add('$imgArr', null, [$imgArr]);
+				$photos = array_merge_recursive($photos, $imgArr);
+			}
+
+			//* Собираем для добавления в $content
+			$header = $xpath->query("//h1[1]")->item(0)->textContent;
+
+			$pgs= $xpath->query(".//p[not(@class)]",$xBlock);
+
+			// $this->log->add('source,xpath,pgs', null, [$source, $xpath, $pgs, /* $xpath->query($xpathToBlock)->item(0)->textContent, */ self::DOMinnerHTML($pgs)]);
+
+			$addContent .= self::DOMinnerHTML(
+				$pgs, []
+			);
+
+			if(strlen(trim($addContent)))
+				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
+		}
+
+		// $this->log->add('content = ',null, [$addContent]);
 
 		# На отсылку
 		if(count($content))
@@ -133,7 +223,5 @@ class Sport extends CommonBot
 		return $out;
 
 	} // handler_www_sport_express_ru
-
-
 
 } //* Sport
