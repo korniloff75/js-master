@@ -11,4 +11,4 @@
 #
 # Advert
 21 8-21 * * * /var/www/js-master.ru/php/tg/Common/Advert.class.php "anekdot" >/var/www/js-master.ru/php/tg/Common/cron.log 2>&1
-*/2 8-22 * * * /var/www/js-master.ru/php/tg/Common/Advert.class.php "test" >/var/www/js-master.ru/php/tg/Common/cron.log 2>&1
+# */2 8-22 * * * /var/www/js-master.ru/php/tg/Common/Advert.class.php "test" >/var/www/js-master.ru/php/tg/Common/cron.log 2>&1
