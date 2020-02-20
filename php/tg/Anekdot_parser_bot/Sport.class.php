@@ -67,7 +67,7 @@ class Sport extends CommonBot
 		$xpath = new DOMXpath($doc);
 
 		# Собираем ссылки с гл. страницы
-		$mainLinks = $xpath->query("//li[contains(@class, 'active-panel')][1]//a[@class='short-text']");
+		$mainLinks = $xpath->query("//div[contains(@class, 'chameleon-main')][1]//div[@class='itm']//a");
 
 		$links = self::DOMcollectLinks($source, $mainLinks);
 		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
@@ -102,7 +102,7 @@ class Sport extends CommonBot
 	/**
 	 * Handlers
 	 */
-	protected function handler_www_sports_ru(array &$diff, $xpathToBlock = "//div[contains(@class, 'news-item__content')][1]")
+	protected function handler_www_sport_ru(array &$diff, $xpathToBlock = "//div[contains(@class, 'news-item__content')][1]")
 	{
 		$photos = [];
 		$content = [];
@@ -144,11 +144,11 @@ class Sport extends CommonBot
 			// $this->log->add('source,xpath,pgs', null, [$source, $xpath, $pgs, /* $xpath->query($xpathToBlock)->item(0)->textContent, */ self::DOMinnerHTML($pgs)]);
 
 			$addContent .= self::DOMinnerHTML(
-				$xBlock, []
+				$pgs, []
 			);
 
 			if(strlen(trim($addContent)))
-				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
+				$content[]= "<b>$header</b>" . PHP_EOL . $addContent;
 		}
 
 		$this->log->add(__METHOD__.' content = ',null, [gzdecode($addContent)]);

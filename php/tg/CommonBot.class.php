@@ -100,17 +100,36 @@ class CommonBot extends TG
 			\H::json("{$this->botDir}/license.json", $this->license);
 		}
 
-		/* $this->log->add("checkLicense ===", null, [
-			($id = $this->message['chat']['id']),
-			new DateTime(),
-			new DateTime($this->license[$id])
-		]); */
+		array_walk($this->license, function(&$data,$id){
+			if(is_array($data))
+			{
+				$data['date'] = &$data[0];
+				$data['name'] = &$data[1];
+				$data['blocked'] = &$data[2];
+				// list($data['date'], $data['name'], $data['blocked']) = $data;
+			}
+			else
+			{
+				$data = ['date'=>$data];
+			}
+			/* $this->log->add("\$data['blocked']",null,[
+				$data['blocked'],
+				$data,
+				(new DateTime() < new DateTime($data['date'])),
+				new DateTime(), new DateTime($data['date'])
+			]); */
 
-		$this->license = array_filter($this->license, function($date){
-			return new DateTime() < new DateTime($date);
+			if (
+				//* Remove olds
+				(new DateTime() > new DateTime($data['date']))
+				|| !empty($data['blocked'])
+			) unset($this->license[$id]);
 		});
 
-		$this->log->add("$this->botDir/license.json", null, [$this->license]);
+		$this->log->add(__METHOD__." $this->botDir/license.json ===", null, [
+			$this->license,
+			($id = $this->message['chat']['id']),
+		]);
 
 		if(
 			$this->message
@@ -118,7 +137,7 @@ class CommonBot extends TG
 			&& (
 				!$this->license
 				|| !in_array($id, array_keys($this->license))
-				|| new DateTime() > new DateTime($this->license[$id])
+				|| new DateTime() > new DateTime($this->license[$id]['date'])
 			)
 		)
 		{

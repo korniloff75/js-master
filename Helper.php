@@ -267,26 +267,6 @@ class H {
 	} // addFromDir
 
 
-	/* public function handleFatals()
-	{
-		# Логируем фаталы
-		register_shutdown_function(function () {
-			$error = error_get_last();
-			if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_COMPILE_ERROR])) {
-			// if ($error && ($error['type'] == E_ERROR || $error['type'] == E_PARSE || $error['type'] == E_COMPILE_ERROR)) {
-				if (strpos($error['message'], 'Allowed memory size') === 0) {
-					# если кончилась память
-					ini_set('memory_limit', (intval(ini_get('memory_limit'))+64)."M"); // выделяем немножко что бы доработать корректно
-					Log::error("PHP Fatal: not enough memory in ".$error['file'].":".$error['line']);
-				} else {
-					Log::error("PHP Fatal: ".$error['message']." in ".$error['file'].":".$error['line']);
-				}
-				 // ... завершаемая корректно ....
-		 }
-	 });
-	} */
-
-
 	public static function profile($n, $rem='')
 	// :string
 	{
@@ -443,7 +423,6 @@ class H {
 	public static function json ($path, $d = NULL, $rewrite = 0)
 
 	{
-		// var obj = is_array($d) || is_object($d);
 		if(!is_array($d) && !file_exists($path)) return [];
 
 		if(is_null($d))

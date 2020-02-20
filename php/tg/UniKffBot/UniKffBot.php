@@ -63,7 +63,7 @@ class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 		}
 
 		//* exp
-		if(
+		/* if(
 			$curBtn = constant("self::".strtoupper($cmdName)."_BTNS")
 			&& in_array($cmdName, $curBtn)
 		)
@@ -75,7 +75,7 @@ class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 				? $cmd
 				: "{$cmdName}__{$cmd}"
 			];
-		}
+		} */
 
 
 		if(!empty($cmdName))

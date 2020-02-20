@@ -174,6 +174,7 @@ class Advert extends TG
 			'src'=> [
 				'/assets/Cap_300.jpg',
 				'/assets/Cap_1.jpg',
+				'/assets/Cap_2.jpg',
 			],
 			'href'=>"https://t.me/CapitalistGameBot?start=673976740"
 		],
@@ -208,7 +209,7 @@ class Advert extends TG
 } //* Advert
 
 
-if (php_sapi_name() == 'cli' && $_SERVER['argv'][1] === 'test')
+if (php_sapi_name() === 'cli' && $_SERVER['argv'][1] === 'test')
 {
 	new Advert('test');
 }
