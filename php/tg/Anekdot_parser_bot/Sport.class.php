@@ -144,11 +144,11 @@ class Sport extends CommonBot
 			// $this->log->add('source,xpath,pgs', null, [$source, $xpath, $pgs, /* $xpath->query($xpathToBlock)->item(0)->textContent, */ self::DOMinnerHTML($pgs)]);
 
 			$addContent .= self::DOMinnerHTML(
-				$xBlock, []
+				$pgs, []
 			);
 
 			if(strlen(trim($addContent)))
-				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
+				$content[]= "<b>$header</b>" . PHP_EOL . $addContent;
 		}
 
 		$this->log->add(__METHOD__.' content = ',null, [gzdecode($addContent)]);
