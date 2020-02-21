@@ -127,8 +127,8 @@ class CommonBot extends TG
 		});
 
 		$this->log->add(__METHOD__." $this->botDir/license.json ===", null, [
-			$this->license,
 			($id = $this->message['chat']['id']),
+			$this->license,
 		]);
 
 		if(

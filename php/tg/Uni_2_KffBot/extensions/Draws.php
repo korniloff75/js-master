@@ -7,7 +7,7 @@ class Draws extends Helper implements DrawsInt
 	use UniConstruct;
 
 	const
-		FOLDER = __DIR__.'/../Game_B',
+		FOLDER = __DIR__.'/../Game_2',
 		BASE = self::FOLDER . '/base.json';
 
 	protected
@@ -30,7 +30,7 @@ class Draws extends Helper implements DrawsInt
 
 	private function init()
 	{
-		// $this->log->add('self::BTNS=',null,[self::BTNS]);
+		// $this->log->add('$this->BTNS=',null,[$this->BTNS]);
 
 		$this->getCurData();
 
@@ -94,7 +94,7 @@ class Draws extends Helper implements DrawsInt
 					'reply_markup' => [
 						"keyboard" => [
 							[
-								['text' => self::BTNS['general']],
+								['text' => $this->BTNS['general']],
 							],
 				],],];
 				$this->addSelf = 1;
@@ -134,7 +134,7 @@ class Draws extends Helper implements DrawsInt
 					'reply_markup' => [
 						"keyboard" => [
 							[
-								['text' => self::BTNS['general']],
+								['text' => $this->BTNS['general']],
 							],
 				],],];
 
@@ -193,8 +193,8 @@ class Draws extends Helper implements DrawsInt
 			)
 			{
 				$o['reply_markup']['keyboard'] = array_merge_recursive($o['reply_markup']['keyboard'] ?? [], [[
-					['text' => self::DRS_BTNS['drs/play draw']],
-					['text' => self::DRS_BTNS['drs/show participants']],
+					['text' => $this->BTNS['play draw']],
+					['text' => $this->BTNS['show participants']],
 				]]);
 				$this->log->add(__METHOD__.' reply_markup=',null, [$o['reply_markup'],]);
 			}
