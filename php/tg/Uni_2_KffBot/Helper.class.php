@@ -1,5 +1,5 @@
 <?php
-class Helper extends CommonBot implements Game,DrawsInt,PumpInt
+class Helper extends CommonBot implements Game
 {
 	protected
 		$data;

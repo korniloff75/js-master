@@ -20,6 +20,7 @@ trait UniConstruct
 
 	private function setConstruct(UniKffBot &$UKB, ?string $cmd=null)
 	{
+		$this->UKB = $UKB;
 		$this->import($UKB);
 
 		//* Define folders
@@ -29,18 +30,16 @@ trait UniConstruct
 		//* Define cmd
 		$cmdArr = array_values(array_filter(explode('__', $cmd)));
 
-		$this->log->add(__METHOD__.' $cmdArr=',null,[$cmdArr, $cmd]);
+		$this->log->add(__METHOD__.' $cmdArr=',null,[$cmdArr]);
 
 		$this->cmd = [array_shift($cmdArr), $cmdArr];
 
 		$this->log->add(__METHOD__.' owner, $this->cmd=',null,[[$this->is_owner, $this->get('is_owner'), $this->cbn['from']['id']], $this->cmd]);
 
 		//* Define tokens
-		// $this->getTokens(__DIR__.'/token.json');
 		if(empty($this->tokens[$this->apiName ?? strtolower(__CLASS__)]))
 		{
 			$this->log->add(__METHOD__ . '$this->tokens = ', E_USER_WARNING, [$this->tokens]);
-			// die;
 		}
 		return $this;
 	}

@@ -7,7 +7,7 @@ class PumpMarket extends Helper implements PumpInt
 	use UniConstruct;
 
 	const
-		FOLDER = __DIR__.'/../Game',
+		FOLDER = __DIR__.'/../Game_2',
 		BASE = self::FOLDER . '/base.json';
 
 
@@ -41,29 +41,8 @@ class PumpMarket extends Helper implements PumpInt
 		$o = parent::routerCmd($cmd);
 		// $pumps = &$this->data['pumps'];
 
-		if(!$o) switch ($cmd ?? $this->cmd[0]) {
-
-			//*** Биржа насосов ***
-			case 'pump/market':
-				$o = [
-					'text' => [
-						self::INFO['pump/market'],
-						$this->showPumps(),
-					],
-					'reply_markup' => [
-						"keyboard" => [
-							[
-								['text' => self::PUMP_BTNS['pump/sale blue']],
-								['text' => self::PUMP_BTNS['pump/sale all']],
-								['text' => self::PUMP_BTNS['pump/sale gold']],
-							],
-							[
-								['text' => self::PUMP_BTNS['pump/market']],
-								['text' => self::BTNS['general']],
-							],
-				],],];
-				break;
-
+		if(!$o) switch ($cmd ?? $this->cmd[0])
+		{
 			case 'sale blue':
 			case 'sale gold':
 			case 'sale all':
@@ -89,10 +68,30 @@ class PumpMarket extends Helper implements PumpInt
 
 			case 'unsale':
 				$this->removePump($this->cmd[1]);
-				return $this->routerCmd('pump/market');
+				return $this->routerCmd('market');
 				break;
 
+			//*** Биржа насосов ***
+			case 'market':
 			default:
+				$o = [
+					'text' => [
+						self::INFO['market'],
+						$this->showPumps(),
+					],
+					'reply_markup' => [
+						"keyboard" => [
+							[
+								['text' => $this->BTNS['sale blue']],
+								['text' => $this->BTNS['sale all']],
+								['text' => $this->BTNS['sale gold']],
+							],
+							[
+								['text' => $this->BTNS['market']],
+								['text' => self::BTNS['general']],
+							],
+				],],];
+				break;
 				$o = $this->showMainMenu();
 				break;
 		} //*switch
@@ -224,7 +223,7 @@ class PumpMarket extends Helper implements PumpInt
 			$uPumps = array_unique($uPumps);
 
 			$this->data['change']++;
-			return $this->routerCmd('pump/market');
+			return $this->routerCmd('market');
 		}
 	}
 

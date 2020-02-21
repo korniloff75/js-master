@@ -39,6 +39,8 @@ class Draws extends Helper implements DrawsInt
 
 		$this->data['change'] = 0;
 
+		$this->log->add(__METHOD__.' $this->data=',null,$this->data);
+
 		return $this;
 	} //* init
 
@@ -71,13 +73,19 @@ class Draws extends Helper implements DrawsInt
 								['text' => 3, 'callback_data' => '/Draws/prizes_count__3'],
 							],
 				],],];
+
+				$this->UKB->setStatement([
+					'drawsOwner'=>1
+				]);
 				break;
 
 			case 'prizes_count':
 
-				if( !$this->drawsOwner )
+				$this->log->add('prizes_count',null, [$this->drawsOwner]);
+
+				if( !$this->drawsOwner && !$this->statement['drawsOwner'] )
 				{
-					$this->showMainMenu([
+					$o = $this->showMainMenu([
 						'text'=> 'Менять количество призов может только спонсор розыгрыша!',
 					]);
 					break;
@@ -130,7 +138,7 @@ class Draws extends Helper implements DrawsInt
 				}
 
 				$o = [
-					'text' => "<u>Победители:</u>\n\n$winStr\n<a href='{$this->urlDIR}/assets/Zorro_300.png' title='ZorroClan'>&#8205;</a>",
+					'text' => "<u>Победители:</u>\n\n$winStr\n<a href='{$this->urlDIR}/assets/roullete.jpg' title='ZorroClan'>&#8205;</a>",
 					'reply_markup' => [
 						"keyboard" => [
 							[
