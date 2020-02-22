@@ -103,7 +103,7 @@ class Helper extends CommonBot implements Game
 	{
 		$keyboard = [
 			[
-				['text' => $this->BTNS['balance']],
+				['text' => $this->BTNS['Gismeteo']],
 				['text' => $this->BTNS['info']],
 			],
 		];

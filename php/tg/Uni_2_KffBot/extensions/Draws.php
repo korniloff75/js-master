@@ -208,14 +208,20 @@ class Draws extends Helper implements DrawsInt
 						['text' => $this->BTNS['show participants']],
 					];
 				}
+				//* Участвовать
 				elseif(isset($this->data['current draws']) && !$this->drawsOwner)
-					$keyboard = [['text' => self::CMD['Draws']['participate']]];
+				{
+					if(!in_array($this->cbn['from'], $draws['participants']))
+						$keyboard = [['text' => self::CMD['Draws']['participate']]];
+				}
+				//* Создать
 				else
 					$keyboard = [['text' => self::CMD['Draws']['new draw']]];
 
 				$o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
 
-				$o['reply_markup']['keyboard'] = array_merge_recursive($o['reply_markup']['keyboard'], [$keyboard]);
+				if(!empty($keyboard))
+					$o['reply_markup']['keyboard'] = array_merge_recursive($o['reply_markup']['keyboard'], [$keyboard]);
 			}
 
 			//* Склеиваем текст перед отправкой

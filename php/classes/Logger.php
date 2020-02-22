@@ -224,7 +224,7 @@ class Logger
 			&& !$GLOBALS['_bot']->is_owner
 		)
 		{
-			echo __METHOD__ . "  = {$GLOBALS['_bot']->is_owner}";
+			echo __METHOD__ . " is_owner = {$GLOBALS['_bot']->is_owner}";
 			return;
 		}
 
@@ -232,6 +232,10 @@ class Logger
 			return strip_tags($i);
 		}, $this->log );
 		// echo __METHOD__ . " {$this->file} " . realpath($this->file);
+		if(!empty($_GET['dev']))
+		{
+			$this->print();
+		}
 		file_put_contents($this->file, $this->log, !$this->rewriteLog ? FILE_APPEND : null);
 	}
 } // Logger

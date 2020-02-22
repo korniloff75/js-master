@@ -169,6 +169,7 @@ class TG {
 			else
 			{
 				$this->inputData['cron'] = $this->cron;
+				$this->webHook=0;
 				$this->log->add("inputData from \$this->cron", E_USER_WARNING, [$this->inputData]);
 			}
 		}
@@ -231,7 +232,7 @@ class TG {
 		)
 		{
 			// $this->__destruct();
-			$this->log->add(__METHOD__ . " aborted with FAIL", E_USER_WARNING, $botURL);
+			$this->log->add(__METHOD__ . " aborted with FAIL - \$this->webHook=", E_USER_WARNING, [$this->webHook]);
 			return $this;
 		}
 

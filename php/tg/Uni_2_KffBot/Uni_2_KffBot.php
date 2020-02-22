@@ -4,9 +4,17 @@ require_once __DIR__."/../CommonBot.class.php";
 
 class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 {
+	public
+		$webHook=0;
 	protected
 		# Test mode, bool
-		$__test = 1;
+		$__test = 1,
+		//* 4 Local
+		$cron = [
+			'chat'=> ['id' => 673976740],
+			'from'=> ['id' => 673976740],
+			'text'=> '⛅Погода'
+		];
 
 
 	public function __construct()
@@ -94,34 +102,37 @@ class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 		//* FIX multibots
 		$inputData= explode('@', $inputData)[0];
 		//* Define command
-		list($cmdName, $cmd) = array_values(array_filter(explode('/', $inputData)));
+		$inputArr= array_values(array_filter(explode('/', $inputData,2)));
 
-		$this->log->add(__METHOD__ . ' input = ', null, [$inputData, $cmdName, $cmd]);
 
-		//* Приходит локация
-		if(!empty($this->message['location']))
-			list($cmdName, $cmd) = ['gismeteo', 'setLocation'];
 
 
 		//* exp
 		//* Aliases
-		if(in_array($cmdName, ['start','drs','⬅️Главная'])) $cmdName = 'Draws';
-		elseif(in_array($cmdName, ['Биржа 泵 насосов','Pump','market']))
+		if(is_array($res= self::findCommand($inputArr, $this->message)))
 		{
-			$cmd= $cmdName;
-			$cmdName = 'PumpMarket';
+			$this->log->add(__METHOD__.' findCommand',null,[$res]);
+
+			$cmdName = $res['cmdKey'];
+			$cmd = $res['cmd'];
 		}
-		//* Define $cmdName
-		elseif(
+		else
+		{
+			$this->log->add(__METHOD__.' findCommand FAIL',E_USER_WARNING,[$res]);
+		}
+
+		if(
 			!array_key_exists($cmdName, self::CMD)
 		)
 		{
+			$this->log->add(__METHOD__.' Нет в self::CMD',null,[array_key_exists($cmdName, self::CMD),$cmdName,$cmd,self::CMD]);
+
 			$cmd= $cmdName;
 			$cmdName= $this->getStatement()->statement['cmdName'];
 		}
 
 		if(
-			!empty($curBtn = self::CMD[$cmdName])
+			!empty($curBtn = @self::CMD[$cmdName])
 		)
 		{
 			$this->BTNS = array_merge(self::BTNS, $curBtn);
@@ -147,6 +158,7 @@ class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 		$this->log->add(__METHOD__.' $this->statement_2',null,[$this->statement]);
 
 
+
 		if(!empty($cmdName))
 		{
 			$cmdName = ucfirst($cmdName);
@@ -154,9 +166,6 @@ class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 			switch ($cmdName)
 			{
 				case 'Gismeteo':
-				case 'Youtube':
-				case 'Zen':
-				case 'GameTest':
 				case 'Draws':
 				case 'PumpMarket':
 					require_once("extensions/$cmdName.php");
@@ -174,6 +183,56 @@ class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 
 	} //* Router
 
+
+	public static function defineCurCmd($inputCmd, array $commands)
+	{
+		if(!in_array($inputCmd, $commands))
+			return null;
+		$flip= array_flip($commands);
+		$cmd = !is_numeric($flip[$inputCmd])
+		? $flip[$inputCmd]
+		: $inputCmd;
+		return [
+			'cmdName'=>$inputCmd,
+			'cmd'=>$cmd
+		];
+	}
+
+	public static function findCommand($inputArr, $message)
+	:?array
+	{
+		list($cmdName, $cmd) = $inputArr;
+
+		// trigger_error(__METHOD__ . ' inputData: $cmdName, $cmd = ', null, [$cmdName, $cmd]);
+
+		//* Приходит локация
+		if(!empty($message['location']))
+			return [
+				'cmdKey'=>'gismeteo',
+				'cmd'=>'setLocation'
+			];
+
+		$cmd= $cmd ?? $cmdName;
+
+		/* if(array_key_exists($cmdName, self::CMD))
+		{
+			return self::defineCurCmd($cmd, self::CMD);
+		} */
+
+		foreach(self::CMD as $cmdName=>&$commands)
+		{
+			// $flip= array_flip($commands);
+			if(in_array($cmd, $commands))
+			{
+				return array_merge([
+					'cmdKey'=>$cmdName
+				], self::defineCurCmd($cmd, $commands));
+				break;
+			}
+		}
+		return null;
+	}
+
 	public function __destruct()
 	{
 		$this->log->add(__METHOD__.' $this->statement_3',null,[$this->statement]);
@@ -188,6 +247,10 @@ interface Game {
 	const
 		CMD = [
 			'Draws'=>[
+				'general'=>'⬅️Главная',
+				'start',
+				'drs',
+				'info'=>'💡Информация',
 				'new draw'=>'Создать розыгрыш',
 				'play draw'=>'Разыграть',
 				'show participants'=>'Участники',
@@ -202,7 +265,10 @@ interface Game {
 				'parsePumps',
 				'sale',
 				'unsale',
-			]
+			],
+			'Gismeteo'=>[
+				'Gismeteo'=>'⛅Погода',
+			],
 		],
 
 		BTNS = [
@@ -214,6 +280,7 @@ interface Game {
 		'community'=>'💬Community',
 		'advanced'=>'Дополнительно',
 		'market'=>'Биржа 泵 насосов',
+		'Gismeteo'=>'⛅Погода',
 
 		//* draws
 		/* 'new draw'=>'Создать розыгрыш',
