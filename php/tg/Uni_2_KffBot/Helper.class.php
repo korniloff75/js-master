@@ -103,18 +103,10 @@ class Helper extends CommonBot implements Game
 	{
 		$keyboard = [
 			[
-				['text' => self::CMD['Draws']['new draw']],
-			],
-			[
 				['text' => $this->BTNS['balance']],
 				['text' => $this->BTNS['info']],
 			],
 		];
-
-		if(isset($this->data['current draws']))
-		{
-			$keyboard[0][0] = ['text' => self::CMD['Draws']['participate']];
-		}
 
 		$arr = [
 			//* Чат или бот?

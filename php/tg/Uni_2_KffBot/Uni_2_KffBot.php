@@ -105,7 +105,7 @@ class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 
 		//* exp
 		//* Aliases
-		if(in_array($cmdName, ['drs','⬅️Главная'])) $cmdName = 'Draws';
+		if(in_array($cmdName, ['start','drs','⬅️Главная'])) $cmdName = 'Draws';
 		elseif(in_array($cmdName, ['Биржа 泵 насосов','Pump','market']))
 		{
 			$cmd= $cmdName;

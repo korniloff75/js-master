@@ -39,7 +39,7 @@ class Draws extends Helper implements DrawsInt
 
 		$this->data['change'] = 0;
 
-		$this->log->add(__METHOD__.' $this->data=',null,$this->data);
+		// $this->log->add(__METHOD__.' $this->data=',null,$this->data);
 
 		return $this;
 	} //* init
@@ -97,17 +97,13 @@ class Draws extends Helper implements DrawsInt
 					'prizes_count' => $this->cmd[1][0],
 				];
 
-				$o = [
-					'text' => 'Розыгрыш создан.',
-					'reply_markup' => [
-						"keyboard" => [
-							[
-								['text' => $this->BTNS['general']],
-							],
-				],],];
+				$o = $this->showMainMenu([
+					'text'=> 'Розыгрыш создан.',
+				]);
+
 				$this->addSelf = 1;
 
-				// $this->sendToAll("Создан розыгрыш от <b>{$this->cbn['from']['first_name']}</b>. Спешите принять участие!");
+				$this->sendToAll("Создан розыгрыш от <b>{$this->cbn['from']['first_name']} @{$this->cbn['from']['username']}</b>. Спешите принять участие!");
 				break;
 
 			case 'show participants':
@@ -117,6 +113,10 @@ class Draws extends Helper implements DrawsInt
 
 			//* Розыгрыш
 			case 'play draw':
+				$this->statement = $this->UKB->setStatement([
+					'drawsOwner'=>0
+				]);
+
 				if(!count($draws['participants']))
 				{
 					$o = $this->showMainMenu([
@@ -137,14 +137,17 @@ class Draws extends Helper implements DrawsInt
 					$winStr .= $this->showUsername($winners[$i]);
 				}
 
-				$o = [
+				$o = $this->showMainMenu([
 					'text' => "<u>Победители:</u>\n\n$winStr\n<a href='{$this->urlDIR}/assets/roullete.jpg' title='ZorroClan'>&#8205;</a>",
-					'reply_markup' => [
-						"keyboard" => [
-							[
-								['text' => $this->BTNS['general']],
-							],
-				],],];
+				]);
+				/* $o = [
+				//* Чат или бот?
+				'text' => "<u>Победители:</u>\n\n$winStr\n<a href='{$this->urlDIR}/assets/roullete.jpg' title='ZorroClan'>&#8205;</a>",
+				'reply_markup' => [
+					"keyboard" => [[
+						['text' => self::CMD['Draws']['new draw']],
+					],],
+				]; */
 
 				$o = array_merge_recursive($this->showParticipants(), $o);
 
@@ -194,23 +197,25 @@ class Draws extends Helper implements DrawsInt
 		//* Подготовка и отправка
 		if($o)
 		{
-			//* Кнопки для организатора
-			if(
-				$this->drawsOwner
-				&& empty($o['reply_markup']['inline_keyboard'])
-			)
-			{
-				$o['reply_markup']['keyboard'] = array_merge_recursive($o['reply_markup']['keyboard'] ?? [], [[
-					['text' => $this->BTNS['play draw']],
-					['text' => $this->BTNS['show participants']],
-				]]);
-				$this->log->add(__METHOD__.' reply_markup=',null, [$o['reply_markup'],]);
-			}
-
 			//* add keyboard options
 			if(!empty($o['reply_markup']['keyboard']))
 			{
+				//* Кнопки для организатора
+				if(isset($this->data['current draws']) && $this->statement['drawsOwner'])
+				{
+					$keyboard = [
+						['text' => $this->BTNS['play draw']],
+						['text' => $this->BTNS['show participants']],
+					];
+				}
+				elseif(isset($this->data['current draws']) && !$this->drawsOwner)
+					$keyboard = [['text' => self::CMD['Draws']['participate']]];
+				else
+					$keyboard = [['text' => self::CMD['Draws']['new draw']]];
+
 				$o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
+
+				$o['reply_markup']['keyboard'] = array_merge_recursive($o['reply_markup']['keyboard'], [$keyboard]);
 			}
 
 			//* Склеиваем текст перед отправкой
@@ -228,7 +233,7 @@ class Draws extends Helper implements DrawsInt
 					$o['chat_id'] = $p['id'];
 					$this->apiRequest($o);
 				}
-				//*
+
 				unset($draws, $this->data['current draws']);
 				$this->data['change']++;
 			}
@@ -242,7 +247,7 @@ class Draws extends Helper implements DrawsInt
 			}
 
 			//* Отправляем владельцу розыгрыша
-			if(!empty($this->sendToOwner) && !$this->drawsOwner)
+			if(!empty($this->sendToOwner) && !$this->statement['drawsOwner'])
 			{
 				$this->sendToOwner = null;
 				$o['chat_id'] = $draws['owner']['id'];
