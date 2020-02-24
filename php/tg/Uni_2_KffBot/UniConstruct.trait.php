@@ -18,7 +18,7 @@ trait UniConstruct
 	}
 
 
-	private function setConstruct(UniKffBot &$UKB, ?string $cmd=null)
+	private function setConstruct(UniKffBot &$UKB, ?array $cmdArr=null)
 	{
 		$this->UKB = $UKB;
 		$this->import($UKB);
@@ -27,8 +27,7 @@ trait UniConstruct
 		$this->urlROOT = ((!empty($_SERVER['HTTPS'])) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
 		$this->urlDIR = $this->urlROOT . '/' . str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__);
 
-		//* Define cmd
-		$cmdArr = array_values(array_filter(explode('__', $cmd)));
+
 
 		$this->log->add(__METHOD__.' $cmdArr=',null,[$cmdArr]);
 

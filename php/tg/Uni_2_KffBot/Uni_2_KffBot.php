@@ -102,18 +102,20 @@ class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 		//* FIX multibots
 		$inputData= explode('@', $inputData)[0];
 		//* Define command
-		$inputArr= array_values(array_filter(explode('/', $inputData,2)));
+		$inputArr= array_values(array_filter(explode('/', $inputData,3)));
 
 
 
 
 		//* exp
 		//* Aliases
-		if(is_array($res= self::findCommand($inputArr, $this->message)))
+		// if(is_array($res= self::findCommand($inputArr, $this->message)))
+
+		if(is_array($res= $this->findCommand($inputArr, $this->message)))
 		{
 			$this->log->add(__METHOD__.' findCommand',null,[$res]);
 
-			$cmdName = $res['cmdKey'];
+			$cmdName = $res['cmdName'];
 			$cmd = $res['cmd'];
 		}
 		else
@@ -121,42 +123,7 @@ class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 			$this->log->add(__METHOD__.' findCommand FAIL',E_USER_WARNING,[$res]);
 		}
 
-		if(
-			!array_key_exists($cmdName, self::CMD)
-		)
-		{
-			$this->log->add(__METHOD__.' Нет в self::CMD',null,[array_key_exists($cmdName, self::CMD),$cmdName,$cmd,self::CMD]);
-
-			$cmd= $cmdName;
-			$cmdName= $this->getStatement()->statement['cmdName'];
-		}
-
-		if(
-			!empty($curBtn = @self::CMD[$cmdName])
-		)
-		{
-			$this->BTNS = array_merge(self::BTNS, $curBtn);
-			$btns_val = array_flip($this->BTNS);
-
-			if(!empty($btns_val[$cmd]))
-			{
-				$cmd = !is_numeric($btns_val[$cmd])
-				? $btns_val[$cmd]
-				: "{$cmdName}__{$cmd}";
-			}
-		}
-		else $this->log->add(__METHOD__.' $curBtn FAIL',E_USER_WARNING,[$curBtn]);
-
 		$this->log->add(__METHOD__.' $this->statement_1',null,[$this->statement,$cmdName,$cmd,$this->BTNS]);
-
-		$this->setStatement([
-			'cmdName'=>$cmdName,
-			'change'=> !empty($this->statement)
-				&& $this->statement['cmdName'] !== $cmdName
-		]);
-
-		$this->log->add(__METHOD__.' $this->statement_2',null,[$this->statement]);
-
 
 
 		if(!empty($cmdName))
@@ -189,31 +156,32 @@ class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 		if(!in_array($inputCmd, $commands))
 			return null;
 		$flip= array_flip($commands);
-		$cmd = !is_numeric($flip[$inputCmd])
+		$flipCmd = !is_numeric($flip[$inputCmd])
 		? $flip[$inputCmd]
 		: $inputCmd;
 		return [
-			'cmdName'=>$inputCmd,
-			'cmd'=>$cmd
+			'cmd'=>[$flipCmd],
 		];
 	}
 
-	public static function findCommand($inputArr, $message)
+	public function findCommand($inputArr, $message)
 	:?array
 	{
 		list($cmdName, $cmd) = $inputArr;
 
-		// trigger_error(__METHOD__ . ' inputData: $cmdName, $cmd = ', null, [$cmdName, $cmd]);
+		$this->log->add(__METHOD__ . ' inputData: $inputArr,$cmdName, $cmd = ', null, [$inputArr,$cmdName, $cmd]);
 
 		//* Приходит локация
 		if(!empty($message['location']))
 			return [
-				'cmdKey'=>'gismeteo',
-				'cmd'=>'setLocation'
+				'cmdName'=>'gismeteo',
+				'cmd'=>['setLocation']
 			];
 
 		$cmd= $cmd ?? $cmdName;
 
+		//* Define cmd
+		$cmd = array_values(array_filter(explode('__', $cmd)));
 		/* if(array_key_exists($cmdName, self::CMD))
 		{
 			return self::defineCurCmd($cmd, self::CMD);
@@ -222,15 +190,32 @@ class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 		foreach(self::CMD as $cmdName=>&$commands)
 		{
 			// $flip= array_flip($commands);
-			if(in_array($cmd, $commands))
+			if(in_array($cmd[0], $commands))
 			{
-				return array_merge([
-					'cmdKey'=>$cmdName
-				], self::defineCurCmd($cmd, $commands));
+				$this->setStatement([
+					'cmdName'=>$cmdName,
+					'change'=> !empty($this->statement)
+						&& $this->statement['cmdName'] !== $cmdName
+				]);
+
+				$this->log->add(__METHOD__.' $this->statement_2',null,[$this->statement]);
+
+				// $this->BTNS = $commands;
+				$this->BTNS = array_merge(self::BTNS, $commands);
+
+				return array_replace_recursive([
+					'cmdName'=>$cmdName,
+					'cmd'=>$cmd,
+				], self::defineCurCmd($cmd[0], $commands));
 				break;
 			}
 		}
-		return null;
+
+		//* Если
+		// if($cmdName= )
+		return [
+			'cmdName'=> $this->getStatement()->statement['cmdName'] ?? null
+		];
 	}
 
 	public function __destruct()
@@ -251,23 +236,18 @@ interface Game {
 				'start',
 				'drs',
 				'info'=>'💡Информация',
+				'advanced'=>'Дополнительно',
+				'help'=>'❓Помощь',
+				'settings'=>'⚙️Настройки',
 				'new draw'=>'Создать розыгрыш',
 				'play draw'=>'Разыграть',
 				'show participants'=>'Участники',
 				'participate'=>'Участвовать',
 			],
-			'PumpMarket'=>[
-				'market'=>'Биржа 泵 насосов',
-				'sale blue'=>'🔷泵🔷',
-				'sale all'=>'🔷泵🔶',
-				'sale gold'=>'🔶泵🔶',
-				'replacePumps',
-				'parsePumps',
-				'sale',
-				'unsale',
-			],
+
 			'Gismeteo'=>[
 				'Gismeteo'=>'⛅Погода',
+				'forecast_aggregate',
 			],
 		],
 
@@ -281,21 +261,6 @@ interface Game {
 		'advanced'=>'Дополнительно',
 		'market'=>'Биржа 泵 насосов',
 		'Gismeteo'=>'⛅Погода',
-
-		//* draws
-		/* 'new draw'=>'Создать розыгрыш',
-		'play draw'=>'Разыграть',
-		'show participants'=>'Участники',
-		'participate'=>'Участвовать',
-		//*
-		'pump market'=>'Биржа 泵 насосов',
-		'sale blue pump'=>'🔷泵🔷',
-		'sale all'=>'🔷泵🔶',
-		'sale gold pump'=>'🔶泵🔶',
-		'replacePumps',
-		'parsePumps',
-		'sale',
-		'unsale', */
 	],
 
 	INFO = [

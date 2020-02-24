@@ -10,9 +10,9 @@ class Gismeteo extends CommonBot {
 
 
 	/**
-	 * @param cmd - 'cmdName_opt1_opt2_...etc'
+	 * @param cmd - 'cmdName__opt1__opt2__...etc'
 	 */
-	public function __construct(UniKffBot &$UKB, ?string $cmd= 'current')
+	public function __construct(UniKffBot &$UKB, ?array $cmd=null)
 	{
 		$this->setConstruct($UKB, $cmd)->init();
 

@@ -21,7 +21,7 @@ class Draws extends Helper implements DrawsInt
 	/**
 	 * @param cmd - 'cmdName_opt1_opt2_...etc'
 	 */
-	public function __construct(UniKffBot &$UKB, ?string $cmd=null)
+	public function __construct(UniKffBot &$UKB, ?array $cmd=null)
 	{
 		$this->setConstruct($UKB, $cmd)->init()->routerCmd()->saveCurData();
 
