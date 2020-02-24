@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__."/../UniConstruct.trait.php";
-require_once __DIR__."/../Helper.class.php";
+// require_once __DIR__."/../UniConstruct.trait.php";
+// require_once __DIR__."/../Helper.class.php";
 
 class Draws extends Helper implements DrawsInt
 {
@@ -108,7 +108,7 @@ class Draws extends Helper implements DrawsInt
 
 			case 'show participants':
 				$o = $this->showParticipants();
-				$o['text'] .= "\n<a href='{$this->urlDIR}/assets/Zorro_300.png' title='ZorroClan'>&#8205;</a>";
+				$o['text'] .= "\n<a href='{$this->urlDIR}/assets/roullete.jpg' title='ZorroClan'>&#8205;</a>";
 				break;
 
 			//* Розыгрыш
@@ -140,14 +140,6 @@ class Draws extends Helper implements DrawsInt
 				$o = $this->showMainMenu([
 					'text' => "<u>Победители:</u>\n\n$winStr\n<a href='{$this->urlDIR}/assets/roullete.jpg' title='ZorroClan'>&#8205;</a>",
 				]);
-				/* $o = [
-				//* Чат или бот?
-				'text' => "<u>Победители:</u>\n\n$winStr\n<a href='{$this->urlDIR}/assets/roullete.jpg' title='ZorroClan'>&#8205;</a>",
-				'reply_markup' => [
-					"keyboard" => [[
-						['text' => self::CMD['Draws']['new draw']],
-					],],
-				]; */
 
 				$o = array_merge_recursive($this->showParticipants(), $o);
 
@@ -184,9 +176,9 @@ class Draws extends Helper implements DrawsInt
 
 			default:
 				$draw= [
-					'text' => isset($draws['owner'])
+					/* 'text' => isset($draws['owner'])
 					? "Создан розыгрыш от {$draws['owner']['first_name']}. Спешите принять участие!"
-					: "На данный момент созданных розыгрышей нет. Вы можете создать свой."
+					: "На данный момент созданных розыгрышей нет. Вы можете создать свой." */
 				];
 
 				$o = $this->showMainMenu($draw);
@@ -220,7 +212,12 @@ class Draws extends Helper implements DrawsInt
 
 				$o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
 
-				if(!empty($keyboard))
+				//* Добавляем кнопки
+				if(
+					!empty($keyboard) && !empty($this->cmd[0])
+					// && !in_array($this->cmd[0], ['general','start'])
+					&& in_array($this->cmd[0], ['advanced'])
+				)
 					$o['reply_markup']['keyboard'] = array_merge_recursive($o['reply_markup']['keyboard'], [$keyboard]);
 			}
 

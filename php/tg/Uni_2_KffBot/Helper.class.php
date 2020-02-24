@@ -47,12 +47,11 @@ class Helper extends CommonBot implements Game
 					'reply_markup' => [
 						"keyboard" => [
 							[
-								['text' => $this->BTNS['advanced']],
+								// ['text' => $this->BTNS['advanced']],
 								['text' => $this->BTNS['help']],
 								['text' => $this->BTNS['settings']],
 							],
 							[
-								['text' => $this->BTNS['market']],
 								['text' => $this->BTNS['general']],
 							],
 				],],];
@@ -68,7 +67,13 @@ class Helper extends CommonBot implements Game
 			case 'advanced':
 				$o = [
 					'text' => self::INFO['about'],
-				];
+					'reply_markup' => [
+						"keyboard" => [
+							[
+								['text' => $this->BTNS['Gismeteo']],
+								['text' => $this->BTNS['general']],
+							],
+				],],];
 				break;
 
 			case 'help':
@@ -81,7 +86,7 @@ class Helper extends CommonBot implements Game
 								['text' => 'Поддержка разработчика', 'url' => 'https://t.me/korniloff75'],
 							],
 							[
-								['text' => '💬Community', 'url' => 'https://t.me/korniloff75'],
+								['text' => '💬Community', 'url' => 'https://t.me/joinchat/KCwRpE0yLGm6qDagOe6gYg'],
 							],
 						],
 				],];
@@ -103,8 +108,11 @@ class Helper extends CommonBot implements Game
 	{
 		$keyboard = [
 			[
-				['text' => $this->BTNS['Gismeteo']],
+				['text' => $this->BTNS['familiar']],
 				['text' => $this->BTNS['info']],
+			],
+			[
+				['text' => $this->BTNS['advanced']],
 			],
 		];
 

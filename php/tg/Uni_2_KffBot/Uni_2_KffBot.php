@@ -1,6 +1,8 @@
 <?php
 
 require_once __DIR__."/../CommonBot.class.php";
+require_once __DIR__."/UniConstruct.trait.php";
+require_once __DIR__."/Helper.class.php";
 
 class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 {
@@ -239,15 +241,21 @@ interface Game {
 				'advanced'=>'Дополнительно',
 				'help'=>'❓Помощь',
 				'settings'=>'⚙️Настройки',
+				'community'=>'💬Community',
 				'new draw'=>'Создать розыгрыш',
 				'play draw'=>'Разыграть',
 				'show participants'=>'Участники',
 				'participate'=>'Участвовать',
+				'prizes_count',
 			],
 
 			'Gismeteo'=>[
 				'Gismeteo'=>'⛅Погода',
 				'forecast_aggregate',
+			],
+
+			'BDU'=>[
+				'familiar'=>'Знакомство',
 			],
 		],
 
@@ -255,12 +263,9 @@ interface Game {
 		'general'=>'⬅️Главная',
 		'balance'=>'💰Баланс',
 		'info'=>'💡Информация',
-		'help'=>'❓Помощь',
-		'settings'=>'⚙️Настройки',
-		'community'=>'💬Community',
-		'advanced'=>'Дополнительно',
 		'market'=>'Биржа 泵 насосов',
 		'Gismeteo'=>'⛅Погода',
+		'familiar'=>'Знакомство',
 	],
 
 	INFO = [
