@@ -136,7 +136,7 @@ class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 			{
 				case 'Gismeteo':
 				case 'Draws':
-				case 'PumpMarket':
+				case 'BDU':
 					require_once("extensions/$cmdName.php");
 					new $cmdName($this, $cmd);
 					break;
@@ -256,6 +256,8 @@ interface Game {
 
 			'BDU'=>[
 				'familiar'=>'Знакомство',
+				'fio'=>'Ваше имя',
+				'hashtags'=>'Ваш стек',
 			],
 		],
 
@@ -269,7 +271,7 @@ interface Game {
 	],
 
 	INFO = [
-		'about'=>"Бот имеет расширенный функционал.\n<b>Основные команды:</b>\n/gismeteo - Показ текущей погоды по вашей геолокации с возможностью посмотреть прогноз на ближайшие дни.\n/draws - Группа с розыгрышами, где любой участник может создавать розыгрыши, а также участвовать в существующих.",
+		'about'=>"Бот имеет расширенный функционал.\n<b>Основные команды:</b>\n/gismeteo - Показ текущей погоды по вашей геолокации с возможностью посмотреть прогноз на ближайшие дни.",
 		'balance'=>'У нас - коммунизм, товагисчи!!! Какие деньги?',
 		'settings'=>'Какие нужны индивидуальные настройки? Пишите @korniloff75',
 		'advanced'=>'',
