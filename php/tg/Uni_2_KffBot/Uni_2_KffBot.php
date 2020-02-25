@@ -4,7 +4,7 @@ require_once __DIR__."/../CommonBot.class.php";
 require_once __DIR__."/UniConstruct.trait.php";
 require_once __DIR__."/Helper.class.php";
 
-class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
+class UniKffBot extends CommonBot implements Game
 {
 	public
 		$webHook=0;
@@ -180,14 +180,17 @@ class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 				'cmd'=>['setLocation']
 			];
 
-		$cmd= $cmd ?? $cmdName;
-
 		//* Define cmd
-		$cmd = array_values(array_filter(explode('__', $cmd)));
-		/* if(array_key_exists($cmdName, self::CMD))
+		if(!empty($cmd))
 		{
-			return self::defineCurCmd($cmd, self::CMD);
-		} */
+			return [
+				'cmdName'=>$cmdName,
+				'cmd'=> array_values(array_filter(explode('__', $cmd)))
+			];
+		}
+		else $cmd= [$cmdName];
+
+		$this->log->add(__METHOD__ . ' NEW $cmd = ', null, [$cmd]);
 
 		foreach(self::CMD as $cmdName=>&$commands)
 		{
@@ -196,8 +199,8 @@ class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 			{
 				$this->setStatement([
 					'cmdName'=>$cmdName,
-					'change'=> !empty($this->statement)
-						&& $this->statement['cmdName'] !== $cmdName
+					//* Отменяем ожидание вводимых данных
+					'wait familiar data'=>0,
 				]);
 
 				$this->log->add(__METHOD__.' $this->statement_2',null,[$this->statement]);
@@ -213,10 +216,13 @@ class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt
 			}
 		}
 
+		$this->log->add(__METHOD__.' не найдено в self::CMD  $cmdName, $cmd',null,[$cmdName, $cmd]);
+
 		//* Если
 		// if($cmdName= )
 		return [
-			'cmdName'=> $this->getStatement()->statement['cmdName'] ?? null
+			'cmdName'=> $this->getStatement()->statement['cmdName'] ?? null,
+			'cmd'=>$cmd
 		];
 	}
 
@@ -251,6 +257,7 @@ interface Game {
 
 			'Gismeteo'=>[
 				'Gismeteo'=>'⛅Погода',
+				'changeLocation',
 				'forecast_aggregate',
 			],
 
@@ -258,6 +265,7 @@ interface Game {
 				'familiar'=>'Знакомство',
 				'fio'=>'Ваше имя',
 				'hashtags'=>'Ваш стек',
+				'region'=>'Ваш регион',
 			],
 		],
 

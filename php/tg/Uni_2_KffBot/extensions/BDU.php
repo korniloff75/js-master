@@ -5,7 +5,7 @@ class BDU extends Helper
 	use UniConstruct;
 
 	const
-		FOLDER = __DIR__.'/../BDU',
+		FOLDER = __DIR__.'/../'.__CLASS__,
 		BASE = self::FOLDER . '/base.json';
 
 	protected
@@ -39,10 +39,11 @@ class BDU extends Helper
 		if(!empty($this->statement['wait familiar data']))
 		{
 			//* Отправляем на приём данных
-			$this->checkFamilar($this->statement['dataname']);
+			$this->checkFamilar($this->statement['dataName']);
 			$this->UKB->setStatement([
 				'wait familiar data'=>0,
 			]);
+			die;
 		}
 
 		$from= &$this->message['from'];
@@ -90,13 +91,14 @@ class BDU extends Helper
 		$name= $curBase['realName'] ?? $curBase['from']['first_name'].($curBase['from']['last_name']??'Незнакомец');
 
 		return [
-			'text' => "Привет, $name! Давай знакомиться получше!",
+			'text' => "Привет, $name! Давай знакомиться получше!\n" . $this->about($curBase),
 			'reply_markup' => ['keyboard' => [
 				[
 					['text' => self::CMD['BDU']['fio']],
 					['text' => self::CMD['BDU']['hashtags']],
 				],
 				[
+					['text' => self::CMD['BDU']['region']],
 					['text' => self::BTNS['general']],
 				],
 			]]
@@ -117,43 +119,82 @@ class BDU extends Helper
 			$this->UKB->setStatement([
 				'wait familiar data'=>1,
 				// 'familiar from'=>$curBase['from'],
-				'dataname'=>'fio'
+				'dataName'=>'fio'
 			]);
 		}
 
-		return [
-			'text' => "Приветствуем Вас <b>$name</b>! ". ($notRealName? "Рады знакомству. Введите своё настоящее имя. Даже, если оно совпадает с Вашим ником.": ""),
-			// 'reply_markup' => ['keyboard' => []]
+		$o= [
+			'text' => "Приветствуем Вас <b>$name</b>! ". ($notRealName ? "Рады знакомству. Введите своё настоящее имя. Даже, если оно совпадает с Вашим ником." : "Хотите изменить своё имя?")
 		];
+
+		if(!$notRealName)
+		{
+			$o['reply_markup']['inline_keyboard']= [
+				[[
+					'text'=>'Изменить',
+					'callback_data'=>'/BDU/changeFamilar__fio',
+				]]
+			];
+		}
+
+		return $o;
 	}
 
 	private function hashtags()
 	{
 		$this->UKB->setStatement([
 			'wait familiar data'=>1,
-			'dataname'=>'hashtags'
+			'dataName'=>'hashtags'
 		]);
 		// if($this->statement[])
 		return [
-			'text' => "Здесь Вы можете ввести данные о своих возможностях и профессиональных навыках по одному на каждой строке\n\nНапример:\n\n<b>Инженер\nСтроительство\nСейсмика</b>",
+			'text' => "Здесь Вы можете ввести данные о своих возможностях и профессиональных навыках по одному на каждой строке\n\nНапример:\n\n<b>Инженер\nСтроительство\nСейсмика</b>\n\n".$this->about(),
 			// 'reply_markup' => ['keyboard' => []]
 		];
 	}
 
-	//* Приём данных
-	private function checkFamilar($dataname)
+	private function region()
 	{
-		$this->log->add(__METHOD__.' $this->message',null,[$this->message]);
+		$this->UKB->setStatement([
+			'wait familiar data'=>1,
+			'dataName'=>'region'
+		]);
+		// if($this->statement[])
+		return [
+			'text' => "Введите регион своего влияния\n\nНапример:\n\n<b>Москва\nМосковская область</b>\n\n".$this->about(),
+			// 'reply_markup' => ['keyboard' => []]
+		];
+	}
+
+	//* Приём и сохранение данных
+	private function checkFamilar($dataName)
+	{
+		// $this->log->add(__METHOD__.' $this->message',null,[$this->message]);
 
 		$txt= trim($this->message['text']);
 
-		if(method_exists(__CLASS__, "save_$dataname"))
+		if(method_exists(__CLASS__, "save_$dataName"))
 		{
-			$this->{"save_$dataname"}(explode("\n",$txt));
+			$this->{"save_$dataName"}(explode("\n",$txt));
 		}
 		else
-			$this->log->add(__METHOD__." method save_$dataname is FAIL",E_USER_WARNING);
+			$this->log->add(__METHOD__." method save_$dataName is FAIL",E_USER_WARNING);
+	}
 
+
+	private function changeFamilar(array $opts)
+	{
+		$dataName= $opts[0];
+		// if(!$dataName) $dataName= $this->cmd[1][0];
+
+		$this->log->add(__METHOD__." \$opts,\$this->cmd",null,[$opts,$this->cmd]);
+
+		$this->UKB->setStatement([
+			'wait familiar data'=>1,
+			'dataName'=>$dataName
+		]);
+
+		return ['text' => "Введите новые данные."];
 	}
 
 
@@ -165,11 +206,10 @@ class BDU extends Helper
 		$curBase= &$this->data["$id"];
 
 		$curBase['realName']= $name;
-		$this->data['change']= 1;
+		$this->data['change']++;
 
 		return $this->send([
-			'text' => "Благодарю Вас, <b>$name</b>! Можете ввести свой стэк возможностей. Инструкция по вводу появится после нажатия на кнопку ниже.",
-			// 'reply_markup' => ['keyboard' => []]
+			'text' => $this->about()
 		]);
 
 		// todo rudiment
@@ -210,101 +250,58 @@ class BDU extends Helper
 		else
 		{
 			$strName= implode(' ',$fio);
-			$this->send(['text' => "Ваши данные успешно сохранены. Итак, Вас зовут <b>$strName</b>. Продолжим?"]);
-			$this->UKB->setStatement([
-				'wait familiar data'=>0,
-				'familiar fio'=>$fio,
-				'dataname'=>''
-			]);
+			$this->send(['text'=>$this->about()]);
 		}
 	} //* save_name
 
 
 	private function save_hashtags($arrStr)
 	{
-		$from= &$this->message['from'];
-		$curBase= &$this->data["{$from['id']}"];
+		$id= &$this->message['from']['id'];
+		$curBase= &$this->data["$id"];
 		$curBase['hashtags']= $arrStr;
-		$this->data['change']= 1;
+		$this->data['change']++;
+		$this->send(['text'=>$this->about()]);
 	} //* save_hashtags
 
-
-	//* Отправляем
-	public function send(array $o)
+	private function save_region($arrStr)
 	{
-		$this->log->add(__METHOD__.' $o',null,[$o]);
+		$id= &$this->message['from']['id'];
+		$curBase= &$this->data["$id"];
+		$curBase['region']= $arrStr;
+		$this->data['change']++;
+		$this->send(['text'=>$this->about()]);
+	} //* save_region
 
-		if(empty($o)) return;
 
-		//* Подготовка и отправка
-
-		//* add keyboard options
-		if(!empty($o['reply_markup']['keyboard']))
+	private function about($curBase=null)
+	:string
+	{
+		if(!$curBase)
 		{
-			//* Кнопки для организатора
-			if(isset($this->data['current draws']) && $this->statement['drawsOwner'])
-			{
-				$keyboard = [
-					['text' => $this->BTNS['play draw']],
-					['text' => $this->BTNS['show participants']],
-				];
+			$id= &$this->message['from']['id'];
+			$curBase= &$this->data["$id"];
+		}
+		$header= "<u>Текущие данные:</u>\n";
+		$about= '';
+
+		foreach($curBase as $fName=>$fld)
+		{
+			switch ($fName) {
+				case 'realName':
+					$about.= "Ваше реальное имя - {$fld}\n";
+					break;
+				case 'hashtags':
+					$about.= "Ваши возможности - ". implode(', ', $fld) ."\n";
+					break;
+				case 'region':
+					$about.= "Ваша зона влияния - ". implode(', ', $fld) ."\n";
+					break;
 			}
-			//* Участвовать
-			elseif(isset($this->data['current draws']) && !$this->drawsOwner)
-			{
-				if(!in_array($this->cbn['from'], $draws['participants']))
-					$keyboard = [['text' => self::CMD['Draws']['participate']]];
-			}
-			//* Создать
-			else
-				$keyboard = [['text' => self::CMD['Draws']['new draw']]];
-
-			$o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
-
-			//* Добавляем кнопки
-			if(
-				!empty($keyboard) && !empty($this->cmd[0])
-				// && !in_array($this->cmd[0], ['general','start'])
-				&& in_array($this->cmd[0], ['advanced'])
-			)
-				$o['reply_markup']['keyboard'] = array_merge_recursive($o['reply_markup']['keyboard'], [$keyboard]);
 		}
 
-		//* Склеиваем текст перед отправкой
-		if(is_array($o['text']))
-		{
-			$o['text'] = implode("\n\n", $o['text']);
-		}
-
-		//* Send
-		if(!empty($this->toAllParticipants))
-		{
-			$this->toAllParticipants = null;
-			foreach($draws['participants'] as $p)
-			{
-				$o['chat_id'] = $p['id'];
-				$this->apiRequest($o);
-			}
-
-			unset($draws, $this->data['current draws']);
-			$this->data['change']++;
-		}
-		else $this->apiRequest($o);
-
-		/* //* Добавляем себя в розыгрыш при создании
-		if(!empty($this->addSelf))
-		{
-			$this->addSelf = null;
-			return $this->routerCmd('participate');
-		} */
-
-		//* Отправляем админу
-		if(!empty($this->sendToOwner) && !$this->statement['BDU_admin'])
-		{
-			$this->sendToOwner = null;
-			$o['chat_id'] = $draws['owner']['id'];
-			$this->apiRequest($o);
-		}
+		return empty($about) ? "Пока нам о Вас ничего не известно. Исправим?\n" : $header.$about;
 	}
+
 
 } //* BDU

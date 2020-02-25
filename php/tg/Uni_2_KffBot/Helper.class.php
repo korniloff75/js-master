@@ -30,10 +30,10 @@ class Helper extends CommonBot implements Game
 
 		// $this->log->add('$this->data[\'pumps\']=',null,[$this->data['pumps']]);
 
-		file_put_contents(
+		if(!file_put_contents(
 			static::BASE,
 			json_encode($this->data, JSON_UNESCAPED_UNICODE), LOCK_EX
-		);
+		)) $this->send(['text' => "Сервер в данный момент перегружен и Ваши данные не были сохранены. Попробуйте повторить."]);
 
 			return $this;
 	} //* saveCurData
@@ -127,4 +127,50 @@ class Helper extends CommonBot implements Game
 		];
 		return array_merge_recursive($arr,$o);
 	} //* showMainMenu
+
+
+	//* Отправляем
+	public function send(array $o)
+	{
+		$this->log->add(__METHOD__.' $o',null,[$o]);
+
+		if(empty($o)) return;
+
+		//* Подготовка и отправка
+
+		//* add keyboard options
+		if(!empty($o['reply_markup']['keyboard']))
+		{
+			$o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
+		}
+
+		//* Склеиваем текст перед отправкой
+		if(is_array($o['text']))
+		{
+			$o['text'] = implode("\n\n", $o['text']);
+		}
+
+		//* Send
+		if(!empty($this->toAllParticipants))
+		{
+			$this->toAllParticipants = null;
+			foreach($draws['participants'] as $p)
+			{
+				$o['chat_id'] = $p['id'];
+				$this->apiRequest($o);
+			}
+
+			unset($draws, $this->data['current draws']);
+			$this->data['change']++;
+		}
+		else $this->apiRequest($o);
+
+		//* Отправляем админу
+		if(!empty($this->sendToOwner) && !$this->statement['BDU_admin'])
+		{
+			$this->sendToOwner = null;
+			$o['chat_id'] = $draws['owner']['id'];
+			$this->apiRequest($o);
+		}
+	}
 } //* Helper

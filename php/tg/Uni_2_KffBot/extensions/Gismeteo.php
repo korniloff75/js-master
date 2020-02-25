@@ -1,12 +1,14 @@
 <?php
-require_once "UniConstruct.trait.php";
 
-
-class Gismeteo extends CommonBot {
+class Gismeteo extends CommonBot implements Game
+{
 	use UniConstruct;
 
+	const
+		FOLDER = __DIR__.'/../base_GM';
+
 	private
-		$base = 'base_GM';
+		$base = __DIR__.'/../base_GM';
 
 
 	/**
@@ -116,10 +118,13 @@ class Gismeteo extends CommonBot {
 			'chat_id' => $this->chat_id,
 			'text' => $text,
 			'reply_markup' => [
-				"keyboard" => [[[
-					"text" => "Отправить локацию",
-					"request_location" => true
-				]]],
+				"keyboard" => [
+					[[
+						"text" => "Отправить локацию",
+						"request_location" => true
+					]],
+					[['text' => self::BTNS['general']],]
+				],
 				"one_time_keyboard" => true,
 				"resize_keyboard" => true,
 				"selective" => true
