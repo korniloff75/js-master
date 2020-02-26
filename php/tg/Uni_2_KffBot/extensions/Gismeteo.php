@@ -104,7 +104,7 @@ class Gismeteo extends CommonBot implements Game
 			"0" => $this->location
 		];
 
-		file_put_contents("{$this->base}/locations.json", json_encode($this->locations, JSON_UNESCAPED_UNICODE));
+		file_put_contents("{$this->base}/locations.json", json_encode($this->locations, JSON_UNESCAPED_UNICODE|JSON_NUMERIC_CHECK|JSON_UNESCAPED_SLASHES));
 	}
 
 	/**
@@ -180,7 +180,7 @@ class Gismeteo extends CommonBot implements Game
 				'params' => $params
 			]);
 
-			if($respJSON = json_encode($this->responseData, JSON_UNESCAPED_UNICODE))
+			if($respJSON = json_encode($this->responseData, JSON_UNESCAPED_UNICODE|JSON_NUMERIC_CHECK|JSON_UNESCAPED_SLASHES))
 				file_put_contents($cacheFilename, $respJSON, LOCK_EX);
 		}
 

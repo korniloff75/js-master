@@ -32,7 +32,7 @@ class Helper extends CommonBot implements Game
 
 		if(!file_put_contents(
 			static::BASE,
-			json_encode($this->data, JSON_UNESCAPED_UNICODE), LOCK_EX
+			json_encode($this->data, JSON_UNESCAPED_UNICODE|JSON_NUMERIC_CHECK|JSON_UNESCAPED_SLASHES), LOCK_EX
 		)) $this->send(['text' => "Сервер в данный момент перегружен и Ваши данные не были сохранены. Попробуйте повторить."]);
 
 			return $this;
@@ -101,18 +101,19 @@ class Helper extends CommonBot implements Game
 
 	protected function showUsername($user)
 	{
-		return "<b>{$user['first_name']}</b> @{$user['username']} ({$user['id']})\n";
+		return "<b>{$user['realName']}</b> @{$user['from']['username']} ({$user['id']})\n";
 	}
 
 	protected function showMainMenu($o=[])
 	{
 		$keyboard = [
 			[
-				['text' => $this->BTNS['familiar']],
-				['text' => $this->BTNS['info']],
+				['text' => self::CMD['BDU']['familiar']],
+				['text' => self::CMD['BDU']['users']],
 			],
 			[
-				['text' => $this->BTNS['advanced']],
+				['text' => self::BTNS['info']],
+				['text' => self::CMD['Draws']['advanced']],
 			],
 		];
 
@@ -172,5 +173,10 @@ class Helper extends CommonBot implements Game
 			$o['chat_id'] = $draws['owner']['id'];
 			$this->apiRequest($o);
 		}
+	}
+
+	public function __destruct()
+	{
+		$this->saveCurData();
 	}
 } //* Helper

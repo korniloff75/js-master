@@ -19,7 +19,10 @@ class BDU extends Helper
 	 */
 	public function __construct(UniKffBot &$UKB, ?array $cmd=null)
 	{
-		$this->setConstruct($UKB, $cmd)->init()->routerCmd()->saveCurData();
+		$this->setConstruct($UKB, $cmd)
+			->init()
+			->routerCmd();
+		// $this->setConstruct($UKB, $cmd)->init()->routerCmd()->saveCurData();
 
 	} //* __construct
 
@@ -73,9 +76,11 @@ class BDU extends Helper
 		if(method_exists(__CLASS__, $cmd))
 			$o = array_merge_recursive($o, $this->{$cmd}($opts));
 
+		if(count($o))
+		{
+			$this->send($o);
+		}
 		$this->log->add(__METHOD__.' $o...=',null,[$o,$cmd]);
-
-		$this->send($o);
 
 		return $this;
 	}
@@ -161,15 +166,16 @@ class BDU extends Helper
 		]);
 		// if($this->statement[])
 		return [
-			'text' => "Введите регион своего влияния\n\nНапример:\n\n<b>Москва\nМосковская область</b>\n\n".$this->about(),
+			'text' => "Введите регион своего влияния\n\nНапример:\n\n<b>Москва\nИнтернет</b>\n\n".$this->about(),
 			// 'reply_markup' => ['keyboard' => []]
 		];
 	}
 
+
 	//* Приём и сохранение данных
 	private function checkFamilar($dataName)
 	{
-		// $this->log->add(__METHOD__.' $this->message',null,[$this->message]);
+		$this->log->add(__METHOD__.' $this->message,$dataName',null,[$this->message,$dataName]);
 
 		$txt= trim($this->message['text']);
 
@@ -277,12 +283,13 @@ class BDU extends Helper
 	private function about($curBase=null)
 	:string
 	{
+		$header= '';
 		if(!$curBase)
 		{
 			$id= &$this->message['from']['id'];
 			$curBase= &$this->data["$id"];
+			$header= "<u>Текущие данные:</u>\n";
 		}
-		$header= "<u>Текущие данные:</u>\n";
 		$about= '';
 
 		foreach($curBase as $fName=>$fld)
@@ -304,4 +311,80 @@ class BDU extends Helper
 	}
 
 
+	//* users
+	private function users()
+	{
+		$users= '';
+		foreach($this->data as $curBase)
+		{
+			foreach($curBase as $fName=>$fld)
+			{
+				switch ($fName) {
+					case 'from':
+						$users.= "{$fld['first_name']}";
+						if(!empty($fld['username'])) $users.= " - @{$fld['username']}";
+						$users.= "\n";
+						break;
+					case 'realName':
+						$users.= "Реальное имя - {$fld}\n";
+						break;
+					case 'hashtags':
+						$users.= "Возможности - ". implode(', ', $fld) ."\n";
+						break;
+					case 'region':
+						$users.= "Зона влияния - ". implode(', ', $fld) ."\n";
+						break;
+				}
+			}
+			$users.= "\n";
+		}
+		return [
+			'text'=>$users,
+			'reply_markup' => ["keyboard" => [
+				[
+					['text' => self::CMD['BDU']['scope']],
+					// ['text' => self::CMD['BDU']['users']],
+				],
+				[
+					['text' => self::BTNS['general']],
+				],
+			]],
+		];
+	}
+
+	private function scope()
+	{
+		$data= &$this->data;
+		//* Сортировка по 2 ключам
+		$arrRegions = [];
+		$arrHashtags = [];
+		$txt='';
+
+		foreach ($data as $id => &$row)
+		{
+			// $this->log->add(__METHOD__." row=",null,[$row]);
+			if(isset($row['region']))
+			{
+				$arrRegions[$id] = $row['region'];
+			}
+			if(isset($row['hashtags']))
+			{
+				$arrHashtags[$id] = $row['hashtags'];
+			}
+
+		}
+
+		array_multisort($arrRegions,  SORT_NATURAL, $arrHashtags,  SORT_NATURAL, $data);
+
+		foreach ($arrHashtags as $id => &$tags)
+		{
+			$txt.= implode(PHP_EOL, $tags).PHP_EOL;
+		}
+
+		$this->log->add(__METHOD__." data=",null,[/* $data, */$arrRegions,$arrHashtags]);
+
+		return [
+			'text'=>$txt
+		];
+	}
 } //* BDU

@@ -26,7 +26,7 @@ class UniKffBot extends CommonBot implements Game
 
 		//* Запускаем скрипт
 		parent::__construct()
-			->checkLicense()
+			// ->checkLicense()
 			->Router();
 
 	} //__construct
@@ -221,7 +221,7 @@ class UniKffBot extends CommonBot implements Game
 		//* Если
 		// if($cmdName= )
 		return [
-			'cmdName'=> $this->getStatement()->statement['cmdName'] ?? null,
+			'cmdName'=> $this->getStatement()->statement['cmdName'],
 			'cmd'=>$cmd
 		];
 	}
@@ -257,15 +257,19 @@ interface Game {
 
 			'Gismeteo'=>[
 				'Gismeteo'=>'⛅Погода',
+				'gismeteo',
 				'changeLocation',
 				'forecast_aggregate',
 			],
 
 			'BDU'=>[
-				'familiar'=>'Знакомство',
+				'familiar'=>'☮ЛК',
 				'fio'=>'Ваше имя',
 				'hashtags'=>'Ваш стек',
 				'region'=>'Ваш регион',
+				//*
+				'users'=>'👥Пользователи',
+				'scope'=>'⚛Возможности',
 			],
 		],
 
@@ -275,7 +279,7 @@ interface Game {
 		'info'=>'💡Информация',
 		'market'=>'Биржа 泵 насосов',
 		'Gismeteo'=>'⛅Погода',
-		'familiar'=>'Знакомство',
+		'familiar'=>'☮ЛК',
 	],
 
 	INFO = [
@@ -304,17 +308,6 @@ interface Game {
 }
 
 interface PumpInt {
-	const
-		PUMP_BTNS= [
-			'pump/market'=>'Биржа 泵 насосов',
-			'pump/sale blue'=>'🔷泵🔷',
-			'pump/sale all'=>'🔷泵🔶',
-			'pump/sale gold'=>'🔶泵🔶',
-			'pump/replacePumps',
-			'pump/parsePumps',
-			'pump/sale',
-			'pump/unsale',
-		];
 }
 
 interface DrawsInt {

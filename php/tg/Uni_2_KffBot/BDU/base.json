@@ -1,1 +1,83 @@
-{"673976740":{"hashtags":["Инженер","Строительство","Сейсмика"],"from":{"id":673976740,"is_bot":false,"first_name":"Павел 🧘‍♂️","last_name":"Корнилов","username":"korniloff75","language_code":"ru"},"realName":"Знакомство"}}
+{
+	"673976740": {
+		"from": {
+			"id": 673976740,
+			"is_bot": false,
+			"first_name": "Павел 🧘‍♂️",
+			"last_name": "Корнилов",
+			"username": "korniloff75",
+			"language_code": "ru"
+		},
+		"realName": "Paul",
+		"hashtags": [
+			"Инженер",
+			"Строительство",
+			"Сейсмика"
+		],
+		"region": [
+			"Крым",
+			"Ялта"
+		]
+	},
+	"478262295": {
+		"from": {
+			"id": 478262295,
+			"is_bot": false,
+			"first_name": "David",
+			"username": "koperfield",
+			"language_code": "ru"
+		},
+		"realName": "Давид",
+		"hashtags": [
+			"Муниципальный служащий",
+			"Системный администратор",
+			"Строитель"
+		]
+	},
+	"1037135948": {
+		"from": {
+			"id": 1037135948,
+			"is_bot": false,
+			"first_name": "Бодрый",
+			"last_name": "Крымчанин",
+			"language_code": "ru"
+		}
+	},
+	"166608259": {
+		"from": {
+			"id": 166608259,
+			"is_bot": false,
+			"first_name": "Great",
+			"last_name": "Papug",
+			"username": "psittacosis",
+			"language_code": "ru"
+		}
+	},
+	"378825138": {
+		"from": {
+			"id": 378825138,
+			"is_bot": false,
+			"first_name": "Coma",
+			"last_name": "Coma",
+			"username": "coma911",
+			"language_code": "de"
+		}
+	},
+	"668799598": {
+		"from": {
+			"id": 668799598,
+			"is_bot": false,
+			"first_name": "Петр",
+			"username": "wodpetr",
+			"language_code": "ru"
+		}
+	},
+	"1055988143": {
+		"from": {
+			"id": 1055988143,
+			"is_bot": true,
+			"first_name": "KffUniversal_2",
+			"username": "Uni_2_KffBot"
+		}
+	}
+}
