@@ -101,7 +101,7 @@ class Helper extends CommonBot implements Game
 
 	protected function showUsername($user)
 	{
-		return "<b>{$user['realName']}</b> @{$user['from']['username']} ({$user['from']['id']})\n";
+		return "<b>" . ($user['realName'] ?? $user['from']['first_name']) . "</b> @{$user['from']['username']} ({$user['from']['id']})\n";
 	}
 
 	protected function showMainMenu($o=[])

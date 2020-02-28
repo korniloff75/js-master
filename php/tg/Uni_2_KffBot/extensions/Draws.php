@@ -54,11 +54,12 @@ class Draws extends Helper implements DrawsInt
 
 		if(!$o) switch ($cmd ?? $this->cmd[0]) {
 			//*** Новый розыгрыш ***
+			case 'draws':
 			case 'new draw':
 				if(!empty($draws))
 				{
 					$o = $this->showMainMenu([
-						'text' => 'Вы не можете создать розыгрыш, пока не разыгран предыдущий. Но вы можете участвовать в существующем!'
+						'text' => "Вы не можете создать розыгрыш, пока не разыгран предыдущий от {$draws['owner']['first_name']} @{$draws['owner']['username']}. Но вы можете участвовать в существующем!"
 					]);
 				break;
 				}

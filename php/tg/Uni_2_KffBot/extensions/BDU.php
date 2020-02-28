@@ -100,6 +100,7 @@ class BDU extends Helper
 			'reply_markup' => ['keyboard' => [
 				[
 					['text' => self::CMD['BDU']['fio']],
+					['text' => self::CMD['BDU']['category']],
 					['text' => self::CMD['BDU']['hashtags']],
 				],
 				[
@@ -153,7 +154,7 @@ class BDU extends Helper
 		]);
 		// if($this->statement[])
 		return [
-			'text' => "Здесь Вы можете ввести данные о своих возможностях и профессиональных навыках по одному на каждой строке\n\nНапример:\n\n<b>Инженер\nСтроительство\nСейсмика</b>\n\n".$this->about(),
+			'text' => "Здесь Вы можете ввести данные о своих возможностях и профессиональных навыках по одному на каждой строке\n\n<u>Например:</u>\n\n<b>Инженер\nСтроительство\nСейсмика</b>\n\n".$this->about(),
 			// 'reply_markup' => ['keyboard' => []]
 		];
 	}
@@ -166,9 +167,87 @@ class BDU extends Helper
 		]);
 		// if($this->statement[])
 		return [
-			'text' => "Введите регион своего влияния\n\nНапример:\n\n<b>Москва\nИнтернет</b>\n\n".$this->about(),
+			'text' => "Введите регион своего влияния\n\n<u>Например:</u>\n\n<b>Москва\nИнтернет</b>\n\n".$this->about(),
 			// 'reply_markup' => ['keyboard' => []]
 		];
+	}
+
+	private function category()
+	{
+		$this->UKB->setStatement([
+			'wait familiar data'=>1,
+			'dataName'=>'category'
+		]);
+
+		$o= [
+			'text' => $this->about(),
+			'reply_markup' => [
+				"keyboard" => [[
+					['text' => self::CMD['BDU']['add_category']],
+					['text' => self::CMD['BDU']['remove_category']],
+				],
+				[
+					['text' => self::CMD['BDU']['familiar']],
+					['text' => self::BTNS['general']],
+				],],
+			],
+		];
+
+		return $o;
+	}
+
+	private function show_category_buttons(&$ikb,$method='save')
+	{
+		foreach(array_chunk(self::CATEGORIES,3) as $nr=>$row)
+		{
+			$ikb[]= [];
+			foreach($row as $spec)
+			{
+				$ikb[$nr][]= [
+					'text'=> $spec,
+					'callback_data'=> "/BDU/{$method}_category__$spec",
+				];
+			}
+		}
+		// return $o;
+	}
+
+	private function add_category()
+	{
+		$this->UKB->setStatement([
+			'wait familiar data'=>1,
+			'dataName'=>'category'
+		]);
+
+		$o= [
+			'text' => "Выберите категорию для добавления \n\n".$this->about(),
+			'reply_markup' => [
+				"inline_keyboard" => [],
+			],
+		];
+
+		$this->show_category_buttons($o['reply_markup']['inline_keyboard']);
+
+		return $o;
+	}
+
+	private function remove_category()
+	{
+		$this->UKB->setStatement([
+			'wait familiar data'=>1,
+			'dataName'=>'category'
+		]);
+
+		$o= [
+			'text' => "Выберите категорию для удаления \n\n".$this->about(),
+			'reply_markup' => [
+				"inline_keyboard" => [],
+			],
+		];
+
+		$this->show_category_buttons($o['reply_markup']['inline_keyboard'], 'unsave');
+
+		return $o;
 	}
 
 
@@ -279,6 +358,27 @@ class BDU extends Helper
 		$this->send(['text'=>$this->about()]);
 	} //* save_region
 
+	private function save_category($arrStr)
+	{
+		$curBase= &$this->data[$this->chat_id];
+		$curBase['category'][]= $arrStr[0];
+		$this->data['change']++;
+		$this->send(['text'=>$this->about($curBase)]);
+		$this->log->add(__METHOD__." \$arrStr[0]=",null,[$arrStr[0]]);
+	} //* save_category
+
+	private function unsave_category($arrStr)
+	{
+		$curBase= &$this->data[$this->chat_id];
+
+		$curBase['category']= array_filter($curBase['category'], function(&$i)use($arrStr){
+			return $i !== $arrStr[0];
+		});
+		$this->data['change']++;
+		$this->send(['text'=>$this->about($curBase)]);
+		// $this->log->add(__METHOD__." curBase=",null,[$curBase]);
+	} //* unsave_category
+
 
 	private function about($curBase=null)
 	:string
@@ -297,6 +397,9 @@ class BDU extends Helper
 			switch ($fName) {
 				case 'realName':
 					$about.= "Ваше реальное имя - {$fld}\n";
+					break;
+				case 'category':
+					$about.= "Ваши категории - ". implode(', ', $fld) ."\n";
 					break;
 				case 'hashtags':
 					$about.= "Ваши возможности - ". implode(', ', $fld) ."\n";
@@ -343,7 +446,7 @@ class BDU extends Helper
 			'reply_markup' => ["keyboard" => [
 				[
 					['text' => self::CMD['BDU']['scope']],
-					// ['text' => self::CMD['BDU']['users']],
+					['text' => self::CMD['BDU']['users']],
 				],
 				[
 					['text' => self::BTNS['general']],
@@ -363,15 +466,15 @@ class BDU extends Helper
 			if(!empty($tags= $uData['hashtags'])) foreach($tags as &$tag)
 			{
 				if(!empty($uData['region'])) $region= '(' . implode(', ',$uData['region']) . ')';
-				$tag= str_replace(' ','_',$tag);
-				$arrTags[]= "#$tag - ".$this->showUsername($data[$id]) . $region;
+				$tag= str_replace([' ','-'],'_',$tag);
+				$arrTags[]= "#$tag - ".$this->showUsername($data[$id]) . $region . PHP_EOL;
 
 			}
 		}
 
 		natsort($arrTags);
 
-		$this->log->add(__METHOD__." data=",null,[$data,]);
+		// $this->log->add(__METHOD__." data=",null,[$data,]);
 
 		return [
 			'text'=>implode(PHP_EOL,$arrTags)

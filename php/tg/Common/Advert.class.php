@@ -199,6 +199,14 @@ class Advert extends TG
 			'src'=> '/assets/invs_240_lh.png',
 			'href'=>"https://invs.ru?utm_source=partner&ref=ueQYF"
 		],
+		'proxy6.net'=> [
+			'title'=> "Стабильные прокси от 25р/мес.
+			Дешевле - только бесплатно. Но бесплатные часто умирают. И всё же, сделаем ещё дешевле!\n
+			Купон на 5% скидку - <b>mXPnafbKkH</b>",
+			'src'=> '/assets/tg_logo_200.png',
+			'alt'=> "Proxy от 25р/мес",
+			'href'=>"https://proxy6.net/d/181788"
+		],
 		'js-master'=> [
 			'alt'=> "Заказать быстрый сайт",
 			'src'=> '/assets/Js_ajax_700.jpg',
