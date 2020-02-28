@@ -48,11 +48,11 @@ class Helper extends CommonBot implements Game
 						"keyboard" => [
 							[
 								// ['text' => $this->BTNS['advanced']],
-								['text' => $this->BTNS['help']],
-								['text' => $this->BTNS['settings']],
+								['text' => self::CMD['Draws']['help']],
+								['text' => self::CMD['Draws']['settings']],
 							],
 							[
-								['text' => $this->BTNS['general']],
+								['text' => self::CMD['Draws']['general']],
 							],
 				],],];
 				break;
@@ -70,8 +70,8 @@ class Helper extends CommonBot implements Game
 					'reply_markup' => [
 						"keyboard" => [
 							[
-								['text' => $this->BTNS['Gismeteo']],
-								['text' => $this->BTNS['general']],
+								['text' => self::CMD['Gismeteo']['Gismeteo']],
+								['text' => self::CMD['Draws']['general']],
 							],
 				],],];
 				break;
@@ -101,7 +101,7 @@ class Helper extends CommonBot implements Game
 
 	protected function showUsername($user)
 	{
-		return "<b>{$user['realName']}</b> @{$user['from']['username']} ({$user['id']})\n";
+		return "<b>{$user['realName']}</b> @{$user['from']['username']} ({$user['from']['id']})\n";
 	}
 
 	protected function showMainMenu($o=[])
@@ -112,7 +112,7 @@ class Helper extends CommonBot implements Game
 				['text' => self::CMD['BDU']['users']],
 			],
 			[
-				['text' => self::BTNS['info']],
+				['text' => self::CMD['Draws']['info']],
 				['text' => self::CMD['Draws']['advanced']],
 			],
 		];

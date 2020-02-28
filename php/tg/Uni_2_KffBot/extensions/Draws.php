@@ -196,8 +196,8 @@ class Draws extends Helper implements DrawsInt
 				if(isset($this->data['current draws']) && $this->statement['drawsOwner'])
 				{
 					$keyboard = [
-						['text' => $this->BTNS['play draw']],
-						['text' => $this->BTNS['show participants']],
+						['text' => self::CMD['Draws']['play draw']],
+						['text' => self::CMD['Draws']['show participants']],
 					];
 				}
 				//* Участвовать

@@ -355,36 +355,26 @@ class BDU extends Helper
 	private function scope()
 	{
 		$data= &$this->data;
-		//* Сортировка по 2 ключам
-		$arrRegions = [];
-		$arrHashtags = [];
-		$txt='';
+		$arrTags=[];
+		$region='(Регион не указан)';
 
-		foreach ($data as $id => &$row)
+		foreach ($data as $id => &$uData)
 		{
-			// $this->log->add(__METHOD__." row=",null,[$row]);
-			if(isset($row['region']))
+			if(!empty($tags= $uData['hashtags'])) foreach($tags as &$tag)
 			{
-				$arrRegions[$id] = $row['region'];
-			}
-			if(isset($row['hashtags']))
-			{
-				$arrHashtags[$id] = $row['hashtags'];
-			}
+				if(!empty($uData['region'])) $region= '(' . implode(', ',$uData['region']) . ')';
+				$tag= str_replace(' ','_',$tag);
+				$arrTags[]= "#$tag - ".$this->showUsername($data[$id]) . $region;
 
+			}
 		}
 
-		array_multisort($arrRegions,  SORT_NATURAL, $arrHashtags,  SORT_NATURAL, $data);
+		natsort($arrTags);
 
-		foreach ($arrHashtags as $id => &$tags)
-		{
-			$txt.= implode(PHP_EOL, $tags).PHP_EOL;
-		}
-
-		$this->log->add(__METHOD__." data=",null,[/* $data, */$arrRegions,$arrHashtags]);
+		$this->log->add(__METHOD__." data=",null,[$data,]);
 
 		return [
-			'text'=>$txt
+			'text'=>implode(PHP_EOL,$arrTags)
 		];
 	}
 } //* BDU
