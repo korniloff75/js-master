@@ -164,8 +164,13 @@ class KorniloFF_news extends CommonBot
 		$photos = [];
 		$content = [];
 
-		$imgXpath = $this->imgXpath ?? "//div[@class=\"news_c\"][1]";
-		# Перебираем все новые ссылки и грузим из них в контент
+		//todo Отключаю изображения на время на crimea-news.com
+		$_photos = [];
+		$imgXpath = $this->imgXpath ?? "//div[@class=\"__news_c\"][1]";
+		//todo правильный вариант для сохранения
+		$_imgXpath = $this->imgXpath ?? "//div[@class=\"news_c\"][1]";
+
+		//* Перебираем все новые ссылки и грузим из них в контент
 		foreach ($diff as &$link) {
 			$s = parse_url($link);
 			$source = "{$s['scheme']}://{$s['host']}/";
@@ -188,6 +193,16 @@ class KorniloFF_news extends CommonBot
 				$photos = array_merge_recursive($photos, $imgArr);
 			}
 
+			//todo START
+			$_xImg = $xpath->query($_imgXpath)->item(0);
+			if(is_object($_xImg))
+				{
+					$_imgArr = self::ExtractImages($source, $xpath, $_xImg, '*', ['crimeanews.jpg', 'size100/']);
+					// $this->log->add('$imgArr', null, [$imgArr]);
+					$_photos = array_merge_recursive($_photos, $_imgArr);
+				}
+			//todo END
+
 			//* Собираем для добавления в $content
 			$header = $xpath->query(".//h1[1]")->item(0)->textContent;
 
@@ -206,6 +221,10 @@ class KorniloFF_news extends CommonBot
 			$out['sendMessage'] = $content;
 		if(count($photos))
 			$out['sendMediaGroup'] = $photos;
+
+		//todo Ловим изображения
+		if(count($_photos))
+			file_put_contents(__DIR__.'/photos.txt',$_photos);
 
 		return $out;
 	} //* handler_crimea_news_com

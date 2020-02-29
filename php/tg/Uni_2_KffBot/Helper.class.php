@@ -83,10 +83,10 @@ class Helper extends CommonBot implements Game
 						"inline_keyboard" => [
 							[
 								['text' => 'Support', 'url' => 'https://t.me/korniloff75'],
-								['text' => 'Поддержка разработчика', 'url' => 'https://t.me/korniloff75'],
+								['text' => 'Development', 'url' => 'https://t.me/korniloff75'],
 							],
 							[
-								['text' => '💬Community', 'url' => 'https://t.me/joinchat/KCwRpE0yLGm6qDagOe6gYg'],
+								['text' => '💬Community', 'url' => 'https://t.me/joinchat/KCwRpFHSzSKtAaymBBRbgg'],
 							],
 						],
 				],];
@@ -109,7 +109,8 @@ class Helper extends CommonBot implements Game
 		$keyboard = [
 			[
 				['text' => self::CMD['BDU']['familiar']],
-				['text' => self::CMD['BDU']['users']],
+				// ['text' => self::CMD['BDU']['users']],
+				['text' => self::CMD['BDU']['scope']],
 			],
 			[
 				['text' => self::CMD['Draws']['info']],

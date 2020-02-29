@@ -214,13 +214,13 @@ class BDU extends Helper
 
 	private function add_category()
 	{
-		$this->UKB->setStatement([
+		/* $this->UKB->setStatement([
 			'wait familiar data'=>1,
 			'dataName'=>'category'
-		]);
+		]); */
 
 		$o= [
-			'text' => "Выберите категорию для добавления \n\n".$this->about(),
+			'text' => "Выберите категорию для <u>добавления</u> \n\n".$this->about(),
 			'reply_markup' => [
 				"inline_keyboard" => [],
 			],
@@ -233,13 +233,13 @@ class BDU extends Helper
 
 	private function remove_category()
 	{
-		$this->UKB->setStatement([
+		/* $this->UKB->setStatement([
 			'wait familiar data'=>1,
 			'dataName'=>'category'
-		]);
+		]); */
 
 		$o= [
-			'text' => "Выберите категорию для удаления \n\n".$this->about(),
+			'text' => "Выберите категорию для <u>удаления</u> \n\n".$this->about(),
 			'reply_markup' => [
 				"inline_keyboard" => [],
 			],
@@ -443,9 +443,40 @@ class BDU extends Helper
 		}
 		return [
 			'text'=>$users,
+			/* 'reply_markup' => ["keyboard" => [
+				[
+					['text' => self::CMD['BDU']['list_categories']],
+					['text' => self::CMD['BDU']['scope']],
+					['text' => self::CMD['BDU']['users']],
+				],
+				[
+					['text' => self::BTNS['general']],
+				],
+			]], */
+		];
+	}
+
+
+	//* Поиск
+	private function scope()
+	{
+		$txt= '';
+		$catTags= $this->collectCategories();
+
+		foreach($catTags as $cat=>&$tags)
+		{
+			natsort($tags);
+			$txt.= "<u><b>$cat</b></u>\n\n" . implode(PHP_EOL,$tags) . "\n\n";
+		}
+
+		// $this->log->add(__METHOD__." catTags=",null,[$catTags,]);
+
+		return [
+			'text'=>$txt,
 			'reply_markup' => ["keyboard" => [
 				[
-					['text' => self::CMD['BDU']['scope']],
+					['text' => self::CMD['BDU']['list_categories']],
+					// ['text' => self::CMD['BDU']['scope']],
 					['text' => self::CMD['BDU']['users']],
 				],
 				[
@@ -453,31 +484,82 @@ class BDU extends Helper
 				],
 			]],
 		];
-	}
+	} //* scope
 
-	private function scope()
+
+	/**
+	 ** Собираем массив с категориями
+	 * @param filter - фильтр по категориям
+	 */
+	private function collectCategories(?string $filter=null)
+	:array
 	{
 		$data= &$this->data;
-		$arrTags=[];
+		$catTags=[];
 		$region='(Регион не указан)';
 
 		foreach ($data as $id => &$uData)
 		{
-			if(!empty($tags= $uData['hashtags'])) foreach($tags as &$tag)
+			$curCats = $uData['category']??['Другое'];
+			if($filter && !in_array($filter,$curCats))
+				continue;
+
+			if(!empty($tags= $uData['hashtags']??null)) foreach($tags as &$tag)
 			{
 				if(!empty($uData['region'])) $region= '(' . implode(', ',$uData['region']) . ')';
-				$tag= str_replace([' ','-'],'_',$tag);
-				$arrTags[]= "#$tag - ".$this->showUsername($data[$id]) . $region . PHP_EOL;
 
+				$tag= str_replace([' ','-'],'_',$tag);
+				$strTag= "#$tag - ".$this->showUsername($data[$id]) . $region . PHP_EOL;
+
+				//* Добавляем в каждую категорию
+				foreach($curCats as &$cat)
+				{
+					$catTags[$cat][]= $strTag;
+				}
 			}
 		}
 
-		natsort($arrTags);
+		ksort($catTags, SORT_NATURAL);
 
-		// $this->log->add(__METHOD__." data=",null,[$data,]);
+		return $catTags;
+	} //* collectCategories
 
-		return [
-			'text'=>implode(PHP_EOL,$arrTags)
+
+	//* Список категорий
+	private function list_categories()
+	{
+		// $this->show_category_buttons()
+		$o= [
+			'text' => "Выберите категорию для <u>просмотра</u> \n\n",
+			'reply_markup' => [
+				"inline_keyboard" => [],
+			],
 		];
+
+		$this->show_category_buttons($o['reply_markup']['inline_keyboard'], 'list');
+		return $o;
+	}
+
+	/**
+	 ** Список тегов по выбранной категории
+	 */
+	private function list_category($arrStr)
+	{
+		$curBase= &$this->data[$this->chat_id];
+		$catName= $arrStr[0];
+		$this->data['change']= 0;
+
+		$txt= '';
+		if(
+			!$curCat= $this->collectCategories($catName)[$catName]
+		) $txt= "В этой категории пока пусто";
+		else
+		{
+			$txt= implode(PHP_EOL,$curCat) . "\n\n";
+		}
+		$this->send([
+			'text'=>"<u><b>$catName</b></u>\n\n$txt"
+		]);
+		$this->log->add(__METHOD__." \$catName,curCat=",null,[$catName,$curCat]);
 	}
 } //* BDU
