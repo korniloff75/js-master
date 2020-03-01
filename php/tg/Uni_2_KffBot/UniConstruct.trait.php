@@ -27,8 +27,6 @@ trait UniConstruct
 		$this->urlROOT = ((!empty($_SERVER['HTTPS'])) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
 		$this->urlDIR = $this->urlROOT . '/' . str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__);
 
-
-
 		$this->log->add(__METHOD__.' $cmdArr=',null,[$cmdArr]);
 
 		$this->cmd = [array_shift($cmdArr), $cmdArr];

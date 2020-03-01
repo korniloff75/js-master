@@ -3,7 +3,7 @@
 trait Curl
 {
 	protected static
-		$proxyPath = 'db.proxy';
+		$proxyPath = __DIR__.'/db.proxy';
 
 	/**
 	 * ! Required

@@ -34,7 +34,7 @@ class BDU extends Helper
 		$this->getCurData();
 
 		$this->drawsOwner = isset($this->data['current draws']['owner'])
-		&& $this->chat_id === $this->data['current draws']['owner']['id'];
+		&& $this->user_id === $this->data['current draws']['owner']['id'];
 
 		$this->data['change'] = 0;
 
@@ -90,10 +90,9 @@ class BDU extends Helper
 	private function familiar($opts)
 	:array
 	{
-		$id= &$this->message['from']['id'];
-		$curBase= &$this->data["$id"];
+		$curBase= &$this->data[$this->user_id];
 
-		$name= $curBase['realName'] ?? $curBase['from']['first_name'].($curBase['from']['last_name']??'Незнакомец');
+		$name= $curBase['realName'] ?? $curBase['from']['first_name'].($curBase['from']['last_name']??' Незнакомец');
 
 		return [
 			'text' => "Привет, $name! Давай знакомиться получше!\n" . $this->about($curBase),
@@ -115,8 +114,7 @@ class BDU extends Helper
 	//* Сохраняем данные из json
 	private function fio()
 	{
-		$id= &$this->message['from']['id'];
-		$curBase= &$this->data["$id"];
+		$curBase= &$this->data[$this->user_id];
 
 		$name= $curBase['realName'] ?? $curBase['from']['first_name'].($curBase['from']['last_name']??'');
 
@@ -287,8 +285,7 @@ class BDU extends Helper
 	{
 		$name= $arrStr[0];
 
-		$id= &$this->message['from']['id'];
-		$curBase= &$this->data["$id"];
+		$curBase= &$this->data[$this->user_id];
 
 		$curBase['realName']= $name;
 		$this->data['change']++;
@@ -342,8 +339,7 @@ class BDU extends Helper
 
 	private function save_hashtags($arrStr)
 	{
-		$id= &$this->message['from']['id'];
-		$curBase= &$this->data["$id"];
+		$curBase= &$this->data[$this->user_id];
 		$curBase['hashtags']= $arrStr;
 		$this->data['change']++;
 		$this->send(['text'=>$this->about()]);
@@ -351,8 +347,7 @@ class BDU extends Helper
 
 	private function save_region($arrStr)
 	{
-		$id= &$this->message['from']['id'];
-		$curBase= &$this->data["$id"];
+		$curBase= &$this->data[$this->user_id];
 		$curBase['region']= $arrStr;
 		$this->data['change']++;
 		$this->send(['text'=>$this->about()]);
@@ -360,7 +355,7 @@ class BDU extends Helper
 
 	private function save_category($arrStr)
 	{
-		$curBase= &$this->data[$this->chat_id];
+		$curBase= &$this->data[$this->user_id];
 		$curBase['category'][]= $arrStr[0];
 		$this->data['change']++;
 		$this->send(['text'=>$this->about($curBase)]);
@@ -369,7 +364,7 @@ class BDU extends Helper
 
 	private function unsave_category($arrStr)
 	{
-		$curBase= &$this->data[$this->chat_id];
+		$curBase= &$this->data[$this->user_id];
 
 		$curBase['category']= array_filter($curBase['category'], function(&$i)use($arrStr){
 			return $i !== $arrStr[0];
@@ -380,14 +375,14 @@ class BDU extends Helper
 	} //* unsave_category
 
 
+	//* Текущие данные
 	private function about($curBase=null)
 	:string
 	{
 		$header= '';
 		if(!$curBase)
 		{
-			$id= &$this->message['from']['id'];
-			$curBase= &$this->data["$id"];
+			$curBase= &$this->data[$this->user_id];
 			$header= "<u>Текущие данные:</u>\n";
 		}
 		$about= '';
@@ -414,7 +409,7 @@ class BDU extends Helper
 	}
 
 
-	//* users
+	//* Пользователи
 	private function users()
 	{
 		$users= '';
@@ -545,7 +540,7 @@ class BDU extends Helper
 	 */
 	private function list_category($arrStr)
 	{
-		$curBase= &$this->data[$this->chat_id];
+		$curBase= &$this->data[$this->user_id];
 		$catName= $arrStr[0];
 		$this->data['change']= 0;
 

@@ -1,8 +1,6 @@
 <?php
-// require_once __DIR__."/../UniConstruct.trait.php";
-// require_once __DIR__."/../Helper.class.php";
 
-class Draws extends Helper implements DrawsInt
+class Draws extends Helper
 {
 	use UniConstruct;
 
@@ -35,7 +33,7 @@ class Draws extends Helper implements DrawsInt
 		$this->getCurData();
 
 		$this->drawsOwner = isset($this->data['current draws']['owner'])
-		&& $this->chat_id === $this->data['current draws']['owner']['id'];
+		&& $this->user_id === $this->data['current draws']['owner']['id'];
 
 		$this->data['change'] = 0;
 
@@ -175,7 +173,8 @@ class Draws extends Helper implements DrawsInt
 				]);
 				break;
 
-			default:
+			case 'general':
+			case 'start':
 				$draw= [
 					/* 'text' => isset($draws['owner'])
 					? "Создан розыгрыш от {$draws['owner']['first_name']}. Спешите принять участие!"
@@ -184,6 +183,8 @@ class Draws extends Helper implements DrawsInt
 
 				$o = $this->showMainMenu($draw);
 				break;
+
+			default: die;
 		} //*switch
 
 
@@ -211,7 +212,7 @@ class Draws extends Helper implements DrawsInt
 				else
 					$keyboard = [['text' => self::CMD['Draws']['new draw']]];
 
-				$o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
+				// $o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
 
 				//* Добавляем кнопки
 				if(
@@ -235,13 +236,13 @@ class Draws extends Helper implements DrawsInt
 				foreach($draws['participants'] as $p)
 				{
 					$o['chat_id'] = $p['id'];
-					$this->apiRequest($o);
+					$this->send($o);
 				}
 
 				unset($draws, $this->data['current draws']);
 				$this->data['change']++;
 			}
-			else $this->apiRequest($o);
+			else $this->send($o);
 
 			//* Добавляем себя в розыгрыш при создании
 			if(!empty($this->addSelf))

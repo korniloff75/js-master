@@ -104,6 +104,47 @@ class Helper extends CommonBot implements Game
 		return "<b>" . ($user['realName'] ?? $user['from']['first_name']) . "</b> @{$user['from']['username']} ({$user['from']['id']})\n";
 	}
 
+
+	/**
+	 ** В чате преобразуем клавиатуру в inline
+	 */
+	protected function fixBtns4Chat(array &$o)
+	{
+		if(
+			!$this->is_group
+			// || empty($o['reply_markup']['keyboard'])
+		)
+			return;
+
+		$markup= &$o['reply_markup'];
+
+		//* to inline
+		if(!empty($markup['keyboard'])) foreach($markup['keyboard'] as &$row)
+		{
+			foreach($row as &$btn)
+			{
+				$btn['callback_data']= $btn['text'];
+			}
+		}
+
+		//* Если нет кнопок - добавляем на Главную
+		if(
+			empty($iKeyboard= array_merge_recursive($markup['inline_keyboard']??[], $markup['keyboard']??[]))
+		) $iKeyboard= [[[
+			'text'=> self::BTNS['general'],
+			'callback_data'=> self::BTNS['general'],
+		]]];
+
+		$o['reply_markup']= [
+			"inline_keyboard" => $iKeyboard,
+		];
+
+			// unset($markup['keyboard']);
+
+		$this->log->add(__METHOD__.' $markup',null,[$markup]);
+	}
+
+
 	protected function showMainMenu($o=[])
 	{
 		$keyboard = [
@@ -118,15 +159,33 @@ class Helper extends CommonBot implements Game
 			],
 		];
 
-		$arr = [
+		/* $arr = [
 			//* Чат или бот?
 			'text' => is_numeric(substr($this->chat_id,0,1))
 			? 'Вы находитесь в частном боте группы Добрые люди.'
-			: "Бот запущен из группы, где не имеет возможности интерактивного диалога с вами.\n\nДля продолжения использования - пеерейдите в бот по ссылке @Uni_2_KffBot",
+			: "Бот запущен из группы, где не имеет возможности интерактивного диалога с вами.\n\nДля использования всех возможностей бота - пеерейдите по ссылке @Uni_2_KffBot",
+			'reply_markup' => [
+				"keyboard" => $keyboard,
+			]
+		]; */
+
+		//* Бот или чат?
+		if(!$this->is_group)
+		{
+			$txt= 'Вы находитесь в частном боте группы Добрые люди.';
+		}
+		else
+		{
+			$txt= "Бот запущен из группы.\n\nДля использования всех возможностей бота - пеерейдите по ссылке @Uni_2_KffBot";
+		}
+
+		$arr= [
+			'text'=>$txt,
 			'reply_markup' => [
 				"keyboard" => $keyboard,
 			]
 		];
+
 		return array_merge_recursive($arr,$o);
 	} //* showMainMenu
 
@@ -134,11 +193,13 @@ class Helper extends CommonBot implements Game
 	//* Отправляем
 	public function send(array $o)
 	{
-		$this->log->add(__METHOD__.' $o',null,[$o]);
-
 		if(empty($o)) return;
 
 		//* Подготовка и отправка
+
+		$this->fixBtns4Chat($o);
+
+		$this->log->add(__METHOD__.' $o',null,[$o]);
 
 		//* add keyboard options
 		if(!empty($o['reply_markup']['keyboard']))
@@ -153,6 +214,15 @@ class Helper extends CommonBot implements Game
 		}
 
 		//* Send
+		$method= !empty($message_id= $this->cbn['message']['message_id'])
+			? 'editMessageText'
+			: 'sendMessage';
+
+		if($method)
+		{
+			$o['message_id'] = $message_id;
+		}
+
 		if(!empty($this->toAllParticipants))
 		{
 			$this->toAllParticipants = null;
@@ -165,7 +235,7 @@ class Helper extends CommonBot implements Game
 			unset($draws, $this->data['current draws']);
 			$this->data['change']++;
 		}
-		else $this->apiRequest($o);
+		else $this->apiRequest($o,$method);
 
 		//* Отправляем админу
 		if(!empty($this->sendToOwner) && !$this->statement['BDU_admin'])

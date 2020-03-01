@@ -27,6 +27,7 @@ class UniKffBot extends CommonBot implements Game
 		//* Запускаем скрипт
 		parent::__construct()
 			// ->checkLicense()
+			->init()
 			->Router();
 
 	} //__construct
@@ -39,10 +40,25 @@ class UniKffBot extends CommonBot implements Game
 		//* Завершаем скрипт без входящего JSON
 		if(empty($this->inputData)) die ('Нет входящего запроса');
 
-		$this->Router();
+		//* Определяем точку запуска
+		$this->is_group = !is_numeric(substr($this->chat_id,0,1));
 
-		die('OK');
+		//* Защищаем от чужих чатов
+		if($this->is_group && !in_array($this->chat_id, [-1001200025834]))
+		{
+			$this->apiResponseJSON([
+				'chat_id'=>$this->chat_id,
+				'text'=>'Ошибка',
+			]);
+			die;
+		}
 
+		//* Определяем пользователя
+		$this->user_id= $this->cbn['from']['id'];
+
+		$this->log->add(__METHOD__.' $this->user_id=',null,[$this->user_id]);
+
+		return $this;
 	} //* init
 
 
@@ -59,7 +75,7 @@ class UniKffBot extends CommonBot implements Game
 		}
 
 		//* get data
-		$file= "$folder/{$this->chat_id}_base.json";
+		$file= "$folder/{$this->user_id}_base.json";
 		$this->statement = file_exists($file)
 			? json_decode(
 				file_get_contents($file), 1

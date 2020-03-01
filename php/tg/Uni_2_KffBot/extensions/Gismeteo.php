@@ -61,7 +61,7 @@ class Gismeteo extends CommonBot implements Game
 				]];
 
 				$this->apiRequest([
-					'chat_id' => $this->chat_id,
+					'chat_id' => $this->user_id,
 					'text' => "Показать прогноз?",
 					'reply_markup' => [
 						"inline_keyboard" => $forecastButs,
@@ -93,14 +93,14 @@ class Gismeteo extends CommonBot implements Game
 		}
 		else
 		{
-			$this->location = $this->locations[$this->chat_id][0] ?? null;
+			$this->location = $this->locations[$this->user_id][0] ?? null;
 		}
 		return $this;
 	}
 
 	private function setLocation()
 	{
-		$this->locations[$this->chat_id] = [
+		$this->locations[$this->user_id] = [
 			"0" => $this->location
 		];
 
@@ -115,7 +115,7 @@ class Gismeteo extends CommonBot implements Game
 		$text = $text ?? "Уточните свою геолокацию?\nБез данных о вашем местоположении бот не сможет отобразить для вас погоду.";
 
 		$pf = [
-			'chat_id' => $this->chat_id,
+			'chat_id' => $this->user_id,
 			'text' => $text,
 			'reply_markup' => [
 				"keyboard" => [
@@ -141,7 +141,7 @@ class Gismeteo extends CommonBot implements Game
 		//* Кеширование
 		$limHours = 1;
 		//* Имя файла с кешем
-		$cacheFilename = "{$this->base}/{$this->chat_id}.{$method}_" . implode('_', $this->cmd[1]) . ".json";
+		$cacheFilename = "{$this->base}/{$this->user_id}.{$method}_" . implode('_', $this->cmd[1]) . ".json";
 		if(!file_exists($this->base))
 			mkdir($this->base, 0664);
 
@@ -331,7 +331,7 @@ class Gismeteo extends CommonBot implements Game
 		$this->apiRequest([
 			'parse_mode' => 'html',
 			'disable_web_page_preview' => false,
-			'chat_id' => $this->chat_id,
+			'chat_id' => $this->user_id,
 			'text' => $this->collectWeather($data)
 		]);
 	}
