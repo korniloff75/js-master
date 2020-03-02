@@ -26,8 +26,8 @@ class UniKffBot extends CommonBot implements Game
 
 		//* Запускаем скрипт
 		parent::__construct()
-			// ->checkLicense()
 			->init()
+			// ->checkLicense()
 			->Router();
 
 	} //__construct
@@ -44,19 +44,26 @@ class UniKffBot extends CommonBot implements Game
 		$this->is_group = !is_numeric(substr($this->chat_id,0,1));
 
 		//* Защищаем от чужих чатов
-		if($this->is_group && !in_array($this->chat_id, [-1001200025834]))
+		$allowedGrop= !$this->is_group || in_array($this->chat_id, [-1001200025834]);
+
+		if(!$allowedGrop)
 		{
 			$this->apiResponseJSON([
 				'chat_id'=>$this->chat_id,
-				'text'=>'Ошибка',
+				'parse_mode' => 'html',
+				'text'=>"Ошибка\n<pre>{$this->user_id}\n{$this->chat_id}\n{$this->is_group}</pre>",
 			]);
 			die;
 		}
 
-		//* Определяем пользователя
+		//* Добавляем в лицензию
+		if($allowedGrop)
+			$this->addUserLicense(['id'=>$this->user_id]);
+
+		/* //* Определяем пользователя
 		$this->user_id= $this->cbn['from']['id'];
 
-		$this->log->add(__METHOD__.' $this->user_id=',null,[$this->user_id]);
+		$this->log->add(__METHOD__.' $this->user_id=',null,[$this->user_id]); */
 
 		return $this;
 	} //* init
@@ -123,12 +130,8 @@ class UniKffBot extends CommonBot implements Game
 		$inputArr= array_values(array_filter(explode('/', $inputData,3)));
 
 
-
-
-		//* exp
 		//* Aliases
 		// if(is_array($res= self::findCommand($inputArr, $this->message)))
-
 		if(is_array($res= $this->findCommand($inputArr, $this->message)))
 		{
 			$this->log->add(__METHOD__.' findCommand',null,[$res]);
@@ -182,6 +185,7 @@ class UniKffBot extends CommonBot implements Game
 		];
 	}
 
+
 	public function findCommand($inputArr, $message)
 	:?array
 	{
@@ -210,8 +214,9 @@ class UniKffBot extends CommonBot implements Game
 
 		foreach(self::CMD as $cmdName=>&$commands)
 		{
-			// $flip= array_flip($commands);
-			if(in_array($cmd[0], $commands))
+			$is_btn= in_array($cmd[0], $commands);
+
+			if($is_btn || array_key_exists($cmd[0], $commands))
 			{
 				$this->setStatement([
 					'cmdName'=>$cmdName,
@@ -224,18 +229,22 @@ class UniKffBot extends CommonBot implements Game
 				// $this->BTNS = $commands;
 				$this->BTNS = array_merge(self::BTNS, $commands);
 
-				return array_replace_recursive([
+				return $is_btn
+				? array_replace_recursive([
 					'cmdName'=>$cmdName,
 					'cmd'=>$cmd,
-				], self::defineCurCmd($cmd[0], $commands));
+				], self::defineCurCmd($cmd[0], $commands))
+				: [
+					'cmdName'=>$cmdName,
+					'cmd'=>$cmd,
+				];
 				break;
 			}
 		}
 
 		$this->log->add(__METHOD__.' не найдено в self::CMD  $cmdName, $cmd',null,[$cmdName, $cmd]);
 
-		//* Если
-		// if($cmdName= )
+		//* Внутренняя команда
 		return [
 			'cmdName'=> $this->getStatement()->statement['cmdName'],
 			'cmd'=>$cmd
@@ -253,52 +262,51 @@ class UniKffBot extends CommonBot implements Game
 
 interface Game {
 	//* Command list
-	const
-		CMD = [
-			'Draws'=>[
-				'general'=>'⬅️Главная',
-				'start',
-				'drs', 'draws',
-				'info'=>'💡Информация',
-				'advanced'=>'Дополнительно',
-				'help'=>'❓Помощь',
-				'settings'=>'⚙️Настройки',
-				'community'=>'💬Community',
-				'new draw'=>'Создать розыгрыш',
-				'play draw'=>'Разыграть',
-				'show participants'=>'Участники',
-				'participate'=>'Участвовать',
-				'prizes_count',
-			],
-
-			'Gismeteo'=>[
-				'Gismeteo'=>'⛅Погода',
-				'gismeteo',
-				'changeLocation',
-				'forecast_aggregate',
-			],
-
-			'BDU'=>[
-				'familiar'=>'☮ЛК',
-				'fio'=>'Имя',
-				'category'=>'Категория',
-				'hashtags'=>'Стек',
-				'region'=>'Регион',
-				//*
-				'scope'=>'⚛Поиск',
-				'users'=>'👥Пользователи',
-				'list_categories'=>'🖹Категории',
-				// 'list_categories'=>"&#128441;Категории",
-				'add_category'=>'⨁Добавить',
-				// 'add_category'=>'➕Добавить',
-				'remove_category'=>'❌Удалить',
-			],
+	const CMD = [
+		'Draws'=>[
+			'general'=>'⬅️Главная',
+			'start',
+			'drs', 'draws',
+			'info'=>'💡Информация',
+			'advanced'=>'Дополнительно',
+			'help'=>'❓Помощь',
+			'settings'=>'⚙️Настройки',
+			'community'=>'💬Community',
+			'new draw'=>'Создать розыгрыш',
+			'play draw'=>'Разыграть',
+			'show participants'=>'Участники',
+			'participate'=>'Участвовать',
+			'prizes_count',
 		],
 
-		BTNS = [
-			'general'=>'⬅️Главная',
-			'balance'=>'💰Баланс',
-			'info'=>'💡Информация',
+		'Gismeteo'=>[
+			'Gismeteo'=>'⛅Погода',
+			'gismeteo',
+			'changeLocation',
+			'forecast_aggregate',
+		],
+
+		'BDU'=>[
+			'familiar'=>'☮ЛК',
+			'fio'=>'Имя',
+			'category'=>'Категория',
+			'hashtags'=>'Стек',
+			'region'=>'Регион',
+			//*
+			'scope'=>'⚛Поиск',
+			'users'=>'👥Пользователи',
+			'list_categories'=>'🖹Категории',
+			// 'list_categories'=>"&#128441;Категории",
+			'add_category'=>'⨁Добавить',
+			// 'add_category'=>'➕Добавить',
+			'remove_category'=>'❌Удалить',
+		],
+	],
+
+	BTNS = [
+		'general'=>'⬅️Главная',
+		'balance'=>'💰Баланс',
+		'info'=>'💡Информация',
 	],
 
 	CATEGORIES = ['Медицина','Образование','IT','Строительство','Торговля','Финансы','Искусство','Общепит','Другое'],

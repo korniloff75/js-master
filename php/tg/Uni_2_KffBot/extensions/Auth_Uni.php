@@ -18,7 +18,6 @@ class PumpMarket extends Helper implements PumpInt
 	{
 		$this->setConstruct($UKB, $cmd)->init()->routerCmd()->saveCurData();
 
-
 	} //* __construct
 
 

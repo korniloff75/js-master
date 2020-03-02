@@ -420,7 +420,7 @@ class BDU extends Helper
 				switch ($fName) {
 					case 'from':
 						$users.= "{$fld['first_name']}";
-						if(!empty($fld['username'])) $users.= " - @{$fld['username']}";
+						if(!empty($fld['username'])) $users.= " - {$fld['username']}";
 						$users.= "\n";
 						break;
 					case 'realName':

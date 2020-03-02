@@ -9,25 +9,28 @@ require_once "../CommonBot.class.php";
 
 class AntimatKFF extends CommonBot
 {
-	protected
-		# Test mode, bool
-		$__test = 1 ;
-
-
-	protected static
-		$patterns = [
+	const
+		MAX_TRY = 5,
+		PATTERNS = [
 			'~(?:\\s|^|>|\\]).{0,4}?[хx][\\s_]*?[уy](?![бж])[\\s_]*?[иuйеeёюя](?![з])~iu',
 			//* пизда
 			'~п(?![ор]).?[еeёиuі].{0,2}?[зz3].{0,2}?д[aа@]?~iu',
+			//* блядь, пидар
 			'~(?:[^аеор]|\\s|^)[бм]и?ля[дт]ь?|п[еeиu][дg][aаоo]?[рp]~iu',
 			'~г[аaоo]вн[оo]?|г[оoаa]ндон|ж[оo]п[аaеeу]|[^о]мандав?[^лрт]|\\b[аa]\\.?[уy]\\.?[еe]\\.?~iu',
-			'~(?:[^вджл-нр-тч-щ]|^|\\s)[ьъ]?[еeёїє]б\\W*?[^ы\\s]~iu',
+			//* ебать
+			'~(?:[^вджл-нр-тч-щ]|^|\\s)[ьъ]?[еeёїє][б6]\\W*?[^ы\\s]~iu',
 			'~сра[лт]ь?|з[аa]лупа?|др[оo]ч~iu',
 			// фразы
 			'~сос[иу] (?:член|хуй|хер)|(?:член|хуй|хер) сос[иу]~iu',
 			# Test
 			// '~123~',
 		];
+
+	protected
+		# Test mode, bool
+		$__test = 1 ;
+
 
 
 	public function __construct()
@@ -56,7 +59,7 @@ class AntimatKFF extends CommonBot
 		else $this->log->add('$this->message', null, [$this->message]);
 
 		$text = $this->message['text'];
-		$censure = preg_replace(self::$patterns, " <b>[<a href='https://js-master.ru/content/5.Razrabotki/Antimat_plus/'>цензура</a>]</b> ", $text);
+		$censure = preg_replace(self::PATTERNS, " <b>[<a href='https://js-master.ru/content/5.Razrabotki/Antimat_plus/'>цензура</a>]</b> ", $text);
 
 		//* Мата нет
 		if(!strcmp($text, $censure))
@@ -76,7 +79,7 @@ class AntimatKFF extends CommonBot
 
 		if(
 			is_numeric($base[$user]['count'])
-			&& ++$base[$user]['count'] > $this->maxTry
+			&& ++$base[$user]['count'] > self::MAX_TRY
 		)
 		{
 			$censure = "Всё, пиздец тебе, <b>@{$user}</b>!\n\nВсе твои посты с матом впредь будут удаляться. Переходи на литературный язык.";
@@ -92,10 +95,13 @@ class AntimatKFF extends CommonBot
 
 		if(
 			!is_numeric($base[$user]['count'])
-			|| $base[$user]['count'] <= ($this->maxTry + 1)
+			|| $base[$user]['count'] <= (self::MAX_TRY + 1)
 		)
 		{
-			\H::json('base.json', $base);
+			file_put_contents(
+				"base.json",
+				json_encode($base, JSON_UNESCAPED_UNICODE|JSON_NUMERIC_CHECK|JSON_UNESCAPED_SLASHES), LOCK_EX
+			);
 			$this->responseData['text'] = $censure;
 			$this->log->add("apiRequest = ", null, [$this->apiRequest($this->responseData)]);
 		}

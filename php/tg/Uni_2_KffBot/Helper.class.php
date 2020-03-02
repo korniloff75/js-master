@@ -101,7 +101,7 @@ class Helper extends CommonBot implements Game
 
 	protected function showUsername($user)
 	{
-		return "<b>" . ($user['realName'] ?? $user['from']['first_name']) . "</b> @{$user['from']['username']} ({$user['from']['id']})\n";
+		return "<b>" . ($user['realName'] ?? $user['from']['first_name']) . "</b> {$user['from']['username']} ({$user['from']['id']})\n";
 	}
 
 
@@ -176,7 +176,7 @@ class Helper extends CommonBot implements Game
 		}
 		else
 		{
-			$txt= "Бот запущен из группы.\n\nДля использования всех возможностей бота - пеерейдите по ссылке @Uni_2_KffBot";
+			$txt= "Бот запущен из группы.";
 		}
 
 		$arr= [
@@ -197,7 +197,7 @@ class Helper extends CommonBot implements Game
 
 		//* Подготовка и отправка
 
-		$this->fixBtns4Chat($o);
+		// $this->fixBtns4Chat($o);
 
 		$this->log->add(__METHOD__.' $o',null,[$o]);
 
@@ -207,7 +207,7 @@ class Helper extends CommonBot implements Game
 			$o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
 		}
 
-		//* Склеиваем текст перед отправкой
+		//* Склеиваем текст
 		if(is_array($o['text']))
 		{
 			$o['text'] = implode("\n\n", $o['text']);
@@ -235,7 +235,11 @@ class Helper extends CommonBot implements Game
 			unset($draws, $this->data['current draws']);
 			$this->data['change']++;
 		}
-		else $this->apiRequest($o,$method);
+		else
+		{
+			$o['chat_id'] = $this->user_id;
+			$this->apiRequest($o,$method);
+		}
 
 		//* Отправляем админу
 		if(!empty($this->sendToOwner) && !$this->statement['BDU_admin'])

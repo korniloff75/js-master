@@ -19,13 +19,16 @@ class CommonBot extends TG
 {
 	use Get_set {}
 
+	const
+		OWNER= 673976740;
+
 	private
 		$is_owner = null;
 
 	protected
 		// $is_owner = false,
 		$responseData,
-		$license,
+		$license = [],
 		$savedBase = [],
 		//* from tg.class.php
 		$botDir,
@@ -39,13 +42,13 @@ class CommonBot extends TG
 		parent::__construct();
 		$GLOBALS['_bot'] = &$this;
 
-		# Определяем владельца скрипта
-		$this->is_owner = $this->set('is_owner', $this->cbn['from']['id'] === 673976740);
+		//* Определяем владельца скрипта
+		$this->is_owner = $this->set('is_owner', $this->user_id === self::OWNER);
 
 		if(!empty($this->cron))
 		{
 			// var_dump($this->cron, $this->cbn);
-			// echo "\$this->cbn['from']['id'] = " . $this->cbn['from']['id'];
+			// echo "\$this->user_id = " . $this->user_id;
 			// $this->is_owner = 1;
 		}
 
@@ -54,7 +57,7 @@ class CommonBot extends TG
 			'parse_mode' => 'html',
 		];
 
-		# Отсекаем inline
+		//* Отсекаем inline
 		if(isset($this->message['message_id']))
 			$this->responseData['message_id'] = $this->message['message_id'];
 
@@ -84,50 +87,55 @@ class CommonBot extends TG
 		return $this;
 	} // init
 
+
 	/**
 	 * REQUIRES
 	 * array child::license = [
-	 * 	chat_id => "25-04-07", ...
+	 * 	chat_id => "2025-04-07", [<string term>,<string name>, optional<bool is_blocked>] ...
 	 * ]
 	 */
 	protected function checkLicense($responseData = null)
 	{
-		$this->license = \H::json("{$this->botDir}/license.json");
-		# Если нет лицензии, создаём ее
-		if($this->get('is_owner') && !count($this->license))
+		if($license= file_get_contents("{$this->botDir}/license.json"))
 		{
-			$this->license = [$this->message['chat']['id'] => "3000-01-01"];
-			\H::json("{$this->botDir}/license.json", $this->license);
+			$this->license = json_decode($license,1);
+		}
+		# Если нет лицензии, создаём ее
+		elseif($this->get('is_owner'))
+		{
+			$this->addUserLicense([
+				'id'=> $this->user_id
+			]);
 		}
 
 		array_walk($this->license, function(&$data,$id){
 			if(is_array($data))
 			{
-				$data['date'] = &$data[0];
+				$data['term'] = &$data[0];
 				$data['name'] = &$data[1];
 				$data['blocked'] = &$data[2];
-				// list($data['date'], $data['name'], $data['blocked']) = $data;
+				// list($data['term'], $data['name'], $data['blocked']) = $data;
 			}
 			else
 			{
-				$data = ['date'=>$data];
+				$data = ['term'=>$data];
 			}
 			/* $this->log->add("\$data['blocked']",null,[
 				$data['blocked'],
 				$data,
-				(new DateTime() < new DateTime($data['date'])),
-				new DateTime(), new DateTime($data['date'])
+				(new DateTime() < new DateTime($data['term'])),
+				new DateTime(), new DateTime($data['term'])
 			]); */
 
 			if (
 				//* Remove olds
-				(new DateTime() > new DateTime($data['date']))
+				(new DateTime() > new DateTime($data['term']))
 				|| !empty($data['blocked'])
 			) unset($this->license[$id]);
-		});
+		}); //walk
 
 		$this->log->add(__METHOD__." $this->botDir/license.json ===", null, [
-			($id = $this->message['chat']['id']),
+			$this->message['chat']['id'],
 			$this->license,
 		]);
 
@@ -137,7 +145,8 @@ class CommonBot extends TG
 			&& (
 				!$this->license
 				|| !in_array($id, array_keys($this->license))
-				|| new DateTime() > new DateTime($this->license[$id]['date'])
+				|| !array_key_exists($id, $this->license)
+				|| new DateTime() > new DateTime($this->license[$id]['term'])
 			)
 		)
 		{
@@ -158,7 +167,26 @@ class CommonBot extends TG
 		}
 
 		return $this;
+	}
 
+
+	/**
+	 ** Добавляем запись в лицензию
+	 */
+	protected function addUserLicense($user_data)
+	{
+		if(
+			$this->user_id != $user_data['id']
+			|| array_key_exists($this->user_id, $this->license)
+		) return;
+
+		$this->license[$this->user_id]= [
+			$user_data['term'] ?? "3000-01-01",
+			"{$this->message['from']['first_name']} "
+			. $this->message['from']['last_name']??''
+			. " {$this->message['from']['username']}"
+		];
+		$this->license['change']= 1;
 	}
 
 
@@ -233,8 +261,26 @@ class CommonBot extends TG
 		}
 	}
 
+
 	public function __destruct()
 	{
+		if( !empty($this->license['change']) )
+		{
+			array_walk($this->license, function(&$data,$id){
+				if(is_array($data))
+				{
+					unset($data['term'],$data['name'],$data['blocked']);
+				}
+			});
+
+			unset($this->license['change']);
+
+			file_put_contents(
+				"{$this->botDir}/license.json",
+				json_encode($this->license, JSON_UNESCAPED_UNICODE|JSON_NUMERIC_CHECK|JSON_UNESCAPED_SLASHES), LOCK_EX
+			);
+		}
+
 		# Выводим логи
 		if($this->__test) $this->log->print();
 	}

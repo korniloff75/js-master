@@ -173,8 +173,8 @@ class Draws extends Helper
 				]);
 				break;
 
-			case 'general':
 			case 'start':
+			case 'general':
 				$draw= [
 					/* 'text' => isset($draws['owner'])
 					? "Создан розыгрыш от {$draws['owner']['first_name']}. Спешите принять участие!"

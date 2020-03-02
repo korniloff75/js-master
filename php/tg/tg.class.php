@@ -209,12 +209,18 @@ class TG {
 			$this->text = $cb['text'];
 		}
 
-		$this->log->add("
+		//* Определяем пользователя
+		$this->user_id= $this->cbn['from']['id'];
+
+		$this->log->add(' $this->user_id=',null,[$this->user_id]);
+
+		$this->log->add(__METHOD__."
 		\$cbn = $cbn\n
-		\$this->chat_id = {$this->chat_id}\n\$this->cbn= ", null, [$this->cbn]);
+		\$this->chat_id = {$this->chat_id}
+		\$this->user_id = {$this->user_id}
+		\$this->cbn= ", null, [$this->cbn]);
 
 		return $cb;
-
 	} // findCallback
 
 
