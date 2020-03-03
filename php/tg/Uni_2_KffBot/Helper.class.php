@@ -99,9 +99,10 @@ class Helper extends CommonBot implements Game
 	}
 
 
-	protected function showUsername($user)
+	protected function showUsername(array &$user)
 	{
-		return "<b>" . ($user['realName'] ?? $user['from']['first_name']) . "</b> {$user['from']['username']} ({$user['from']['id']})\n";
+		$arr= $user['from'] ?? $user;
+		return "<b>" . ($arr['realName'] ?? $arr['first_name']) . "</b> {$arr['username']} ({$arr['id']})\n";
 	}
 
 
@@ -172,7 +173,7 @@ class Helper extends CommonBot implements Game
 		//* Бот или чат?
 		if(!$this->is_group)
 		{
-			$txt= 'Вы находитесь в частном боте группы Добрые люди.';
+			$txt= 'Вы находитесь в боте чата Бюро Добрых Услуг.';
 		}
 		else
 		{

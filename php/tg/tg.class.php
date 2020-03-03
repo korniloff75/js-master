@@ -258,6 +258,7 @@ class TG {
 			$responseSetWebhook = $this->apiRequest([
 				'url' => $botURL,
 				'parse_mode' => null,
+				// 'allowed_updates' => true,
 			], 'setWebhook') ?? [];
 
 			$this->log->add("\$botURL = {$botURL}");

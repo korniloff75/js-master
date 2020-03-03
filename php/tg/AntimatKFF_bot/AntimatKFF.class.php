@@ -11,18 +11,30 @@ class AntimatKFF extends CommonBot
 {
 	const
 		MAX_TRY = 5,
+		PRETREATMENT = [
+			[
+				'~[a@]~i','~6~','~B~','~g~','~[eєї]~iu','~[z3]~i','~[uiі]~iu','~[o0]~i','~p~i','~y~i','~x~i',"~(.)\\1+~u",
+				"~['`\"*_|/\\.,\\~\\-+#$%^&\\?\\!\\(\\)]~"
+			],
+			[
+				'а','б','в','д','е','з','и','о','р','у','х', "$1",'',''
+			]
+		],
+
+		REPLACEMENT = " <b>[<a href='https://js-master.ru/content/5.Razrabotki/Antimat_plus/'>цензура</a>]</b> ",
+
 		PATTERNS = [
-			'~(?:\\s|^|>|\\]).{0,4}?[хx][\\s_]*?[уy](?![бж])[\\s_]*?[иuйеeёюя](?![з])~iu',
+			'~х\\s*?у(?![бж])\\s*?[ийеёюя](?![з])~iu',
 			//* пизда
-			'~п(?![ор]).?[еeёиuі].{0,2}?[зz3].{0,2}?д[aа@]?~iu',
+			'~п(?![ор]).?[еёи].{0,2}?з.{0,2}?да?~iu',
 			//* блядь, пидар
-			'~(?:[^аеор]|\\s|^)[бм]и?ля[дт]ь?|п[еeиu][дg][aаоo]?[рp]~iu',
-			'~г[аaоo]вн[оo]?|г[оoаa]ндон|ж[оo]п[аaеeу]|[^о]мандав?[^лрт]|\\b[аa]\\.?[уy]\\.?[еe]\\.?~iu',
+			'~(?:[^аеор]|\\s|^)[бм]и?ля[дт]ь?|п[еи]д[ао]?р~iu',
+			'~г[ао]вно?|г[ао]ндон|жоп[аеу]|[^о]мандав?[^лрт]|\\bауе~iu',
 			//* ебать
-			'~(?:[^вджл-нр-тч-щ]|^|\\s)[ьъ]?[еeёїє][б6]\\W*?[^ы\\s]~iu',
-			'~сра[лт]ь?|з[аa]лупа?|др[оo]ч~iu',
+			'~(?:[^вджл-нр-тч-щ]|^|\\s)[ьъ]?[её]б\\W*?[^ы\\b]~iu',
+			'~сра[лт]ь?|залупа?|дроч~iu',
 			// фразы
-			'~сос[иу] (?:член|хуй|хер)|(?:член|хуй|хер) сос[иу]~iu',
+			'~педик|гомик~iu',
 			# Test
 			// '~123~',
 		];
@@ -40,9 +52,10 @@ class AntimatKFF extends CommonBot
 
 		/* Запускаем скрипт
 		 * Protect from CommonBot
-		 * $this->checkLicense();
 		*/
-		parent::__construct()->checkLicense()->init();
+		parent::__construct()
+			->checkLicense()
+			->init();
 
 	} //__construct
 
@@ -59,17 +72,19 @@ class AntimatKFF extends CommonBot
 		else $this->log->add('$this->message', null, [$this->message]);
 
 		$text = $this->message['text'];
-		$censure = preg_replace(self::PATTERNS, " <b>[<a href='https://js-master.ru/content/5.Razrabotki/Antimat_plus/'>цензура</a>]</b> ", $text);
+		$pretreatmentText = preg_replace(self::PRETREATMENT[0], self::PRETREATMENT[1], $text);
+
+		$censure = preg_replace(self::PATTERNS, self::REPLACEMENT, $pretreatmentText);
 
 		//* Мата нет
-		if(!strcmp($text, $censure))
+		if(!strcmp($pretreatmentText, $censure))
 		{
-			$this->log->add("censure FAIL", null, [$text, $censure]);
+			$this->log->add("censure FAIL", null, [$text,$pretreatmentText, $censure]);
 			return;
 		}
 		else
 		{
-			$this->log->add("censure SUCCESS");
+			$this->log->add("censure SUCCESS", null, [$text,$pretreatmentText, $censure]);
 		}
 
 		$user = $this->message['from']['username'];

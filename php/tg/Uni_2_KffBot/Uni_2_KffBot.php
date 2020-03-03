@@ -27,7 +27,10 @@ class UniKffBot extends CommonBot implements Game
 		//* Запускаем скрипт
 		parent::__construct()
 			->init()
-			// ->checkLicense()
+			//* Добавляем в лицензию
+			->checkLicense(null, [
+				'condition'=> $this->is_group && in_array($this->chat_id, [-1001200025834])
+			])
 			->Router();
 
 	} //__construct
@@ -56,20 +59,11 @@ class UniKffBot extends CommonBot implements Game
 			die;
 		}
 
-		//* Добавляем в лицензию
-		if($allowedGrop)
-			$this->addUserLicense(['id'=>$this->user_id]);
-
-		/* //* Определяем пользователя
-		$this->user_id= $this->cbn['from']['id'];
-
-		$this->log->add(__METHOD__.' $this->user_id=',null,[$this->user_id]); */
-
 		return $this;
 	} //* init
 
 
-	protected function getStatement()
+	public function getStatement()
 	{
 		if(!empty($this->statement))
 			return $this;
@@ -132,7 +126,9 @@ class UniKffBot extends CommonBot implements Game
 
 		//* Aliases
 		// if(is_array($res= self::findCommand($inputArr, $this->message)))
-		if(is_array($res= $this->findCommand($inputArr, $this->message)))
+		if(
+			is_array($res= $this->findCommand($inputArr, $this->message))
+		)
 		{
 			$this->log->add(__METHOD__.' findCommand',null,[$res]);
 
@@ -144,7 +140,7 @@ class UniKffBot extends CommonBot implements Game
 			$this->log->add(__METHOD__.' findCommand FAIL',E_USER_WARNING,[$res]);
 		}
 
-		$this->log->add(__METHOD__.' $this->statement_1',null,[$this->statement,$cmdName,$cmd,$this->BTNS]);
+		$this->log->add(__METHOD__.' $this->statement_1',null,[$this->statement,$cmdName,$cmd]);
 
 
 		if(!empty($cmdName))
@@ -251,10 +247,13 @@ class UniKffBot extends CommonBot implements Game
 		];
 	}
 
+
 	public function __destruct()
 	{
 		$this->log->add(__METHOD__.' $this->statement_3',null,[$this->statement]);
 		$this->saveStatement();
+
+		parent::__destruct();
 	}
 
 } //* UniKffBot

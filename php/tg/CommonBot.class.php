@@ -94,21 +94,16 @@ class CommonBot extends TG
 	 * 	chat_id => "2025-04-07", [<string term>,<string name>, optional<bool is_blocked>] ...
 	 * ]
 	 */
-	protected function checkLicense($responseData = null)
+	protected function checkLicense($responseData = null, $user_data=null)
 	{
-		if($license= file_get_contents("{$this->botDir}/license.json"))
-		{
-			$this->license = json_decode($license,1);
-		}
-		# Если нет лицензии, создаём ее
-		elseif($this->get('is_owner'))
-		{
-			$this->addUserLicense([
-				'id'=> $this->user_id
-			]);
-		}
+		$this->addUserLicense($user_data);
+
+		// $this->log->add(__METHOD__.' $this->license',null,[$this->license]);
 
 		array_walk($this->license, function(&$data,$id){
+			if(!is_numeric($id))
+				return;
+
 			if(is_array($data))
 			{
 				$data['term'] = &$data[0];
@@ -120,32 +115,31 @@ class CommonBot extends TG
 			{
 				$data = ['term'=>$data];
 			}
-			/* $this->log->add("\$data['blocked']",null,[
-				$data['blocked'],
+
+			/* $this->log->add("\$data",null,[
 				$data,
+				$data['term'],
 				(new DateTime() < new DateTime($data['term'])),
 				new DateTime(), new DateTime($data['term'])
 			]); */
 
 			if (
 				//* Remove olds
-				(new DateTime() > new DateTime($data['term']))
-				|| !empty($data['blocked'])
-			) unset($this->license[$id]);
+				new DateTime() > new DateTime($data['term'])
+			) $data['blocked']= 1;
 		}); //walk
 
-		$this->log->add(__METHOD__." $this->botDir/license.json ===", null, [
+		/* $this->log->add(__METHOD__." $this->botDir/license.json ===", null, [
 			$this->message['chat']['id'],
 			$this->license,
-		]);
+		]); */
 
 		if(
 			$this->message
 			&& ($id = $this->message['chat']['id'])
 			&& (
-				!$this->license
-				|| !in_array($id, array_keys($this->license))
-				|| !array_key_exists($id, $this->license)
+				!array_key_exists($id, $this->license)
+				|| !empty($this->license[$id]['blocked'])
 				|| new DateTime() > new DateTime($this->license[$id]['term'])
 			)
 		)
@@ -173,15 +167,25 @@ class CommonBot extends TG
 	/**
 	 ** Добавляем запись в лицензию
 	 */
-	protected function addUserLicense($user_data)
+	private function addUserLicense($user_data=null)
 	{
+		$user_data= $user_data ?? ['condition'=>false];
+
 		if(
-			$this->user_id != $user_data['id']
+			empty($this->license)
+			&& ($license= file_get_contents("{$this->botDir}/license.json"))
+		)
+		{
+			$this->license = json_decode($license,1);
+		}
+
+		if(
+			!$user_data['condition']
 			|| array_key_exists($this->user_id, $this->license)
 		) return;
 
 		$this->license[$this->user_id]= [
-			$user_data['term'] ?? "3000-01-01",
+			($user_data['term'] ?? "3000-01-01"),
 			"{$this->message['from']['first_name']} "
 			. $this->message['from']['last_name']??''
 			. " {$this->message['from']['username']}"
@@ -243,6 +247,7 @@ class CommonBot extends TG
 		// return array_keys($posArr)[0] ?? false;
 	}
 
+
 	//* Общая рассылка
 	protected function sendToAll($txt)
 	{
@@ -267,10 +272,7 @@ class CommonBot extends TG
 		if( !empty($this->license['change']) )
 		{
 			array_walk($this->license, function(&$data,$id){
-				if(is_array($data))
-				{
-					unset($data['term'],$data['name'],$data['blocked']);
-				}
+				$data= [$data['term'],$data['name'],$data['blocked']];
 			});
 
 			unset($this->license['change']);
@@ -281,7 +283,9 @@ class CommonBot extends TG
 			);
 		}
 
+		$this->log->add(__METHOD__,null,$this->license);
+
 		# Выводим логи
-		if($this->__test) $this->log->print();
+		// if($this->__test) $this->log->print();
 	}
 } // CommonBot

@@ -32,8 +32,9 @@ class Draws extends Helper
 
 		$this->getCurData();
 
-		$this->drawsOwner = isset($this->data['current draws']['owner'])
-		&& $this->user_id === $this->data['current draws']['owner']['id'];
+		/* $this->drawsOwner = isset($this->data['current draws']['owner'])
+		&& $this->user_id === $this->data['current draws']['owner']['id']; */
+		$this->drawsOwner = $this->UKB->getStatement()->statement['drawsOwner'];
 
 		$this->data['change'] = 0;
 
@@ -102,7 +103,7 @@ class Draws extends Helper
 
 				$this->addSelf = 1;
 
-				$this->sendToAll("Создан розыгрыш от <b>{$this->cbn['from']['first_name']} @{$this->cbn['from']['username']}</b>. Спешите принять участие!");
+				//todo $this->sendToAll("Создан розыгрыш от <b>{$this->cbn['from']['first_name']} @{$this->cbn['from']['username']}</b>. Спешите принять участие!");
 				break;
 
 			case 'show participants':
