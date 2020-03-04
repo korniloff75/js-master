@@ -12,7 +12,7 @@ trait Curl
 	 */
 	protected function findAnzProxy(?string $proxy=null, bool $stop=false)
 	{
-		$timeoutInSeconds = 1;
+		$timeoutInSeconds = 1.5;
 		$parsePath = 'https://cloudflare-ipfs.com/ipns/pacipfs2.antizapret.prostovpn.org/proxy-nossl.js';
 
 		if(file_exists(self::$proxyPath))

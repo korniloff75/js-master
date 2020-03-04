@@ -185,9 +185,9 @@ class CommonBot extends TG
 		) return;
 
 		$this->license[$this->user_id]= [
-			($user_data['term'] ?? "3000-01-01"),
+			$user_data['term'] ?? "3000-01-01",
 			"{$this->message['from']['first_name']} "
-			. $this->message['from']['last_name']??''
+			. ($this->message['from']['last_name']??'')
 			. " {$this->message['from']['username']}"
 		];
 		$this->license['change']= 1;
@@ -249,7 +249,7 @@ class CommonBot extends TG
 
 
 	//* Общая рассылка
-	protected function sendToAll($txt)
+	protected function sendToAll($txt,$btns=null)
 	{
 		$txt = str_replace(
 			['!','синий','жёлтый'],
@@ -257,12 +257,18 @@ class CommonBot extends TG
 			$txt
 		);
 
-		foreach(array_keys($this->license) as $id)
+		$o= ['text'=> "❗️❗️❗️\n$txt",];
+
+		if($btns)
+			$o['reply_markup']= ['inline_keyboard'=>$btns];
+
+		foreach($this->license as $id=>$data)
 		{
-			$this->apiRequest([
-				'chat_id'=> $id,
-				'text'=> "❗️❗️❗️\n$txt",
-			]);
+			if(!empty($data['blocked']) || !is_numeric($id))
+				continue;
+
+			$o['chat_id']= $id;
+			$this->apiRequest($o);
 		}
 	}
 

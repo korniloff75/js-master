@@ -83,7 +83,7 @@ class UniKffBot extends CommonBot implements Game
 			)
 			: [];
 
-		$this->statement = array_merge($this->statement, ['file'=>$file,'change'=>0]);
+		$this->statement = array_merge(['file'=>$file,'change'=>0], $this->statement);
 
 		return $this;
 	}
@@ -118,6 +118,11 @@ class UniKffBot extends CommonBot implements Game
 	{
 		$inputData = $this->cbn['data'] ?? $this->message["text"];
 
+		/* if(!empty($this->message))
+			$this->setStatement([
+				'last'=> $this->message
+			]); */
+
 		//* FIX multibots
 		$inputData= explode('@', $inputData)[0];
 		//* Define command
@@ -139,6 +144,9 @@ class UniKffBot extends CommonBot implements Game
 		{
 			$this->log->add(__METHOD__.' findCommand FAIL',E_USER_WARNING,[$res]);
 		}
+
+		if(empty($this->statement))
+			$this->getStatement();
 
 		$this->log->add(__METHOD__.' $this->statement_1',null,[$this->statement,$cmdName,$cmd]);
 

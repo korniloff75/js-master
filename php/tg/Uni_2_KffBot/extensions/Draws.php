@@ -6,7 +6,8 @@ class Draws extends Helper
 
 	const
 		FOLDER = __DIR__.'/../Game_2',
-		BASE = self::FOLDER . '/base.json';
+		BASE = self::FOLDER . '/base.json',
+		IMG = '/assets/roullete.jpg';
 
 	protected
 		$draws;
@@ -77,11 +78,12 @@ class Draws extends Helper
 				$this->UKB->setStatement([
 					'drawsOwner'=>1
 				]);
+				$this->log->add('new draw $this->statement[drawsOwner]=',null, [$this->statement['drawsOwner']]);
 				break;
 
 			case 'prizes_count':
-
-				$this->log->add('prizes_count',null, [$this->drawsOwner]);
+				$this->log->add('prizes_count $this->drawsOwner=',null, [$this->drawsOwner]);
+				$this->log->add('prizes_count $this->statement[drawsOwner]=',null, [$this->statement['drawsOwner']]);
 
 				if( !$this->drawsOwner && !$this->statement['drawsOwner'] )
 				{
@@ -103,12 +105,16 @@ class Draws extends Helper
 
 				$this->addSelf = 1;
 
-				//todo $this->sendToAll("Создан розыгрыш от <b>{$this->cbn['from']['first_name']} @{$this->cbn['from']['username']}</b>. Спешите принять участие!");
+				//! sendToAll
+				$this->sendToAll("Создан розыгрыш от <b>{$this->cbn['from']['first_name']} @{$this->cbn['from']['username']}</b>. Спешите принять участие!", [[[
+					'text' => self::CMD['Draws']['participate'],
+					'callback_data'=> 'draws/participate'
+				]]]);
 				break;
 
 			case 'show participants':
 				$o = $this->showParticipants();
-				$o['text'] .= "\n<a href='{$this->urlDIR}/assets/roullete.jpg' title='ZorroClan'>&#8205;</a>";
+				$o['text'] .= "\n<a href='{$this->urlDIR}".self::IMG."' title='ZorroClan'>&#8205;</a>";
 				break;
 
 			//* Розыгрыш
@@ -138,7 +144,7 @@ class Draws extends Helper
 				}
 
 				$o = $this->showMainMenu([
-					'text' => "<u>Победители:</u>\n\n$winStr\n<a href='{$this->urlDIR}/assets/roullete.jpg' title='ZorroClan'>&#8205;</a>",
+					'text' => "<u>Победители:</u>\n\n$winStr\n<a href='{$this->urlDIR}".self::IMG."' title='ZorroClan'>&#8205;</a>",
 				]);
 
 				$o = array_merge_recursive($this->showParticipants(), $o);
@@ -165,7 +171,7 @@ class Draws extends Helper
 					$count++;
 
 					$o = [
-						'text' => "Участник " . $this->showUsername($this->cbn['from']) . " зарегистрировался в розыгрыше от {$owner['first_name']}.\nНа данный момент зарегистрировано {$count} чел."
+						'text' => "Участник " . $this->showUsername($this->cbn['from']) . " зарегистрировался в розыгрыше от {$owner['first_name']}.\nНа данный момент зарегистрировано {$count} чел.",
 					];
 					$this->sendToOwner = 1;
 				}
@@ -224,6 +230,23 @@ class Draws extends Helper
 					$o['reply_markup']['keyboard'] = array_merge_recursive($o['reply_markup']['keyboard'], [$keyboard]);
 			}
 
+			//* Add inline btns
+			/* if(!empty($keyboard))
+			{
+				$iKeyboard = &$o['reply_markup']['inline_keyboard'];
+				$r = [];
+				foreach($keyboard as $btn)
+				{
+					$r[]= [
+						'text'=> $btn['text'],
+						'callback_data'=> $btn['text'],
+					];
+					// $this->log->add(__METHOD__,null,[$btn]);
+				}
+				$iKeyboard= [$r];
+				// $o['method']= 'editMessageText';
+			} */
+
 			//* Склеиваем текст перед отправкой
 			if(is_array($o['text']))
 			{
@@ -275,7 +298,7 @@ class Draws extends Helper
 			$ps .= $this->showUsername($p);
 		}
 		return [
-			'text' => "<u>Зарегистрировались:</u> " . count($draws['participants']) . " чел.\n\n$ps\n<a href='{$this->urlDIR}/assets/Zorro_300.png' title='ZorroClan'>&#8205;</a>"
+			'text' => "<u>Зарегистрировались:</u> " . count($draws['participants']) . " чел.\n\n$ps\n<a href='{$this->urlDIR}".self::IMG."' title='ZorroClan'>&#8205;</a>"
 		];
 	}
 

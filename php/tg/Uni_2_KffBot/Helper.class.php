@@ -215,41 +215,28 @@ class Helper extends CommonBot implements Game
 		}
 
 		//* Send
-		$method= !empty($message_id= $this->cbn['message']['message_id'])
-			? 'editMessageText'
-			: 'sendMessage';
+		$o['chat_id'] = $o['chat_id'] ?? $this->user_id;
 
-		if($method)
+		/* if(!empty($method = $o['method']))
 		{
-			$o['message_id'] = $message_id;
-		}
-
-		if(!empty($this->toAllParticipants))
-		{
-			$this->toAllParticipants = null;
-			foreach($draws['participants'] as $p)
+			if($method === 'editMessageText')
 			{
-				$o['chat_id'] = $p['id'];
-				$this->apiRequest($o);
+				$o['message_id'] = $this->cbn['message']['message_id'] ?? $this->statenent['last']['message_id'];
 			}
-
-			unset($draws, $this->data['current draws']);
-			$this->data['change']++;
-		}
-		else
-		{
-			$o['chat_id'] = $this->user_id;
+			unset($o['method']);
 			$this->apiRequest($o,$method);
 		}
+		else */ $this->apiRequest($o);
 
 		//* Отправляем админу
-		if(!empty($this->sendToOwner) && !$this->statement['BDU_admin'])
+		/* if(!empty($this->sendToOwner) && !$this->statement['BDU_admin'])
 		{
 			$this->sendToOwner = null;
 			$o['chat_id'] = $draws['owner']['id'];
 			$this->apiRequest($o);
-		}
+		} */
 	}
+
 
 	public function __destruct()
 	{
