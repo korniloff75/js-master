@@ -99,10 +99,10 @@ class Helper extends CommonBot implements Game
 	}
 
 
-	protected function showUsername(array &$user)
+	protected function showUsername(array &$user, $tag=null)
 	{
 		$arr= $user['from'] ?? $user;
-		return "<b>" . ($arr['realName'] ?? $arr['first_name']) . "</b> {$arr['username']} ({$arr['id']})\n";
+		return "<b>" . ($arr['realName'] ?? $arr['first_name']) . "</b> ". ($tag?'@':'') ."{$arr['username']} ({$arr['id']})\n";
 	}
 
 
@@ -160,16 +160,6 @@ class Helper extends CommonBot implements Game
 			],
 		];
 
-		/* $arr = [
-			//* Чат или бот?
-			'text' => is_numeric(substr($this->chat_id,0,1))
-			? 'Вы находитесь в частном боте группы Добрые люди.'
-			: "Бот запущен из группы, где не имеет возможности интерактивного диалога с вами.\n\nДля использования всех возможностей бота - пеерейдите по ссылке @Uni_2_KffBot",
-			'reply_markup' => [
-				"keyboard" => $keyboard,
-			]
-		]; */
-
 		//* Бот или чат?
 		if(!$this->is_group)
 		{
@@ -203,7 +193,9 @@ class Helper extends CommonBot implements Game
 		$this->log->add(__METHOD__.' $o',null,[$o]);
 
 		//* add keyboard options
-		if(!empty($o['reply_markup']['keyboard']))
+		if(
+			!empty($o['reply_markup']['keyboard'])
+		)
 		{
 			$o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
 		}

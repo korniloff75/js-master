@@ -59,7 +59,13 @@ class Draws extends Helper
 				if(!empty($draws))
 				{
 					$o = $this->showMainMenu([
-						'text' => "Вы не можете создать розыгрыш, пока не разыгран предыдущий от {$draws['owner']['first_name']} @{$draws['owner']['username']}. Но вы можете участвовать в существующем!"
+						'text' => "Вы не можете создать розыгрыш, пока не разыгран предыдущий от {$draws['owner']['first_name']} @{$draws['owner']['username']}. Но вы можете участвовать в существующем!",
+						'reply_markup'=> [
+							'inline_keyboard'=>[[[
+								'text' => self::CMD['Draws']['participate'],
+								'callback_data'=> 'Draws/participate'
+							]]]
+						]
 					]);
 				break;
 				}
@@ -140,7 +146,7 @@ class Draws extends Helper
 						break;
 
 					$winners[] = $draws['participants'][$i];
-					$winStr .= $this->showUsername($winners[$i]);
+					$winStr .= $this->showUsername($winners[$i],'tag');
 				}
 
 				$o = $this->showMainMenu([
@@ -175,9 +181,15 @@ class Draws extends Helper
 					];
 					$this->sendToOwner = 1;
 				}
-				else $o = $this->showMainMenu([
-					'text' => 'Для вас нет доступных розыгрышей в настоящий момент.',
-				]);
+				else $o = [
+					'text' => 'Для вас нет доступных розыгрышей в настоящий момент. Но вы можете создать новый.',
+					'reply_markup'=> [
+						'inline_keyboard'=>[[[
+							'text' => self::CMD['Draws']['new draw'],
+							'callback_data'=> 'Draws/new draw'
+						]]]
+					]
+				];
 				break;
 
 			case 'start':
@@ -218,8 +230,6 @@ class Draws extends Helper
 				//* Создать
 				else
 					$keyboard = [['text' => self::CMD['Draws']['new draw']]];
-
-				// $o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
 
 				//* Добавляем кнопки
 				if(
