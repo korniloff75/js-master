@@ -4,6 +4,11 @@ class Helper extends CommonBot implements Game
 	protected
 		$data;
 
+	public function __construct()
+	{
+		// parent::__construct();
+	}
+
 	protected function getCurData()
 	{
 		if(!file_exists(static::FOLDER))
@@ -163,21 +168,22 @@ class Helper extends CommonBot implements Game
 		//* Бот или чат?
 		if(!$this->is_group)
 		{
-			$txt= 'Вы находитесь в боте чата Бюро Добрых Услуг.';
+			$txt= 'Вы находитесь в боте чата <a href="https://t.me/joinchat/KCwRpEeG8OoZmye-5Cz55Q">Бюро Добрых Услуг</a>.';
 		}
 		else
 		{
 			$txt= "Бот запущен из группы.";
 		}
 
-		$arr= [
+		$o= array_merge_recursive([
 			'text'=>$txt,
 			'reply_markup' => [
 				"keyboard" => $keyboard,
 			]
-		];
+		],$o);
 
-		return array_merge_recursive($arr,$o);
+		$this->checkSendData($o);
+		return $o;
 	} //* showMainMenu
 
 
@@ -190,21 +196,9 @@ class Helper extends CommonBot implements Game
 
 		// $this->fixBtns4Chat($o);
 
-		$this->log->add(__METHOD__.' $o',null,[$o]);
+		// $this->log->add(__METHOD__.' $o',null,[$o]);
 
-		//* add keyboard options
-		if(
-			!empty($o['reply_markup']['keyboard'])
-		)
-		{
-			$o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
-		}
-
-		//* Склеиваем текст
-		if(is_array($o['text']))
-		{
-			$o['text'] = implode("\n\n", $o['text']);
-		}
+		$this->checkSendData($o);
 
 		//* Send
 		$o['chat_id'] = $o['chat_id'] ?? $this->user_id;
@@ -218,15 +212,8 @@ class Helper extends CommonBot implements Game
 			unset($o['method']);
 			$this->apiRequest($o,$method);
 		}
-		else */ $this->apiRequest($o);
-
-		//* Отправляем админу
-		/* if(!empty($this->sendToOwner) && !$this->statement['BDU_admin'])
-		{
-			$this->sendToOwner = null;
-			$o['chat_id'] = $draws['owner']['id'];
-			$this->apiRequest($o);
-		} */
+		else */
+		$this->apiRequest($o);
 	}
 
 

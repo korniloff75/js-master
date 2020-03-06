@@ -5,7 +5,8 @@ class Gismeteo extends CommonBot implements Game
 	use UniConstruct;
 
 	const
-		FOLDER = __DIR__.'/../base_GM';
+		FOLDER = __DIR__.'/../base_GM',
+		LIM_HOURS = 1;
 
 	private
 		$base = __DIR__.'/../base_GM';
@@ -45,7 +46,7 @@ class Gismeteo extends CommonBot implements Game
 				$this->requestGM('by_day_part')->methodSwitcher();
 				break;
 
-			default:
+			case 'Gismeteo':
 				$this->requestGM('current')->responseGMHandler();
 				$forecastButs = [[]];
 				for ($i=3; $i <= 5; $i++) {
@@ -60,7 +61,19 @@ class Gismeteo extends CommonBot implements Game
 					"callback_data" => "/gismeteo/changeLocation"
 				]];
 
-				$this->apiRequest([
+				//* Выводим текущее положение
+				$this->apiRequest(array_merge([
+					'chat_id' => $this->user_id,
+					'title' => "Текущие координаты",
+					'reply_markup' => [
+						"inline_keyboard" => $forecastButs,
+						"one_time_keyboard" => true,
+						"resize_keyboard" => true,
+						"selective" => true
+					]
+				], $this->location), 'sendVenue');
+
+				/* $this->apiRequest([
 					'chat_id' => $this->user_id,
 					'text' => "Показать прогноз?",
 					'reply_markup' => [
@@ -70,7 +83,7 @@ class Gismeteo extends CommonBot implements Game
 						"selective" => true
 					]
 					// 'callback_data' =>
-				]);
+				]); */
 				break;
 		}
 
@@ -88,8 +101,6 @@ class Gismeteo extends CommonBot implements Game
 		if(!empty($this->location = @$this->message['location']))
 		{
 			$this->setLocation();
-			// todo удалить кнопку
-			// editMessageReplyMarkup
 		}
 		else
 		{
@@ -138,8 +149,6 @@ class Gismeteo extends CommonBot implements Game
 	private function requestGM($method = 'current')
 	:object
 	{
-		//* Кеширование
-		$limHours = 1;
 		//* Имя файла с кешем
 		$cacheFilename = "{$this->base}/{$this->user_id}.{$method}_" . implode('_', $this->cmd[1]) . ".json";
 		if(!file_exists($this->base))
@@ -163,7 +172,7 @@ class Gismeteo extends CommonBot implements Game
 
 		if(
 			file_exists($cacheFilename)
-			&& (time() - filemtime($cacheFilename) < $limHours * 3600)
+			&& (time() - filemtime($cacheFilename) < self::LIM_HOURS * 3600)
 			&& $this->cmd[0] !== 'setLocation'
 		)
 		{

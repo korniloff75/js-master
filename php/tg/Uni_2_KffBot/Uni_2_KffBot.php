@@ -29,7 +29,7 @@ class UniKffBot extends CommonBot implements Game
 			->init()
 			//* Добавляем в лицензию
 			->checkLicense(null, [
-				'condition'=> $this->is_group && in_array($this->chat_id, [-1001200025834])
+				'condition'=> $this->is_group && in_array($this->chat_id, self::CHATS)
 			])
 			->Router();
 
@@ -47,7 +47,7 @@ class UniKffBot extends CommonBot implements Game
 		$this->is_group = !is_numeric(substr($this->chat_id,0,1));
 
 		//* Защищаем от чужих чатов
-		$allowedGrop= !$this->is_group || in_array($this->chat_id, [-1001200025834]);
+		$allowedGrop= !$this->is_group || in_array($this->chat_id, self::CHATS);
 
 		if(!$allowedGrop)
 		{
@@ -198,7 +198,7 @@ class UniKffBot extends CommonBot implements Game
 		$this->log->add(__METHOD__ . ' inputData: $inputArr,$cmdName, $cmd = ', null, [$inputArr,$cmdName, $cmd]);
 
 		//* Приходит локация
-		if(!empty($message['location']))
+		if(!empty($message['location']) && $cmd !== 'changeLocation')
 			return [
 				'cmdName'=>'gismeteo',
 				'cmd'=>['setLocation']
@@ -269,7 +269,8 @@ class UniKffBot extends CommonBot implements Game
 
 interface Game {
 	//* Command list
-	const CMD = [
+	const CHATS = [-1001200025834],
+	CMD = [
 		'Draws'=>[
 			'general'=>'⬅️Главная',
 			'start',
@@ -280,6 +281,7 @@ interface Game {
 			'settings'=>'⚙️Настройки',
 			'community'=>'💬Community',
 			'new draw'=>'Создать розыгрыш',
+			'cancel draw'=>'❌Отменить розыгрыш',
 			'play draw'=>'Разыграть',
 			'show participants'=>'Участники',
 			'participate'=>'Участвовать',

@@ -22,7 +22,12 @@ class Draws extends Helper
 	 */
 	public function __construct(UniKffBot &$UKB, ?array $cmd=null)
 	{
-		$this->setConstruct($UKB, $cmd)->init()->routerCmd()->saveCurData();
+		// parent::__construct();
+
+		$this->setConstruct($UKB, $cmd)
+			->init()
+			->routerCmd();
+			// ->saveCurData();
 
 	} //* __construct
 
@@ -33,9 +38,14 @@ class Draws extends Helper
 
 		$this->getCurData();
 
-		/* $this->drawsOwner = isset($this->data['current draws']['owner'])
-		&& $this->user_id === $this->data['current draws']['owner']['id']; */
-		$this->drawsOwner = $this->UKB->getStatement()->statement['drawsOwner'];
+		$this->drawsOwner = isset($this->data['current draws']['owner'])
+		&& $this->user_id === $this->data['current draws']['owner']['id'];
+		// $this->drawsOwner = $this->UKB->getStatement()->statement['drawsOwner'];
+
+		if(!$this->drawsOwner)
+			$this->UKB->setStatement([
+				'drawsOwner'=>0
+			]);
 
 		$this->data['change'] = 0;
 
@@ -59,11 +69,11 @@ class Draws extends Helper
 				if(!empty($draws))
 				{
 					$o = $this->showMainMenu([
-						'text' => "Вы не можете создать розыгрыш, пока не разыгран предыдущий от {$draws['owner']['first_name']} @{$draws['owner']['username']}. Но вы можете участвовать в существующем!",
+						'text' => "Вы не можете создать розыгрыш, пока не разыгран предыдущий от " . $this->showUsername($draws['owner']) . ". Но вы можете участвовать в существующем - /participate",
 						'reply_markup'=> [
 							'inline_keyboard'=>[[[
 								'text' => self::CMD['Draws']['participate'],
-								'callback_data'=> 'Draws/participate'
+								'callback_data'=> '/Draws/participate'
 							]]]
 						]
 					]);
@@ -81,7 +91,7 @@ class Draws extends Helper
 							],
 				],],];
 
-				$this->UKB->setStatement([
+				$this->statement = $this->UKB->setStatement([
 					'drawsOwner'=>1
 				]);
 				$this->log->add('new draw $this->statement[drawsOwner]=',null, [$this->statement['drawsOwner']]);
@@ -105,6 +115,10 @@ class Draws extends Helper
 					'prizes_count' => $this->cmd[1][0],
 				];
 
+				$this->statement = $this->UKB->setStatement([
+					'drawsOwner'=>1
+				]);
+
 				$o = $this->showMainMenu([
 					'text'=> 'Розыгрыш создан.',
 				]);
@@ -112,15 +126,38 @@ class Draws extends Helper
 				$this->addSelf = 1;
 
 				//! sendToAll
-				$this->sendToAll("Создан розыгрыш от <b>{$this->cbn['from']['first_name']} @{$this->cbn['from']['username']}</b>. Спешите принять участие!", [[[
-					'text' => self::CMD['Draws']['participate'],
-					'callback_data'=> 'draws/participate'
-				]]]);
+				// $this->sendToAll([
+				$this->sendToChats([
+					'text'=> "Создан розыгрыш от " . $this->showUsername($draws['owner']) . ". Спешите принять участие!",
+					'reply_markup'=> [
+						'inline_keyboard'=>[[[
+							'text' => self::CMD['Draws']['participate'],
+							'callback_data'=> 'draws/participate'
+						]]]
+					]
+				]);
+				break;
+
+			case 'cancel draw':
+				if(!$this->is_owner && empty($this->statement['drawsOwner']))
+				{
+					$o= ['text'=>'Вы не можете отменить этот розыгрыш'];
+					break;
+				}
+
+				$o= $this->showMainMenu(['text'=>"Розыгрыш от " . $this->showUsername($draws['owner']) . " был успешно удалён"]);
+				//! sendToChats
+				$this->sendToChats($o);
+
+				unset($draws, $this->data['current draws']);
+				$this->data['change']++;
+
+				die;
 				break;
 
 			case 'show participants':
 				$o = $this->showParticipants();
-				$o['text'] .= "\n<a href='{$this->urlDIR}".self::IMG."' title='ZorroClan'>&#8205;</a>";
+				$o['text'] .= "\n<a href='{$this->urlDIR}".self::IMG."'>&#8205;</a>";
 				break;
 
 			//* Розыгрыш
@@ -150,12 +187,15 @@ class Draws extends Helper
 				}
 
 				$o = $this->showMainMenu([
-					'text' => "<u>Победители:</u>\n\n$winStr\n<a href='{$this->urlDIR}".self::IMG."' title='ZorroClan'>&#8205;</a>",
+					'text' => "<u>Победители:</u>\n\n$winStr\n<a href='{$this->urlDIR}".self::IMG."'>&#8205;</a>",
 				]);
 
 				$o = array_merge_recursive($this->showParticipants(), $o);
-
-				$this->toAllParticipants = 1;
+				//! sendToChats
+				$this->sendToChats($o);
+				unset($draws, $this->data['current draws']);
+				$this->data['change']++;
+				die;
 				break;
 
 			//* Участвовать
@@ -207,76 +247,49 @@ class Draws extends Helper
 		} //*switch
 
 
-		//* Подготовка и отправка
+		//note Подготовка и отправка
 		if($o)
 		{
-			//* add keyboard options
-			if(!empty($o['reply_markup']['keyboard']))
-			{
-				//* Кнопки для организатора
-				if(isset($this->data['current draws']) && $this->statement['drawsOwner'])
-				{
-					$keyboard = [
-						['text' => self::CMD['Draws']['play draw']],
-						['text' => self::CMD['Draws']['show participants']],
-					];
-				}
-				//* Участвовать
-				elseif(isset($this->data['current draws']) && !$this->drawsOwner)
-				{
-					if(!in_array($this->cbn['from'], $draws['participants']))
-						$keyboard = [['text' => self::CMD['Draws']['participate']]];
-				}
-				//* Создать
-				else
-					$keyboard = [['text' => self::CMD['Draws']['new draw']]];
+			$this->log->add(__METHOD__.' Подготовка и отправка $this->is_owner',null,[$this->is_owner]);
+			/* if(is_null($this->is_owner))
+				$this->log->add(__METHOD__.' is_null $this->is_owner this=',null,[$this]); */
 
-				//* Добавляем кнопки
-				if(
-					!empty($keyboard) && !empty($this->cmd[0])
-					// && !in_array($this->cmd[0], ['general','start'])
-					&& in_array($this->cmd[0], ['advanced'])
+			//* Кнопки для организатора
+			if(
+				!empty($draws) && (
+					$this->statement['drawsOwner']
+					|| $this->is_owner
 				)
-					$o['reply_markup']['keyboard'] = array_merge_recursive($o['reply_markup']['keyboard'], [$keyboard]);
-			}
-
-			//* Add inline btns
-			/* if(!empty($keyboard))
+			)
 			{
-				$iKeyboard = &$o['reply_markup']['inline_keyboard'];
-				$r = [];
-				foreach($keyboard as $btn)
-				{
-					$r[]= [
-						'text'=> $btn['text'],
-						'callback_data'=> $btn['text'],
-					];
-					// $this->log->add(__METHOD__,null,[$btn]);
-				}
-				$iKeyboard= [$r];
-				// $o['method']= 'editMessageText';
-			} */
-
-			//* Склеиваем текст перед отправкой
-			if(is_array($o['text']))
-			{
-				$o['text'] = implode("\n\n", $o['text']);
+				$keyboard = [
+					['text' => self::CMD['Draws']['play draw']],
+					['text' => self::CMD['Draws']['show participants']],
+					['text' => self::CMD['Draws']['cancel draw']],
+				];
 			}
+			//* Участвовать
+			elseif(
+				!empty($draws) && !$this->drawsOwner
+			)
+			{
+				if(!in_array($this->cbn['from'], $draws['participants']))
+					$keyboard = [['text' => self::CMD['Draws']['participate']]];
+			}
+			//* Создать
+			else
+				$keyboard = [['text' => self::CMD['Draws']['new draw']]];
+
+			//* Добавляем кнопки
+			if(
+				!empty($keyboard) && !empty($this->cmd[0])
+				// && !in_array($this->cmd[0], ['general','start'])
+				&& in_array($this->cmd[0], ['advanced'])
+			)
+				$o['reply_markup']['keyboard'] = array_merge_recursive($o['reply_markup']['keyboard'], [$keyboard]);
 
 			//* Send
-			if(!empty($this->toAllParticipants))
-			{
-				$this->toAllParticipants = null;
-				foreach($draws['participants'] as $p)
-				{
-					$o['chat_id'] = $p['id'];
-					$this->send($o);
-				}
-
-				unset($draws, $this->data['current draws']);
-				$this->data['change']++;
-			}
-			else $this->send($o);
+			$this->send($o);
 
 			//* Добавляем себя в розыгрыш при создании
 			if(!empty($this->addSelf))
@@ -308,7 +321,7 @@ class Draws extends Helper
 			$ps .= $this->showUsername($p);
 		}
 		return [
-			'text' => "<u>Зарегистрировались:</u> " . count($draws['participants']) . " чел.\n\n$ps\n<a href='{$this->urlDIR}".self::IMG."' title='ZorroClan'>&#8205;</a>"
+			'text' => "<u>Зарегистрировались:</u> " . count($draws['participants']) . " чел.\n\n$ps\n<a href='{$this->urlDIR}".self::IMG."'>&#8205;</a>"
 		];
 	}
 

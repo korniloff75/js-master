@@ -31,7 +31,9 @@ trait UniConstruct
 
 		$this->cmd = [array_shift($cmdArr), $cmdArr];
 
-		$this->log->add(__METHOD__.' owner, $this->cmd=',null,[[$this->is_owner, $this->get('is_owner'), $this->cbn['from']['id']], $this->cmd]);
+		$this->is_owner= $UKB->is_owner;
+
+		$this->log->add(__METHOD__.' is_owner, $this->cmd=',null,[[$this->is_owner, $this->get('is_owner'), $this->user_id], $this->cmd]);
 
 		//* Define tokens
 		if(empty($this->tokens[$this->apiName ?? strtolower(__CLASS__)]))

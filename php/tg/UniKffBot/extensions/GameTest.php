@@ -219,7 +219,8 @@ class GameTest extends CommonBot implements Game,DrawsInt {
 				],],];
 				$this->addSelf = 1;
 
-				$this->sendToAll("Создан розыгрыш от <b>{$this->cbn['from']['first_name']}</b>. Спешите принять участие!");
+				// $this->sendToAll("Создан розыгрыш от <b>{$this->cbn['from']['first_name']}</b>. Спешите принять участие!");
+				$this->sendToAll(['text'=>"Создан розыгрыш от <b>{$this->cbn['from']['first_name']}</b>. Спешите принять участие!"]);
 				break;
 
 			case 'show participants':
