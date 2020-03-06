@@ -249,18 +249,16 @@ class CommonBot extends TG
 
 
 	//* Общая рассылка
-	protected function sendToAll($txt,$btns=null)
+	protected function sendToAll($o)
 	{
+		$this->checkSendData($o);
 		$txt = str_replace(
-			['!','синий','жёлтый'],
+			['!','синий','рыжий'],
 			['❗️','синий🔷','рыжий🔶'],
 			$txt
 		);
 
-		$o= ['text'=> "❗️❗️❗️\n$txt",];
-
-		if($btns)
-			$o['reply_markup']= ['inline_keyboard'=>$btns];
+		$o['text']= "❗️❗️❗️\n{$o['text']}";
 
 		foreach($this->license as $id=>$data)
 		{
@@ -269,6 +267,57 @@ class CommonBot extends TG
 
 			$o['chat_id']= $id;
 			$this->apiRequest($o);
+		}
+	}
+
+	//* Рассылка в зарегистрированные чаты
+	protected function sendToChats($o)
+	{
+		$this->checkSendData($o);
+		$o['text']= "❗️❗️❗️\n{$o['text']}";
+
+		//* Отсылаем в бот
+		$o['chat_id']= $this->user_id;
+		$this->apiRequest($o);
+
+		if(empty(static::CHATS))
+		{
+			return;
+		}
+
+		if(!empty($o['reply_markup']['keyboard']))
+		{
+			$keyboard= &$o['reply_markup']['keyboard'];
+			unset($keyboard);
+		}
+
+		foreach(static::CHATS as $id)
+		{
+			if(!is_numeric($id))
+				continue;
+
+			$o['chat_id']= $id;
+			$this->apiRequest($o);
+		}
+	}
+
+
+	//* Проверяем данные
+	protected function checkSendData(&$o)
+	{
+		//* add keyboard options
+		if(
+			!empty($o['reply_markup']['keyboard'])
+			&& empty($o['reply_markup']['resize_keyboard'])
+		)
+		{
+			$o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
+		}
+
+		//* Склеиваем текст
+		if(is_array($o['text']))
+		{
+			$o['text'] = implode("\n\n", $o['text']);
 		}
 	}
 
