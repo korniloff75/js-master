@@ -198,7 +198,7 @@ class UniKffBot extends CommonBot implements Game
 		$this->log->add(__METHOD__ . ' inputData: $inputArr,$cmdName, $cmd = ', null, [$inputArr,$cmdName, $cmd]);
 
 		//* Приходит локация
-		if(!empty($message['location']) && $cmd !== 'changeLocation')
+		if(!empty($message['location']) && empty($message['venue']))
 			return [
 				'cmdName'=>'gismeteo',
 				'cmd'=>['setLocation']
