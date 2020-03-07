@@ -281,22 +281,22 @@ class Gismeteo extends CommonBot implements Game
 		if(!empty($data['temperature']['air']['max']))
 		{
 			$w .= "
-			<u>Воздух:</u>
+			<b><u>Воздух:</u></b>
 			MAX {$data['temperature']['air']['max']['C']} ℃
 			MIN {$data['temperature']['air']['min']['C']} ℃
 			AVG {$data['temperature']['air']['avg']['C']} ℃
 			<u>Воздух ощущается:</u>
 			MAX {$data['temperature']['comfort']['max']['C']} ℃
-			MIN {$data['temperature']['comfort']['min']['C']} ℃
+			MIN {$data['temperature']['comfort']['min']['C']} ℃\n
 			<u>Вода:</u>
 			MAX {$data['temperature']['water']['max']['C']} ℃
 			MIN {$data['temperature']['water']['min']['C']} ℃
 
-			<b>Ветер</b>
+			<u>Ветер</u>
 			MAX {$wind[$data['wind']['direction']['max']['scale_8']]} - {$data['wind']['speed']['max']['m_s']} м/с
 			MIN {$wind[$data['wind']['direction']['min']['scale_8']]} - {$data['wind']['speed']['min']['m_s']} м/с
 
-			<b>Давление</b>
+			<u>Давление</u>
 			MAX {$data['pressure']['mm_hg_atm']['max']} мм рт.ст.
 			MIN {$data['pressure']['mm_hg_atm']['min']} мм рт.ст.";
 		}
