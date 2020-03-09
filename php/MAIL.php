@@ -2,11 +2,11 @@
 // utf8-marker = $tx['utf-8']['marker'];
 $H['protectScript'](basename(__FILE__));
 /*
-*	$email= new Mail([@email], [@subject]);
+* $email= new Mail([@email], [@subject]);
 * Задаем адрес отправителя
-*	$email->$from_mail= "no-reply@kpa-ing.ru";  # Адрес отправителя, по умолчанию - автосборка
-*	$email->subject= "Комментарий со страницы...";
-*	$email->send_mail($arr);
+* $email->$from_mail= "no-reply@kpa-ing.ru";  # Адрес отправителя, по умолчанию - автосборка
+* $email->subject= "Комментарий со страницы...";
+* $email->send_mail($arr);
 */
 
 
@@ -25,7 +25,7 @@ class Mail {
 
 
 	function __construct($email = null, $subject = null)
-	
+
 	{
 		global $cf;
 		$this->email = $email ?? $cf['mailform']['email'];
@@ -42,7 +42,7 @@ class Mail {
 
 
 	protected function fixTxt ( $t, $type)
-	
+
 	{
 		if(is_array($t)) {
 			$out = [];
@@ -54,13 +54,13 @@ class Mail {
 			}
 
 			return ['fix'=> $out['fix'], 'XSS'=> $out['XSS']];
-		} 
+		}
 
 		switch ($type) {
 			case 'toMail':
 				$t= preg_replace("/\<br[^>]*?\>|\[br\]/","\n", trim($t)); break;
 			case 'toRead':
-				$t= preg_replace("/\[br\]/","<br>", trim($t)); 
+				$t= preg_replace("/\[br\]/","<br>", trim($t));
 				break;
 			case 'toSave':
 				if(!empty($this->maxLen) && (strlen($t) > $this->maxLen)) $t= substr($t,0,$this->maxLen) . '.....';
@@ -76,7 +76,7 @@ class Mail {
 
 
 	public function XSS($d, $type='toSave')
-	
+
 	{
 		 # Отдает массив с fix и XSS
 		$out= ['fix'=>[], 'XSS'=>[]];
@@ -99,7 +99,7 @@ class Mail {
 	{ # $arr - ассоциативный массив
 		global $cf;
 		$arr= $this->XSS($arr,'toMail')['XSS'];
-		
+
 		foreach($arr as $name=>$value) {
 			if(!trim($value)) continue;
 			if(in_array($name, array('Пост','Ответ'))) {
@@ -115,7 +115,7 @@ class Mail {
 		if(!empty($this->Bcc_mail)) $headers .= "Bcc:$this->copy_mail " . PHP_EOL;
 		$headers .= 'X-Mailer: PHP/' . phpversion();
 		if(!empty($p)) $this->message.= "\n===============\n\n" . $p;
-		
+
 		# Выбираем функцию отправки
 		$sf= function_exists('mb_send_mail')? 'mb_send_mail':'mail';
 //		echo 'send_mail';

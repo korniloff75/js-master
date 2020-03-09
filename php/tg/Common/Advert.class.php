@@ -178,7 +178,7 @@ class Advert extends TG
 			],
 			'href'=>"https://t.me/CapitalistGameBot?start=673976740"
 		],
-		'wod_my_1'=> [
+		/* 'wod_my_1'=> [
 			'alt'=> "💣RPG в Telegram",
 			'title'=> "Достигни первым максимального лэвела и получи миллион(!!!) рублей.
 
@@ -193,7 +193,7 @@ class Advert extends TG
 				'/assets/wod_3.jpg',
 			],
 			'href'=>"https://t.me/WorldDogs_bot?start=673976740"
-		],
+		], */
 		'invs'=> [
 			'alt'=> "Дешевый хостинг",
 			'src'=> '/assets/invs_240_lh.png',

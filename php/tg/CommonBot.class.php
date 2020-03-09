@@ -302,26 +302,6 @@ class CommonBot extends TG
 	}
 
 
-	//* Проверяем данные
-	protected function checkSendData(&$o)
-	{
-		//* add keyboard options
-		if(
-			!empty($o['reply_markup']['keyboard'])
-			&& empty($o['reply_markup']['resize_keyboard'])
-		)
-		{
-			$o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
-		}
-
-		//* Склеиваем текст
-		if(is_array($o['text']))
-		{
-			$o['text'] = implode("\n\n", $o['text']);
-		}
-	}
-
-
 	public function __destruct()
 	{
 		if( !empty($this->license['change']) )

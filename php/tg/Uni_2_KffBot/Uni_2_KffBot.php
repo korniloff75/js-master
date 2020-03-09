@@ -155,14 +155,13 @@ class UniKffBot extends CommonBot implements Game
 		{
 			$cmdName = ucfirst($cmdName);
 
-			switch ($cmdName)
+			if(file_exists("extensions/$cmdName.php"))
 			{
-				case 'Gismeteo':
-				case 'Draws':
-				case 'BDU':
-					require_once("extensions/$cmdName.php");
-					new $cmdName($this, $cmd);
-					break;
+				require_once("extensions/$cmdName.php");
+				new $cmdName($this, $cmd);
+			}
+			else switch ($cmdName)
+			{
 				case 'All':
 					$this->sendToAll($cmd);
 					break;
@@ -310,6 +309,10 @@ interface Game {
 			// 'add_category'=>'➕Добавить',
 			'remove_category'=>'❌Удалить',
 		],
+
+		'Admin'=> [
+			'adm'
+		]
 	],
 
 	BTNS = [
@@ -324,9 +327,27 @@ interface Game {
 		'about'=>"Бот имеет расширенный функционал.\n<b>Основные команды:</b>\n/gismeteo - Показ текущей погоды по вашей геолокации с возможностью посмотреть прогноз на ближайшие дни.
 		/draws - Создание розыгрышей для всех желающих.",
 		'balance'=>'У нас - коммунизм, товагисчи!!! Какие деньги?',
-		'settings'=>'Какие нужны индивидуальные настройки? Пишите @korniloff75',
-		'advanced'=>'',
+		'settings'=>'Какие нужны индивидуальные настройки? Пишите @js_master_bot',
+		/* 'advanced'=> [
+			'text' => self::INFO['about'],
+			'reply_markup' => ["keyboard" => [
+				[
+					['text' => self::CMD['Gismeteo']['Gismeteo']],
+					['text' => self::CMD['Draws']['general']],
+				],
+			],],
+		], */
 		'help'=>"При возникновении трудностей с использованием бота обратитесь по одной из указанных ссылок.",
+		'help'=> [
+			'text' => "При возникновении трудностей с использованием бота обратитесь по одной из указанных ссылок.",
+			'reply_markup' => ["inline_keyboard" => [
+				[
+					// ['text' => 'Support', 'url' => 'https://t.me/js_master_bot'],
+					['text' => 'Development', 'url' => 'https://t.me/js_master_bot'],
+					['text' => '💬Community', 'url' => 'https://t.me/joinchat/KCwRpEeG8OoZmye-5Cz55Q'],
+				],
+			],],
+		],
 
 	];
 }

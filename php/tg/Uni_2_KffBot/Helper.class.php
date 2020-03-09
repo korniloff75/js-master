@@ -11,7 +11,11 @@ class Helper extends CommonBot implements Game
 
 	protected function getCurData()
 	{
-		if(!file_exists(static::FOLDER))
+		if(empty(static::FOLDER))
+		{
+			$this->log->add('static::FOLDER is empty!', E_USER_WARNING);
+		}
+		elseif(!file_exists(static::FOLDER))
 		{
 			$this->log->add('folder '.static::FOLDER.' was created!');
 			mkdir(static::FOLDER, 0755);
@@ -38,7 +42,7 @@ class Helper extends CommonBot implements Game
 		if(!file_put_contents(
 			static::BASE,
 			json_encode($this->data, JSON_UNESCAPED_UNICODE|JSON_NUMERIC_CHECK|JSON_UNESCAPED_SLASHES), LOCK_EX
-		)) $this->send(['text' => "Сервер в данный момент перегружен и Ваши данные не были сохранены. Попробуйте повторить."]);
+		)) $this->apiRequest(['text' => "Сервер в данный момент перегружен и Ваши данные не были сохранены. Попробуйте повторить."]);
 
 			return $this;
 	} //* saveCurData
@@ -70,31 +74,20 @@ class Helper extends CommonBot implements Game
 				break;
 
 			case 'advanced':
+				// $o = self::INFO['advanced'];
 				$o = [
 					'text' => self::INFO['about'],
-					'reply_markup' => [
-						"keyboard" => [
-							[
-								['text' => self::CMD['Gismeteo']['Gismeteo']],
-								['text' => self::CMD['Draws']['general']],
-							],
-				],],];
+					'reply_markup' => ["keyboard" => [
+						[
+							['text' => self::CMD['Gismeteo']['Gismeteo']],
+							['text' => self::CMD['Draws']['general']],
+						],
+					],],
+				];
 				break;
 
 			case 'help':
-				$o = [
-					'text' => self::INFO['help'],
-					'reply_markup' => [
-						"inline_keyboard" => [
-							[
-								['text' => 'Support', 'url' => 'https://t.me/korniloff75'],
-								['text' => 'Development', 'url' => 'https://t.me/korniloff75'],
-							],
-							[
-								['text' => '💬Community', 'url' => 'https://t.me/joinchat/KCwRpFHSzSKtAaymBBRbgg'],
-							],
-						],
-				],];
+				$o = self::INFO['help'];
 				break;
 
 			default:
@@ -107,7 +100,11 @@ class Helper extends CommonBot implements Game
 	protected function showUsername(array &$user, $tag=null)
 	{
 		$arr= $user['from'] ?? $user;
-		return "<b>" . ($arr['realName'] ?? $arr['first_name']) . "</b> ". ($tag?'@':'') ."{$arr['username']} ({$arr['id']})\n";
+		return "<b>"
+		. ($arr['realName'] ?? $arr['first_name'])
+		. ($arr['last_name'] ?? '')
+		. "</b> " . ($tag?'@':'')
+		. "{$arr['username']} ({$arr['id']})\n";
 	}
 
 
@@ -182,7 +179,6 @@ class Helper extends CommonBot implements Game
 			]
 		],$o);
 
-		$this->checkSendData($o);
 		return $o;
 	} //* showMainMenu
 
@@ -198,21 +194,9 @@ class Helper extends CommonBot implements Game
 
 		// $this->log->add(__METHOD__.' $o',null,[$o]);
 
-		$this->checkSendData($o);
-
 		//* Send
 		$o['chat_id'] = $o['chat_id'] ?? $this->user_id;
 
-		/* if(!empty($method = $o['method']))
-		{
-			if($method === 'editMessageText')
-			{
-				$o['message_id'] = $this->cbn['message']['message_id'] ?? $this->statenent['last']['message_id'];
-			}
-			unset($o['method']);
-			$this->apiRequest($o,$method);
-		}
-		else */
 		$this->apiRequest($o);
 	}
 

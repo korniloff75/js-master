@@ -438,16 +438,6 @@ class BDU extends Helper
 		}
 		return [
 			'text'=>$users,
-			/* 'reply_markup' => ["keyboard" => [
-				[
-					['text' => self::CMD['BDU']['list_categories']],
-					['text' => self::CMD['BDU']['scope']],
-					['text' => self::CMD['BDU']['users']],
-				],
-				[
-					['text' => self::BTNS['general']],
-				],
-			]], */
 		];
 	}
 

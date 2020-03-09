@@ -59,6 +59,8 @@ class Draws extends Helper
 	{
 		$o = parent::routerCmd($cmd);
 
+		$this->log->add(__METHOD__.' $o=',null,[$o]);
+
 		$draws = &$this->data['current draws'];
 		// $pumps = &$this->data['pumps'];
 
@@ -289,7 +291,8 @@ class Draws extends Helper
 				$o['reply_markup']['keyboard'] = array_merge_recursive($o['reply_markup']['keyboard'], [$keyboard]);
 
 			//* Send
-			$this->send($o);
+			$o['chat_id']= $this->user_id;
+			$this->apiRequest($o);
 
 			//* Добавляем себя в розыгрыш при создании
 			if(!empty($this->addSelf))
