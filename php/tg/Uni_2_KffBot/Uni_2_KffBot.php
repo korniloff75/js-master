@@ -155,14 +155,13 @@ class UniKffBot extends CommonBot implements Game
 		{
 			$cmdName = ucfirst($cmdName);
 
-			switch ($cmdName)
+			if(file_exists("extensions/$cmdName.php"))
 			{
-				case 'Gismeteo':
-				case 'Draws':
-				case 'BDU':
-					require_once("extensions/$cmdName.php");
-					new $cmdName($this, $cmd);
-					break;
+				require_once("extensions/$cmdName.php");
+				new $cmdName($this, $cmd);
+			}
+			else switch ($cmdName)
+			{
 				case 'All':
 					$this->sendToAll($cmd);
 					break;
@@ -310,6 +309,10 @@ interface Game {
 			// 'add_category'=>'➕Добавить',
 			'remove_category'=>'❌Удалить',
 		],
+
+		'Admin'=> [
+			'adm'
+		]
 	],
 
 	BTNS = [

@@ -107,7 +107,11 @@ class Helper extends CommonBot implements Game
 	protected function showUsername(array &$user, $tag=null)
 	{
 		$arr= $user['from'] ?? $user;
-		return "<b>" . ($arr['realName'] ?? $arr['first_name']) . "</b> ". ($tag?'@':'') ."{$arr['username']} ({$arr['id']})\n";
+		return "<b>"
+		. ($arr['realName'] ?? $arr['first_name'])
+		. ($arr['last_name'] ?? '')
+		. "</b> " . ($tag?'@':'')
+		. "{$arr['username']} ({$arr['id']})\n";
 	}
 
 
@@ -182,7 +186,6 @@ class Helper extends CommonBot implements Game
 			]
 		],$o);
 
-		$this->checkSendData($o);
 		return $o;
 	} //* showMainMenu
 
@@ -198,7 +201,7 @@ class Helper extends CommonBot implements Game
 
 		// $this->log->add(__METHOD__.' $o',null,[$o]);
 
-		$this->checkSendData($o);
+		// $this->checkSendData($o);
 
 		//* Send
 		$o['chat_id'] = $o['chat_id'] ?? $this->user_id;

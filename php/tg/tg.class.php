@@ -287,6 +287,8 @@ class TG {
 			return $this->apiRequest($postFields, $method);
 		}
 
+		$this->checkSendData($postFields);
+
 		$postFields["method"] = $method;
 		$this->log->add('$postFields in ' . __METHOD__, null, [$postFields]);
 
@@ -302,15 +304,7 @@ class TG {
 	 */
 	public  function apiRequest(array $postFields = [], string $method = 'sendMessage')
 	{
-		// $ch = curl_init();
-
-		$postFields = array_merge([
-			'chat_id' => $this->message['chat']['id'],
-			// 'text' => $text,
-			'parse_mode' => 'html',
-			'certificate' => '@' . realpath('/etc/ssl/certs/dhparam.pem'),
-
-		], $postFields);
+		$this->checkSendData($postFields);
 
 		$this->log->add("URL - {$this->api}$method\n\$postFields in " . __METHOD__, null, [$postFields]);
 
@@ -324,6 +318,34 @@ class TG {
 		//* Обрабатываем результаты
 		return $this->apiExecCurl($response);
 	} //* apiRequest
+
+
+	//* Проверяем данные
+	protected function checkSendData(&$o)
+	{
+		//* add keyboard options
+		if(
+			!empty($o['reply_markup']['keyboard'])
+			&& empty($o['reply_markup']['resize_keyboard'])
+		)
+		{
+			$o['reply_markup'] += ["one_time_keyboard" => false, "resize_keyboard" => true, "selective" => true];
+		}
+
+		//* Склеиваем текст
+		if(is_array($o['text']))
+		{
+			$o['text'] = implode("\n\n", $o['text']);
+		}
+
+		$o = array_merge([
+			'chat_id' => $this->message['chat']['id'],
+			// 'text' => $text,
+			'parse_mode' => 'html',
+			'certificate' => '@' . realpath('/etc/ssl/certs/dhparam.pem'),
+
+		], $o);
+	}
 
 
 	/**
