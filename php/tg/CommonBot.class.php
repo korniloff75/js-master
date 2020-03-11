@@ -8,8 +8,9 @@ if(php_sapi_name() === 'cli' && empty($_SERVER['DOCUMENT_ROOT']))
 }
 
 require_once $_SERVER['DOCUMENT_ROOT'] . "/php/Path.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/DbJSON.php";
 
-require_once $_SERVER['DOCUMENT_ROOT'] . "/Helper.php";
+// require_once $_SERVER['DOCUMENT_ROOT'] . "/Helper.php";
 # TG
 require_once __DIR__ . "/tg.class.php";
 require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Get_set.trait.php";
@@ -18,9 +19,6 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Get_set.trait.php";
 class CommonBot extends TG
 {
 	use Get_set {}
-
-	const
-		OWNER= 673976740;
 
 	private
 		$is_owner = null;
@@ -34,7 +32,7 @@ class CommonBot extends TG
 		$botDir,
 		# Счётчик обновлений
 		$countDiff = 0,
-		$protecText = "Вы пытаетесь воспользоваться частным ботом.\nДля его разблокировки свяжитесь с автором <b>@korniloff75</b>",
+		$protecText = "Вы пытаетесь воспользоваться частным ботом.\nДля его разблокировки свяжитесь с автором <b>@js_master_bot</b>",
 		$noUdatesText = "Обновлений пока нет. Попробуйте позже.";
 
 	public function __construct()
@@ -140,7 +138,7 @@ class CommonBot extends TG
 			&& (
 				!array_key_exists($id, $this->license)
 				|| !empty($this->license[$id]['blocked'])
-				|| new DateTime() > new DateTime($this->license[$id]['term'])
+				// || new DateTime() > new DateTime($this->license[$id]['term'])
 			)
 		)
 		{
@@ -173,10 +171,11 @@ class CommonBot extends TG
 
 		if(
 			empty($this->license)
-			&& ($license= file_get_contents("{$this->botDir}/license.json"))
+			&& ($license = new DbJSON("{$this->botDir}/license.json"))
 		)
 		{
-			$this->license = json_decode($license,1);
+			$this->license = &$license->get();
+			// $this->license = json_decode($license,1);
 		}
 
 		if(
@@ -184,13 +183,13 @@ class CommonBot extends TG
 			|| array_key_exists($this->user_id, $this->license)
 		) return;
 
-		$this->license[$this->user_id]= [
+		$license->set([$this->user_id=> [
 			$user_data['term'] ?? "3000-01-01",
 			"{$this->message['from']['first_name']} "
 			. ($this->message['from']['last_name']??'')
 			. " {$this->message['from']['username']}"
-		];
-		$this->license['change']= 1;
+		]]);
+		// $this->license['change']= 1;
 	}
 
 
@@ -199,20 +198,20 @@ class CommonBot extends TG
 	 */
 	public static function setAdvButton()
 	{
+		$_adv= new DbJSON(__DIR__ . '/Common/Adv.json');
 		# Advert
-		$adv = \H::json(__DIR__ . '/Common/Adv.json');
-		if(!count($adv))
+		if(!count($db= $_adv->get()))
 		{
-			$this->log->add('realpath Common/Adv.json = ' . realpath(__DIR__ . '/Common/Adv.json') . "\nDIR = " . __DIR__, E_USER_WARNING, [$adv]);
+			$this->log->add('realpath Common/Adv.json = ' . realpath(__DIR__ . '/Common/Adv.json') . "\nDIR = " . __DIR__, E_USER_WARNING, [$db]);
 			return false;
 		}
 
-		$text = array_keys($adv);
+		$text = array_keys($db);
 		shuffle($text);
 
 		return [
 			"text" => $text[0],
-			"url" => $adv[$text[0]],
+			"url" => $db[$text[0]],
 		];
 	}
 
@@ -278,7 +277,7 @@ class CommonBot extends TG
 
 		//* Отсылаем в бот
 		$o['chat_id']= $this->user_id;
-		$this->apiRequest($o);
+		$this->apiResponseJSON($o);
 
 		if(empty(static::CHATS))
 		{
@@ -310,12 +309,12 @@ class CommonBot extends TG
 				$data= [$data['term'],$data['name'],$data['blocked']];
 			});
 
-			unset($this->license['change']);
+			/* unset($this->license['change']);
 
 			file_put_contents(
 				"{$this->botDir}/license.json",
 				json_encode($this->license, JSON_UNESCAPED_UNICODE|JSON_NUMERIC_CHECK|JSON_UNESCAPED_SLASHES), LOCK_EX
-			);
+			); */
 		}
 
 		$this->log->add(__METHOD__,null,$this->license);

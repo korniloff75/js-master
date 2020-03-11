@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "D:\\Domains\\js-master.ru"
+		}
+	],
+	"settings": {
+		"editor.fontSize": 17,
+		"workbench.enableExperiments": false,
+		"telemetry.enableTelemetry": false
+	}
+}

@@ -20,11 +20,15 @@ interface iBotTG
 	// protected function init();
 }
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/Helper.php';
+// require_once $_SERVER['DOCUMENT_ROOT'] . '/Helper.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Curl.trait.php";
 
 
 class TG {
+	const
+		HOST= 'https://js-master.ru',
+		OWNER= 673976740;
+
 	public
 		$webHook = true;
 		// $cron=[];
@@ -243,8 +247,8 @@ class TG {
 		}
 
 		# Full URI
-		$botURL = \BASE_URL . $this->botDirFromRoot . '/' . $this->botFileInfo->getBaseName();
-		$trigger = \HOME . $this->botDirFromRoot . "/webHookRegistered.trigger";
+		$botURL = self::HOST . "/{$this->botDirFromRoot}/" . $this->botFileInfo->getBaseName();
+		$trigger = $this->botDir . "/webHookRegistered.trigger";
 
 		$this->log->add("\$trigger= $trigger",null, [file_exists($trigger)]);
 

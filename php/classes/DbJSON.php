@@ -1,10 +1,12 @@
 <?php
 class DbJSON {
-	public
+	private
 		$path = '',
-		# DataBase
-		$db = [], # Array
 		$json; # String
+
+	public
+		# DataBase
+		$db = []; # Array
 
 
 	public function __construct(string $path=null)
@@ -22,19 +24,21 @@ class DbJSON {
 	 */
 	public function get($id=null)
 	{
-		return empty($id) ? $this->db : (
+		return empty($id)
+		? $this->db
+		: (
 			$this->db[$id] ?? null
 		);
 	}
 
 	/**
-	 * @data <array>
+	 * @param data <array>
 	 */
 	public function set(array $data)
 	{
 		$this->db = array_replace_recursive($this->db, $data);
-		$this->json = self::toJSON($this->db);
-		file_put_contents($this->path, $this->json, LOCK_EX);
+		$this->db['change']= 1;
+
 		return $this;
 	}
 
@@ -54,5 +58,15 @@ class DbJSON {
 	public static function toJSON(array $arr)
 	{
 		return json_encode(($arr), JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+	}
+
+
+	public function __destruct()
+	{
+		if(empty($this->db['change'])) return;
+
+		unset($this->db['change']);
+
+		file_put_contents($this->path, self::toJSON($this->db), LOCK_EX);
 	}
 } // DbJSON

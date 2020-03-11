@@ -47,6 +47,7 @@ class Gismeteo extends CommonBot implements Game
 				break;
 
 			case 'Gismeteo':
+			case 'gismeteo':
 				$this->requestGM('current')->responseGMHandler();
 				$forecastButs = [[]];
 				for ($i=3; $i <= 5; $i++) {

@@ -30,9 +30,6 @@ class jsMaster extends CommonBot
 
 		$this->log->add(__METHOD__.' $this->text',null,[$this->text]);
 
-		/* $recipient= $this->user_id == self::OWNER
-		?  */
-
 		// file_put_contents('test.log.json', $this->inputJson, LOCK_EX);
 
 		//* Intro
@@ -43,7 +40,7 @@ class jsMaster extends CommonBot
 			$this->apiResponseJSON([
 				'chat_id'=> $from['id'],
 				// 'chat_id'=> $reply['from']['id'],
-				'text'=> "Привет, " . $this->showUsername($from, 'tag') . "!\n\nЕсли можно, давай без прелюдий, переходи сразу к делу. На сообщения из серии \"Привет, как дела?\" я могу не найти времени ответить.\n\nЕсли сообщение по делу, но я сразу не ответил, пожалуйста, подожди. Возможно, меня просто сейчас нет в сети. Спасибо за понимание.",
+				'text'=> "Привет, " . $this->showUsername($from, 'tag') . "!\n\nЕсли можно, давай без прелюдий, переходи сразу к делу. На сообщения из серии \"Привет, как дела?\" я могу не найти времени ответить.\n\nЕсли сообщение по делу, но я сразу не ответил, пожалуйста, подожди. Возможно, меня просто сейчас нет в сети.\n\nСпасибо за понимание.",
 			]);
 			die;
 		}
