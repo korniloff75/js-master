@@ -1,5 +1,7 @@
 <?php
 
+require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/DbJSON.php";
+
 trait Parser {
 
 	protected
@@ -49,7 +51,8 @@ trait Parser {
 			{
 				$currentItem = "{$this->baseDir}/" . $base[$this->chat_id];
 				$this->log->add(__METHOD__ . ' - $currentItem = ' . $currentItem);
-				$this->savedBase = \H::json($currentItem);
+				$this->objBase = new DbJSON($currentItem);
+				$this->savedBase = $this->objBase->get();
 
 			}
 
@@ -121,7 +124,8 @@ trait Parser {
 		}
 
 		# Пишем файл без редакции
-		\H::json("{$this->baseDir}/{$this->chat_id}.$bSource.json", $this->definedBase);
+		// \H::json("{$this->baseDir}/{$this->chat_id}.$bSource.json", $this->definedBase);
+		$this->objBase->set($this->definedBase);
 
 		$this->log->add(__METHOD__ . " \$this->baseDir = {$this->baseDir}/{$this->chat_id}.$bSource.json");
 

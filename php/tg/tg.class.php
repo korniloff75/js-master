@@ -21,6 +21,7 @@ interface iBotTG
 }
 
 // require_once $_SERVER['DOCUMENT_ROOT'] . '/Helper.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Get_set.trait.php";
 require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Curl.trait.php";
 
 
@@ -36,8 +37,9 @@ class TG {
 	protected
 		# Test mode, bool
 		$__test = 0 ,
+		$tg_startTime,
 		$inputJson = null,
-		$token,
+		$inputData = null,
 		$tokens = [],
 		$api,
 		$headers = ["Content-Type:multipart/form-data"],
@@ -53,19 +55,26 @@ class TG {
 		$botDirFromRoot,
 		# take object message
 		$message,
-		$inputData = null,
 		$cbn,
-		$chat_id;
+		$user_id,
+		$chat_id,
+		$is_group;
 
 
 	protected static
 		$allowedTags = '<pre><b><strong><i><em><u><ins><s><strike><del><code>',
 		$textLimit = 3900;
 
+	use Get_set {}
+
+	private
+		$is_owner = null;
+
 	use Curl;
 
 	public function __construct($token=null)
 	{
+		$this->tg_startTime= new DateTime;
 		$this->checkLog();
 		$this->log->add("tg.class.php started");
 
@@ -84,8 +93,6 @@ class TG {
 
 		if(!count($this->tokens))
 			$this->getTokens(null, $token);
-
-		// $this->token = $token ?? $this->tokens['tg'] ?? $this->token;
 
 		$this->api = "https://api.telegram.org/bot{$this->tokens['tg']}/";
 
@@ -213,8 +220,13 @@ class TG {
 			$this->text = $cb['text'];
 		}
 
+		$this->is_group= !is_numeric(substr($this->chat_id,0,1));
+
 		//* Определяем пользователя
 		$this->user_id= $this->cbn['from']['id'];
+
+		//* Определяем владельца скрипта
+		$this->is_owner = $this->set('is_owner', $this->user_id == self::OWNER);
 
 		$this->log->add(' $this->user_id=',null,[$this->user_id]);
 
@@ -222,6 +234,7 @@ class TG {
 		\$cbn = $cbn\n
 		\$this->chat_id = {$this->chat_id}
 		\$this->user_id = {$this->user_id}
+		\$this->is_group = {$this->is_group}
 		\$this->cbn= ", null, [$this->cbn]);
 
 		return $cb;

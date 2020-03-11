@@ -9,7 +9,7 @@ class DbJSON {
 		$db = []; # Array
 
 
-	public function __construct(string $path=null)
+	public function __construct(string $path)
 	{
 		if(empty($path)) throw new LogicException("Отсутствует \$path", 1);
 

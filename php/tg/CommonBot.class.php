@@ -13,15 +13,15 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/DbJSON.php";
 // require_once $_SERVER['DOCUMENT_ROOT'] . "/Helper.php";
 # TG
 require_once __DIR__ . "/tg.class.php";
-require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Get_set.trait.php";
+// require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Get_set.trait.php";
 
 
 class CommonBot extends TG
 {
-	use Get_set {}
+	/* use Get_set {}
 
 	private
-		$is_owner = null;
+		$is_owner = null; */
 
 	protected
 		// $is_owner = false,
@@ -41,7 +41,7 @@ class CommonBot extends TG
 		$GLOBALS['_bot'] = &$this;
 
 		//* Определяем владельца скрипта
-		$this->is_owner = $this->set('is_owner', $this->user_id == self::OWNER);
+		// $this->is_owner = $this->set('is_owner', $this->user_id == self::OWNER);
 
 		if(!empty($this->cron))
 		{
@@ -92,8 +92,13 @@ class CommonBot extends TG
 	 * 	chat_id => "2025-04-07", [<string term>,<string name>, optional<bool is_blocked>] ...
 	 * ]
 	 */
-	protected function checkLicense($responseData = null, $user_data=null)
+	protected function checkLicense($responseData = null, $user_data=[])
 	{
+		$user_data = array_merge([
+			'botProtect'=>true,
+			'condition'=>false
+		], $user_data);
+
 		$this->addUserLicense($user_data);
 
 		// $this->log->add(__METHOD__.' $this->license',null,[$this->license]);
@@ -132,7 +137,9 @@ class CommonBot extends TG
 			$this->license,
 		]); */
 
+		// todo
 		if(
+			// && !$this->is_owner
 			$this->message
 			&& ($id = $this->message['chat']['id'])
 			&& (
@@ -142,6 +149,16 @@ class CommonBot extends TG
 			)
 		)
 		{
+			if(
+				!$user_data['botProtect'] && !$this->is_group
+			)
+			{
+				$this->log->add(__METHOD__." \$user_data['botProtect'] ===", null, [
+					$user_data['botProtect'],
+				]);
+				return $this;
+			}
+
 			$responseData = $responseData ?? $this->responseData;
 			$responseData['text'] = $this->protecText;
 			$responseData['disable_web_page_preview'] = false;
@@ -165,21 +182,20 @@ class CommonBot extends TG
 	/**
 	 ** Добавляем запись в лицензию
 	 */
-	private function addUserLicense($user_data=null)
+	private function addUserLicense($user_data=[])
 	{
-		$user_data= $user_data ?? ['condition'=>false];
-
 		if(
 			empty($this->license)
 			&& ($license = new DbJSON("{$this->botDir}/license.json"))
 		)
 		{
-			$this->license = &$license->get();
+			$this->license = $license->get();
 			// $this->license = json_decode($license,1);
 		}
 
 		if(
-			!$user_data['condition']
+			empty($user_data)
+			|| !$user_data['condition']
 			|| array_key_exists($this->user_id, $this->license)
 		) return;
 

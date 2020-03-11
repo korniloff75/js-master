@@ -1,11 +1,10 @@
 <?php
-/**
- * https://imakebots.ru/article/delaem-bot-dlya-obratnoy-svyazi-v-telegram
- */
+// require_once __DIR__ . "/../CommonBot.class.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/php/Path.php";
+require_once __DIR__ . "/../tg.class.php";
 
-require_once __DIR__ . "/../CommonBot.class.php";
-
-class jsMaster extends CommonBot
+class jsMaster extends TG
+// class jsMaster extends CommonBot
 {
 
 	public function __construct()
@@ -21,16 +20,15 @@ class jsMaster extends CommonBot
 
 	private function init()
 	{
+		// file_put_contents('test.log.json', $this->inputJson, LOCK_EX);
+
 		//* Завершаем скрипт без входящего JSON
 		if(
 			empty($this->inputData)
-		) die ('Нет входящего запроса');
-
-		if($this->is_group) die;
+			|| $this->is_group
+		) die;
 
 		$this->log->add(__METHOD__.' $this->text',null,[$this->text]);
-
-		// file_put_contents('test.log.json', $this->inputJson, LOCK_EX);
 
 		//* Intro
 		if($this->text === '/start')
@@ -74,20 +72,7 @@ class jsMaster extends CommonBot
 			], 'forwardMessage');
 		}
 
-
-		/* $this->apiResponseJSON([
-			'chat_id'=> $this->cbn['data'] ?? self::OWNER,
-			'text'=> $this->text,
-			'reply_markup' => ["inline_keyboard" => [[
-				[
-					'text' => "Ответить",
-					'callback_data'=> $this->user_id
-				],
-			],],]
-		]); */
-
 		die('OK');
-
 	} // init
 
 

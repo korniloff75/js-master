@@ -14,17 +14,21 @@ class AntimatKFF extends CommonBot
 		PRETREATMENT = [
 			[
 				'~[a@]~i','~6~','~B~','~g~','~[eєї]~iu','~[z3]~i','~[uiі]~iu','~[o0]~i','~p~i','~y~i','~x~i',"~(.)\\1+~u",
-				"~['`\"*_|/\\.,\\~\\-+#$%^&\\?\\!\\(\\)]~"
+				//* п р о б е л ы
+				'~\\s+\\b(.)\\b\\s+~u',
+				//* Separators
+				"~['`\"*_|/\\.,\\~\\-+#$%^&\\?\\!\\(\\)]~",
 			],
 			[
-				'а','б','в','д','е','з','и','о','р','у','х', "$1",'',''
+				'а','б','в','д','е','з','и','о','р','у','х', "$1",'$1',''
 			]
 		],
 
-		REPLACEMENT = " <b>[<a href='https://js-master.ru/content/5.Razrabotki/Antimat_plus/'>цензура</a>]</b> ",
+		REPLACEMENT = " <b>[<a href='https://t.me/js_master_bot'>цензура</a>]</b> ",
+		// REPLACEMENT = " <b>[<a href='https://js-master.ru/content/5.Razrabotki/Antimat_plus/'>цензура</a>]</b> ",
 
 		PATTERNS = [
-			'~х\\s*?у(?![бж])\\s*?[ийеёюя](?![з])~iu',
+			'~(?<!стра)х\\s*?у(?![бж])\\s*?[ийеёюя](?![з])~iu',
 			//* пизда
 			'~п(?![ор]).?[еёи].{0,2}?з.{0,2}?да?~iu',
 			//* блядь, пидар
@@ -54,7 +58,7 @@ class AntimatKFF extends CommonBot
 		 * Protect from CommonBot
 		*/
 		parent::__construct()
-			->checkLicense()
+			->checkLicense(null, ['botProtect'=>false])
 			->init();
 
 	} //__construct
@@ -66,8 +70,8 @@ class AntimatKFF extends CommonBot
 	{
 		if(empty($this->inputData) || !$this->message)
 		{
-			$this->log->add('Нет входящего запроса');
-			die ('Нет входящего запроса');
+			$this->log->add('Нет входящего запроса',E_USER_ERROR);
+			die;
 		}
 		else $this->log->add('$this->message', null, [$this->message]);
 
@@ -88,8 +92,10 @@ class AntimatKFF extends CommonBot
 		}
 
 		$user = $this->message['from']['username'];
-		$base = \H::json('base.json');
+		$objBase = new DbJSON('base.json');
+		$base = $objBase->get();
 		$base[$user] = $base[$user] ?? ['count'=>0];
+
 		$this->log->add(__METHOD__ . '$base[$user] = ', null, [$base[$user]]);
 
 		if(
@@ -101,7 +107,7 @@ class AntimatKFF extends CommonBot
 		}
 		else
 		{
-			$censure = "Отредактировано сообщение от @{$user}\n\n$censure\n\nПользователю <b>@{$user}</b> выдано <b>{$base[$user]['count']}</b>-е предупреждение от администрации.";
+			$censure = "Отредактировано сообщение от @{$user}\n\n$censure\n\nПользователю <b>@{$user}</b> выдано <b>{$base[$user]['count']}</b>-е предупреждение от администрации.\nTime - " . ((new DateTime)->format('u') - $this->tg_startTime->format('u')) . ' мкс';
 
 		}
 
@@ -113,10 +119,11 @@ class AntimatKFF extends CommonBot
 			|| $base[$user]['count'] <= (self::MAX_TRY + 1)
 		)
 		{
-			file_put_contents(
+			$objBase->set($base);
+			/* file_put_contents(
 				"base.json",
 				json_encode($base, JSON_UNESCAPED_UNICODE|JSON_NUMERIC_CHECK|JSON_UNESCAPED_SLASHES), LOCK_EX
-			);
+			); */
 			$this->responseData['text'] = $censure;
 			$this->log->add("apiRequest = ", null, [$this->apiRequest($this->responseData)]);
 		}
