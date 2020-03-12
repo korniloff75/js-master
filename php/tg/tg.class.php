@@ -211,13 +211,13 @@ class TG {
 		if($cbn === 'inline_query')
 		{
 			$this->chat_id = $cb['from']['id'];
-			$cb['text'] = $this->text = $cb['query'];
+			$cb['text'] = $this->text = trim($cb['query']);
 			$cb['chat'] = $cb['from'];
 		}
 		else
 		{
 			$this->chat_id = $cb['chat']['id'];
-			$this->text = $cb['text'];
+			$this->text = trim($cb['text']);
 		}
 
 		$this->is_group= !is_numeric(substr($this->chat_id,0,1));

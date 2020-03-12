@@ -33,7 +33,7 @@ class Helper extends CommonBot implements Game
 		$this->data['change'] = 0;
 	}
 
-	protected function saveCurData()
+	/* protected function saveCurData()
 	{
 		// $this->log->add('$this->BTNS=',null,[$this->BTNS]);
 		if(!$this->data['change']) return;
@@ -47,7 +47,7 @@ class Helper extends CommonBot implements Game
 		)) $this->apiRequest(['text' => "Сервер в данный момент перегружен и Ваши данные не были сохранены. Попробуйте повторить."]);
 
 			return $this;
-	} //* saveCurData
+	} //* saveCurData */
 
 	protected function routerCmd($cmd=null)
 	{
@@ -205,6 +205,11 @@ class Helper extends CommonBot implements Game
 
 	public function __destruct()
 	{
-		$this->saveCurData();
+		if(!$this->data['change']) return;
+
+		// $this->log->add(__METHOD__." \$this->data=",null,[$this->data]);
+
+		$this->objData->replace($this->data);
+		// $this->saveCurData();
 	}
 } //* Helper

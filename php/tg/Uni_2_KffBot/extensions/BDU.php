@@ -33,8 +33,8 @@ class BDU extends Helper
 
 		$this->getCurData();
 
-		$this->drawsOwner = isset($this->data['current draws']['owner'])
-		&& $this->user_id === $this->data['current draws']['owner']['id'];
+		/* $this->drawsOwner = isset($this->data['current draws']['owner'])
+		&& $this->user_id === $this->data['current draws']['owner']['id']; */
 
 		$this->data['change'] = 0;
 
@@ -94,7 +94,7 @@ class BDU extends Helper
 
 		$name= $curBase['realName'] ?? $curBase['from']['first_name'].($curBase['from']['last_name']??' Незнакомец');
 
-		return [
+		$o= [
 			'text' => "Привет, $name! Давай знакомиться получше!\n" . $this->about($curBase),
 			'reply_markup' => ['keyboard' => [
 				[
@@ -108,6 +108,15 @@ class BDU extends Helper
 				],
 			]]
 		];
+
+		if(!empty(array_filter($curBase, function($i){
+			return $i !== 'from';
+		}, ARRAY_FILTER_USE_KEY)))
+		$o['reply_markup']['keyboard'][]= [
+			['text' => self::CMD['BDU']['remove_self']],
+		];
+
+		return $o;
 	}
 
 
@@ -172,11 +181,6 @@ class BDU extends Helper
 
 	private function category()
 	{
-		/* $this->UKB->setStatement([
-			'wait familiar data'=>1,
-			'dataName'=>'category'
-		]); */
-
 		$o= [
 			'text' => $this->about(),
 			// 'text' => "Выберите категорию для <u>добавления</u> \n\n".$this->about(),
@@ -205,10 +209,9 @@ class BDU extends Helper
 				];
 			}
 		}
-		// return $o;
 	}
 
-	private function toggle_category()
+	/* private function toggle_category()
 	{
 		$this->UKB->setStatement([
 			'wait familiar data'=>1,
@@ -228,7 +231,7 @@ class BDU extends Helper
 		$this->apiResponseJSON($o, 'editMessageText');
 		die;
 		// return $o;
-	}
+	} */
 
 	/* private function remove_category()
 	{
@@ -350,6 +353,9 @@ class BDU extends Helper
 		$this->apiResponseJSON(['text'=>$this->about()]);
 	} //* save_region
 
+	/**
+	 * Добавление / удаление категории
+	 */
 	private function save_category($arrStr)
 	{
 		$curBase= &$this->data[$this->user_id];
@@ -433,7 +439,9 @@ class BDU extends Helper
 	private function users()
 	{
 		$users= '';
-		foreach($this->data as $curBase)
+		$iKeyboard= [];
+
+		foreach($this->data as $id=>$curBase)
 		{
 			foreach($curBase as $fName=>$fld)
 			{
@@ -455,10 +463,39 @@ class BDU extends Helper
 				}
 			}
 			$users.= "\n";
+
+			if(!is_numeric($id)) continue;
+
+			$name= $curBase['from']['first_name']??$id;
+
+			$iKeyboard[]= [
+				'text'=> $name,
+				'callback_data'=> "/BDU/remove_user__{$id}__$name",
+			];
 		}
-		return [
+
+		$o= [
 			'text'=>$users,
 		];
+
+		//* 4 owner
+		if($this->is_owner)
+		{
+			$ikb= [];
+			$o['text'].= "\n\n<u>Удаление данных:</u>";
+
+			foreach(array_chunk($iKeyboard,4) as $nr=>&$row)
+			{
+				$ikb[]= [];
+				foreach($row as &$btn)
+				{
+					$ikb[$nr][]= $btn;
+				}
+			}
+			$o['reply_markup']['inline_keyboard'] = &$ikb;
+		}
+
+		return $o;
 	}
 
 
@@ -476,7 +513,7 @@ class BDU extends Helper
 
 		// $this->log->add(__METHOD__." catTags=",null,[$catTags,]);
 
-		return [
+		$o= [
 			'text'=>$txt,
 			'reply_markup' => ["keyboard" => [
 				[
@@ -489,6 +526,8 @@ class BDU extends Helper
 				],
 			]],
 		];
+
+		return $o;
 	} //* scope
 
 
@@ -562,9 +601,81 @@ class BDU extends Helper
 		{
 			$txt= implode(PHP_EOL,$curCat) . "\n\n";
 		}
-		$this->apiResponseJSON([
-			'text'=>"<u><b>$catName</b></u>\n\n$txt"
-		]);
+
+		$o= [
+			'text'=>"<u><b>$catName</b></u>\n\n$txt",
+			'reply_markup' => [
+				"inline_keyboard" => [],
+			],
+		];
+
+		$this->show_category_buttons($o['reply_markup']['inline_keyboard'], 'list');
+
+		$this->apiResponseJSON($o);
+
 		$this->log->add(__METHOD__." \$catName,curCat=",null,[$catName,$curCat]);
 	}
+
+
+	//! Удаление учётной записи
+	private function remove_self()
+	{
+		$this->apiResponseJSON([
+			'text'=>"❗️❗️❗️Внимание❗️❗️❗️\n\nДанное действие будет <u>невозможно</u> отменить.\nНажимая кнопку ниже вы подтверждаете полное удаление своих данных из базы бота.",
+			'reply_markup' => ["inline_keyboard" => [[
+				[
+					'text'=> "Подтвердить удаление",
+					'callback_data'=>'/BDU/confirm_remove_self',
+				]
+			]],],
+		]);
+		die;
+	}
+
+
+	private function confirm_remove_self()
+	{
+		unset($this->data[$this->user_id]);
+		$this->data['change']++;
+
+		return $this->routerCmd('familiar');
+	}
+
+
+	//! Удаление данных пользователя
+	private function remove_user($arrStr)
+	{
+		$this->apiResponseJSON([
+			'text'=>"❗️❗️❗️Внимание❗️❗️❗️\n\nДанное действие будет <u>невозможно</u> отменить.\nНажимая кнопку ниже вы подтверждаете полное удаление данных пользователя <u>{$arrStr[1]}</u> из базы бота.",
+			'message_id' => $this->message['message_id'],
+			'reply_markup' => ["inline_keyboard" => [[
+				[
+					'text'=> "Подтвердить ❌",
+					'callback_data'=>"/BDU/confirm_remove_user__{$arrStr[0]}",
+				],
+				[
+					'text'=> "⬅️Отменить",
+					'callback_data'=>"/BDU/users",
+				],
+			]],],
+		], 'editMessageText');
+		die;
+	}
+
+	private function confirm_remove_user($arrStr)
+	{
+		unset($this->data[$arrStr[0]]);
+		$this->data['change']++;
+
+		$this->apiResponseJSON([
+			'text'=> "Данные удалены",
+			'message_id' => $this->message['message_id'],
+		], 'editMessageText');
+		die;
+	}
+
+	/* public function __destruct()
+	{
+		parent::__destruct();
+	} */
 } //* BDU
