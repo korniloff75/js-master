@@ -172,25 +172,23 @@ class BDU extends Helper
 
 	private function category()
 	{
-		$this->UKB->setStatement([
+		/* $this->UKB->setStatement([
 			'wait familiar data'=>1,
 			'dataName'=>'category'
-		]);
+		]); */
 
 		$o= [
 			'text' => $this->about(),
+			// 'text' => "Выберите категорию для <u>добавления</u> \n\n".$this->about(),
+			'message_id' => $this->message['message_id'],
 			'reply_markup' => [
-				"keyboard" => [[
-					['text' => self::CMD['BDU']['add_category']],
-					['text' => self::CMD['BDU']['remove_category']],
-				],
-				[
-					['text' => self::CMD['BDU']['familiar']],
-					['text' => self::BTNS['general']],
-				],],
+				"inline_keyboard" => [],
 			],
 		];
 
+		$this->show_category_buttons($o['reply_markup']['inline_keyboard']);
+
+		// $this->apiResponseJSON($o, 'editMessageText');
 		return $o;
 	}
 
@@ -210,15 +208,16 @@ class BDU extends Helper
 		// return $o;
 	}
 
-	private function add_category()
+	private function toggle_category()
 	{
-		/* $this->UKB->setStatement([
+		$this->UKB->setStatement([
 			'wait familiar data'=>1,
 			'dataName'=>'category'
-		]); */
+		]);
 
 		$o= [
 			'text' => "Выберите категорию для <u>добавления</u> \n\n".$this->about(),
+			'message_id' => $this->message['message_id'],
 			'reply_markup' => [
 				"inline_keyboard" => [],
 			],
@@ -226,15 +225,13 @@ class BDU extends Helper
 
 		$this->show_category_buttons($o['reply_markup']['inline_keyboard']);
 
-		return $o;
+		$this->apiResponseJSON($o, 'editMessageText');
+		die;
+		// return $o;
 	}
 
-	private function remove_category()
+	/* private function remove_category()
 	{
-		/* $this->UKB->setStatement([
-			'wait familiar data'=>1,
-			'dataName'=>'category'
-		]); */
 
 		$o= [
 			'text' => "Выберите категорию для <u>удаления</u> \n\n".$this->about(),
@@ -246,7 +243,7 @@ class BDU extends Helper
 		$this->show_category_buttons($o['reply_markup']['inline_keyboard'], 'unsave');
 
 		return $o;
-	}
+	} */
 
 
 	//* Приём и сохранение данных
@@ -290,7 +287,7 @@ class BDU extends Helper
 		$curBase['realName']= $name;
 		$this->data['change']++;
 
-		return $this->send([
+		return $this->apiResponseJSON([
 			'text' => $this->about()
 		]);
 
@@ -342,7 +339,7 @@ class BDU extends Helper
 		$curBase= &$this->data[$this->user_id];
 		$curBase['hashtags']= $arrStr;
 		$this->data['change']++;
-		$this->send(['text'=>$this->about()]);
+		$this->apiResponseJSON(['text'=>$this->about()]);
 	} //* save_hashtags
 
 	private function save_region($arrStr)
@@ -350,19 +347,42 @@ class BDU extends Helper
 		$curBase= &$this->data[$this->user_id];
 		$curBase['region']= $arrStr;
 		$this->data['change']++;
-		$this->send(['text'=>$this->about()]);
+		$this->apiResponseJSON(['text'=>$this->about()]);
 	} //* save_region
 
 	private function save_category($arrStr)
 	{
 		$curBase= &$this->data[$this->user_id];
-		$curBase['category'][]= $arrStr[0];
+		if(in_array($arrStr[0], $curBase['category']))
+		{
+			$curBase['category']= array_filter($curBase['category'], function(&$i)use($arrStr){
+				return $i !== $arrStr[0];
+			});
+		}
+		else
+		{
+			$curBase['category'][]= $arrStr[0];
+		}
+
 		$this->data['change']++;
-		$this->send(['text'=>$this->about($curBase)]);
+		// $this->apiResponseJSON(['text'=>$this->about($curBase)]);
+
+		$o= [
+			'text'=>$this->about($curBase),
+			'message_id' => $this->message['message_id'],
+			'reply_markup' => [
+				"inline_keyboard" => [],
+			],
+		];
+
+		$this->show_category_buttons($o['reply_markup']['inline_keyboard']);
+
+		$this->apiResponseJSON($o, 'editMessageText');
+
 		$this->log->add(__METHOD__." \$arrStr[0]=",null,[$arrStr[0]]);
 	} //* save_category
 
-	private function unsave_category($arrStr)
+	/* private function unsave_category($arrStr)
 	{
 		$curBase= &$this->data[$this->user_id];
 
@@ -370,10 +390,10 @@ class BDU extends Helper
 			return $i !== $arrStr[0];
 		});
 		$this->data['change']++;
-		$this->send(['text'=>$this->about($curBase)]);
+		$this->apiResponseJSON(['text'=>$this->about($curBase)]);
 		// $this->log->add(__METHOD__." curBase=",null,[$curBase]);
-	} //* unsave_category
-
+	}
+ */
 
 	//* Текущие данные
 	private function about($curBase=null)
@@ -542,7 +562,7 @@ class BDU extends Helper
 		{
 			$txt= implode(PHP_EOL,$curCat) . "\n\n";
 		}
-		$this->send([
+		$this->apiResponseJSON([
 			'text'=>"<u><b>$catName</b></u>\n\n$txt"
 		]);
 		$this->log->add(__METHOD__." \$catName,curCat=",null,[$catName,$curCat]);

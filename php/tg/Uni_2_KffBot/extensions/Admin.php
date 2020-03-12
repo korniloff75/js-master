@@ -17,7 +17,6 @@ class Admin extends Helper
 		$this->setConstruct($UKB, $cmd)
 			->init()
 			->routerCmd();
-		// $this->setConstruct($UKB, $cmd)->init()->routerCmd()->saveCurData();
 
 	} //* __construct
 
@@ -124,10 +123,6 @@ class Admin extends Helper
 			]);
 		}
 
-		/* $this->apiRequest([
-			'chat_id'=> $this->chat_id,
-			'message_id'=> $this->cbn['message_id'],
-		], 'deleteMessage'); */
 		die;
 	}
 

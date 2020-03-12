@@ -22,11 +22,13 @@ class Helper extends CommonBot implements Game
 		}
 
 		//* get data
-		$this->data = file_exists(static::BASE)
+		$this->objData = new DbJSON(static::BASE);
+		$this->data = $this->objData->get();
+		/* $this->data = file_exists(static::BASE)
 			? json_decode(
 				file_get_contents(static::BASE), 1
 			)
-			: [];
+			: []; */
 
 		$this->data['change'] = 0;
 	}
