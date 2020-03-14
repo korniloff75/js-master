@@ -89,9 +89,14 @@ class DbJSON {
 
 		// file_put_contents($this->path, self::toJSON($this->db), LOCK_EX);
 
-		if(!file_put_contents(
+		file_put_contents(
 			$this->path,
 			self::toJSON($this->db), LOCK_EX
-		)) trigger_error(__METHOD__."❗️❗️❗️\nСервер в данный момент перегружен и Ваши данные не были сохранены. Попробуйте повторить.", E_USER_WARNING);
+		);
+
+		/* if(!file_put_contents(
+			$this->path,
+			self::toJSON($this->db), LOCK_EX
+		)) trigger_error(__METHOD__."❗️❗️❗️\nСервер в данный момент перегружен и Ваши данные не были сохранены. Попробуйте повторить.", E_USER_WARNING); */
 	}
 } // DbJSON

@@ -3,7 +3,8 @@
 trait Curl
 {
 	protected static
-		$proxyPath = __DIR__.'/db.proxy';
+		$proxyPath = __DIR__.'/db.proxy',
+		$timeoutInSeconds = 1.5;
 
 	/**
 	 * ! Required
@@ -12,7 +13,6 @@ trait Curl
 	 */
 	protected function findAnzProxy(?string $proxy=null, bool $stop=false)
 	{
-		$timeoutInSeconds = 1.5;
 		$parsePath = 'https://cloudflare-ipfs.com/ipns/pacipfs2.antizapret.prostovpn.org/proxy-nossl.js';
 
 		if(file_exists(self::$proxyPath))
@@ -21,14 +21,14 @@ trait Curl
 
 			preg_match("~PROXY\s+(.+); DIRECT~i", $proxy, $proxyURL);
 
-			$proxyURL = "http://{$proxyURL[1]}";
+			$proxyURL = "http://" . trim($proxyURL[1]);
 			trigger_error("\$proxyURL = $proxyURL");
 
 			$p = parse_url($proxyURL);
 			// $p['scheme'].'://'.
 
 			//* Если прокси из файла доступен - возвращаем его
-			if($fp = fsockopen($p['host'], $p['port'], $errCode, $errStr, $timeoutInSeconds))
+			if($fp = fsockopen($p['host'], $p['port'], $errCode, $errStr, self::$timeoutInSeconds))
 			{
 				$this->log->add("Proxy $proxyURL - is <font color=green size=4><b>AVAILABLE</b></font>\n");
 				return $proxyURL;
@@ -53,7 +53,7 @@ trait Curl
 					"~return \"(PROXY.+DIRECT)\";$~im", $anz, $proxy)
 			)
 			{
-				$proxy = $proxy[1];
+				$proxy = trim($proxy[1]);
 				file_put_contents(self::$proxyPath, $proxy);
 
 				//* Рекурсия с новым прокси
@@ -64,6 +64,33 @@ trait Curl
 		//* Полный провал
 		return false;
 	} //* findAnzProxy
+
+
+	public function findProxy()
+	{
+		// if($proxyURL = $this->findAnzProxy()) return $proxyURL;
+
+		require_once __DIR__.'/../classes/DbJSON.php';
+
+		$arrProxy= (new DbJSON(__DIR__.'/../tg/Common/proxy.json'))->get();
+
+		foreach($arrProxy as &$proxyURL)
+		{
+			trigger_error("\$proxyURL = $proxyURL");
+
+			$p = parse_url($proxyURL);
+			// $p['scheme'].'://'.
+
+			//* Если прокси из файла доступен - возвращаем его
+			if($fp = fsockopen($p['host'], $p['port'], $errCode, $errStr, self::$timeoutInSeconds))
+			{
+				$this->log->add(__METHOD__." Proxy $proxyURL - is <font color=green size=4><b>AVAILABLE</b></font>\n");
+				return $proxyURL;
+			}
+		}
+
+		$this->log->add(__METHOD__." ALL Proxies is <font color=red size=4><b>FAIL</b></font>\n");
+	} // findProxy
 
 
 	public function browsEmul()
@@ -163,7 +190,8 @@ trait Curl
 	public function CurlRequestProxy(string $url, array $opts=[])
 	{
 		$ch = $this->CurlSetOpt($url, $opts);
-		curl_setopt($ch, CURLOPT_PROXY, $this->findAnzProxy());
+		// curl_setopt($ch, CURLOPT_PROXY, $this->findAnzProxy());
+		curl_setopt($ch, CURLOPT_PROXY, $this->findProxy());
 
 		return $this->execCurl($ch);
 	}
@@ -279,17 +307,20 @@ trait Curl
 		}
 		elseif ($http_code === 200)
 		{
-			$this->log->add(__METHOD__ . " was SUCCESSFUL", null, [/*$response*/]);
+			$this->log->add(__METHOD__ . " was SUCCESSFUL");
 		}
 
 		curl_close($ch);
 
 		//note deprecated
 		if($opts['json'] && is_string($response))
+		{
 			$response = json_decode($response, 1) ?? [
 				'description' => 'cURL is failed convert to JSON array in ' . __METHOD__ . __LINE__,
 				'curlInfo' => $this->curlInfo
 			];
+			$this->log->add(__METHOD__ . " response not JSON string", null, [$response]);
+		}
 
 		return $response;
 	} // execCurl
