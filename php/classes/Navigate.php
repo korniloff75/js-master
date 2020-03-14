@@ -11,24 +11,27 @@ class Navigate
 	public $firstPage;
 
 
-	function __construct($dir=\CONT)
+	function __construct($dir=null)
 
 	{
 		global $First_page;
 
-		$dir = self::checkContDir($dir);
+		$dir = self::checkContDir($dir ?? \CONT);
 
 		$this->allowed_dir = "#^" . self::ALLOWED . "$#u";
 		$this->allowed_file = "#^" . self::ALLOWED . "\.(php|htm)$#u";
 
 		$this->map_path = $map_path = $dir . 'map_content.json';
 
+		// trigger_error(__METHOD__." \$this->map_path= " . $this->map_path.' called from= '. realpath('.').'$dir= '.realpath($dir));
+
 		#
 		$this->mapObj = new \DbJSON($map_path);
 
 		if(!count($this->mapObj->db))
 		{
-			$this->mapObj->set($this->createMap());
+			$this->mapObj->replace($this->createMap());
+			// trigger_error(__METHOD__." \$this->mapObj->db has count ");
 		}
 
 
@@ -71,9 +74,10 @@ class Navigate
 	}
 
 
-	public static function checkContDir($dir = \CONT)
+	public static function checkContDir($dir=null)
 
 	{
+		$dir= $dir ?? \CONT;
 		if(!is_dir($dir)) mkdir($dir);
 		if(!file_exists("$dir.htaccess"))
 			copy('assets/htaccess4content.txt', "$dir.htaccess");
@@ -118,7 +122,7 @@ class Navigate
 	# В разработке
 	public function createGlobalMap($map = null, $ref=\CONT)
 	{
-		$map = $map ?? $this->mapObj->db;
+		$map = $map ?? $this->mapObj->get();
 
 		foreach($map as $title => &$item_val) {
 			$path = $ref . $title . '/';

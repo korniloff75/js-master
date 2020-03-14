@@ -78,6 +78,12 @@ class BDU extends Helper
 
 		if(count($o))
 		{
+			/* if(!$this->is_group && !empty($this->message['message_id']))
+			{
+				$o['message_id'] = $this->message['message_id'];
+				$this->apiRequest($o, 'editMessageText');
+			}
+			else  */
 			$this->send($o);
 		}
 		$this->log->add(__METHOD__.' $o...=',null,[$o,$cmd]);
@@ -201,52 +207,15 @@ class BDU extends Helper
 		foreach(array_chunk(self::CATEGORIES,3) as $nr=>$row)
 		{
 			$ikb[]= [];
-			foreach($row as $spec)
+			foreach($row as $btn)
 			{
 				$ikb[$nr][]= [
-					'text'=> $spec,
-					'callback_data'=> "/BDU/{$method}_category__$spec",
+					'text'=> $btn,
+					'callback_data'=> "/BDU/{$method}_category__$btn",
 				];
 			}
 		}
 	}
-
-	/* private function toggle_category()
-	{
-		$this->UKB->setStatement([
-			'wait familiar data'=>1,
-			'dataName'=>'category'
-		]);
-
-		$o= [
-			'text' => "Выберите категорию для <u>добавления</u> \n\n".$this->about(),
-			'message_id' => $this->message['message_id'],
-			'reply_markup' => [
-				"inline_keyboard" => [],
-			],
-		];
-
-		$this->show_category_buttons($o['reply_markup']['inline_keyboard']);
-
-		$this->apiResponseJSON($o, 'editMessageText');
-		die;
-		// return $o;
-	} */
-
-	/* private function remove_category()
-	{
-
-		$o= [
-			'text' => "Выберите категорию для <u>удаления</u> \n\n".$this->about(),
-			'reply_markup' => [
-				"inline_keyboard" => [],
-			],
-		];
-
-		$this->show_category_buttons($o['reply_markup']['inline_keyboard'], 'unsave');
-
-		return $o;
-	} */
 
 
 	//* Приём и сохранение данных
@@ -388,18 +357,6 @@ class BDU extends Helper
 		$this->log->add(__METHOD__." \$arrStr[0]=",null,[$arrStr[0]]);
 	} //* save_category
 
-	/* private function unsave_category($arrStr)
-	{
-		$curBase= &$this->data[$this->user_id];
-
-		$curBase['category']= array_filter($curBase['category'], function(&$i)use($arrStr){
-			return $i !== $arrStr[0];
-		});
-		$this->data['change']++;
-		$this->apiResponseJSON(['text'=>$this->about($curBase)]);
-		// $this->log->add(__METHOD__." curBase=",null,[$curBase]);
-	}
- */
 
 	//* Текущие данные
 	private function about($curBase=null)
@@ -464,6 +421,7 @@ class BDU extends Helper
 			}
 			$users.= "\n";
 
+			//* Кнопки удаления данных
 			if(!is_numeric($id)) continue;
 
 			$name= $curBase['from']['first_name']??$id;
@@ -638,6 +596,9 @@ class BDU extends Helper
 		unset($this->data[$this->user_id]);
 		$this->data['change']++;
 
+		unset($this->license[$this->user_id]);
+		$this->objLicense->replace($this->license);
+
 		return $this->routerCmd('familiar');
 	}
 
@@ -666,6 +627,9 @@ class BDU extends Helper
 	{
 		unset($this->data[$arrStr[0]]);
 		$this->data['change']++;
+
+		unset($this->license[$arrStr[0]]);
+		$this->objLicense->replace($this->license);
 
 		$this->apiResponseJSON([
 			'text'=> "Данные удалены",
