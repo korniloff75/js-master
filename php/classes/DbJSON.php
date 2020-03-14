@@ -1,7 +1,7 @@
 <?php
 class DbJSON {
 	private
-		$path = '',
+		$path,
 		$json; # String
 
 	public
@@ -11,10 +11,14 @@ class DbJSON {
 
 	public function __construct(string $path)
 	{
-		if(empty($path)) throw new LogicException("Отсутствует \$path", 1);
+		//* fix 4 __destruct
+		$this->path= realpath($path);
+		if(!$this->path) $this->path= $_SERVER['DOCUMENT_ROOT']. '/' . $path;
 
-		$this->path = $path;
+		// var_dump($this->path);
+
 		$this->json = @file_get_contents($this->path);
+		// trigger_error(__METHOD__.' ./'.$path." \$this->path= " . $this->path);
 		$this->db = json_decode($this->json, true) ?? [];
 
 	}
@@ -34,7 +38,7 @@ class DbJSON {
 	/**
 	 * @param data <array>
 	 */
-	public function set(array &$data)
+	public function set(array $data)
 	{
 		$this->db = array_replace_recursive($this->db, $data);
 		$this->db['change']= 1;
@@ -45,9 +49,9 @@ class DbJSON {
 	/**
 	 * @param data <array>
 	 */
-	public function replace(array &$data)
+	public function replace(array $data)
 	{
-		$this->db = &$data;
+		$this->db = $data;
 		$this->db['change']= 1;
 
 		return $this;
@@ -74,9 +78,12 @@ class DbJSON {
 
 	public function __destruct()
 	{
-		if(empty($this->db['change'])) return;
+		// todo test
+		// $this->db['change']= 1;
 
-		trigger_error(__METHOD__." \$this->db['change']= " . ((bool) $this->db['change']));
+		// trigger_error(__METHOD__." \$this->db['change']= " . ((bool) $this->db['change']) . "\nBase saved! \$this->path= {$this->path} current=" . realpath('.') . ' spl=' . $_SERVER['DOCUMENT_ROOT']. '/' .  $this->objPath->getPathname());
+
+		if(empty($this->db['change'])) return;
 
 		unset($this->db['change']);
 

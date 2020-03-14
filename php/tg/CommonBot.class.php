@@ -26,7 +26,7 @@ class CommonBot extends TG
 	protected
 		// $is_owner = false,
 		$responseData,
-		$license = [],
+		$objLicense = [],
 		$savedBase = [],
 		//* from tg.class.php
 		$botDir,
@@ -186,10 +186,10 @@ class CommonBot extends TG
 	{
 		if(
 			empty($this->license)
-			&& ($license = new DbJSON("{$this->botDir}/license.json"))
+			&& ($this->objLicense = new DbJSON("{$this->botDir}/license.json"))
 		)
 		{
-			$this->license = $license->get();
+			$this->license = $this->objLicense->get();
 			// $this->license = json_decode($license,1);
 		}
 
@@ -199,7 +199,7 @@ class CommonBot extends TG
 			|| array_key_exists($this->user_id, $this->license)
 		) return;
 
-		$license->set([$this->user_id=> [
+		$this->objLicense->set([$this->user_id=> [
 			$user_data['term'] ?? "3000-01-01",
 			"{$this->message['from']['first_name']} "
 			. ($this->message['from']['last_name']??'')
@@ -319,7 +319,7 @@ class CommonBot extends TG
 
 	public function __destruct()
 	{
-		if( !empty($this->license['change']) )
+		if( !empty($this->objLicense->db['change']) )
 		{
 			array_walk($this->license, function(&$data,$id){
 				$data= [$data['term'],$data['name'],$data['blocked']];
