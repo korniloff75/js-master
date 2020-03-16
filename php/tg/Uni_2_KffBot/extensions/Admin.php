@@ -4,13 +4,13 @@ class Admin extends Helper
 {
 	use UniConstruct;
 
-	const
+	/* const
 		FOLDER = __DIR__.'/../'.__CLASS__,
-		BASE = self::FOLDER . '/base.json';
+		BASE = self::FOLDER . '/base.json'; */
 
 
 	/**
-	 * @param cmd - 'cmdName_opt1_opt2_...etc'
+	 * @param cmd - 'cmdName__opt1__opt2__...etc'
 	 */
 	public function __construct(UniKffBot &$UKB, ?array $cmd=null)
 	{
@@ -127,25 +127,10 @@ class Admin extends Helper
 	}
 
 
-	//* Приём и сохранение данных
-	private function inputDataRouter($dataName)
-	{
-		$this->log->add(__METHOD__.' $this->message,$dataName',null,[$this->message,$dataName]);
-
-		$txt= trim($this->message['text']);
-
-		if(method_exists(__CLASS__, "w_$dataName"))
-		{
-			$this->{"w_$dataName"}(explode("\n",$txt));
-		}
-		else
-			$this->log->add(__METHOD__." method w_$dataName is FAIL",E_USER_WARNING);
-	}
-
 
 	//note wait data
 	// deprecated
-	private function w_getAdmins()
+	protected function w_getAdmins()
 	{
 		file_put_contents(self::FOLDER.'/inputJson.txt', $this->inputJson);
 	}

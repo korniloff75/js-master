@@ -319,7 +319,7 @@ trait Curl
 				'description' => 'cURL is failed convert to JSON array in ' . __METHOD__ . __LINE__,
 				'curlInfo' => $this->curlInfo
 			];
-			$this->log->add(__METHOD__ . " response not JSON string", null, [$response]);
+			$this->log->add(__METHOD__ . " response must be JSON string", null, [$response]);
 		}
 
 		return $response;

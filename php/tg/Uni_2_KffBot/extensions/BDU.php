@@ -20,36 +20,17 @@ class BDU extends Helper
 	public function __construct(UniKffBot &$UKB, ?array $cmd=null)
 	{
 		$this->setConstruct($UKB, $cmd)
+			// https://js-master.ru/php/tg/Uni_2_KffBot/BDU/base.json
+			->getCurData()
+			->inputDataRouter('save')
 			->init()
 			->routerCmd();
-		// $this->setConstruct($UKB, $cmd)->init()->routerCmd()->saveCurData();
 
 	} //* __construct
 
 
 	private function init()
 	{
-		// $this->log->add('$this->BTNS=',null,[$this->BTNS]);
-
-		// https://js-master.ru/php/tg/Uni_2_KffBot/BDU/base.json
-		$this->getCurData();
-
-		/* $this->drawsOwner = isset($this->data['current draws']['owner'])
-		&& $this->user_id === $this->data['current draws']['owner']['id']; */
-
-		$this->data['change'] = 0;
-
-		//* Ждем данные
-		if(!empty($this->statement['wait familiar data']))
-		{
-			//* Отправляем на приём данных
-			$this->checkFamilar($this->statement['dataName']);
-			$this->UKB->setStatement([
-				'wait familiar data'=>0,
-			]);
-			die;
-		}
-
 		$from= &$this->message['from'];
 		$curBase= &$this->data["{$from['id']}"];
 
@@ -137,7 +118,7 @@ class BDU extends Helper
 		if($notRealName = empty($curBase['realName']))
 		{
 			$this->UKB->setStatement([
-				'wait familiar data'=>1,
+				'wait data'=>1,
 				// 'familiar from'=>$curBase['from'],
 				'dataName'=>'fio'
 			]);
@@ -163,7 +144,7 @@ class BDU extends Helper
 	private function hashtags()
 	{
 		$this->UKB->setStatement([
-			'wait familiar data'=>1,
+			'wait data'=>1,
 			'dataName'=>'hashtags'
 		]);
 		// if($this->statement[])
@@ -176,7 +157,7 @@ class BDU extends Helper
 	private function region()
 	{
 		$this->UKB->setStatement([
-			'wait familiar data'=>1,
+			'wait data'=>1,
 			'dataName'=>'region'
 		]);
 		// if($this->statement[])
@@ -220,7 +201,7 @@ class BDU extends Helper
 
 
 	//* Приём и сохранение данных
-	private function checkFamilar($dataName)
+	/* private function checkFamilar($dataName)
 	{
 		$this->log->add(__METHOD__.' $this->message,$dataName',null,[$this->message,$dataName]);
 
@@ -232,7 +213,7 @@ class BDU extends Helper
 		}
 		else
 			$this->log->add(__METHOD__." method save_$dataName is FAIL",E_USER_WARNING);
-	}
+	} */
 
 
 	private function changeFamilar(array $opts)
@@ -243,7 +224,7 @@ class BDU extends Helper
 		$this->log->add(__METHOD__." \$opts,\$this->cmd",null,[$opts,$this->cmd]);
 
 		$this->UKB->setStatement([
-			'wait familiar data'=>1,
+			'wait data'=>1,
 			'dataName'=>$dataName
 		]);
 
@@ -251,7 +232,7 @@ class BDU extends Helper
 	}
 
 
-	private function save_fio($arrStr)
+	protected function save_fio($arrStr)
 	{
 		$name= $arrStr[0];
 
@@ -307,7 +288,7 @@ class BDU extends Helper
 	} //* save_name
 
 
-	private function save_hashtags($arrStr)
+	protected function save_hashtags($arrStr)
 	{
 		$curBase= &$this->data[$this->user_id];
 		$curBase['hashtags']= $arrStr;
@@ -315,7 +296,7 @@ class BDU extends Helper
 		$this->apiResponseJSON(['text'=>$this->about()]);
 	} //* save_hashtags
 
-	private function save_region($arrStr)
+	protected function save_region($arrStr)
 	{
 		$curBase= &$this->data[$this->user_id];
 		$curBase['region']= $arrStr;
@@ -326,7 +307,7 @@ class BDU extends Helper
 	/**
 	 * Добавление / удаление категории
 	 */
-	private function save_category($arrStr)
+	protected function save_category($arrStr)
 	{
 		$curBase= &$this->data[$this->user_id];
 		if(in_array($arrStr[0], $curBase['category']))

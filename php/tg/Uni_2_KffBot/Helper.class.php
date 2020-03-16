@@ -31,6 +31,7 @@ class Helper extends CommonBot implements Game
 			: []; */
 
 		$this->data['change'] = 0;
+		return $this;
 	}
 
 	/* protected function saveCurData()
@@ -107,6 +108,32 @@ class Helper extends CommonBot implements Game
 		. ($arr['last_name'] ?? '')
 		. "</b> " . ($tag?'@':'')
 		. "{$arr['username']} ({$arr['id']})\n";
+	}
+
+
+	//* Приём и обработка ожидаемых данных
+	protected function inputDataRouter($prefix='w')
+	{
+		//* Ждем данные
+		if(empty($this->statement['wait data']))
+			return $this;
+
+		$dataName= $this->statement['dataName'];
+		$this->log->add(__METHOD__.' $this->message,$dataName',null,[$this->message,$dataName]);
+
+		$txt= trim($this->message['text']);
+
+		if(method_exists($this, "{$prefix}_$dataName"))
+		{
+			$this->{"{$prefix}_$dataName"}(explode("\n",$txt));
+		}
+		else
+			$this->log->add(__METHOD__." method {$prefix}_$dataName is FAIL",E_USER_WARNING);
+
+		$this->UKB->setStatement([
+			'wait data'=>0,
+		]);
+		die;
 	}
 
 

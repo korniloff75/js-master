@@ -224,7 +224,7 @@ class UniKffBot extends CommonBot implements Game
 				$this->setStatement([
 					'cmdName'=>$cmdName,
 					//* Отменяем ожидание вводимых данных
-					'wait familiar data'=>0,
+					'wait data'=>0,
 				]);
 
 				$this->log->add(__METHOD__.' $this->statement_2',null,[$this->statement]);
