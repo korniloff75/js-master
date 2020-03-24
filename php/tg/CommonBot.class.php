@@ -324,13 +324,6 @@ class CommonBot extends TG
 			array_walk($this->license, function(&$data,$id){
 				$data= [$data['term'],$data['name'],$data['blocked']];
 			});
-
-			/* unset($this->license['change']);
-
-			file_put_contents(
-				"{$this->botDir}/license.json",
-				json_encode($this->license, JSON_UNESCAPED_UNICODE|JSON_NUMERIC_CHECK|JSON_UNESCAPED_SLASHES), LOCK_EX
-			); */
 		}
 
 		$this->log->add(__METHOD__,null,$this->license);

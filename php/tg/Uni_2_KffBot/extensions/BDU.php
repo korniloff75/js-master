@@ -173,19 +173,21 @@ class BDU extends Helper
 			// 'text' => $this->about(),
 			'text' => "Здесь вы можете подключать или отключать подходящие вам категории \n\n".$this->about(),
 			'message_id' => $this->message['message_id'],
-			'reply_markup' => [
+			/* 'reply_markup' => [
 				"inline_keyboard" => [],
-			],
+			], */
 		];
 
-		$this->show_category_buttons($o['reply_markup']['inline_keyboard']);
+		$this->show_category_buttons($o/* ['reply_markup']['inline_keyboard'] */);
 
 		// $this->apiResponseJSON($o, 'editMessageText');
 		return $o;
 	}
 
-	private function show_category_buttons(&$ikb,$method='save')
+
+	private function show_category_buttons(&$o,$method='save')
 	{
+		$ikb= &$o['reply_markup']['inline_keyboard'];
 		foreach(array_chunk(self::CATEGORIES,3) as $nr=>$row)
 		{
 			$ikb[]= [];
@@ -197,23 +199,9 @@ class BDU extends Helper
 				];
 			}
 		}
+
+		// $this->apiResponseJSON($o, 'editMessageText');
 	}
-
-
-	//* Приём и сохранение данных
-	/* private function checkFamilar($dataName)
-	{
-		$this->log->add(__METHOD__.' $this->message,$dataName',null,[$this->message,$dataName]);
-
-		$txt= trim($this->message['text']);
-
-		if(method_exists(__CLASS__, "save_$dataName"))
-		{
-			$this->{"save_$dataName"}(explode("\n",$txt));
-		}
-		else
-			$this->log->add(__METHOD__." method save_$dataName is FAIL",E_USER_WARNING);
-	} */
 
 
 	private function changeFamilar(array $opts)
@@ -327,12 +315,9 @@ class BDU extends Helper
 		$o= [
 			'text'=>$this->about($curBase),
 			'message_id' => $this->message['message_id'],
-			'reply_markup' => [
-				"inline_keyboard" => [],
-			],
 		];
 
-		$this->show_category_buttons($o['reply_markup']['inline_keyboard']);
+		$this->show_category_buttons($o);
 
 		$this->apiResponseJSON($o, 'editMessageText');
 
@@ -515,12 +500,9 @@ class BDU extends Helper
 		// $this->show_category_buttons()
 		$o= [
 			'text' => "Выберите категорию для <u>просмотра</u> \n\n",
-			'reply_markup' => [
-				"inline_keyboard" => [],
-			],
 		];
 
-		$this->show_category_buttons($o['reply_markup']['inline_keyboard'], 'list');
+		$this->show_category_buttons($o, 'list');
 		return $o;
 	}
 
@@ -544,16 +526,16 @@ class BDU extends Helper
 
 		$o= [
 			'text'=>"<u><b>$catName</b></u>\n\n$txt",
-			'reply_markup' => [
-				"inline_keyboard" => [],
-			],
+			'message_id'=> $this->statement['last']['message_id'],
 		];
 
-		$this->show_category_buttons($o['reply_markup']['inline_keyboard'], 'list');
+		$this->show_category_buttons($o, 'list');
 
-		$this->apiResponseJSON($o);
+		// $this->apiRequest($o, 'editMessageText');
+		$this->apiResponseJSON($o, 'editMessageText');
 
 		$this->log->add(__METHOD__." \$catName,curCat=",null,[$catName,$curCat]);
+		die;
 	}
 
 

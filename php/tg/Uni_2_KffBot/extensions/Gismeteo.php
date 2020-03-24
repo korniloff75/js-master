@@ -40,7 +40,8 @@ class Gismeteo extends CommonBot implements Game
 				$this->userPermission("Поменяйте вашу геолокацию, нажав на кнопку внизу экрана.\n\nТекущие данные о погоде будут отображены сразу, а новые данные по прогнозу будут доступны в течение часа после вашего последнего запроса прогноза по прежней геолокации.");
 				break;
 			case 'forecast_aggregate':
-				$this->requestGM('aggregate')->methodSwitcher();
+				$this->requestGM('aggregate')
+					->methodSwitcher();
 				break;
 			case 'by_day_part':
 				$this->requestGM('by_day_part')->methodSwitcher();
@@ -73,18 +74,6 @@ class Gismeteo extends CommonBot implements Game
 						"selective" => true
 					]
 				], $this->location), 'sendVenue');
-
-				/* $this->apiRequest([
-					'chat_id' => $this->user_id,
-					'text' => "Показать прогноз?",
-					'reply_markup' => [
-						"inline_keyboard" => $forecastButs,
-						"one_time_keyboard" => true,
-						"resize_keyboard" => true,
-						"selective" => true
-					]
-					// 'callback_data' =>
-				]); */
 				break;
 		}
 

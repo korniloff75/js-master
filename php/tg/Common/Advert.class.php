@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-require_once __DIR__ . "/../CommonBot.class.php";
+// require_once __DIR__ . "/../CommonBot.class.php";
 
 require_once __DIR__ . "/../tg.class.php";
 require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/DbJSON.php";

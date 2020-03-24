@@ -44,15 +44,18 @@ class Reviews extends Helper
 
 		if(count($o))
 		{
-			/* if(!$this->is_group && !empty($this->message['message_id']))
-			{
-				$o['message_id'] = $this->message['message_id'];
-				$this->apiRequest($o, 'editMessageText');
-			}
-			else  */
 			$this->apiRequest($o);
 		}
 		$this->log->add(__METHOD__.' $o...=',null,[$o,$cmd]);
+
+		return $this;
+	}
+
+	protected function setReview(string $person_id)
+	{
+		$this->objData->set([
+
+		]);
 
 		return $this;
 	}

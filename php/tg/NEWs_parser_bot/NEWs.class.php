@@ -61,7 +61,7 @@ class KorniloFF_news extends CommonBot
 		$remoteSource = [
 			'https://crimea-news.com/',
 			'http://m.allcrimea.net/',
-			'http://www.yalta-24.ru/',
+			// 'http://www.yalta-24.ru/',
 		];
 
 	private
@@ -71,13 +71,15 @@ class KorniloFF_news extends CommonBot
 
 	public function __construct()
 	{
-		// \H::profile('base');
 		# Set local data
 		$this->botFileInfo = new kffFileInfo(__FILE__);
 
 		# Запускаем скрипт
 		# Protect from CommonBot
-		parent::__construct()->checkLicense()->init();
+		parent::__construct()
+			->findCommand()
+			->checkLicense()
+			->init();
 
 	} //__construct
 
@@ -94,6 +96,18 @@ class KorniloFF_news extends CommonBot
 		die('OK');
 
 	} // init
+
+
+	private function findCommand()
+	{
+		$this->log->add(__METHOD__ . " - \$this->text", null, [
+			$this->text,
+		]);
+
+		if(!$this->text) return $this;
+
+		return $this;
+	}
 
 
 	protected function parser_crimea_news_com($source, &$doc)

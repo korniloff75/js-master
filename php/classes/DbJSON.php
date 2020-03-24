@@ -13,6 +13,7 @@ class DbJSON {
 	{
 		//* fix 4 __destruct
 		$this->path= realpath($path);
+		$dir= realpath(dirname($this->path));
 		if(!$this->path) $this->path= $_SERVER['DOCUMENT_ROOT']. '/' . $path;
 
 		// var_dump($this->path);

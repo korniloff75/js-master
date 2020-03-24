@@ -109,7 +109,7 @@ class AntimatKFF extends CommonBot
 		}
 		else
 		{
-			$censure = "Отредактировано сообщение от @{$user}\n\n$censure\n\nПользователю <b>@{$user}</b> выдано <b>{$base[$user]['count']}</b>-е предупреждение от администрации.\nTime - " . ((new DateTime)->format('u') - $this->tg_startTime->format('u')) . ' мкс';
+			$censure = "Отредактировано сообщение от @{$user}\n\n$censure\n\nПользователю <b>@{$user}</b> выдано <b>{$base[$user]['count']}</b>-е предупреждение от администрации.\n" . ((new DateTime)->format('u') - $this->tg_startTime->format('u')) . ' мкс';
 
 		}
 

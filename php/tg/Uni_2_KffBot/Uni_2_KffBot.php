@@ -118,10 +118,10 @@ class UniKffBot extends CommonBot implements Game
 	{
 		$inputData = $this->cbn['data'] ?? $this->message["text"];
 
-		/* if(!empty($this->message))
+		if(!empty($this->message))
 			$this->setStatement([
 				'last'=> $this->message
-			]); */
+			]);
 
 		//* FIX multibots
 		$inputData= explode('@', $inputData)[0];

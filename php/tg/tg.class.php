@@ -47,13 +47,12 @@ class TG {
 		$proxy,
 		# define in child classes
 		$botFileInfo,
-		$log, # instanceof Logger
-		//*
-		$cron=[],
+		$log, //* instanceof Logger
+		$cron=[], //* cron start
 
 		$botDir,
 		$botDirFromRoot,
-		# take object message
+		//* take object message
 		$message,
 		$cbn,
 		$user_id,
@@ -98,7 +97,7 @@ class TG {
 
 		$this->log->add(basename(__FILE__) . ' inited');
 
-		# Обрабатываем входящие данные
+		//* Обрабатываем входящие данные
 		$this->message = $this->webHook()->findCallback();
 		return $this;
 	} // __construct
@@ -108,7 +107,7 @@ class TG {
 	{
 		if($this->log) return;
 
-		# Если не логируется из дочернего класса
+		//* Если не логируется из дочернего класса
 		require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
 		if($this->botFileInfo)
 		{
@@ -147,9 +146,9 @@ class TG {
 	}
 
 
-	public function getData()
+	public function getInputData()
 	{
-		$this->log->add("getData() started = " . (is_null($this->inputData) ? 'TRUE' : 'FALSE'));
+		$this->log->add("getInputData() started = " . (is_null($this->inputData) ? 'TRUE' : 'FALSE'));
 		if(is_null($this->inputData))
 		{
 			# Ловим входящий поток
@@ -161,7 +160,7 @@ class TG {
 		}
 
 		return $this;
-	} // getData
+	} // getInputData
 
 
 	/**
@@ -169,9 +168,9 @@ class TG {
 	 */
 	public function findCallback()
 	{
-		if(!$this->getData()->inputData)
+		if(!$this->getInputData()->inputData)
 		{
-			// Проверяем cron
+			//* Проверяем cron
 			if(empty($this->cron))
 			{
 				$this->log->add("inputData is EMPTY!", E_USER_WARNING, [$this->inputData]);
@@ -433,9 +432,7 @@ class TG {
 	 */
 	public function sendMessage(array &$content, array $postFields= [], string $break="\n\n")
 	{
-		$postFields = array_merge([
-			'chat_id' => $this->chat_id,
-			'parse_mode' => 'html',
+		$postFields[] = array_merge([
 			'disable_web_page_preview' => true,
 		], $postFields);
 
@@ -445,7 +442,7 @@ class TG {
 
 		foreach($content as $i) {
 			--$diffLength;
-			if(!strlen(trim($i)))
+			if(empty(trim($i)))
 				continue;
 			# Если один элемент больше лимита
 			if(strlen($i) > self::$textLimit)
@@ -466,24 +463,6 @@ class TG {
 			// 	continue;
 
 			$postFields['text'] = strip_tags($bus, self::$allowedTags);
-
-			/* if(class_exists('CommonBot'))
-			{
-				$postFields['reply_markup'] = ["inline_keyboard" => [
-					//* Rows
-					[
-						CommonBot::setAdvButton(),
-					]
-				]];
-
-				if(empty($this->cron) && $this->is_owner)
-				{
-					$postFields['reply_markup']["inline_keyboard"][]= [
-						"text" => "More",
-						"callback_data" => '/more',
-					];
-				}
-			} */
 
 			//* Отправляем в канал.
 			$respTG[]= $this->apiRequest($postFields);
