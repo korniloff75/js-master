@@ -1,26 +1,36 @@
 #!/usr/bin/php
 <?php
 require_once __DIR__ . "/../CommonBot.class.php";
+
 require_once __DIR__ . "/../tg.class.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/DbJSON.php";
 // trigger_error(__FILE__.' inited');
 
 class Advert extends TG
 {
+	const BASE= '/base.jsonc';
+
 	protected $cron = [];
 
-	private $test;
+	private $test,
+		$DIR,
+		$urlDIR;
 
 	public function __construct($chat=null)
 	{
 		// trigger_error(__CLASS__.' inited');
 		$this->botFileInfo = new SplFileInfo(__FILE__);
 
-		$this->urlDIR = 'https://js-master.ru/' . str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__);
+		$this->DIR= str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__);
+		$this->urlDIR = 'https://js-master.ru/' . $this->DIR;
+
+		$this->base= new DbJSON($this->DIR . self::BASE);
 
 		$this->addChat($chat);
 
 		$this->log->add(__METHOD__.' botFileInfo,$this->cron= ',null,[$this->botFileInfo,$_SERVER['argv']]);
 	}
+
 
 	private function getAdvert()
 	{
@@ -56,27 +66,41 @@ class Advert extends TG
 
 		$this->log->add(__METHOD__.' src,txt=',null,[$src,$txt]);
 
-		$this->apiRequest([
+		//* Удаляем предыдущую рекламу
+		if(!empty($previous= $this->base->get($this->cron['chat']['id'])))
+		{
+			$this->apiRequest([
+				'chat_id' => $this->cron['chat']['id'],
+				'message_id'=> $previous
+			], 'deleteMessage');
+		}
+
+		$log= $this->apiRequest([
 			'text' => $txt,
 			'chat_id' => $this->cron['chat']['id'],
 			'disable_web_page_preview' => false,
-			'reply_markup' => [
-				"inline_keyboard" => [
+			'reply_markup' => ["inline_keyboard" => [
+				[
 					[
-						[
-							'text' => $rnd['alt'],
-							'url' => $href
-						],
+						'text' => $rnd['alt'],
+						'url' => $href
 					],
+				],
 			],]
 		]);
+
+		$this->base->set([$this->cron['chat']['id']=> $log['message_id']]);
+
+		$this->log->add(__METHOD__.' $log=',null,[$log]);
 	}
+
 
 	public function addChat(?string $chat)
 	{
 		if(is_string($chat)) $chat= strtolower($chat);
 
-		if($chat && !empty($this->argv[$chat])) $this->cron['chat'] = $this->argv[$chat];
+		if($chat && !empty($this->argv[$chat]))
+			$this->cron['chat'] = $this->argv[$chat];
 		elseif (php_sapi_name() == 'cli')
 		{
 			$this->cron['chat'] = $this->argv[$_SERVER['argv'][1]];
@@ -88,9 +112,8 @@ class Advert extends TG
 		$this->getTokens($this->cron['chat']['token']);
 		$this->webHook = 0;
 
-		parent::__construct();
-
-		$this->getAdvert();
+		parent::__construct()
+			->getAdvert();
 	}
 
 	private $argv= [

@@ -170,8 +170,8 @@ class BDU extends Helper
 	private function category()
 	{
 		$o= [
-			'text' => $this->about(),
-			// 'text' => "Выберите категорию для <u>добавления</u> \n\n".$this->about(),
+			// 'text' => $this->about(),
+			'text' => "Здесь вы можете подключать или отключать подходящие вам категории \n\n".$this->about(),
 			'message_id' => $this->message['message_id'],
 			'reply_markup' => [
 				"inline_keyboard" => [],
