@@ -199,8 +199,6 @@ class BDU extends Helper
 				];
 			}
 		}
-
-		// $this->apiResponseJSON($o, 'editMessageText');
 	}
 
 
@@ -365,9 +363,9 @@ class BDU extends Helper
 		$users= '';
 		$iKeyboard= [];
 
-		foreach($this->data as $id=>$curBase)
+		foreach($this->data as $id=>&$curBase)
 		{
-			foreach($curBase as $fName=>$fld)
+			foreach($curBase as $fName=>&$fld)
 			{
 				switch ($fName) {
 					case 'from':

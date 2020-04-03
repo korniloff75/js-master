@@ -215,6 +215,7 @@ class Anekdot extends CommonBot
 
 		return [
 			'sendMessage' => array_filter($diff, function($i) {
+				// ^([\d\.\s]+)$
 				return preg_match('/Показать полностью|читать дальше|а н е к д о т о в \. n е t|\s+\d+(>|&gt;)/iu', $i) === 0;
 			}),
 

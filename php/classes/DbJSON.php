@@ -73,7 +73,7 @@ class DbJSON {
 	# Массив в JSON
 	public static function toJSON(array $arr)
 	{
-		return json_encode(($arr), JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		return json_encode($arr, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 	}
 
 

@@ -6,6 +6,8 @@ require_once __DIR__."/Helper.class.php";
 
 class UniKffBot extends CommonBot implements Game
 {
+	const OPTS_SEPARATOR = '__';
+
 	public
 		$webHook=0;
 	protected
@@ -208,10 +210,11 @@ class UniKffBot extends CommonBot implements Game
 		{
 			return [
 				'cmdName'=>$cmdName,
-				'cmd'=> array_values(array_filter(explode('__', $cmd)))
+				'cmd'=> array_values(array_filter(explode(self::OPTS_SEPARATOR, $cmd)))
 			];
 		}
-		else $cmd= [$cmdName];
+		// else $cmd= [$cmdName];
+		else $cmd= array_values(array_filter(explode(self::OPTS_SEPARATOR, $cmdName)));
 
 		$this->log->add(__METHOD__ . ' NEW $cmd = ', null, [$cmd]);
 
@@ -268,7 +271,7 @@ class UniKffBot extends CommonBot implements Game
 
 interface Game {
 	//* Command list
-	const CHATS = [-1001200025834],
+	const CHATS = [-1001200025834, -1001251056203],
 	CMD = [
 		'Draws'=>[
 			'general'=>'⬅️Главная',
@@ -310,9 +313,15 @@ interface Game {
 			'remove_self'=>'❌Удалить данные',
 		],
 
+		'Converter'=> [
+			'converter'
+		],
+		'Reviews'=> [
+			'Reviews'
+		],
 		'Admin'=> [
 			'adm'
-		]
+		],
 	],
 
 	BTNS = [

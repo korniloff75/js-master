@@ -52,23 +52,6 @@ class Reviews extends Helper
 	}
 
 
-	protected function showReviews(string $person_id)
-	{
-		$users= array_filter($this->data, function($k){
-			return is_numeric($k);
-		}, ARRAY_FILTER_USE_KEY);
-
-		foreach($this->data as $id=>&$user)
-		{
-			if(!is_numeric($id)) continue;
-
-
-		}
-
-		return $this;
-	}
-
-
 	protected function setReview(string $person_id)
 	{
 		$this->objData->set([

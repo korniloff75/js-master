@@ -25,7 +25,7 @@ trait Parser {
 
 		if($opts['onlyOwner'] && !$this->is_owner)
 		{
-			$this->NoUpdates();
+			$this->NoUpdatesTG();
 			$this->log->add(__METHOD__.' not OWNER',E_USER_ERROR);
 			die;
 		}
@@ -65,7 +65,7 @@ trait Parser {
 		# If not exist new content
 
 		if (!$this->countDiff)
-			return $this->NoUpdates();
+			return $this->NoUpdatesTG();
 	} // Parser
 
 
@@ -306,7 +306,7 @@ trait Parser {
 	}
 
 
-	protected function NoUpdates()
+	protected function NoUpdatesTG()
 	{
 		if (!array_key_exists('callback_query', $this->inputData)) return;
 
@@ -381,7 +381,7 @@ trait Parser {
 		// $innerHTML = str_ireplace($remove, '', $innerHTML);
 		//* FIX 4 TG
 		$innerHTML = preg_replace(
-			["/^\s*[\d\.]+\s*$/m", "/\s*[\r\n]{2,}/"
+			["/^[\\d\\.\\s]+$/", "/\\s*[\r\n]{2,}|[\r\n]*?<br\\s*?\\/?>[\r\n]*?/"
 		], ['', PHP_EOL], $innerHTML);
 		// trigger_error(__METHOD__ . ' $innerHTML= ' . $innerHTML);
 

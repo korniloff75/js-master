@@ -326,9 +326,7 @@ class CommonBot extends TG
 			});
 		}
 
-		$this->log->add(__METHOD__,null,$this->license);
+		// $this->log->add(__METHOD__,null,$this->license);
 
-		# Выводим логи
-		// if($this->__test) $this->log->print();
 	}
 } // CommonBot
