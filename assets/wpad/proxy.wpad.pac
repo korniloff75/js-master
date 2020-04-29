@@ -4,7 +4,9 @@
  * @param stop - service stop recursion
  */
 ob_start();
+
 echo '<pre style="white-space: pre-line;">';
+
 function findAnzProxySSL(?string $proxyWpad=null, bool $stop=false)
 {
 	$timeoutInSeconds = 1;
@@ -91,7 +93,8 @@ ob_start();
 		'send\\.firefox\\.com', // Прокси-сервер отказывается принимать соединения
 		// test https://suip.biz/ru/?act=proxy-checker
 		'suip\\.biz',
-		'nvidia\.ru',
+		'nvidia\\.ru',
+
 		// ВадимZ
 		'kinozal\\.', 'pornolab\\.', 'erokomiksixxx\\.', 'svscomics\\.', 'abook-club\\.', 'nnm\-club', 'rutracker', '4pna\\.', 'rutor\.', '7\-zip',
 	];

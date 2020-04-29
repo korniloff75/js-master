@@ -1,0 +1,32 @@
+aside .tabsitem {
+	margin-right: 1em;
+	cursor: pointer;
+	display: inline-block;
+	padding: .5rem 1rem;
+	border-bottom: 1px transparent;
+}
+aside .tabsitem.active {
+	font-weight: 700;
+	/* text-decoration: underline; */
+	/* color: #0055c5; */
+	/* border-bottom: 1px solid #05b; */
+}
+aside #tabsBlock {
+	position: relative;
+	background: inherit;
+	border: #eee 1px solid;
+}
+aside #tabsBlock::after {
+	content: '▼';
+	padding-left: 1em;
+	right: .5em;
+	position: absolute;
+	top: .5em;
+	color: #ccc;
+}
+aside #tabsBlock ul {
+	position: absolute;
+	background: #fff;
+	top: 100%;
+	box-shadow: 0 0 .25rem rgba(0,0,0,.1);
+}
