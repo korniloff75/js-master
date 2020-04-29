@@ -137,7 +137,7 @@ class Advert extends TG
 
 	public $advert = [
 
-		'AliExpress' => [
+		/* 'AliExpress' => [
 			'base' =>'https://alitems.com',
 			'alt' =>'Aliexpress INT',
 			'links' =>[
@@ -200,7 +200,7 @@ class Advert extends TG
 				'/assets/Cap_2.jpg',
 			],
 			'href'=>"https://t.me/CapitalistGameBot?start=673976740"
-		],
+		], */
 		/* 'wod_my_1'=> [
 			'alt'=> "💣RPG в Telegram",
 			'title'=> "Достигни первым максимального лэвела и получи миллион(!!!) рублей.
@@ -247,7 +247,7 @@ if (php_sapi_name() === 'cli' && $_SERVER['argv'][1] === 'test')
 else
 {
 	$adv = new Advert('anekdot');
-	$adv->addChat('news');
+	// $adv->addChat('news');
 	$adv->addChat('sport');
 }
 

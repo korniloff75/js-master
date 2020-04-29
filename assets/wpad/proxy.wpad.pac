@@ -88,6 +88,7 @@ ob_start();
 		'kinorai\\.net',
 		'spotify',
 		'dot\\.tk',
+		'send\\.firefox\\.com', // Прокси-сервер отказывается принимать соединения
 		// test https://suip.biz/ru/?act=proxy-checker
 		'suip\\.biz',
 		'nvidia\.ru',

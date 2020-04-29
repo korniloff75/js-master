@@ -436,7 +436,7 @@ class TG {
 			'disable_web_page_preview' => true,
 		], $postFields);
 
-		# Делим на шины по self::$textLimit символов
+		//* Делим на шины по self::$textLimit символов
 		$bus = '';
 		$diffLength = count($content);
 
@@ -447,27 +447,27 @@ class TG {
 			# Если один элемент больше лимита
 			if(strlen($i) > self::$textLimit)
 			{
-				$content = explode("\n", $i);
-				if(count($content) < 2) continue;
-				$this->sendMessage($content, $postFields, "\n");
-				continue;
+				$strContent = explode("\n", $i);
+				if(count($strContent) > 1)
+				{
+					$this->sendMessage($strContent, $postFields, "\n");
+					continue;
+				}
 			}
+
 			# Разбиваем на строки фикс. размера
-			elseif(strlen($bus) + strlen($i) < self::$textLimit)
+			elseif((strlen($bus) + strlen($i)) < self::$textLimit)
 			{
 				$bus .= "{$i}{$break}";
 				if($diffLength) continue;
 			}
-
-			// if(!strlen(trim($bus)))
-			// 	continue;
 
 			$postFields['text'] = strip_tags($bus, self::$allowedTags);
 
 			//* Отправляем в канал.
 			$respTG[]= $this->apiRequest($postFields);
 
-			$bus = '';
+			$bus = "{$i}{$break}";
 
 		}
 
