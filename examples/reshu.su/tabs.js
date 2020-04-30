@@ -5,7 +5,7 @@
 (function() {
 	var nav= document.querySelector('aside.book-menu>nav'),
 		headers= nav.querySelectorAll('li.book-section-flat'),
-		tabs={},
+		// allItems={},
 		tabsBlock= document.createElement('div'),
 		tabsBlockHidden= document.createElement('ul'),
 		oldBlock= nav.querySelector('ul:not([id])'),
@@ -13,79 +13,124 @@
 
 	tabsBlockHidden.hidden= 1;
 	tabsBlock.id= 'tabsBlock';
+	contentBlock.id= 'contentBlock';
 
 	[].forEach.call(headers, (i,ind)=>{
 		var title= i.querySelector('span').textContent,
-			// content= i.querySelector('ul'),
 			link= document.createElement('li');
 
 		link.content= i.querySelector('ul');
 		link.classList.add('tabsitem');
-		if(!ind) {
-			link.classList.add('active');
-			// link.classList.add('book-languages');
-			contentBlock.appendChild(link.content);
-			tabsBlock.appendChild(link);
-		} else {
-			tabsBlockHidden.appendChild(link);
-		}
 
-		// tabs[title]= link.content;
+		var active= i.querySelector(`a[href*='${location.pathname.slice(0,-1)}']`);
+
+		(active? tabsBlock: tabsBlockHidden).appendChild(link);
+
+		// allItems[title]= link.content;
 		link.textContent= title;
 
 	});
 
-	tabsBlock.appendChild(tabsBlockHidden);
+	// *Define currentHeader
 
-	console.log('tabs= ', tabs, oldBlock);
+	if(!tabsBlock.children.length)
+		tabsBlock.appendChild(tabsBlockHidden.children[0]);
 
-	nav.insertBefore(tabsBlock, oldBlock);
-	nav.insertBefore(contentBlock, oldBlock);
-	nav.removeChild(oldBlock);
+	tabsBlock.children[0].classList.add('active');
+	contentBlock.appendChild(tabsBlock.children[0].content);
+
 
 	// *Events on tabsBlock
+
 	tabsBlock.addEventListener('click', changeTabs);
-	tabsBlock.addEventListener('mouseover', e=>{
-		tabsBlockHidden.hidden= 0;
-	});
-	tabsBlock.addEventListener('mouseout', e=>{
+	tabsBlock.addEventListener('mouseleave', e=>{
 		tabsBlockHidden.hidden= 1;
 	});
 
 	function changeTabs(e) {
 		var t= e.target;
 
-		if(!t.classList.contains('tabsitem'))
+		tabsBlockHidden.hidden= !tabsBlockHidden.hidden;
+
+		if(!t.classList.contains('tabsitem')) {
+			// tabsBlock.addEventListener('mouseenter', displayHeaders);
 			return;
+		}
 
-		console.log(t, contentBlock.children[0]);
+		// console.log(t, contentBlock.children[0]);
 
-		this.querySelector('.active').classList.remove('active');
-		t.classList.add('active');
+		setActiveHeader(t);
 
-		tabsBlockHidden.appendChild(tabsBlock.querySelector('li'));
-		tabsBlock.insertBefore(t,tabsBlockHidden);
-		tabsBlockHidden.hidden= 1;
-
-		// nav.replaceChild(t.content, contentBlock.children[0]);
-		contentBlock.innerHTML= '';
-		contentBlock.appendChild(t.content);
 	}
+
+
+	// *Render
+
+	tabsBlock.appendChild(tabsBlockHidden);
+
+	// console.log('allItems= ', allItems, oldBlock);
+
+	nav.insertBefore(tabsBlock, oldBlock);
+	nav.insertBefore(contentBlock, oldBlock);
+	// note
+	nav.removeChild(oldBlock);
+
 
 	// *Scroll to current menu item
 
-	var navItems= contentBlock.querySelectorAll('a');
-	[].forEach.call(navItems, i=>{
-		// if(location.href !== i.href)
-		console.log(i.href, location.pathname, i.href.includes(location.pathname));
-		if(!(i.href+'/').includes(location.pathname))
-			return;
+	var curItem= contentBlock.querySelector(`a[href*='${location.pathname.slice(0,-1)}']`);
 
-		var bcr= i.getBoundingClientRect(),
-		top= bcr.top + nav.scrollTop - document.body.clientHeight/2;
+	if(curItem) {
+		var bcrItem= curItem.getBoundingClientRect(),
+			bcrBlock= contentBlock.getBoundingClientRect(),
 
-		nav.scrollTo(0,top);
+			top= bcrItem.top - bcrBlock.top + contentBlock.scrollTop - (bcrBlock.height + bcrItem.height)/2;
+			// top= bcrItem.top + nav.scrollTop - document.body.clientHeight/2;
 
-		console.log('bcr= ', bcr, top, document.body.clientHeight/2, nav.scrollTop);
-	});
-})()
+		curItem.classList.add('active');
+
+		contentBlock.scrollTo(0,top);
+
+		/* console.log(
+			'bcrItem= ', bcrItem, top,
+			document.body.clientHeight/2,
+			contentBlock.scrollTop,
+			'curItem= ', curItem
+		); */
+	}
+
+
+
+	// *=================
+	// *Helpers
+
+	function setActiveHeader (item) {
+
+		/* console.log(
+			'item= ', item,
+			'tabsBlockHidden= ', tabsBlockHidden
+		); */
+
+		tabsBlock.querySelector('.active') && tabsBlock.querySelector('.active').classList.remove('active');
+		item.classList.add('active');
+
+		tabsBlockHidden.appendChild(tabsBlock.querySelector('li'));
+		tabsBlock.insertBefore(item,tabsBlockHidden);
+
+		// *Change content
+		contentBlock.innerHTML= '';
+		contentBlock.appendChild(item.content);
+	}
+})();
+
+
+// *Styles
+
+import('/examples/reshu.su/dark.js')
+.then(dark=>{
+	dark= dark.default
+	console.info('dark= ', dark, dark.clickBtn);
+})
+.catch(err => {
+	console.info('err.message= ', err.message);
+});
