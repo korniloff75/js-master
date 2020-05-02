@@ -10,6 +10,12 @@ aside .tabsitem:hover {
 }
 aside .tabsitem.active {
 	font-weight: 700;
+<<<<<<< HEAD
+=======
+	/* text-decoration: underline; */
+	/* color: #0055c5; */
+	/* border-left: 3px solid #05b; */
+>>>>>>> a59382778fcd5cd2009346b50b6f6b0795d8cb09
 }
 aside #tabsBlock {
 	position: relative;
@@ -30,18 +36,24 @@ aside #tabsBlock ul {
 	background: #fff;
 	top: 100%;
 	box-shadow: 0 0 .25rem rgba(0,0,0,.1);
+<<<<<<< HEAD
 	z-index: 100;
+=======
+>>>>>>> a59382778fcd5cd2009346b50b6f6b0795d8cb09
 }
 
 aside #contentBlock {
 	height: 300px;
 	overflow-y: auto;
 }
+<<<<<<< HEAD
 
 #contentBlock > ul {
 	padding-right: .5em;
 }
 
+=======
+>>>>>>> a59382778fcd5cd2009346b50b6f6b0795d8cb09
 nav li {
 	line-height: 150%;
 }
@@ -50,7 +62,11 @@ nav a.active {
 	position: relative;
 	/* border-left: 3px solid #aaa; */
 }
+<<<<<<< HEAD
 /* nav a.active::before {
+=======
+nav a.active::before {
+>>>>>>> a59382778fcd5cd2009346b50b6f6b0795d8cb09
 	content: '';
 	display: block;
 	border: 2px solid #aaa;
@@ -59,10 +75,17 @@ nav a.active {
 	left: -.3em;
 	top: -25%;
 	position: absolute;
+<<<<<<< HEAD
 } */
 
 
 /* ▼ Scroll ▼ */
+=======
+}
+
+
+/* Scroll */
+>>>>>>> a59382778fcd5cd2009346b50b6f6b0795d8cb09
 
 /* width */
 ::-webkit-scrollbar {
@@ -102,6 +125,7 @@ nav a.active {
 /* Resizer */
 ::-webkit-resizer {
 	background: #111;
+<<<<<<< HEAD
 }
 
 
@@ -115,4 +139,6 @@ button.styles {
 
 a.styles::after {
 
+=======
+>>>>>>> a59382778fcd5cd2009346b50b6f6b0795d8cb09
 }
