@@ -30,7 +30,9 @@ aside #tabsBlock ul {
 	background: #fff;
 	top: 100%;
 	box-shadow: 0 0 .25rem rgba(0,0,0,.1);
+
 	z-index: 100;
+
 }
 
 aside #contentBlock {
@@ -50,16 +52,7 @@ nav a.active {
 	position: relative;
 	/* border-left: 3px solid #aaa; */
 }
-/* nav a.active::before {
-	content: '';
-	display: block;
-	border: 2px solid #aaa;
-	height: 150%;
-	width: 0;
-	left: -.3em;
-	top: -25%;
-	position: absolute;
-} */
+
 
 
 /* ▼ Scroll ▼ */
