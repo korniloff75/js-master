@@ -1,0 +1,74 @@
+// Used in layout
+$padding-1: 1px !default;
+$padding-4: 0.25rem !default;
+$padding-8: 0.5rem !default;
+$padding-16: 1rem !default;
+
+$font-size-base: 16.4px !default;
+$font-size-12: 0.75rem !default;
+$font-size-14: 0.875rem !default;
+$font-size-16: 1rem !default;
+
+$border-radius: $padding-4 !default;
+
+// Grayscale
+$white: #ffffff !default;
+$gray-100: rgba(255, 255, 255, 0.1);
+$gray-200: rgba(255, 255, 255, 0.2);
+$gray-300: #dee2e6 !default;
+$gray-400: #ced4da !default;
+$gray-500: #adb5bd !default;
+$gray-600: #868e96 !default;
+$gray-700: #495057 !default;
+$gray-800: #343a40 !default;
+$gray-900: #212529 !default;
+$black: #21242c !default;   /// default(#000)
+
+
+/* tabs css */
+
+aside .tabsitem:hover {
+ background: #eee;
+ color: #343a40;
+}
+
+aside #tabsBlock ul {
+  position: absolute;
+  /* background: #fff; */
+  background: #343a40;
+  top: 105%;
+  box-shadow: 0 0 .25rem rgba(0,0,0,.1);
+  z-index: 100;
+}
+
+/* tabs css */
+
+
+
+
+// DARK theme YEAS YEAS YEAS YEAS YEAS
+
+$color-link: #84b2ff;
+$color-visited-link: #b88dff;
+
+$body-background: #343a40;
+$body-font-color: #e9ecef;
+$body-font-weight: normal !default;
+
+$body-min-width: 20rem !default;
+$container-max-width: 80rem !default;
+
+$header-height: 3.5rem !default;
+$menu-width: 16rem !default;
+$toc-width: 16rem !default;
+
+$mobile-breakpoint: $menu-width + $body-min-width * 1.2 + $toc-width !default;
+
+// Hint colors
+$hint-colors: (
+  info: #6bf,
+  warning: #fd6,
+  danger: #f66
+) !default;
+
+$icon-filter: brightness(0) invert(1);

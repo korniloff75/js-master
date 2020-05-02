@@ -3,6 +3,14 @@
  ** KorniloFF - https://js-master.ru/examples/reshu.su/
  */
 (function() {
+	// *Пути к стилям дизайна
+	var DEF_CSS= '',
+	// var DEF_CSS= '_defaults.css',
+		DARK_CSS= '_defaults black_my.css';
+		// DARK_CSS= '_defaults black.css';
+
+	var DARK_MODE= 1;
+
 	var nav= document.querySelector('aside.book-menu>nav'),
 		headers= nav.querySelectorAll('li.book-section-flat'),
 		// allItems={},
@@ -15,6 +23,8 @@
 	tabsBlock.id= 'tabsBlock';
 	contentBlock.id= 'contentBlock';
 
+	tabsBlock.innerHTML='';
+
 	[].forEach.call(headers, (i,ind)=>{
 		var title= i.querySelector('span').textContent,
 			link= document.createElement('li');
@@ -22,7 +32,7 @@
 		link.content= i.querySelector('ul');
 		link.classList.add('tabsitem');
 
-		var active= i.querySelector(`a[href*='${location.pathname.slice(0,-1)}']`);
+		var active= !tabsBlock.children.length && i.querySelector(`a[href*='${location.pathname.slice(0,-1)}']`);
 
 		(active? tabsBlock: tabsBlockHidden).appendChild(link);
 
@@ -80,7 +90,8 @@
 
 	var curItem= contentBlock.querySelector(`a[href*='${location.pathname.slice(0,-1)}']`);
 
-	if(curItem) {
+	// fix 4 /ua/
+	if(curItem && location.pathname.length > 5) {
 		var bcrItem= curItem.getBoundingClientRect(),
 			bcrBlock= contentBlock.getBoundingClientRect(),
 
@@ -97,6 +108,64 @@
 			contentBlock.scrollTop,
 			'curItem= ', curItem
 		); */
+	}
+
+
+
+	// *Styles
+
+	if(DARK_MODE) darkModeInit();
+
+	function darkModeInit () {
+		var LiDark= document.createElement('li'),
+			Btn= document.createElement('a');
+
+		Btn.classList.add('styles');
+		Btn.href= '#';
+
+		Btn.addEventListener('click', setDark);
+
+		LiDark.appendChild(Btn);
+		nav.lastElementChild.appendChild(LiDark);
+
+		var styles= document.querySelectorAll('link[href$="css"]'),
+			// defStyle= document.querySelector('link[href*="book."]'),
+			lastStyle= styles[styles.length-1],
+			newStyle= document.createElement('link');
+
+		newStyle.rel= 'stylesheet';
+		console.log('styles', styles, lastStyle/*,  defStyle */);
+
+		// defStyle.id='defStyle';
+		// defStyle= document.querySelector('#defStyle');
+
+
+		insertAfter(newStyle, lastStyle);
+
+		setDark();
+
+		function setDark (e) {
+			var t;
+
+			if(e) {
+				t= e.target;
+				e.stopPropagation();
+				e.preventDefault();
+				// t.dark= !decodeURI(defStyle.href).includes(DARK_CSS);
+				t.dark= !decodeURI(newStyle.href).includes(DARK_CSS);
+				localStorage.setItem('dark', t.dark);
+			} else {
+				t= Btn;
+				t.dark= localStorage.getItem('dark') === 'true';
+			}
+
+			newStyle.href= t.dark? DARK_CSS: DEF_CSS;
+			// defStyle.href= t.dark? DARK_CSS: DEF_CSS;
+
+			t.textContent= t.dark? 'Включить свет': 'Выключить свет';
+
+			// console.log(t.dark, !!t.dark, newStyle.href, localStorage.getItem('dark'));
+		}
 	}
 
 
@@ -121,12 +190,23 @@
 		contentBlock.innerHTML= '';
 		contentBlock.appendChild(item.content);
 	}
+
+
+	function insertAfter (node, refNode) {
+		if(refNode.nextSibling)
+			refNode.parentNode.insertBefore(node, refNode.nextSibling);
+		else
+			refNode.parentNode.appendChild(node);
+
+		return refNode;
+	}
+
 })();
 
 
-// *Styles
 
-import('/examples/reshu.su/dark.js')
+
+/* import('/examples/reshu.su/dark.js')
 .then(dark=>{
 	dark= dark.default
 	console.info('dark= ', dark, dark.clickBtn);
@@ -134,3 +214,8 @@ import('/examples/reshu.su/dark.js')
 .catch(err => {
 	console.info('err.message= ', err.message);
 });
+*/
+
+/* (function () {
+
+})() */
