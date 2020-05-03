@@ -1,5 +1,8 @@
 
-*, html, body {
+*,
+html,
+body,
+aside #tabsBlock ul {
 	background: #343a40;
 	color: #e9ecef;
 }

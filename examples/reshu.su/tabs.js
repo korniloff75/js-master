@@ -114,9 +114,7 @@
 
 	// *Styles
 
-	if(DARK_MODE) darkModeInit();
-
-	function darkModeInit () {
+	if(DARK_MODE) {
 		var LiDark= document.createElement('li'),
 			Btn= document.createElement('a');
 
