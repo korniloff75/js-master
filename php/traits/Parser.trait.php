@@ -219,7 +219,7 @@ trait Parser {
 	 * @param xBlock - parent node for parsing
 	 * optional @param srcName - img attribute name
 	 */
-	public static function DOMcollectImgs(string $source, DOMXpath &$xpath, DOMNode &$xBlock, string $srcName = 'src')
+	public static function DOMcollectImgs(string $source, DOMXpath &$xpath, DOMNode &$xBlock, ?string $srcName = 'src')
 	:array
 	{
 		$xImgs = $xpath->query(".//img[@$srcName]", $xBlock);
@@ -230,10 +230,19 @@ trait Parser {
 		foreach($xImgs as $img) {
 			if(!strlen($src = $img->getAttribute($srcName)))
 				continue;
-			if(strpos($src, 'http') !== 0)
+
+			// trigger_error("\$src= $src");
+			// trigger_error(strpos($src, '//'));
+
+			if(strpos($src, '//') === 0)
+			{
+				// $scheme= parse_url($src, PHP_URL_SCHEME);
+				$src = "http:{$src}";
+			}
+			elseif(strpos($src, 'http') !== 0)
 			{
 				$src = preg_replace("~^/+~", '', $src);
-				$src = "$source$src";
+				$src = "{$source}{$src}";
 			}
 
 			$toCont []= "$src|||" . ($img->getAttribute('alt') ?? '');
@@ -252,7 +261,7 @@ trait Parser {
 	 * @param excludes - array with excludes words in src
 	 * Возвращает массив, пригодный для отправки в ТГ методом sendMediaGroup
 	 */
-	public static function ExtractImages(string $source, DOMXpath &$xpath, DOMNode &$xBlock, string $srcName = 'src', array $excludes=[])
+	public static function ExtractImages(string $source, DOMXpath &$xpath, DOMNode &$xBlock, ?string $srcName = 'src', array $excludes=[])
 	:array
 	{
 		$imgArr = self::DOMcollectImgs($source, $xpath, $xBlock, $srcName);

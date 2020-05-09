@@ -2,11 +2,13 @@
 /**
  ** KorniloFF - https://js-master.ru/examples/reshu.su/
  */
+var _DEV = location.host.includes('js-master');
+
 (function() {
 	// *Пути к стилям дизайна
 	var DEF_CSS= '',
 	// var DEF_CSS= '_defaults.css',
-		DARK_CSS= '_defaults black_my.css';
+		DARK_CSS= _DEV? '_defaults black_my.css': '/_defaults black_my.css';
 		// DARK_CSS= '_defaults black.css';
 
 	var DARK_MODE= 1;
@@ -90,12 +92,15 @@
 
 	var curItem= contentBlock.querySelector(`a[href*='${location.pathname.slice(0,-1)}']`);
 
-	// fix 4 /ua/
-	if(curItem && location.pathname.length > 5) {
+	if(
+		curItem
+		// fix 4 /ua/
+		&& location.pathname.length > 5
+	) {
 		var bcrItem= curItem.getBoundingClientRect(),
 			bcrBlock= contentBlock.getBoundingClientRect(),
 
-			top= bcrItem.top - bcrBlock.top + contentBlock.scrollTop - (bcrBlock.height + bcrItem.height)/2;
+			top= bcrItem.top - bcrBlock.top + contentBlock.scrollTop - (bcrBlock.height - bcrItem.height)/2;
 			// top= bcrItem.top + nav.scrollTop - document.body.clientHeight/2;
 
 		curItem.classList.add('active');
@@ -189,31 +194,34 @@
 		contentBlock.appendChild(item.content);
 	}
 
-
-	function insertAfter (node, refNode) {
-		if(refNode.nextSibling)
-			refNode.parentNode.insertBefore(node, refNode.nextSibling);
-		else
-			refNode.parentNode.appendChild(node);
-
-		return refNode;
-	}
-
 })();
 
+function insertAfter (node, refNode) {
+	if(refNode.nextSibling)
+		refNode.parentNode.insertBefore(node, refNode.nextSibling);
+	else
+		refNode.parentNode.appendChild(node);
+
+	return refNode;
+}
 
 
+// *=======
+// *Graphs
 
-/* import('/examples/reshu.su/dark.js')
-.then(dark=>{
-	dark= dark.default
-	console.info('dark= ', dark, dark.clickBtn);
-})
-.catch(err => {
-	console.info('err.message= ', err.message);
-});
-*/
+(function () {
+	var GRAPHS_PATH= _DEV? '/examples/reshu.su/graphs.js': '',
+		graphs= document.querySelectorAll('.graph');
+	if(!(graphs.length))
+		return;
 
-/* (function () {
-
-})() */
+		import(GRAPHS_PATH)
+		.then(_G=>{
+			_G= _G.default
+			_G.collectItems(graphs);
+			console.info('_G= ', _G);
+		})
+		.catch(err => {
+			console.info('err.message= ', err.message);
+		});
+})()

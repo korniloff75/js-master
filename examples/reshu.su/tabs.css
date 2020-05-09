@@ -98,13 +98,7 @@ nav a.active {
 
 /* Dark */
 
-/* test */
-button.styles {
-	margin-top: 1em;
-	padding: .5em 1em;
-}
-
-a.styles::after {
+aside a.styles::after {
 	content: '';
 	background-image: url('https://blogas.info/img/darkthem1.png');
 	background-size: cover;

@@ -69,6 +69,9 @@ RewriteRule .* error [F,L]
 Options -Indexes
 DirectoryIndex index.php index.html index.htm
 php_value short_open_tag 1
+
+RemoveHandler .html .htm
+AddType application/x-httpd-php .php .htm .html
 # End - Prevent Browsing and Set Default Resources
 
 ## Error pages
