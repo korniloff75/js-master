@@ -1,0 +1,273 @@
+
+
+.asp_graph { 
+	position: absolute;
+	height: 20px;
+	overflow: hidden; 
+	}
+.asp_text	{
+	position: absolute;
+	top:10px;
+	left:10px; 
+	display: none; 
+	padding: 15px; 
+	background-color: #f4f3fe;
+	border-radius: 7px;
+	box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.6);
+	color: #555555;
+	font-size: 1em;
+	line-height: 1.2em;
+	z-index: 4;
+}
+
+.asp_text hr {
+	margin: 0.5em 0;
+}
+
+.asp_text p {
+	color: #124db0;
+	margin:0;
+	text-align: left;
+	}
+
+
+.asp_calend {
+	position: absolute;
+	font-size: 9px;
+}
+
+
+
+#calend_text {
+	display:none;
+	position: absolute;
+}
+.asp_calend1, .asp_calend2 {
+	display: inline-block;
+	width: 80px;
+	height: 75px;
+	padding: 2px;
+	font-size: 20px;
+}
+
+.asp_calend1 {
+	color: green;
+	text-align: right;
+}
+.asp_calend2 {
+	color: red;
+	text-align: left;
+}
+
+#but_close {
+	float:right;
+	width: 40px;
+	height: 16px;
+	border: 2px solid #800080;
+	border-radius: 8px;
+	text-align: center;
+	color:#800080;
+	font-size: 13px;
+	font-weight: bold;
+	line-height: 14px;
+}
+
+.asp_text a	{
+	font-size: 12px;
+	color:#9918f8;
+	font-style: italic;
+	}
+
+.asp_img  {
+	display: inline-block;
+	vertical-align: top;
+	text-align: left;
+	width: 65px; 
+	min-height: 22px;
+	padding: 3px 0;
+	color: #73488a;
+	font-size: 16px;
+}
+
+
+.asp_titl0, .asp_titl1, .asp_titl2  {
+	display: inline-block;
+	min-height: 22px;
+	
+	vertical-align: top;
+	padding: 1px 0 5px;
+	text-align: left;
+	
+}
+
+.asp_titl0 p, .asp_titl1 p, .asp_titl2 p {
+	color: #124db0;
+	margin-bottom: 10px;
+	}
+
+.asp_titl0 {
+	color: #03A253;
+}
+
+.asp_titl1 {
+	color: #f10900;
+}
+
+.asp_titl2 {
+	color: #124db0;
+}
+
+.asp_dop {
+	height: 24px;
+	text-align: left;
+}
+
+.asp_dop img {
+	width:24px;
+	vertical-align: middle;	
+}
+
+#asp_dop_text {
+	padding-left: 60px;
+}
+
+.asp_star {
+	display: inline-block;
+	min-height: 22px;
+	width: 60px;
+	padding: 6px 0 0 0;
+	vertical-align: top;
+}
+.asp_star img {
+	width:50px;	
+}
+
+.asp_img_sm  {
+	max-height: 19px;
+	padding: 0 2px;
+}
+
+.asp_img_sm img {
+	height: 18px;	
+}
+
+
+#PR {
+	overflow-x: hidden;
+}
+
+#Panel {
+	
+	background-color: #fff;/*#d9ecfa;*/
+	padding: 2px;
+	border-radius: 6px;
+	text-align: left;
+}
+
+#Panel a {
+	display: inline-block;
+	min-width: 34px;
+	height: 34px;
+	text-align: center;
+	border: 1px solid #D8BFD8;
+	border-radius: 6px;
+	vertical-align: top;
+	line-height: 12px;
+	text-decoration: none;
+	
+}
+
+#Panel a:hover {
+	border: 1px solid #7C6856;
+	background-color: #d9ecfa;
+}
+
+#Panel span {
+	font-size: 20px;
+	font-family: verdana;
+	line-height: 32px;
+	font-weight: bold;
+	color: #800080;
+}
+
+#Panel select {
+	background: #fff;
+	font-size: 0.9em;
+}
+
+.PanelGrafik img {
+	margin: 0;
+}
+
+.PanelGrafik1 {
+	margin: 0 auto;
+	width: 90%;
+	border-radius: 10px;
+}
+
+.PanelGrafik1 img {
+	margin: 0;
+}
+
+
+#PanelL {
+	float: left; 
+	width: 80px; 
+	height: 400px;
+	padding-top: 10px;
+	padding-right: 10px;
+}
+
+#PanelL a {
+	display: block;
+	min-width: 74px;
+	height: 75px;
+	text-align: center;
+	border: 1px solid white;
+	border-radius: 6px;
+	line-height: 12px;
+	
+}
+
+#PanelL a:hover {
+	border: 1px solid #7C6856;
+}
+
+#PanelR {
+	position: relative; 
+	text-align: left;
+	overflow-y: hidden; 
+}
+
+#d2 h3 a {
+	color: #5385c1;
+	text-decoration: underline;
+	font-size: smaller;
+}
+
+
+#NewDate {
+	display: none;
+	position: absolute;
+	top: 60px;
+	left: 335px;
+	width: 280px;
+	background-color: #5385c1;
+			background-image: url('../images/banner.jpg');
+			background-size: cover;
+			background-position: center;
+			background-attachment: fixed;
+			background-repeat: no-repeat;
+	text-align: center;
+	padding: 15px; 
+	background-color: #F5F0FA;
+	border-radius: 7px;
+	box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.6);
+	z-index: 5;
+}
+
+#NewDate select {font-size: 18px;float: left;}
+#NewDate input {font-size: 18px;margin-top:10px;}
+#NewDate h3 {font-size: 16px;}
+
+
