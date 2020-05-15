@@ -1,9 +1,17 @@
 /**
+ * *https://coding.studio/tchart/
+ * https://coding.studio/tchart/README.txt
+ *
+ * var ch = new TChart(container);
+ * ch.canvas - динамически созданный canvas
+ *
  * @param {Node|jQ} container
  * note container.caption - родительский блок, включающий название чертежа
- * @param {Node|jQ} eventContainer
+ * @param {Node|jQ} eventContainer - общий элемент для обработчиков событий
  */
-function TChart(container, eventContainer) {
+
+export function TChart(container, eventContainer) {
+	'use strict';
 
 	extractMainNodes();
 
@@ -16,7 +24,8 @@ function TChart(container, eventContainer) {
 		container = extractFromJQ(container);
 		eventContainer = extractFromJQ(eventContainer) || container.parentNode;
 		container.caption = extractFromJQ(container.caption);
-		// console.log('container= ', container,  container.caption);
+
+		console.log('tchart container= ', container,  container.caption);
 	}
 
 	function extractFromJQ(obj) {
@@ -98,14 +107,24 @@ function TChart(container, eventContainer) {
 		return true;
 	}
 
-	var canvas = createElement(container, 'canvas');
-	var context = canvas.getContext('2d');
+	var canvas = this.canvas = createElement(container, 'canvas');
+	var ctx = canvas.getContext('2d');
 	var checksContainer = createElement(container, 'div', 'checks');
 	var popup = createElement(container, 'div', 'popup');
 	popup.style.display = 'none';
 	var popupTitle = null;
 
-	var colors = null;
+	var colors = {
+		circleFill: '#242f3e',
+		line: '#293544',
+		zeroLine: '#313d4d',
+		selectLine: '#3b4a5a',
+		text: '#546778',
+		preview: '#152435',
+		previewAlpha: 0.8,
+		previewBorder: '#5a7e9f',
+		previewBorderAlpha: 0.5
+	};
 	var data = null;
 	var xColumn = null;
 	var columns = null;
@@ -318,7 +337,7 @@ function TChart(container, eventContainer) {
 	}
 
 	this.setColors = function (newColors) {
-		colors = newColors;
+		Object.assign(colors, newColors);
 		needRedrawMain = needRedrawPreview = true;
 	};
 
@@ -345,6 +364,7 @@ function TChart(container, eventContainer) {
 
 		data = newData;
 		var nameOfX = findNameOfX(data.types);
+		// console.log('nameOfX= ', nameOfX);
 
 		for (var c = 0; c < data.columns.length; c++) {
 			var columnData = data.columns[c];
@@ -358,10 +378,12 @@ function TChart(container, eventContainer) {
 				previewAlpha: createAnimation(1, SCALE_DURATION / 2)
 			};
 
+			// console.log('name= ', name, columnData);
 			if (name === nameOfX) {
 				column.min = columnData[1];
 				column.max = columnData[columnData.length - 1];
 				xColumn = column
+				// console.log('xColumn= ', xColumn);
 			} else {
 				for (var i = 2; i < columnData.length; i++) {
 					var value = columnData[i];
@@ -688,7 +710,7 @@ function TChart(container, eventContainer) {
 
 	function renderTextsX(textX, skipStep) {
 		if (textX.alpha.value > 0) {
-			context.globalAlpha = textX.alpha.value;
+			ctx.globalAlpha = textX.alpha.value;
 
 			var delta = textX.delta;
 			if (skipStep) delta *= 2;
@@ -706,40 +728,40 @@ function TChart(container, eventContainer) {
 				} else if (i > 1) {
 					offsetX = -(textXWidth / 2);
 				}
-				context.fillText(formatDate(value, true), x + offsetX, mainHeight + textXMargin);
+				ctx.fillText(formatDate(value, true), x + offsetX, mainHeight + textXMargin);
 			}
 		}
 	}
 
 	function renderTextsY(textY) {
 		if (textY.alpha.value > 0) {
-			context.globalAlpha = textY.alpha.value;
+			ctx.globalAlpha = textY.alpha.value;
 
 			for (var i = 1; i < textCountY; i++) {
 				var value = mainMinY + textY.delta * i;
 				var y = mainToScreenY(value);
-				context.fillText(formatNumber(value, true), paddingHor, y + textYMargin);
+				ctx.fillText(formatNumber(value, true), paddingHor, y + textYMargin);
 			}
 		}
 	}
 
 	function renderLinesY(textY) {
 		if (textY.alpha.value > 0) {
-			context.globalAlpha = textY.alpha.value;
+			ctx.globalAlpha = textY.alpha.value;
 
 			for (var i = 1; i < textCountY; i++) {
 				var value = mainMinY + textY.delta * i;
 				var y = mainToScreenY(value);
-				context.beginPath();
-				context.moveTo(paddingHor, y);
-				context.lineTo(width - paddingHor, y);
-				context.stroke();
+				ctx.beginPath();
+				ctx.moveTo(paddingHor, y);
+				ctx.lineTo(width - paddingHor, y);
+				ctx.stroke();
 			}
 		}
 	}
 
 	function renderPreview() {
-		context.clearRect(0, height - previewHeight - 1, width, previewHeight + 1);
+		ctx.clearRect(0, height - previewHeight - 1, width, previewHeight + 1);
 
 		// paths
 
@@ -765,8 +787,8 @@ function TChart(container, eventContainer) {
 				}
 			}
 
-			context.globalAlpha = yColumn.previewAlpha.value;
-			context.lineWidth = previewLineWidth;
+			ctx.globalAlpha = yColumn.previewAlpha.value;
+			ctx.lineWidth = previewLineWidth;
 			renderPath(yColumn, 1, yColumn.data.length, previewScaleX, columnScaleY, previewOffsetX, columnOffsetY)
 		}
 
@@ -775,43 +797,43 @@ function TChart(container, eventContainer) {
 		previewUiMin = previewToScreenX(mainMinX);
 		previewUiMax = previewToScreenX(mainMaxX);
 
-		context.globalAlpha = colors.previewAlpha;
-		context.beginPath();
-		context.rect(paddingHor, height - previewHeight, previewUiMin - paddingHor, previewHeight);
-		context.rect(previewUiMax, height - previewHeight, width - previewUiMax - paddingHor, previewHeight);
-		context.fillStyle = colors.preview;
-		context.fill();
+		ctx.globalAlpha = colors.previewAlpha;
+		ctx.beginPath();
+		ctx.rect(paddingHor, height - previewHeight, previewUiMin - paddingHor, previewHeight);
+		ctx.rect(previewUiMax, height - previewHeight, width - previewUiMax - paddingHor, previewHeight);
+		ctx.fillStyle = colors.preview;
+		ctx.fill();
 
-		context.globalAlpha = colors.previewBorderAlpha;
-		context.beginPath();
-		context.rect(previewUiMin, height - previewHeight, previewUiW, previewHeight);
-		context.rect(previewUiMax - previewUiW, height - previewHeight, previewUiW, previewHeight);
-		context.rect(previewUiMin, height - previewHeight, previewUiMax - previewUiMin, previewUiH);
-		context.rect(previewUiMin, height - previewUiH, previewUiMax - previewUiMin, previewUiH);
-		context.fillStyle = colors.previewBorder;
-		context.fill();
+		ctx.globalAlpha = colors.previewBorderAlpha;
+		ctx.beginPath();
+		ctx.rect(previewUiMin, height - previewHeight, previewUiW, previewHeight);
+		ctx.rect(previewUiMax - previewUiW, height - previewHeight, previewUiW, previewHeight);
+		ctx.rect(previewUiMin, height - previewHeight, previewUiMax - previewUiMin, previewUiH);
+		ctx.rect(previewUiMin, height - previewUiH, previewUiMax - previewUiMin, previewUiH);
+		ctx.fillStyle = colors.previewBorder;
+		ctx.fill();
 	}
 
 	function renderMain() {
-		context.clearRect(0, 0, width, mainHeight + previewMarginTop);
+		ctx.clearRect(0, 0, width, mainHeight + previewMarginTop);
 
 		mainScaleY = -(mainHeight - mainPaddingTop) / mainRangeY.value;
 		mainOffsetY = mainHeight - mainMinY * mainScaleY;
 
 		// lines
 
-		context.strokeStyle = colors.line;
-		context.lineWidth = lineWidth;
+		ctx.strokeStyle = colors.line;
+		ctx.lineWidth = lineWidth;
 
 		renderLinesY(oldTextY);
 		renderLinesY(newTextY);
 
-		context.globalAlpha = 1;
-		context.strokeStyle = colors.zeroLine;
-		context.beginPath();
-		context.moveTo(paddingHor, mainHeight);
-		context.lineTo(width - paddingHor, mainHeight);
-		context.stroke();
+		ctx.globalAlpha = 1;
+		ctx.strokeStyle = colors.zeroLine;
+		ctx.beginPath();
+		ctx.moveTo(paddingHor, mainHeight);
+		ctx.lineTo(width - paddingHor, mainHeight);
+		ctx.stroke();
 
 		// paths
 
@@ -820,8 +842,8 @@ function TChart(container, eventContainer) {
 
 			if (yColumn.alpha.value === 0) continue;
 
-			context.globalAlpha = yColumn.alpha.value;
-			context.lineWidth = mainLineWidth;
+			ctx.globalAlpha = yColumn.alpha.value;
+			ctx.lineWidth = mainLineWidth;
 
 			renderPath(yColumn, mainMinI, mainMaxI, mainScaleX, mainScaleY, mainOffsetX, mainOffsetY);
 		}
@@ -829,34 +851,34 @@ function TChart(container, eventContainer) {
 		// select
 
 		if (selectX) {
-			context.globalAlpha = 1;
-			context.strokeStyle = colors.selectLine;
-			context.lineWidth = lineWidth;
-			context.beginPath();
+			ctx.globalAlpha = 1;
+			ctx.strokeStyle = colors.selectLine;
+			ctx.lineWidth = lineWidth;
+			ctx.beginPath();
 			var x = mainToScreenX(selectX);
-			context.moveTo(x, 0);
-			context.lineTo(x, mainHeight);
-			context.stroke();
+			ctx.moveTo(x, 0);
+			ctx.lineTo(x, mainHeight);
+			ctx.stroke();
 
 			var x = xColumn.data[selectI];
 			for (var c = 0; c < columns.length; c++) {
 				var yColumn = columns[c];
 				if (yColumn.alpha.toValue === 0) continue;
 				var y = yColumn.data[selectI];
-				context.strokeStyle = data.colors[yColumn.name];
-				context.fillStyle = colors.circleFill;
-				context.lineWidth = circleLineWidth;
-				context.beginPath();
-				context.arc(x * mainScaleX + mainOffsetX, y * mainScaleY + mainOffsetY, circleRadius, 0, Math.PI * 2);
-				context.stroke();
-				context.fill();
+				ctx.strokeStyle = data.colors[yColumn.name];
+				ctx.fillStyle = colors.circleFill;
+				ctx.lineWidth = circleLineWidth;
+				ctx.beginPath();
+				ctx.arc(x * mainScaleX + mainOffsetX, y * mainScaleY + mainOffsetY, circleRadius, 0, Math.PI * 2);
+				ctx.stroke();
+				ctx.fill();
 			}
 		}
 
 		// text
 
-		context.fillStyle = colors.text;
-		context.font = font;
+		ctx.fillStyle = colors.text;
+		ctx.font = font;
 		var skipStepNew = oldTextX.delta > newTextX.delta;
 		renderTextsX(oldTextX, !skipStepNew);
 		renderTextsX(newTextX, skipStepNew);
@@ -864,20 +886,20 @@ function TChart(container, eventContainer) {
 		renderTextsY(oldTextY);
 		renderTextsY(newTextY);
 
-		context.globalAlpha = 1;
-		context.fillText(formatNumber(mainMinY), paddingHor, mainHeight + textYMargin);
+		ctx.globalAlpha = 1;
+		ctx.fillText(formatNumber(mainMinY), paddingHor, mainHeight + textYMargin);
 	}
 
 	function renderPath(yColumn, minI, maxI, scaleX, scaleY, offsetX, offsetY) {
-		context.strokeStyle = data.colors[yColumn.name];
+		ctx.strokeStyle = data.colors[yColumn.name];
 
-		context.beginPath();
-		context.lineJoin = 'bevel';
-		context.lineCap = 'butt';
+		ctx.beginPath();
+		ctx.lineJoin = 'bevel';
+		ctx.lineCap = 'butt';
 
 		var firstX = xColumn.data[minI];
 		var firstY = yColumn.data[minI];
-		context.moveTo(firstX * scaleX + offsetX, firstY * scaleY + offsetY);
+		ctx.moveTo(firstX * scaleX + offsetX, firstY * scaleY + offsetY);
 
 		var step = Math.floor((maxI - minI) / (width - paddingHor * 2));
 		if (step < 1) step = 1;
@@ -885,8 +907,8 @@ function TChart(container, eventContainer) {
 		for (var i = minI + 1; i < maxI; i += step) {
 			var x = xColumn.data[i];
 			var y = yColumn.data[i];
-			context.lineTo(x * scaleX + offsetX, y * scaleY + offsetY);
+			ctx.lineTo(x * scaleX + offsetX, y * scaleY + offsetY);
 		}
-		context.stroke();
+		ctx.stroke();
 	}
 }

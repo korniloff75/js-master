@@ -444,7 +444,7 @@ class TG {
 			--$diffLength;
 			if(empty(trim($i)))
 				continue;
-			# Если один элемент больше лимита
+			// *Если один элемент больше лимита
 			if(strlen($i) > self::$textLimit)
 			{
 				$strContent = explode("\n", $i);
@@ -455,7 +455,7 @@ class TG {
 				}
 			}
 
-			# Разбиваем на строки фикс. размера
+			// * Разбиваем на строки фикс. размера
 			elseif((strlen($bus) + strlen($i)) < self::$textLimit)
 			{
 				$bus .= "{$i}{$break}";

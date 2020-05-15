@@ -1,5 +1,7 @@
 'use strict';
 // *@arssmolin
+// https://github.com/korniloff75/js-master/blob/beta/examples/ars/
+
 export let a1 = [
 	340.32138333333336,
 	340.421358,

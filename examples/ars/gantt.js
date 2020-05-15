@@ -203,7 +203,7 @@ function GrafikPaint() {
 // *kff
 
 
-import(location.href + 'findInArray_module.js')
+import(location.href + 'mod_findInArray.js')
 .then(fia => {
 	// console.log('fia= ', fia);
 
@@ -224,4 +224,25 @@ import(location.href + 'findInArray_module.js')
 })
 .catch(err => {
 	console.warn('fia.err.message= ', err.message);
+});
+
+
+import(location.href + 'mod_my_chart.js')
+.then(ch => {
+	console.log('ch= ', ch);
+
+	// *Отрисовываем канвас, задаём настройки
+	ch.createCanvas(null, {
+		wrapper: {
+			style: 'text-align: center;',
+		},
+		canvas: {
+			width: '500',
+			height: '300',
+		}
+
+	});
+})
+.catch(err => {
+	console.warn('ch.err.message= ', err.message);
 });

@@ -1,0 +1,498 @@
+<!DOC<!DOCTYPE html>
+
+<html lang="ru">
+
+<head>
+
+  <TITLE>Все астрологические сервисы</TITLE>
+
+  <link rel="stylesheet" href="/css/PTSansNarrow/PTSans-Narrow.ttf">
+
+  <!--<link href="https://fonts.googleapis.com/css?family=PT+Sans+Narrow&display=swap" rel="stylesheet">-->
+
+  <meta charset="utf-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+
+  <!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+-->
+
+  <!-- Optional JavaScript -->
+
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+  <script src="/header/main.js"></script>
+
+  <script src="/css/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
+
+  <link rel="stylesheet" href="/css/bootstrap-4.3.1-dist/css/bootstrap.min.css">
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!???>
+
+  <link rel="shortcut icon" href="image/favicon.ico" type="image/x-icon">
+
+  <meta name="keywords" content="натальная карта бесплатно, астрологические сервисы, персональный гороскоп онлайн, знаки зодиака, синастрия, гороскоп переезда, консультация астролога, астрологические прогнозы">
+
+  <meta name="description" content="Составить личный гороскоп рождения онлайн на сегодня, завтра, неделю, месяц, 2018, 2019, 2020 год,  совместимость. Персональный гороскоп по дате дня, времени, месяца, года рождения. Консультация астролога онлайн, астрологический кабинет">
+
+  <link rel="stylesheet" href="/css/styles.css">
+
+  <meta http-equiv="Content-Type" content="text/html; charset = utf-8" />
+
+  <meta http-equiv="Cache-Control" content="no-cache">
+
+</head>
+
+<BODY>
+  <header>
+    <div class="header_wrapper">
+      <div class="logo">
+        <a href="/"><img class="graficlogo" src="/image/Logo_violet_letters_violet_small.png" alt="logo"><img class="logo_small" src="/image/Logo_violet_letters_violet_small3.png" alt="logo_small">
+          <h2 class="logo_slogan"></h2>
+        </a>
+      </div>
+
+      <div>
+        <p>
+          <a href="/online_calcs/signup_login.php" target="_blank" class="a_entry">Войти</a>
+
+        </p>
+      </div>
+
+      <div id="stars"></div>
+      <div id="stars2"></div>
+      <div id="stars3"></div>
+      <div id="title">
+
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="index_utp_wrapper particle-canvas1 " id="particle-canvas1" style="text-align:center;">
+
+      <div class="index_utp_text_wr">
+
+        <div class="container">
+
+          <div class="row">
+
+            <div class="col-lg-12">
+
+              <h1 class="index_utp_title">Профессиональная астрология и инновационные технологии</h1>
+
+              <div class="index_utp_text">
+
+                <!--новый уровень астрологии
+
+						3 простых шага к счастью:<br>
+
+						1. регистрируйтесь и получайте доступ к тысячелетним базам научных данных;<br>
+
+						2. система составит Вашу натальную карту;<br>
+
+						3. система рассчитает все необходимые параметры жизни, которые требуют корректировки.<br>-->
+
+                <!--<p><img src="/image/earth_prozr1.png"></p>-->
+
+                С помощью авторских интерпретаций профессиональных астрологов и предсказательных методик мы определим цель
+                <!-- / смысл жизни / предназначение-->, и путь к ней, чтобы изменить всё в нашей жизни к лучшему и начать счастливую жизнь – в любви, карьере, финансовом положении, отношениях с окружающими.
+                <br>
+
+                <strong>АстроПлан.online</strong> - все современные астрологические онлайн-сервисы в одном месте
+                <br>
+
+                <!--о свой астрологический <strong>гороскоп по дате рождения</strong>,<br><br>
+
+						Проанализируйте <strong>онлайн гороскопы</strong> своего бизнеса, совместимости и рождения, .-->
+
+              </div>
+
+            </div>
+
+            <div class="col-lg-12">
+
+              <div class="index_reg_btn_wr">
+
+                 <!--<a class="index_reg_btn reg" data-toggle="modal" data-target="#myModal">зарегистрироваться</a>
+
+                                <a class="index_reg_btn" data-toggle="modal" data-target="#myModal">Присоединиться</a>    -->
+
+                <!-- <form action="/online_calcs/signup_login.php" target="_blank">
+
+									<button>Присоединиться</button>
+
+								</form>  -->
+                <div>
+                  <p>
+                    <a href="/online_calcs/signup_login.php" target="_blank" class="a_join">Присоединиться</a>
+
+                  </p>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="content_wrapper index_content_wrapper">
+
+      <div class="container">
+
+        <div class="row">
+
+          <div class="col-lg-12">
+
+            <div class="content_page_wrapper">
+
+              <div class="row">
+
+                <div class="col-lg-12">
+
+                  <h2 class="index_services_menu">
+
+                    Астрологические онлайн-сервисы:
+
+				   </h2>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <!--<div class="row">
+
+        <div class="col-lg-12">
+
+            <div class="top_blocks_menu_description">Все гороскопы рассчитываются с использованием астрономических <span class="ephemerids_text">эфемерид НАСА</span> и профессиональных математических алгоритмов.            </div>
+
+        </div>
+
+    </div>-->
+
+            <div class="row services_row">
+
+              <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+
+                <div class="services_item_wrapper">
+
+                  <!--<a class="services_title_a" data-hres="/products/marks/1" title="Натальная карта">-->
+
+                  <div class="services_item_tile_wrapper clearfix">
+
+                    <img src="/i/natal.png" class="service_title_icon" alt="" title="Онлайн сервисы гороскопы - натальный и  гороскоп переезда, прогнозы, карта событий, совместимость">
+
+                    <span class="service_title_text">Натальная карта</span>
+
+                  </div>
+
+                  </a>
+
+                  <div class="services_list_links_wrapper clearfix">
+
+                    <!--<a class="services_list_link_open" data-hres="/products/marks/1"  data-toggle="modal" data-target="#myModal">Открыть</a-->
+
+                    <a class="services_list_link_more" href="#" title="Натальная карта">Подробнее</a>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+
+                <div class="services_item_wrapper">
+
+                  <a class="services_title_a" data-hres="/products/marks/1" title="Натальная карта">
+
+                    <div class="services_item_tile_wrapper clearfix">
+
+                      <img src="/i/natal.png" class="service_title_icon" alt="" title="Онлайн сервисы гороскопы - натальный и  гороскоп переезда, прогнозы, карта событий, совместимость">
+
+                      <span class="service_title_text">Совместимость</span>
+
+                    </div>
+
+                  </a>
+
+                  <div class="services_list_links_wrapper clearfix">
+
+                    <!--<a class="services_list_link_open" data-hres="/products/marks/1"  data-toggle="modal" data-target="#myModal">Открыть</a-->
+
+                    <a class="services_list_link_more" href="/services/natal_form_wheel.php" title="Натальная карта">Подробнее</a>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+
+                <div class="services_item_wrapper">
+
+                  <a class="services_title_a" data-hres="/products/marks/1" title="Натальная карта">
+
+                    <div class="services_item_tile_wrapper clearfix">
+
+                      <img src="/i/natal.png" class="service_title_icon" alt="" title="Онлайн сервисы гороскопы - натальный и  гороскоп переезда, прогнозы, карта событий, совместимость">
+
+                      <span class="service_title_text">Индивидуальный календарь на сегодня</span>
+
+                    </div>
+
+                  </a>
+
+                  <div class="services_list_links_wrapper clearfix">
+
+                    <!--<a class="services_list_link_open" data-hres="/products/marks/1"  data-toggle="modal" data-target="#myModal">Открыть</a-->
+
+                    <a class="services_list_link_more" href="/services/natal_form_wheel.php" title="Натальная карта">Подробнее</a>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+
+                <div class="services_item_wrapper">
+
+                  <a class="services_title_a" data-hres="/products/marks/1" title="Натальная карта">
+
+                    <div class="services_item_tile_wrapper clearfix">
+
+                      <img src="/i/natal.png" class="service_title_icon" alt="" title="Онлайн сервисы гороскопы - натальный и  гороскоп переезда, прогнозы, карта событий, совместимость">
+
+                      <span class="service_title_text">Индивидуальный прогноз на сегодня</span>
+
+                    </div>
+
+                  </a>
+
+                  <div class="services_list_links_wrapper clearfix">
+
+                    <!--<a class="services_list_link_open" data-hres="/products/marks/1"  data-toggle="modal" data-target="#myModal">Открыть</a-->
+
+                    <a class="services_list_link_more" href="/services/natal_form_wheel.php" title="Натальная карта">Подробнее</a>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+
+                <div class="services_item_wrapper">
+
+                  <a class="services_title_a" data-hres="/products/marks/1" title="Натальная карта">
+
+                    <div class="services_item_tile_wrapper clearfix">
+
+                      <img src="/i/natal.png" class="service_title_icon" alt="" title="Онлайн сервисы гороскопы - натальный и  гороскоп переезда, прогнозы, карта событий, совместимость">
+
+                      <span class="service_title_text">Гороскоп для Ваших близких</span>
+
+                    </div>
+
+                  </a>
+
+                  <div class="services_list_links_wrapper clearfix">
+
+                    <!--<a class="services_list_link_open" data-hres="/products/marks/1"  data-toggle="modal" data-target="#myModal">Открыть</a-->
+
+                    <a class="services_list_link_more" href="/services/natal_form_wheel.php" title="Натальная карта">Подробнее</a>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+
+                <div class="services_item_wrapper">
+
+                  <a class="services_title_a" data-hres="/products/marks/1" title="Натальная карта">
+
+                    <div class="services_item_tile_wrapper clearfix">
+
+                      <img src="/i/natal.png" class="service_title_icon" alt="" title="Онлайн сервисы гороскопы - натальный и  гороскоп переезда, прогнозы, карта событий, совместимость">
+
+                      <span class="service_title_text">Кармическое предназначение</span>
+
+                    </div>
+
+                  </a>
+
+                  <div class="services_list_links_wrapper clearfix">
+
+                    <!--<a class="services_list_link_open" data-hres="/products/marks/1"  data-toggle="modal" data-target="#myModal">Открыть</a-->
+
+                    <a class="services_list_link_more" href="/services/natal_form_wheel.php" title="Натальная карта">Подробнее</a>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+
+<?php
+//include ('header_for_transits.html');
+date_default_timezone_set('indian/antananarivo');
+// calculate astronomic data
+$swephsrc = '';
+$sweph = '';
+$num_planets = 10;
+// Unset any variables not initialized elsewhere in the program
+unset($PATH, $out, $longitude, $speed);
+//get date and time right now
+$date_now = date("Y-m-d");
+$inmonth = strftime("%m", time());
+$inday = strftime("%d", time());
+$inyear = strftime("%Y", time());
+$inhours = strftime("%H", time());
+$inmins = strftime("%M", time());
+$insecs = "0";
+//$intz = (strftime("%z", time()) / 100); //time zone on server
+if ($intz >= 0) {
+    $whole = floor($intz);
+    $fraction = $intz - floor($intz);
+} else {
+    $whole = ceil($intz);
+    $fraction = $intz - ceil($intz);
+}
+$inhours = $inhours - $whole;
+$inmins = $inmins - ($fraction * 100); //this was 60, but Adriбn Argьelles noted an error when time zones like +10.30 were used
+// adjust date and time for minus hour due to time zone taking the hour negative
+$utdatenow = strftime("%d.%m.20%y", mktime($inhours, $inmins, $insecs, $inmonth, $inday, $inyear));
+$utnow = strftime("%H:%M:%S", mktime($inhours, $inmins, $insecs, $inmonth, $inday, $inyear));
+$transit_date_time = strftime("%H:%M", mktime($inhours, $inmins, $insecs, $inmonth, $inday, $inyear)). ", московское время, " . strftime("%d %B 20%y", mktime($inhours, $inmins, $insecs, $inmonth, $inday, $inyear)) ;;
+putenv("PATH=$PATH:$swephsrc");
+// get 10 planets
+exec("swetest -edir$sweph -b$utdatenow -ut$utnow -p0123456789 -eswe -fPls -g, -head", $out);
+// Each line of output data from swetest is exploded into array $row, giving these elements:
+// 0 = planet name
+// 1 = longitude
+// 2 = speed
+// planets are index 0 - index ($num_planets - 1)
+foreach ($out as $key => $line) {
+    $row = explode(',', $line);
+    $longitude[$key] = $row[1];
+    $speed[$key] = $row[2];
+	print_r($longitude);
+	//echo $longitude;
+};
+// display date and time for NOW
+echo "<center>";
+echo "Актуальные транзиты на " . $transit_date_time . "<br>";
+echo "</center>";
+$pl_name[0] = "Солнце";
+$pl_name[1] = "Луна";
+$pl_name[2] = "Меркурий";
+$pl_name[3] = "Венера";
+$pl_name[4] = "Марс";
+$pl_name[5] = "Юпитер";
+$pl_name[6] = "Сатурн";
+$pl_name[7] = "Уран";
+$pl_name[8] = "Нептун";
+$pl_name[9] = "Плутон";
+//$pl_name[10] = "Хирон";
+// find retrograde planets
+$retrograde = "";
+for ($i = 0;$i <= $num_planets - 1;$i++) {
+    if ($speed[$i] < 0) {
+        $retrograde = $retrograde . "R";
+    } else {
+        $retrograde = $retrograde . " ";
+    }
+}
+// display chartwheel
+echo "<center>";
+//echo "<img border='0' src='chartwheel.php?in_test=0&rx=$retrograde&p0=$longitude[0]&p1=$longitude[1]&p2=$longitude[2]&p3=$longitude[3]&p4=$longitude[4]&p5=$longitude[5]&p6=$longitude[6]&p7=$longitude[7]&p8=$longitude[8]&p9=$longitude[9]&p10=$longitude[10]' width='400' height='400'>";
+echo "</center>";
+echo "<br><br>";
+//display natal data
+echo "<center>";
+echo '<center><table width="45%" cellpadding="0" cellspacing="0" border="0">', "\n";
+echo '<tr>';
+echo "<td><center><font color='#800080'><b> Планета </b></font></center></td>";
+echo "<td><center><font color='#800080'><b> Долгота </b></font></center></td>";
+echo "<td>&nbsp;</td>";
+echo '</tr>';
+echo "</center>";
+for ($i = 0;$i <= $num_planets - 1;$i++) {
+    echo '<tr>';
+    echo "<td><center>" . $pl_name[$i] . "</center></td>";
+    if ($speed[$i] < 0) {
+        echo "<td><center><font>" . Convert_Longitude($longitude[$i]) . " R" . "</font></center></td>";
+    } else {
+        echo "<td><center><font>" . Convert_Longitude($longitude[$i]) . "</font></center></td>";
+    }
+    echo "<td>&nbsp;</td>";
+    echo '</tr>';
+}
+echo '<tr>';
+echo "<td> &nbsp </td>";
+echo "<td> &nbsp </td>";
+echo "<td> &nbsp </td>";
+echo "<td> &nbsp </td>";
+echo '</tr>';
+echo '</table></center>', "\n";
+echo "<br /><br />";
+//include ('button_index_below.html');
+//include ('footer.html');
+exit();
+Function Convert_Longitude($longitude) {
+    $signs = array(0 => 'Ari', 'Tau', 'Gem', 'Can', 'Leo', 'Vir', 'Lib', 'Sco', 'Sag', 'Cap', 'Aqu', 'Pis');
+    $sign_num = floor($longitude / 30);
+    $pos_in_sign = $longitude - ($sign_num * 30);
+    $deg = floor($pos_in_sign);
+    $full_min = ($pos_in_sign - $deg) * 60;
+    $min = floor($full_min);
+    $full_sec = round(($full_min - $min) * 60);
+    if ($deg < 10) {
+        $deg = "0" . $deg;
+    }
+    if ($min < 10) {
+        $min = "0" . $min;
+    }
+    if ($full_sec < 10) {
+        $full_sec = "0" . $full_sec;
+    }
+    return $deg . " " . $signs[$sign_num] . " " . $min . "' " . $full_sec . chr(34);
+}
+?>
+

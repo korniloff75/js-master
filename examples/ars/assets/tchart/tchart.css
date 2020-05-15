@@ -1,3 +1,7 @@
+.tchart {
+	position: relative;
+}
+
 /* popup */
 
 .tchart .popup {
@@ -115,7 +119,7 @@
 	width: 10px;
 	height: 10px;
 
-	background-image: url('check.svg');
+	/* background-image: url('check.svg'); */
 	background-size: cover;
 	background-repeat: no-repeat;
 
