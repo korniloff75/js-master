@@ -15,8 +15,8 @@ export function TChart(container, eventContainer) {
 
 	extractMainNodes();
 
-	var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-	var DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+	var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+		DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
 		eventBounds = eventContainer.getBoundingClientRect();
 
 	// console.log('eventBounds = ', eventBounds, eventContainer);
@@ -33,10 +33,10 @@ export function TChart(container, eventContainer) {
 	}
 
 	function formatDate(time, short) {
-		var date = new Date(time);
-		var s = MONTH_NAMES[date.getMonth()] + ' ' + date.getDate();
+		var date = new Date(time),
+			s = MONTH_NAMES[date.getMonth()] + ' ' + date.getDate();
 		if (short) return s;
-		return DAY_NAMES[date.getDay()] + ', ' + s;
+		return DAY_NAMES[date.getDay()] + ', ' + s + ' - ' +  date.getHours() + ':' + date.getMinutes();
 	}
 
 	function formatNumber(n, short) {
@@ -46,8 +46,8 @@ export function TChart(container, eventContainer) {
 		if (abs > 1e3 && short) return (n / 1e3).toFixed(1) + 'K';
 
 		if (abs > 1) {
-			var s = abs.toFixed(0);
-			var formatted = n < 0 ? '-' : '';
+			var s = abs.toFixed(0),
+				formatted = n < 0 ? '-' : '';
 			for (var i = 0; i < s.length; i++) {
 				formatted += s.charAt(i);
 				if ((s.length - 1 - i) % 3 === 0) formatted += ' ';
@@ -107,15 +107,20 @@ export function TChart(container, eventContainer) {
 		return true;
 	}
 
-	var canvas = this.canvas = createElement(container, 'canvas');
-	var ctx = canvas.getContext('2d');
-	var checksContainer = createElement(container, 'div', 'checks');
-	var popup = createElement(container, 'div', 'popup');
+	var canvas = this.canvas = createElement(container, 'canvas'),
+		ctx = canvas.getContext('2d');
+	var checksContainer = createElement(container, 'div', 'checks'),
+		popup = createElement(container, 'div', 'popup');
 	popup.style.display = 'none';
 	var popupTitle = null;
 
+	/**
+	 * defaults
+	 ** redefine with this.setColors(colors)
+	 */
 	var colors = {
-		circleFill: '#242f3e',
+		// *фон для цифр
+		background: getComputedStyle(container).backgroundColor,
 		line: '#293544',
 		zeroLine: '#313d4d',
 		selectLine: '#3b4a5a',
@@ -125,104 +130,108 @@ export function TChart(container, eventContainer) {
 		previewBorder: '#5a7e9f',
 		previewBorderAlpha: 0.5
 	};
-	var data = null;
-	var xColumn = null;
-	var columns = null;
-	var popupColumns = null;
-	var popupValues = null;
 
-	var width = 0;
-	var height = 0;
-	var mainHeight = 0;
+	if(!colors.background || colors.background === "rgba(0, 0, 0, 0)")
+		colors.background = '#fff';
 
-	var textCountX = 6;
-	var textCountY = 6;
+	var data = null,
+		xColumn = null,
+		columns = null,
+		popupColumns = null,
+		popupValues = null,
 
-	var SCALE_DURATION = 400;
-	var TEXT_X_FADE_DURATION = 200;
+		width = 0,
+		height = 0,
+		mainHeight = 0,
 
-	var pixelRatio = window.devicePixelRatio;
-	var previewMarginTop = 32 * pixelRatio;
-	var previewHeight = 38 * pixelRatio;
-	var mouseArea = 20 * pixelRatio;
-	var previewUiW = 4 * pixelRatio;
-	var previewUiH = 1 * pixelRatio;
-	var lineWidth = 1 * pixelRatio;
-	var previewLineWidth = 1 * pixelRatio;
-	var mainLineWidth = 2 * pixelRatio;
-	var circleRadius = 3 * pixelRatio;
-	var circleLineWidth = 3 * pixelRatio;
-	var font = (10 * pixelRatio) + 'px Arial';
-	var textYMargin = -6 * pixelRatio;
-	var textXMargin = 16 * pixelRatio;
-	var textXWidth = 30 * pixelRatio;
-	var textYHeight = 45 * pixelRatio;
-	var mainPaddingTop = 21 * pixelRatio;
-	var paddingHor = 11 * pixelRatio;
-	var popupLeftMargin = -5;
+		textCountX = 6,
+		textCountY = 6,
+
+		SCALE_DURATION = 400,
+		TEXT_X_FADE_DURATION = 200;
+
+	var pixelRatio = window.devicePixelRatio,
+		previewMarginTop = 32 * pixelRatio,
+		previewHeight = 38 * pixelRatio,
+		mouseArea = 20 * pixelRatio,
+		previewUiW = 4 * pixelRatio,
+		previewUiH = 1 * pixelRatio,
+		lineWidth = 1 * pixelRatio,
+		previewLineWidth = 1 * pixelRatio,
+		mainLineWidth = 2 * pixelRatio,
+		circleRadius = 3 * pixelRatio,
+		circleLineWidth = 3 * pixelRatio,
+		font = (10 * pixelRatio) + 'px Arial',
+		textYMargin = -6 * pixelRatio,
+		textXMargin = 16 * pixelRatio,
+		textXWidth = 30 * pixelRatio,
+		textYHeight = 45 * pixelRatio,
+		mainPaddingTop = 21 * pixelRatio,
+		paddingHor = 11 * pixelRatio,
+		popupLeftMargin = -5;
 	// var popupLeftMargin = -25;
 	var popupTopMargin = !('ontouchstart' in window) ? 0 : 10;
 	// var popupTopMargin = !('ontouchstart' in window) ? 8 : 40;
 
-	var intervalX = 0;
-	var forceMinY = 0;
+	var intervalX = 0,
+		forceMinY = 0;
 
-	var mainMinX = 0;
-	var mainMinY = 0;
-	var mainMaxX = 0;
-	var mainMaxY = 0;
-	var mainRangeX = 0;
-	var mainRangeY = createAnimation(0, SCALE_DURATION);
-	var mainScaleX = 1;
-	var mainScaleY = 1;
-	var mainOffsetX = 0;
-	var mainOffsetY = 0;
+	var mainMinX = 0,
+		mainMinY = 0;
+	var mainMaxX = 0,
+		mainMaxY = 0;
+	var mainRangeX = 0,
+		mainRangeY = createAnimation(0, SCALE_DURATION);
+	var mainScaleX = 1,
+		mainScaleY = 1;
+	var mainOffsetX = 0,
+		mainOffsetY = 0;
 
-	var mainMinI = 0;
-	var mainMaxI = 0;
+	var mainMinI = 0,
+		mainMaxI = 0;
 
-	var previewMinX = 0;
-	var previewMinY = 0;
-	var previewMaxX = 0;
-	var previewMaxY = 0;
-	var previewRangeX = 0;
-	var previewRangeY = createAnimation(0, SCALE_DURATION);
-	var previewScaleX = 1;
-	var previewScaleY = 1;
-	var previewOffsetX = 0;
-	var previewOffsetY = 0;
+	var previewMinX = 0,
+		previewMinY = 0;
+	var previewMaxX = 0,
+		previewMaxY = 0;
+	var previewRangeX = 0,
+		previewRangeY = createAnimation(0, SCALE_DURATION);
+	var previewScaleX = 1,
+		previewScaleY = 1;
+	var previewOffsetX = 0,
+		previewOffsetY = 0;
 
-	var selectX = 0;
-	var selectY = 0;
-	var selectI = 0;
+	var selectX = 0,
+		selectY = 0;
+	var selectI = 0,
 
-	var oldTextX = {delta: 1, alpha: createAnimation(0, TEXT_X_FADE_DURATION)};
-	var newTextX = {delta: 1, alpha: createAnimation(0, TEXT_X_FADE_DURATION)};
-	var oldTextY = {delta: 1, alpha: createAnimation(0, SCALE_DURATION)};
-	var newTextY = {delta: 1, alpha: createAnimation(0, SCALE_DURATION)};
+		oldTextX = {delta: 1, alpha: createAnimation(0, TEXT_X_FADE_DURATION)};
+	var newTextX = {delta: 1, alpha: createAnimation(0, TEXT_X_FADE_DURATION)},
+		oldTextY = {delta: 1, alpha: createAnimation(0, SCALE_DURATION)};
+	var newTextY = {delta: 1, alpha: createAnimation(0, SCALE_DURATION)},
 
-	var needRedrawMain = true;
-	var needRedrawPreview = true;
+		needRedrawMain = true;
+	var needRedrawPreview = true,
 
-	var canvasBounds = {left: 0, top: 0};
+		canvasBounds = {left: 0, top: 0};
 
-	var mouseX = 0;
-	var mouseY = 0;
-	var newMouseX = 0;
-	var newMouseY = 0;
-	var mouseStartX = 0;
-	var mouseRange = 0;
-	var previewUiMin = 0;
-	var previewUiMax = 0;
+	var mouseX = 0,
+		mouseY = 0;
+	var newMouseX = 0,
+		newMouseY = 0;
+	var mouseStartX = 0,
+		mouseRange = 0;
+	var previewUiMin = 0,
+		previewUiMax = 0;
 
-	var time = 0;
+	var time = 0,
+		NONE = 0;
 
-	var NONE = 0;
-	var DRAG_START = 1;
-	var DRAG_END = 2;
-	var DRAG_ALL = 3;
+	var DRAG_START = 1,
+		DRAG_END = 2,
+		DRAG_ALL = 3,
 
-	var mouseMode = NONE;
+		mouseMode = NONE;
 
 	function onMouseDown(e) {
 		// e.stopPropagation();
@@ -367,8 +376,8 @@ export function TChart(container, eventContainer) {
 		// console.log('nameOfX= ', nameOfX);
 
 		for (var c = 0; c < data.columns.length; c++) {
-			var columnData = data.columns[c];
-			var name = columnData[0];
+			var columnData = data.columns[c],
+				name = columnData[0];
 			var column = {
 				name: name,
 				data: columnData,
@@ -403,8 +412,8 @@ export function TChart(container, eventContainer) {
 					input.checked = true;
 					input.type = 'checkbox';
 					addEventListener(input, 'change', function (e) {
-						var id = e.currentTarget.getAttribute('data-id');
-						var checked = e.currentTarget.checked;
+						var id = e.currentTarget.getAttribute('data-id'),
+							checked = e.currentTarget.checked;
 						var checkedColumn = columns[id];
 						checkedColumn.saveScaleY = previewScaleY;
 						checkedColumn.saveOffsetY = previewOffsetY;
@@ -458,9 +467,9 @@ export function TChart(container, eventContainer) {
 		mainScaleX = (width - paddingHor * 2) / mainRangeX;
 		mainOffsetX = -mainMinX * mainScaleX + paddingHor;
 
-		var delta = mainRangeX / intervalX / textCountX;
+		var delta = mainRangeX / intervalX / textCountX,
 
-		var pow = 1;
+			pow = 1;
 		while (pow <= delta) pow *= 2;
 		delta = pow;
 
@@ -580,8 +589,8 @@ export function TChart(container, eventContainer) {
 					popupTitle.innerText = formatDate(x, false);
 
 					for (var c = 0; c < columns.length; c++) {
-						var yColumn = columns[c];
-						var y = yColumn.data[selectI];
+						var yColumn = columns[c],
+							y = yColumn.data[selectI];
 						popupColumns[c].style.display = yColumn.alpha.toValue === 0 ? 'none' : 'block';
 						popupValues[c].innerText = formatNumber(y, false);
 					}
@@ -608,8 +617,8 @@ export function TChart(container, eventContainer) {
 
 	function onResize() {
 		canvasBounds = canvas.getBoundingClientRect();
-		var newWidth = canvasBounds.width * pixelRatio;
-		var newHeight = canvasBounds.height * pixelRatio;
+		var newWidth = canvasBounds.width * pixelRatio,
+			newHeight = canvasBounds.height * pixelRatio;
 
 		if (width !== newWidth || height !== newHeight) {
 			width = newWidth;
@@ -662,8 +671,8 @@ export function TChart(container, eventContainer) {
 					if (newMaxX > previewMaxX) newMaxX = previewMaxX;
 					setMainMinMax(null, newMaxX);
 				} else if (mouseMode === DRAG_ALL) {
-					var startX = mouseX + mouseStartX;
-					var newMinX = screenToPreviewX(startX);
+					var startX = mouseX + mouseStartX,
+						newMinX = screenToPreviewX(startX);
 					if (newMinX < previewMinX) newMinX = previewMinX;
 					if (newMinX > previewMaxX - mouseRange) newMinX = previewMaxX - mouseRange;
 					setMainMinMax(newMinX, newMinX + mouseRange);
@@ -720,8 +729,8 @@ export function TChart(container, eventContainer) {
 			var startI = Math.max(mainMinI - 1, 1);
 
 			for (var i = endI - 1; i >= startI; i -= delta) {
-				var value = xColumn.data[i];
-				var x = mainToScreenX(value);
+				var value = xColumn.data[i],
+					x = mainToScreenX(value);
 				var offsetX = 0;
 				if (i === xColumn.data.length - 1) {
 					offsetX = -textXWidth;
@@ -738,9 +747,15 @@ export function TChart(container, eventContainer) {
 			ctx.globalAlpha = textY.alpha.value;
 
 			for (var i = 1; i < textCountY; i++) {
-				var value = mainMinY + textY.delta * i;
-				var y = mainToScreenY(value);
-				ctx.fillText(formatNumber(value, true), paddingHor, y + textYMargin);
+				var value = mainMinY + textY.delta * i,
+					y = mainToScreenY(value),
+					txtY= formatNumber(value, true);
+				ctx.fillStyle= colors.background;
+				ctx.fillRect(paddingHor-2, y + textYMargin/2, ctx.measureText(txtY).width + 4, -17*pixelRatio);
+				// console.log(17*pixelRatio, ctx.measureText(txtY));
+
+				ctx.fillStyle= colors.text;
+				ctx.fillText(txtY, paddingHor, y + textYMargin);
 			}
 		}
 	}
@@ -750,8 +765,8 @@ export function TChart(container, eventContainer) {
 			ctx.globalAlpha = textY.alpha.value;
 
 			for (var i = 1; i < textCountY; i++) {
-				var value = mainMinY + textY.delta * i;
-				var y = mainToScreenY(value);
+				var value = mainMinY + textY.delta * i,
+					y = mainToScreenY(value);
 				ctx.beginPath();
 				ctx.moveTo(paddingHor, y);
 				ctx.lineTo(width - paddingHor, y);
@@ -773,8 +788,8 @@ export function TChart(container, eventContainer) {
 
 			if (yColumn.previewAlpha.value === 0) continue;
 
-			var columnScaleY = previewScaleY;
-			var columnOffsetY = previewOffsetY;
+			var columnScaleY = previewScaleY,
+				columnOffsetY = previewOffsetY;
 
 			if (yColumn.alpha.toValue === 0) {
 				columnScaleY = yColumn.saveScaleY;
@@ -866,7 +881,7 @@ export function TChart(container, eventContainer) {
 				if (yColumn.alpha.toValue === 0) continue;
 				var y = yColumn.data[selectI];
 				ctx.strokeStyle = data.colors[yColumn.name];
-				ctx.fillStyle = colors.circleFill;
+				ctx.fillStyle = colors.background;
 				ctx.lineWidth = circleLineWidth;
 				ctx.beginPath();
 				ctx.arc(x * mainScaleX + mainOffsetX, y * mainScaleY + mainOffsetY, circleRadius, 0, Math.PI * 2);
@@ -897,16 +912,16 @@ export function TChart(container, eventContainer) {
 		ctx.lineJoin = 'bevel';
 		ctx.lineCap = 'butt';
 
-		var firstX = xColumn.data[minI];
-		var firstY = yColumn.data[minI];
+		var firstX = xColumn.data[minI],
+			firstY = yColumn.data[minI];
 		ctx.moveTo(firstX * scaleX + offsetX, firstY * scaleY + offsetY);
 
 		var step = Math.floor((maxI - minI) / (width - paddingHor * 2));
 		if (step < 1) step = 1;
 
 		for (var i = minI + 1; i < maxI; i += step) {
-			var x = xColumn.data[i];
-			var y = yColumn.data[i];
+			var x = xColumn.data[i],
+				y = yColumn.data[i];
 			ctx.lineTo(x * scaleX + offsetX, y * scaleY + offsetY);
 		}
 		ctx.stroke();

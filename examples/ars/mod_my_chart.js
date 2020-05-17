@@ -1,8 +1,7 @@
 'use strict';
 
 export var _ch= {
-	sts: {
-	}
+	sts: {}
 }
 
 export function createCanvas (pNode, sts) {
@@ -55,7 +54,7 @@ function chartInit (tchart) {
 	arrColor= color.split(',').map(i=>parseInt(i));
 
 	// *prepare _json
-	// *s->ms
+
 	Object.assign(_json, {
 		colors: {},
 		names: {},
@@ -72,6 +71,7 @@ function chartInit (tchart) {
 		}
 		else {
 			_json.types['x']= 'x';
+			// *s->ms
 			return _json.columns[i].map(ts=>{
 				return isNaN(ts)? ts : ts*1e3;
 			});
