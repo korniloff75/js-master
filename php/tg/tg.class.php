@@ -422,13 +422,14 @@ class TG {
 	/**
 	 ** Wrapper 4 $this->apiRequest
 	 * @param content - array with content strings
-	 * optional:
-	 * @param postFields - array with custom settings
-	 * @param break - break between message in bus
+	 **optional:
+	 * @param postFields - array with custom send data
+	 * @param break - break between messages in bus
 	 *
 	 * Проверяет длину каждого элемента из @content
 	 * Если превышает лимит - создаёт массив из строк и передаёт в рекурсию
 	 * Если нет - собирает шину элементов до лимита и отправляет в ТГ
+	 * Почему не отсылается последний элемент?
 	 */
 	public function sendMessage(array &$content, array $postFields= [], string $break="\n\n")
 	{

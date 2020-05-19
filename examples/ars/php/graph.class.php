@@ -12,9 +12,9 @@ class Graph
 		// *жизнь кэша, сек.
 		CACHE_TIME = 3600 * 24;
 
-	private $cols;
+	protected $cols;
 
-	private $json= [
+	protected $json= [
 		'columns'=> [
 			['x']
 		]
@@ -29,8 +29,6 @@ class Graph
 	{
 		echo "<h3>{$GLOBALS['LOCAL']}</h3>";
 
-		$start_time= microtime(true);
-
 		// *set date range
 		$rangeDate = [
 			(new DateTime())->modify("-$deltaDate")->getTimestamp(),
@@ -42,20 +40,17 @@ class Graph
 		// *Получаем $this->json
 		$this->cache($rangeDate);
 
-		// *Timing
-		$delta_time= (microtime(true) - $start_time) * 1000;
-		echo "<h4>TimeExec = $delta_time ms</h4>";
-
 		// *Controls
 		var_dump(
+			// $this->json,
 			// $this->cols,
 			self::SWETEST_PATH
 			, file_exists(self::SWETEST_PATH)
-			, $start_time
-			, $delta_time
 			, realpath('.')
 			, $rangeDate
 		);
+
+		return $this;
 	}
 
 
@@ -156,18 +151,19 @@ class Graph
 	 */
 	private function cache($rangeDate)
 	{
+		// *Cache read
 		if(
 			file_exists(self::CACHE_PATH)
 			&& filemtime(self::CACHE_PATH) + self::CACHE_TIME > time()
 		)
 		{
-			var_dump(
+			/* var_dump(
 				time(),
 				filemtime(self::CACHE_PATH),
 				file_exists(self::CACHE_PATH),
 				(filemtime(self::CACHE_PATH) + self::CACHE_TIME),
 				(filemtime(self::CACHE_PATH) + self::CACHE_TIME < time())
-			);
+			); */
 
 			$this->json= json_decode(file_get_contents(self::CACHE_PATH), 1);
 		}
@@ -179,7 +175,7 @@ class Graph
 			// !
 			// ;
 				->Interpolation();
-			file_put_contents(self::CACHE_PATH, json_encode($this->json));
+			file_put_contents(self::CACHE_PATH, $this->GetJSON());
 		}
 	}
 

@@ -1,97 +1,97 @@
 <?php
-class PlAngles
+class PlAngles extends Graph
 {
 	const
-		INTER_PARTS = 8;
+		ANGLES = [0,30,60,90,120,180,];
 
-	private $cols;
+	private $angles=[];
 
 
 
 	/**
-	 * @param $deltaDate
-	 * *Собираем данные для графика за период -$deltaDate ... $deltaDate в $this->json
+	 * @param {string} $deltaDate
+	 * $modify - https://www.php.net/manual/ru/datetime.modify.php
 	 */
-	public function __construct()
+	public function __construct(string $deltaDate= '10 day')
 	{
 		$start_time= microtime(true);
 
-
+		parent::__construct($deltaDate)
+			->Find();
 
 		// *Timing
 		$delta_time= (microtime(true) - $start_time) * 1000;
 		echo "<h4>TimeExec = $delta_time ms</h4>";
 
 		// *Controls
+		echo "<h3>" . __CLASS__ . "</h3>";
 		var_dump(
-			// $this->cols,
+			$this->angles(),
 
 		);
 	}
 
 
-	protected function ExecSwetest($rangeDate)
+	// *Генерируем углы для поиска
+	private function angles()
 	{
-
-
-
-		return $this;
+		for ($a=0; $a <= 360; $a+=30) {
+			yield $a;
+		}
 	}
 
 	/**
-	 * *Интерполируем промежуточные значения $this->cols
+	 *
 	 */
-	private function Interpolation()
+	public function Find()
 	{
-		$interCols= [];
+		$diff= [];
+		$nearests= [];
 
-		foreach($this->cols as $name=>&$v)
+		$this->cols= &$this->json['columns'];
+
+		// *Удаляем 'x'
+		// unset($this->cols[0][0]);
+
+
+
+		foreach($this->cols as $name=>$col)
 		{
-			foreach($v as $n=>&$cur)
+			if(is_numeric($name)) continue;
+			echo $name;
+
+			$nearests[$name]= [];
+
+			// *Углы планеты $name
+			foreach($col as $ind=>$f)
 			{
-				$interCols[$name][]= $cur;
 
-				if(
-					empty($next= @$v[$n+1])
-					|| !is_numeric($cur)
-				) continue;
-
-
-				// *Фиксим переход 360->0
-				if($cur > 350 && $next < 50)
+				// *Искомые углы
+				foreach($this->angles() as $a)
 				{
-					$prev= $v[$n-1];
-					$delta= ($cur - $prev) / self::INTER_PARTS;
+					$nearests[$name][$a] = $nearests[$name][$a] ?? ['diff'=>1e5];
 
-					for ($i=1; $i < self::INTER_PARTS; $i++)
+					if (abs($f - $a) < $nearests[$name][$a]['diff'])
 					{
-						// if(!is_numeric($name) && abs($delta) < 180)
-							$interCols[$name][]= $delta * $i;
-					}
-				}
-				else
-				{
-					$delta= ($next - $cur) / self::INTER_PARTS;
 
-					for ($i=1; $i < self::INTER_PARTS; $i++)
-					{
-						// if(!is_numeric($name) && abs($delta) < 180)
-							$interCols[$name][]= $cur + $delta * $i;
-					}
-				}
+						$nearests[$name][$a]= [
+							'ts'=> $this->cols[0][$ind+1],
+							'val'=> $f,
+							'diff'=> abs($f - $a),
+						];
+					};
 
-				// var_dump($cur);
+				}
 
 			}
 
 		}
 
-		$this->cols = $interCols;
-	}
 
-	public function GetJSON()
-	{
-
+		var_dump(
+			// $this->cols,
+			$nearests
+		);
 	}
 
 }

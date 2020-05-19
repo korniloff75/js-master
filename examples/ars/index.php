@@ -13,8 +13,9 @@ putenv("PATH=PATH:" . realpath('.'));
 $P= getenv('PATH');
 
 require_once './php/Graph.class.php';
-$JSON = (new Graph('10 day'))->GetJSON();
 require_once './php/PlAngles.class.php';
+$Graph = new PlAngles('10 day');
+$JSON = $Graph->GetJSON();
 ?>
 
 <script>
