@@ -1,14 +1,17 @@
 <?php
-
-$LOCAL = $_SERVER['HTTP_HOST'] === "js-master";
+define('LOCAL', ($_SERVER['HTTP_HOST'] === "js-master"));
 
 class Graph
 {
 	const
 		SWETEST_PATH = __DIR__ . "/../swetest.exe",
-		INTER_PARTS = 8,
+		// $modify - https://www.php.net/manual/ru/datetime.modify.php
+		DELTA_DATE = '10 day',
+		// *Шаг запуска программы, сек.
+		EXEC_STEP = 3600 * 8,
+		INTER_PARTS = 2,
 		// *Путь к кэшу
-		CACHE_PATH = __DIR__ . "/../cache_db.json",
+		CACHE_PATH = __DIR__ . "/../cache.json",
 		// *жизнь кэша, сек.
 		CACHE_TIME = 3600 * 24;
 
@@ -22,17 +25,16 @@ class Graph
 
 
 	/**
-	 * @param $deltaDate
-	 * *Собираем данные для графика за период [-$deltaDate ... $deltaDate] в $this->json
+	 * *Собираем данные для графика за период [-DELTA_DATE ... DELTA_DATE] в $this->json
 	 */
-	public function __construct(string $deltaDate= '10 day')
+	public function __construct()
 	{
-		echo "<h3>{$GLOBALS['LOCAL']}</h3>";
+		echo "<h3>".LOCAL."</h3>";
 
 		// *set date range
 		$rangeDate = [
-			(new DateTime())->modify("-$deltaDate")->getTimestamp(),
-			(new DateTime())->modify("+$deltaDate")->getTimestamp()
+			(new DateTime())->modify("-".self::DELTA_DATE)->getTimestamp(),
+			(new DateTime())->modify("+".self::DELTA_DATE)->getTimestamp()
 		];
 
 		$this->cols= &$this->json['columns'];
@@ -57,7 +59,7 @@ class Graph
 	protected function ExecSwetest($rangeDate)
 	{
 
-		for($ts=$rangeDate[0]; $ts<=$rangeDate[1]; $ts+=3600*48)
+		for($ts=$rangeDate[0]; $ts<=$rangeDate[1]; $ts+=self::EXEC_STEP)
 		{
 			$date = date('d.m.Y', $ts);
 			$time = date('H:i:s', $ts);
@@ -123,6 +125,7 @@ class Graph
 						$interCols[$name][]= $nextIter <= 360? $nextIter : $nextIter - 360;
 						// $interCols[$name][]= $cur - 360 + $delta * $i;
 					}
+
 				}
 				// *Обычный режим 0->360 deg.
 				else
@@ -134,6 +137,7 @@ class Graph
 						// if(!is_numeric($name) && abs($delta) < 180)
 							$interCols[$name][]= $cur + $delta * $i;
 					}
+
 				}
 
 				// var_dump($cur);
@@ -171,18 +175,18 @@ class Graph
 		else
 		{
 			// todo
-			$this->ExecSwetest($rangeDate)
+			$this->ExecSwetest($rangeDate);
 			// !
-			// ;
-				->Interpolation();
+			$this->Interpolation();
+
 			file_put_contents(self::CACHE_PATH, $this->GetJSON());
 		}
 	}
 
 
-	public function GetJSON()
+	public function GetJSON($arr=null)
 	{
-		return json_encode($this->json);
+		return json_encode($arr ?? $this->json);
 	}
 
 }

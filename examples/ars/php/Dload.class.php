@@ -1,17 +1,78 @@
 <?php
-/**
- * Функция для скачивания файла с сервера с возможностью докачки,
- * требует предварительной установки ограничения времени выполнения сценария для больших файлов
- *
- * @param string $realFilePath
- * @return bool
- */
-function downloadFile($realFilePath) {
-	ob_start();
-	var_dump(
-		$realFilePath,
-		file_exists($realFilePath)
-	);
+class Dload
+{
+	const
+		// *Внутренние папки для сканирования
+		ALLOWED_FOLDERS = ['php'];
+
+	public
+		$link;
+
+
+	public function __construct()
+	{
+		if(isset($_GET['f']))
+			$this->downloadFile("{$_GET['f']}");
+		else
+		{
+			$this->link = str_ireplace($_SERVER['DOCUMENT_ROOT'], '', str_replace('\\', '/', __FILE__));
+			// echo "link = {$this->link}";
+			?>
+
+			<hr>
+
+			<h2>Used files:</h2>
+
+			<ul>
+			<?php
+			$this->print4dawnload('.');
+			?>
+			</ul>
+			<hr>
+			<?php
+
+		}
+
+	}
+
+	function print4dawnload($path, $dir='.')
+	{
+		foreach(scandir($path) as $k) {
+			// echo $k;
+			if(is_dir($k) && in_array($k, self::ALLOWED_FOLDERS))
+			{
+				echo "<ul><h4>Folder - $k</h4>";
+				$this->print4dawnload("$k", $k);
+				echo "</ul>";
+				continue;
+			}
+			elseif(
+				is_dir($k)
+				|| (
+					($name = explode('.', $k))
+					&& strpos(end($name), '_')
+				)
+			) continue;
+
+			// echo $k."<br>";
+			echo "<li><a href=\"" . $this->link . "?f=../{$dir}/$k\">{$dir}/$k</a> - Last update: " . date('Y-m-d H:i:s', filemtime("{$dir}/$k")) . "</li>";
+		}
+	}
+
+
+	/**
+	 * Функция для скачивания файла с сервера с возможностью докачки,
+	 * требует предварительной установки ограничения времени выполнения сценария для больших файлов
+	 *
+	 * @param string $realFilePath
+	 * @return bool
+	 */
+	private function downloadFile($realFilePath) {
+		ob_start();
+		var_dump(
+			$realFilePath,
+			file_exists($realFilePath)
+		);
 		// вначале проверим, что файл существует
 		if(!file_exists($realFilePath)) {
 			echo "Нет файла $realFilePath";
@@ -63,7 +124,7 @@ function downloadFile($realFilePath) {
 				// HTTP/1.0
 				header ( 'Pragma: no-cache' );
 				header ( 'Accept-Ranges: bytes');
-				header ( 'Content-Range: bytes ' . $rangePosition . '-' . $CLen - 1 . '/' . $CLen);
+				header ( 'Content-Range: bytes ' . $rangePosition . '-' . ($CLen - 1) . '/' . $CLen);
 				header ( 'Content-Length: ' . $newCLen );
 				header ( 'Content-Disposition: attachment; filename="' . $filename . '"' );
 				header ( 'Content-Description: File Transfer' );
@@ -109,32 +170,10 @@ function downloadFile($realFilePath) {
 			return true;
 		}
 		else {
-				return false;
+			return false;
 		}
-}
-
-
-
-if(isset($_GET['f']))
-	downloadFile(__DIR__."/{$_GET['f']}");
-else
-{
-	?>
-	<hr>
-
-	<h2>Used files:</h2>
-
-	<ol>
-	<?php
-	$path = scandir(".");
-
-	foreach($path as $k) {
-		if(is_dir($k) || strpos(explode('.', $k)[1], '_')) continue;
-		// echo $k."<br>";
-		echo "<li><a href=\"/examples/ars/dload.php?f=$k\">$k</a> - Last update: " . date('Y-m-d H:i:s', filemtime($k)) . "</li>";
 	}
-	?>
-	</ol>
-	<hr>
-	<?php
 }
+
+
+new Dload();
