@@ -1,7 +1,10 @@
 <?php
-class PlAngles extends Graph
+/**
+ ** Обработка абсолютных углов планет относительно нулевого меридиана Зодиака.
+ */
+class PlAngles extends PlAnglesRel
 {
-	private
+	protected
 		// *Шпаргалка
 		$hint = [
 			30=>'20.05.2020  2:10:22  30',
@@ -14,11 +17,7 @@ class PlAngles extends Graph
 			240=>'4.06.2020 17:16:49  240,',
 			270=>'6.06.2020 19:44:09  270,',
 			300=>'9.06.2020  0:53:57  300,',
-		],
-		$hint_relat = [
-
-		],
-		$nearests=[];
+		];
 
 
 
@@ -33,26 +32,19 @@ class PlAngles extends Graph
 			->FindNearests()
 			->FindExact();
 
-		// *Timing
-		$delta_time= (microtime(true) - $start_time) * 1000;
-		echo "<h4>TimeExec = $delta_time ms</h4>";
-
 		// *Controls
 		echo "<h3>" . __CLASS__ . "</h3>";
 		var_dump(
 			$this->angles(),
-
 		);
+
+		// *Timing
+		$delta_time= (microtime(true) - $start_time) * 1000;
+		echo "<h4>TimeExec = $delta_time ms</h4>";
+		echo "<h4>ОЗУ = " . memory_get_usage() / 1024 . " кБ</h4>";
+		echo "<h4>ОЗУ (макс) = " . memory_get_peak_usage() / 1024 . " кБ</h4>";
 	}
 
-
-	// *Генерируем углы для поиска
-	private function angles()
-	{
-		for ($a=0; $a <= 360; $a+=30) {
-			yield $a;
-		}
-	}
 
 	/**
 	 *
@@ -154,6 +146,10 @@ class PlAngles extends Graph
 
 				$data['exact']= round(($data['ts'] * ($a - $val_2) + $data_2['ts'] * ($val_1 - $a)) / ($val_1 - $val_2));
 
+				// *Сравниваем со шпаргалкой
+				$data['exact_date']= "<b>$name exact - $a deg." . date('Y/m/d - H:i:s', $data['exact']) . '</b>';
+				$data['hint']= "<b>$name hint - $a deg. with the Moon - " . ($this->hint[$a] ?? "А нэту пока...") . '</b>';
+
 				/* var_dump(
 					$data['ts'], $data, $data_2
 				); */
@@ -166,56 +162,6 @@ class PlAngles extends Graph
 			// , $this->nearests
 		);
 
-	}
-
-
-	public function CollectToJson()
-	{
-		$o=[['x']];
-		foreach($this->nearests as $name=>$angles)
-		{
-			$col= $this->cols[$name];
-
-			$cur= [$name];
-			// $o[]= &$cur;
-
-			foreach($angles as $a=>&$data)
-			{
-				// $o[0][]= $data['exact'] * 1e3;
-				/* $data= array_merge_recursive([
-					'range'=>
-				], $data); */
-
-				$this->logDates($name, $a, $data);
-
-				$cur[]= $a;
-			}
-		}
-
-		/* var_dump(
-			__METHOD__
-			, $o
-			, $this->nearests
-		); */
-
-		return $this->GetJSON($o);
-	}
-
-	function logDates($name, $a, &$data)
-	{
-		$o= [];
-		// *Выводим даты
-		$o[]= "<b>$name exact - $a deg." . date('Y/m/d - H:i:s', $data['exact']) . '</b>';
-		$o[]= "$name val_1 - {$data['val']} deg." . date('Y/m/d - H:i:s', $data['ts']);
-		$o[]= "$name val_2 - {$data['range'][0]['val']} deg." . date('Y/m/d - H:i:s', $data['range'][0]['ts']);
-
-		if($name === 'Moon' && !empty($this->hint[$a]))
-		{
-			$o[]= "<h3>Realy value - {$this->hint[$a]}</h3>";
-		}
-		$o[]= $data;
-
-		print_r($o);
 	}
 
 }

@@ -1,11 +1,10 @@
 <?php
-define('LOCAL', ($_SERVER['HTTP_HOST'] === "js-master"));
 
 class Graph
 {
 	const
 		SWETEST_PATH = __DIR__ . "/../swetest.exe",
-		// $modify - https://www.php.net/manual/ru/datetime.modify.php
+		// see $modify - https://www.php.net/manual/ru/datetime.modify.php
 		DELTA_DATE = '10 day',
 		// *Шаг запуска программы, сек.
 		EXEC_STEP = 3600 * 8,
@@ -169,7 +168,8 @@ class Graph
 				(filemtime(self::CACHE_PATH) + self::CACHE_TIME < time())
 			); */
 
-			$this->json= json_decode(file_get_contents(self::CACHE_PATH), 1);
+			$this->cacheData = json_decode(file_get_contents(self::CACHE_PATH), 1);
+			$this->json= &$this->cacheData;
 		}
 		// *Cache rewrite
 		else

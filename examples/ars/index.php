@@ -9,19 +9,22 @@ if(version_compare(PHP_VERSION, '7.0') < 0)
 	die("<h2>Требуется версия РНР выше 7.0 !!!</h2>");
 }
 
+define('LOCAL', ($_SERVER['HTTP_HOST'] === "js-master"));
+
 echo "<pre>";
 
 // putenv(realpath('.'));
 // putenv("PATH=PATH;" . realpath('.'));
-putenv("PATH=PATH:" . realpath('.'));
+putenv("PATH=" . getenv('PATH') . ":" . realpath('.'));
 
-$P= getenv('PATH');
+// var_dump(getenv('PATH'));
 
 require_once './php/Graph.class.php';
+require_once './php/PlAnglesRel.class.php';
 require_once './php/PlAngles.class.php';
 $Graph = new PlAngles();
 $JSON = $Graph->GetJSON();
-$Graph->CollectToJson();
+// $Graph->CollectToJson();
 ?>
 
 <script>
@@ -32,4 +35,4 @@ $Graph->CollectToJson();
 <?php
 echo "</pre>";
 // *Вывожу все файлы из текущей папки для скачивания
-require_once('./php/Dload.class.php');
+require_once './php/Dload.class.php';
