@@ -47,7 +47,7 @@ class PlAnglesRel extends Graph
 				60=>'29.05.2020 13:32:23  1°04\'52"Vir 60',
 				90=>'31.05.2020 21:15:46  3°59\'05"Lib 90',
 			],
-		'Uranus'=>[
+			'Uranus'=>[
 				60=>'25.05.2020 14:33:53  8°13\'44"Cnc 60',
 				90=>'27.05.2020 21:33:52  8°20\'57"Leo 90',
 				120=>'30.05.2020  2:14:40  8°27\'45"Vir 120',
@@ -58,7 +58,7 @@ class PlAnglesRel extends Graph
 	protected
 		$nearests=[];
 
-	private
+	protected
 		$nearests_rel=[];
 
 
@@ -74,18 +74,18 @@ class PlAnglesRel extends Graph
 		// *Controls
 		echo "<h3>" . __CLASS__ . "</h3>";
 		var_dump(
-			$this->angles(60,180),
+			$this->acceptAngles(60,180),
 		);
 
 		echo "<hr><h3>".__METHOD__."</h3>nearests_rel<br>";
-		var_dump($this->nearests_rel);
+		// var_dump($this->nearests_rel);
 
 		return $this;
 	}
 
 
 	// *Генерируем углы для поиска
-	protected function angles($start=0, $end=360)
+	protected function acceptAngles($start=0, $end=360)
 	{
 		for ($a=$start; $a <= $end; $a+=30) {
 			yield $a;
@@ -121,7 +121,7 @@ class PlAnglesRel extends Graph
 				$ts_ind= $ind+1;
 
 				// *Искомые углы
-				foreach($this->angles(60,180) as $a)
+				foreach([ 0, 60, 90, 120, 180 ] as $a)
 				{
 					$nearests[$name][$a] = $nearests[$name][$a] ?? ['diff'=>1e5];
 
@@ -221,8 +221,8 @@ class PlAnglesRel extends Graph
 				$data['exact']= round(($data['ts'] * ($a - $d_val_2) + $data_2['ts'] * ($d_val_1 - $a)) / ($d_val_1 - $d_val_2));
 
 				// *Сравниваем со шпаргалкой
-				$data['exact_date']= "<b>$name exact - $a deg." . date('Y/m/d - H:i:s', $data['exact']) . '</b>';
-				$data['hint']= "<b>$name hint - $a deg. with the Moon - " . (!empty($this->hint[$name])? $this->hint[$name][$a] ?? '' : "А нэту пока...") . '</b>';
+				$data['exact_date']= "<b>$name exact relative - $a deg." . date('Y/m/d - H:i:s', $data['exact']) . '</b>';
+				$data['hint']= "<b>$name hint - $a deg. " . (!empty($this->hint[$name])? $this->hint[$name][$a] ?? '' : "А нэту пока...") . ' - relative with the Moon</b>';
 
 				/* var_dump(
 					$data['ts'], $data, $data_2

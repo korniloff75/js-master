@@ -4,6 +4,9 @@
  */
 class PlAngles extends PlAnglesRel
 {
+	const
+		CACHE_ANGLES_PATH = __DIR__ . '/../angles.json';
+
 	protected
 		// *Шпаргалка
 		$hint = [
@@ -19,6 +22,8 @@ class PlAngles extends PlAnglesRel
 			300=>'9.06.2020  0:53:57  300,',
 		];
 
+	public $angles;
+
 
 
 	/**
@@ -26,23 +31,21 @@ class PlAngles extends PlAnglesRel
 	 */
 	public function __construct()
 	{
-		$start_time= microtime(true);
-
 		parent::__construct()
 			->FindNearests()
 			->FindExact();
 
+		$this->angles = [
+			'abs'=> $this->nearests,
+			'rel'=> $this->nearests_rel,
+		];
+
 		// *Controls
 		echo "<h3>" . __CLASS__ . "</h3>";
 		var_dump(
-			$this->angles(),
+			$this->acceptAngles()
+			// , $this->angles
 		);
-
-		// *Timing
-		$delta_time= (microtime(true) - $start_time) * 1000;
-		echo "<h4>TimeExec = $delta_time ms</h4>";
-		echo "<h4>ОЗУ = " . memory_get_usage() / 1024 . " кБ</h4>";
-		echo "<h4>ОЗУ (макс) = " . memory_get_peak_usage() / 1024 . " кБ</h4>";
 	}
 
 
@@ -59,7 +62,6 @@ class PlAngles extends PlAnglesRel
 		foreach($this->cols as $name=>$col)
 		{
 			if(is_numeric($name)) continue;
-			echo $name;
 
 			$nearests[$name]= [];
 
@@ -69,8 +71,9 @@ class PlAngles extends PlAnglesRel
 				$ts_ind= $ind+1;
 
 				// *Искомые углы
-				foreach($this->angles() as $a)
+				foreach($this->acceptAngles() as $a)
 				{
+					// var_dump($a);
 					$nearests[$name][$a] = $nearests[$name][$a] ?? ['diff'=>1e5];
 
 					if (abs($f - $a) < $nearests[$name][$a]['diff'])
@@ -94,7 +97,7 @@ class PlAngles extends PlAnglesRel
 							if(empty($col[$_i]))
 								continue;
 
-							$cur['range'][$_i]= [
+							$cur['range'][]= [
 								'ts'=> $this->cols[0][$_i+1],
 								'val'=> $col[$_i],
 								'diff'=> abs($col[$_i] - $a),
@@ -102,6 +105,8 @@ class PlAngles extends PlAnglesRel
 							];
 						}
 					};
+
+					// var_dump($cur);
 
 				}
 
@@ -124,8 +129,24 @@ class PlAngles extends PlAnglesRel
 			{
 				$val_1= $data['val'];
 
-				usort($data['range'], function ($a, $b){
-					return $a['diff'] > $b['diff'];
+				// var_dump($data['range']);
+
+				// *Фиксим проход через 0
+				if(
+					$a === 0
+					&& count($data['range']) == 2
+					&& abs($data['range'][0]['val'] - $data['range'][1]['val']) > 180
+				)
+				{
+					foreach($data['range'] as &$n)
+					{
+						$n['val'] = $n['val']<180? $n['val']: $n['val']-360;
+						$n['diff'] = abs($n['val'] - $a);
+					}
+				}
+
+				usort($data['range'], function (&$n, &$p){
+					return $n['diff'] > $p['diff'];
 				});
 
 				$data_2= $data['range'][0];
@@ -133,22 +154,29 @@ class PlAngles extends PlAnglesRel
 
 				// *Фильтруем значения вне диапазона
 
+				/* if($a == 0)
+				{
+					// $data['ttt'] = $data['range'];
+					continue;
+				} */
+
 				if(
 					$a > $val_1 && $a > $val_2
 					|| $a < $val_1 && $a < $val_2
 				)
 				{
+					// if($a == 0) continue;
 					unset($angles[$a]);
 					continue;
 				}
 
 				//note Составляем пропорцию
 
-				$data['exact']= round(($data['ts'] * ($a - $val_2) + $data_2['ts'] * ($val_1 - $a)) / ($val_1 - $val_2));
+				$data['exact']= $data['exact'] ?? round(($data['ts'] * ($a - $val_2) + $data_2['ts'] * ($val_1 - $a)) / ($val_1 - $val_2));
 
 				// *Сравниваем со шпаргалкой
-				$data['exact_date']= "<b>$name exact - $a deg." . date('Y/m/d - H:i:s', $data['exact']) . '</b>';
-				$data['hint']= "<b>$name hint - $a deg. with the Moon - " . ($this->hint[$a] ?? "А нэту пока...") . '</b>';
+				$data['exact_date']= "<b>$name exact abs - $a deg. " . date('Y/m/d - H:i:s', $data['exact']) . '</b>';
+				$data['hint']= "<b>$name hint abs - $a deg. " . ($this->hint[$a] ?? "А нэту пока...") . '</b>';
 
 				/* var_dump(
 					$data['ts'], $data, $data_2

@@ -16,7 +16,7 @@ class Graph
 
 	protected $cols;
 
-	protected $json= [
+	public $json= [
 		'columns'=> [
 			['x']
 		]
@@ -24,7 +24,7 @@ class Graph
 
 
 	/**
-	 * *Собираем данные для графика за период [-DELTA_DATE ... DELTA_DATE] в $this->json
+	 * *Собираем данные для графика за период [now ... DELTA_DATE] в $this->json
 	 */
 	public function __construct()
 	{
@@ -32,6 +32,7 @@ class Graph
 
 		// *set date range
 		$rangeDate = [
+			// (new DateTime())->modify("-1 day")->getTimestamp(),
 			(new DateTime())->modify("-".self::DELTA_DATE)->getTimestamp(),
 			(new DateTime())->modify("+".self::DELTA_DATE)->getTimestamp()
 		];

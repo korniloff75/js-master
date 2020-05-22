@@ -19,10 +19,9 @@ putenv("PATH=" . getenv('PATH') . ":" . realpath('.'));
 
 // var_dump(getenv('PATH'));
 
-require_once './php/Graph.class.php';
-require_once './php/PlAnglesRel.class.php';
-require_once './php/PlAngles.class.php';
-$Graph = new PlAngles();
+require_once './php/EntryPointGraph.class.php';
+
+$Graph = new EntryPointGraph();
 $JSON = $Graph->GetJSON();
 // $Graph->CollectToJson();
 ?>
