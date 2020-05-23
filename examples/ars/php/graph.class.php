@@ -5,9 +5,9 @@ class Graph
 	const
 		SWETEST_PATH = __DIR__ . "/../swetest.exe",
 		// see $modify - https://www.php.net/manual/ru/datetime.modify.php
-		DELTA_DATE = '10 day',
+		DELTA_DATE = '25 day',
 		// *Шаг запуска программы, сек.
-		EXEC_STEP = 3600 * 8,
+		EXEC_STEP = 3600 * 6,
 		INTER_PARTS = 2,
 		// *Путь к кэшу
 		CACHE_PATH = __DIR__ . "/../cache.json",
@@ -32,8 +32,8 @@ class Graph
 
 		// *set date range
 		$rangeDate = [
-			// (new DateTime())->modify("-1 day")->getTimestamp(),
-			(new DateTime())->modify("-".self::DELTA_DATE)->getTimestamp(),
+			(new DateTime())->modify("-1 day")->getTimestamp(),
+			// (new DateTime())->modify("-".self::DELTA_DATE)->getTimestamp(),
 			(new DateTime())->modify("+".self::DELTA_DATE)->getTimestamp()
 		];
 

@@ -23,7 +23,7 @@ class EntryPointGraph
 		echo "<h3>" . __CLASS__ . "</h3>";
 		var_dump(
 			$this->angles['abs']
-			// , $this->angles['rel']
+			, $this->angles['rel']
 		);
 
 		// *Timing
