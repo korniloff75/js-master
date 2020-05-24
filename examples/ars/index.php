@@ -4,7 +4,7 @@
 
 <?php
 
-echo "<pre>";
+echo "<pre style=\"white-space: pre-wrap;\">";
 
 // putenv(realpath('.'));
 // putenv("PATH=PATH;" . realpath('.'));

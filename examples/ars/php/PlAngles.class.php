@@ -64,9 +64,9 @@ class PlAngles extends PlAnglesRel
 				foreach($this->acceptAngles() as $a)
 				{
 					// var_dump($a);
-					$nearests[$name][$a] = $nearests[$name][$a] ?? ['diff'=>1e5];
+					$nearests[$name][$a] = $nearests[$name][$a] ?? ['diff_abs'=>1e5];
 
-					if (abs($f - $a) < $nearests[$name][$a]['diff'])
+					if (abs($f - $a) < $nearests[$name][$a]['diff_abs'])
 					{
 
 						// $this->FindExact($col, $ind);
@@ -75,7 +75,7 @@ class PlAngles extends PlAnglesRel
 						$cur= [
 							'ts'=> $this->cols[0][$ts_ind],
 							'val'=> $f,
-							'diff'=> abs($f - $a),
+							'diff_abs'=> abs($f - $a),
 							'ind'=> $ind,
 							'range'=> [],
 						];
@@ -90,7 +90,7 @@ class PlAngles extends PlAnglesRel
 							$cur['range'][]= [
 								'ts'=> $this->cols[0][$_i+1],
 								'val'=> $col[$_i],
-								'diff'=> abs($col[$_i] - $a),
+								'diff_abs'=> abs($col[$_i] - $a),
 								'ind'=> $_i,
 							];
 						}
@@ -131,12 +131,12 @@ class PlAngles extends PlAnglesRel
 					foreach($data['range'] as &$n)
 					{
 						$n['val'] = $n['val']<180? $n['val']: $n['val']-360;
-						$n['diff'] = abs($n['val'] - $a);
+						$n['diff_abs'] = abs($n['val'] - $a);
 					}
 				}
 
 				usort($data['range'], function (&$n, &$p){
-					return $n['diff'] > $p['diff'];
+					return $n['diff_abs'] > $p['diff_abs'];
 				});
 
 				$data_2= $data['range'][0];

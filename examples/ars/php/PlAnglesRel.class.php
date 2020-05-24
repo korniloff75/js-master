@@ -23,8 +23,7 @@ class PlAnglesRel extends Graph
 		$this->hint = EntryPointGraph::HINT['rel'];
 
 		parent::__construct()
-			->FindNearests()
-			->FindExact();
+			->FindNearests();
 
 		// *Controls
 		/* echo "<h3>" . __CLASS__ . "</h3>";
@@ -78,7 +77,8 @@ class PlAnglesRel extends Graph
 				// *Искомые углы
 				foreach([ 0, 60, 90, 120, 180 ] as $a)
 				{
-					$nearests[$name][$a] = $nearests[$name][$a] ?? ['diff_abs'=>1e5];
+					$nearests[$name][$a] = $nearests[$name][$a] ?? [];
+					// $nearests[$name][$a] = $nearests[$name][$a] ?? ['diff_abs'=>1e5];
 
 					$d_val= abs($f - $moon[$ind]);
 					$sign= $f - $moon[$ind] > 0? 1: -1;
@@ -89,12 +89,12 @@ class PlAnglesRel extends Graph
 
 					$diff_abs= abs($d_val - $a);
 
-					if (abs($diff_abs) < abs($nearests[$name][$a]['diff_abs']))
+					// if (abs($diff_abs) < abs($nearests[$name][$a]['diff_abs']))
 					{
 						$cur= &$nearests[$name][$a];
-						$cur= [
+						$cur[$ind]= [
 							'ts'=> $this->cols[0][$ts_ind],
-							'ts_date'=> "control - " . date('Y/m/d - H:i:s', $this->cols[0][$ts_ind]),
+							'ts_date'=> "control - " . date('d.m.Y - H:i:s', $this->cols[0][$ts_ind]),
 							'm_val'=> $moon[$ind],
 							'val'=> $f,
 							'd_val'=> $d_val * $sign,
@@ -119,9 +119,9 @@ class PlAnglesRel extends Graph
 							// $d_val= $d_val>180? 360-$d_val: $d_val;
 							$sign= $col[$_i] - $moon[$_i] > 0? 1: -1;
 
-							$cur['range'][]= [
+							$cur[$ind]['range'][]= [
 								'ts'=> $this->cols[0][$_i+1],
-								'ts_date'=> "control - " . date('Y/m/d - H:i:s', $this->cols[0][$_i+1]),
+								'ts_date'=> "control - " . date('d.m.Y - H:i:s', $this->cols[0][$_i+1]),
 								'm_val'=> $moon[$_i],
 								'val'=> $col[$_i],
 								'd_val'=> $d_val * $sign,
@@ -133,11 +133,20 @@ class PlAnglesRel extends Graph
 						}
 					};
 
-				}
+
+					usort($cur[$ind]['range'], function ($a, $b){
+						return $a['diff_abs'] > $b['diff_abs'];
+					});
+
+					$this->findExact($name, $cur, $a);
+
+				} //* $a iter
 
 			}
 
-		}
+		} //* $names iter
+
+
 
 		// echo "<h3>".__METHOD__."</h3>";
 		// var_dump($this->nearests_rel);
@@ -145,9 +154,98 @@ class PlAnglesRel extends Graph
 		return $this;
 	}
 
+	// *Выкидываем данные вне диапазонов
+	// note deprecated
+	/* private function filterCur(&$cur, $a, $name)
+	{
+		$cur = array_filter($cur, function(&$data) use($a, $name){
+			// *Разница с Луной
+			$d_val_1= $data['d_val'];
+
+			$data_2= $data['range'][0];
+			$val_2= $data_2['val'];
+			// $d_val_2= abs($val_2 - $data_2['m_val']);
+			$d_val_2= $data_2['d_val'];
+
+			if(
+				$a * $data['sign'] > $d_val_1 && $a * $data_2['sign'] > $d_val_2
+				|| $a * $data['sign'] < $d_val_1 && $a * $data_2['sign'] < $d_val_2
+			)
+			{
+					// unset($angles[$a]);
+
+				return false;
+			}
+
+			return true;
+		});
+
+		return $this;
+	} */
+
+
+	private function findExact(string $name, array &$cur, $a)
+	{
+		$last_ind = null;
+		foreach($cur as $ind=>&$data)
+		{
+			$last_ind = $last_ind ?? $ind;
+			// *Разница с Луной
+			$d_val_1= $data['d_val'];
+
+			$data_2= $data['range'][0];
+			$val_2= $data_2['val'];
+			$d_val_2= $data_2['d_val'];
+
+			if(
+				$a * $data['sign'] > $d_val_1 && $a * $data_2['sign'] > $d_val_2
+				|| $a * $data['sign'] < $d_val_1 && $a * $data_2['sign'] < $d_val_2
+				|| $a !== 0 && (
+					abs($d_val_1 - $d_val_2) > 30
+				)
+				|| $data['diff_abs'] > 30
+			)
+			{
+				unset($cur[$ind]);
+				continue;
+			}
+
+			//note Составляем пропорцию
+
+			$data['exact']= round(($data['ts'] * ($a * $data_2['sign'] - $d_val_2) + $data_2['ts'] * ($d_val_1 - $a * $data['sign'])) / ($d_val_1 - $d_val_2));
+			// note $data['exact']= round(($data['ts'] * ($a - $d_val_2) + $data_2['ts'] * ($d_val_1 - $a)) / ($d_val_1 - $d_val_2));
+
+			// *Удаляем дубли
+			/* if(
+				!empty($cur[$last_ind])
+				&& $data['exact'] === $cur[$last_ind]['exact']
+			) */
+			if(
+				!empty($cur[$ind-1])
+				&& $data['exact'] === $cur[$ind-1]['exact']
+			)
+			{
+				/* var_dump(
+					$ind,
+					// $last_ind,
+					$cur[$ind],
+				); */
+				unset($cur[$ind-1]);
+				continue;
+			}
+
+			// *Сравниваем со шпаргалкой
+			$data['exact_date']= "<b>$name exact relative - $a deg." . date('d.m.Y - H:i:s', $data['exact']) . '</b>';
+			$data['hint']= "<b>$name hint - $a deg. " . (!empty($this->hint[$name])? json_encode($this->hint[$name][$a], JSON_UNESCAPED_UNICODE| JSON_UNESCAPED_SLASHES) : "А нэту пока...") . ' - relative with the Moon</b>';
+		}
+
+		return $data;
+	}
+
 
 	// *Находим точные значения для углов
-	private function FindExact()
+	// note deprecated
+	/* private function FindExact__()
 	{
 		foreach($this->nearests_rel as $name=>&$angles)
 		{
@@ -159,20 +257,6 @@ class PlAnglesRel extends Graph
 				// *Разница с Луной
 				$d_val_1= $data['d_val'];
 
-				//! *Фиксим проход через 0
-				/* if(
-					$a === 0
-					&& count($data['range']) == 2
-					&& abs($data['range'][0]['val'] - $data['range'][1]['val']) > 180
-				)
-				{
-					foreach($data['range'] as &$n)
-					{
-						$n['val'] = $n['val']<180? $n['val']: $n['val']-360;
-						$n['diff_abs'] = abs($n['val'] - $a);
-					}
-				} */
-
 				usort($data['range'], function ($a, $b){
 					return abs($a['diff_abs']) > abs($b['diff_abs']);
 				});
@@ -182,23 +266,9 @@ class PlAnglesRel extends Graph
 				// $d_val_2= abs($val_2 - $data_2['m_val']);
 				$d_val_2= $data_2['d_val'];
 
-				/* var_dump(
-					$a, $d_val_1, $d_val_2,
-					($a > $d_val_1 && $a > $d_val_2),
-					($a < $d_val_1 && $a < $d_val_2),
-					($a > $d_val_1 && $a > $d_val_2
-					|| $a < $d_val_1 && $a < $d_val_2),
-					'==='
-				); */
-
 
 				// *Фильтруем значения вне диапазона
 
-				/* if(
-					$a > abs($d_val_1) && $a > abs($d_val_2)
-					|| $a < abs($d_val_1) && $a < abs($d_val_2)
-					// && $a !== 0
-				) */
 				if(
 					$a * $data['sign'] > $d_val_1 && $a * $data_2['sign'] > $d_val_2
 					|| $a * $data['sign'] < $d_val_1 && $a * $data_2['sign'] < $d_val_2
@@ -222,21 +292,11 @@ class PlAnglesRel extends Graph
 				// note $data['exact']= round(($data['ts'] * ($a - $d_val_2) + $data_2['ts'] * ($d_val_1 - $a)) / ($d_val_1 - $d_val_2));
 
 				// *Сравниваем со шпаргалкой
-				$data['exact_date']= "<b>$name exact relative - $a deg." . date('Y/m/d - H:i:s', $data['exact']) . '</b>';
+				$data['exact_date']= "<b>$name exact relative - $a deg." . date('d.m.Y - H:i:s', $data['exact']) . '</b>';
 				$data['hint']= "<b>$name hint - $a deg. " . (!empty($this->hint[$name])? $this->hint[$name][$a] ?? '' : "А нэту пока...") . ' - relative with the Moon</b>';
 
-				/* var_dump(
-					$data['ts'], $data, $data_2
-				); */
 			}
 		}
-
-		/* var_dump(
-			"<h3>".__METHOD__."</h3>"
-			// , $this->cols
-			// , $this->nearests_rel
-		); */
-
-	}
+	} */
 
 }
