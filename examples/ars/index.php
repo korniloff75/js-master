@@ -16,7 +16,7 @@ require_once './php/EntryPointGraph.class.php';
 
 $Graph = new EntryPointGraph();
 $JSON = $Graph->GetJSON();
-// $Graph->CollectToJson();
+$Graph->CollectToJson();
 ?>
 
 <script>

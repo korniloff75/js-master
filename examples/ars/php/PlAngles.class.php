@@ -7,23 +7,11 @@ class PlAngles extends PlAnglesRel
 	const
 		CACHE_ANGLES_PATH = __DIR__ . '/../angles.json';
 
-	protected
-		// *Шпаргалка
-		$hint = [
-			30=>'20.05.2020  2:10:22  30',
-			60=>'22.05.2020 13:35:44  60',
-			90=>'24.05.2020 23:08:46  90,',
-			120=>'27.05.2020  6:33:00  120,',
-			150=>'29.05.2020 11:40:05  150,',
-			180=>'31.05.2020 14:37:41  180, ',
-			210=>'2.06.2020 16:05:29  210,',
-			240=>'4.06.2020 17:16:49  240,',
-			270=>'6.06.2020 19:44:09  270,',
-			300=>'9.06.2020  0:53:57  300,',
-		];
-
 	public $angles;
 
+	private
+		// *Шпаргалка
+		$hint;
 
 
 	/**
@@ -31,6 +19,8 @@ class PlAngles extends PlAnglesRel
 	 */
 	public function __construct()
 	{
+		$this->hint = EntryPointGraph::HINT['abs'];
+
 		parent::__construct()
 			->FindNearests()
 			->FindExact();
@@ -41,11 +31,11 @@ class PlAngles extends PlAnglesRel
 		];
 
 		// *Controls
-		echo "<h3>" . __CLASS__ . "</h3>";
+		/* echo "<h3>" . __CLASS__ . "</h3>";
 		var_dump(
 			$this->acceptAngles()
 			// , $this->angles
-		);
+		); */
 	}
 
 
@@ -175,8 +165,8 @@ class PlAngles extends PlAnglesRel
 				$data['exact']= $data['exact'] ?? round(($data['ts'] * ($a - $val_2) + $data_2['ts'] * ($val_1 - $a)) / ($val_1 - $val_2));
 
 				// *Сравниваем со шпаргалкой
-				$data['exact_date']= "<b>$name exact abs - $a deg. " . date('Y/m/d - H:i:s', $data['exact']) . '</b>';
-				$data['hint']= "<b>$name hint abs - $a deg. " . ($this->hint[$a] ?? "А нэту пока...") . '</b>';
+				/* $data['exact_date']= "<b>$name exact abs - $a deg. " . date('Y/m/d - H:i:s', $data['exact']) . '</b>';
+				$data['hint']= "<b>$name hint abs - $a deg. " . ($this->hint[$a] ?? "А нэту пока...") . '</b>'; */
 
 				/* var_dump(
 					$data['ts'], $data, $data_2
