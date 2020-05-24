@@ -1,4 +1,13 @@
 <?php
+
+if(version_compare(PHP_VERSION, '7.0') < 0)
+{
+	die("<h2>Для работы скрипта " . basename(__FILE__) . " требуется версия РНР выше 7.0 !!!</h2>");
+}
+
+define('LOCAL', ($_SERVER['HTTP_HOST'] === "js-master"));
+
+
 class EntryPointGraph
 {
 	const

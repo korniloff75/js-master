@@ -1,5 +1,6 @@
 /**
  * *https://coding.studio/tchart/
+ * vendor's guid
  * https://coding.studio/tchart/README.txt
  *
  * var ch = new TChart(container);
@@ -863,6 +864,8 @@ export function TChart(container, eventContainer) {
 			renderPath(yColumn, mainMinI, mainMaxI, mainScaleX, mainScaleY, mainOffsetX, mainOffsetY);
 		}
 
+
+
 		// select
 
 		if (selectX) {
@@ -924,6 +927,39 @@ export function TChart(container, eventContainer) {
 				y = yColumn.data[i];
 			ctx.lineTo(x * scaleX + offsetX, y * scaleY + offsetY);
 		}
+		ctx.stroke();
+	}
+
+
+	// todo
+	// this.addTokens = function (yColumn, minI, maxI, scaleX, scaleY, offsetX, offsetY) {
+	/**
+	 * @param {Array} tokens
+	 */
+	function addTokens (tokens, yColumn, minI, maxI, scaleX, scaleY, offsetX, offsetY) {
+		// ctx.strokeStyle = colors.line;
+
+		ctx.beginPath();
+		ctx.lineJoin = 'bevel';
+		ctx.lineCap = 'butt';
+
+		tokens.forEach(function(tx) {
+			ctx.moveTo(tx * mainScaleX + mainOffsetX, 0);
+			ctx.lineTo(0, height - mainOffsetY);
+		})
+
+		/* var firstX = xColumn.data[minI],
+			firstY = yColumn.data[minI];
+		ctx.moveTo(firstX * scaleX + offsetX, firstY * scaleY + offsetY);
+
+		var step = Math.floor((maxI - minI) / (width - paddingHor * 2));
+		if (step < 1) step = 1;
+
+		for (var i = minI + 1; i < maxI; i += step) {
+			var x = xColumn.data[i],
+				y = yColumn.data[i];
+			ctx.lineTo(x * scaleX + offsetX, y * scaleY + offsetY);
+		} */
 		ctx.stroke();
 	}
 }

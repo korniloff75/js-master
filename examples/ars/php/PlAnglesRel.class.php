@@ -185,6 +185,7 @@ class PlAnglesRel extends Graph
 						$cur= &$nearests[$name][$a];
 						$cur= [
 							'ts'=> $this->cols[0][$ts_ind],
+							'ts_date'=> "control - " . date('Y/m/d - H:i:s', $this->cols[0][$ts_ind]),
 							'm_val'=> $moon[$ind],
 							'val'=> $f,
 							'd_val'=> $d_val * $sign,
@@ -213,6 +214,7 @@ class PlAnglesRel extends Graph
 
 							$cur['range'][]= [
 								'ts'=> $this->cols[0][$_i+1],
+								'ts_date'=> "control - " . date('Y/m/d - H:i:s', $this->cols[0][$_i+1]),
 								'm_val'=> $moon[$_i],
 								'val'=> $col[$_i],
 								'd_val'=> $d_val * $sign,
@@ -309,7 +311,9 @@ class PlAnglesRel extends Graph
 
 				//note Составляем пропорцию
 
-				$data['exact']= round(($data['ts'] * ($a - $d_val_2) + $data_2['ts'] * ($d_val_1 - $a)) / ($d_val_1 - $d_val_2));
+				// $data['exact']= round(($data['ts'] * ($a - abs($d_val_2)) + $data_2['ts'] * (abs($d_val_1) - $a)) / (abs($d_val_1) - abs($d_val_2)));
+				$data['exact']= round(($data['ts'] * ($a * $data_2['sign'] - $d_val_2) + $data_2['ts'] * ($d_val_1 - $a * $data['sign'])) / ($d_val_1 - $d_val_2));
+				// note $data['exact']= round(($data['ts'] * ($a - $d_val_2) + $data_2['ts'] * ($d_val_1 - $a)) / ($d_val_1 - $d_val_2));
 
 				// *Сравниваем со шпаргалкой
 				$data['exact_date']= "<b>$name exact relative - $a deg." . date('Y/m/d - H:i:s', $data['exact']) . '</b>';

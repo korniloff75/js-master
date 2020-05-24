@@ -4,13 +4,6 @@
 
 <?php
 
-if(version_compare(PHP_VERSION, '7.0') < 0)
-{
-	die("<h2>Требуется версия РНР выше 7.0 !!!</h2>");
-}
-
-define('LOCAL', ($_SERVER['HTTP_HOST'] === "js-master"));
-
 echo "<pre>";
 
 // putenv(realpath('.'));

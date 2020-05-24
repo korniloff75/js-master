@@ -50,8 +50,9 @@ function chartInit (tchart) {
 	// *Строим тестовый график
 	_ch.tchart= new tchart.TChart(_ch.wrapper);
 
-	let color= "rgb(22,55,77)",
-	arrColor= color.split(',').map(i=>parseInt(i));
+	let color= "rgb(22,55,77)";
+
+	// _ch.tchart.addTokens([Date.now()]);
 
 	// *prepare _json
 
