@@ -162,24 +162,24 @@ class EntryPointGraph
 
 			$this->json = &$Graph->json;
 			$this->angles = &$Graph->angles;
+			/* usort($this->angles['abs']['Moon'], function($a,$b){
+				return $a['ts'] - $b['ts'];
+			}); */
 
-			$this->PlAnglesObj = &$Graph;
+			// $this->PlAnglesObj = &$Graph;
 			// $JSON = $Graph->GetJSON();
 
 			file_put_contents(
 				self::CACHE_ANGLES_PATH,
-				json_encode(
-					$Graph->angles,
-					JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-				)
+				$this->GetJSON($Graph->angles)
 			);
 		}
 	}
 
 
-	public function GetJSON($arr=null)
+	public function GetJSON(&$arr=null)
 	{
-		return json_encode($arr ?? $this->json);
+		return json_encode($arr ?? $this->json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 	}
 
 
@@ -193,36 +193,42 @@ class EntryPointGraph
 		// *convert to Zodiac
 		$deg = $deg - floor($deg/30)*30;
 
-		return "{$deg}° $mm\' $ss\"";
+		return "{$deg}° $mm' $ss\"";
 	}
 
 
 
 	public function CollectToJson(?array &$nearests=null, ?string $category= null)
 	{
-		$nearests = $nearests ?? $this->angles;
+		$nearests ?? ($nearests = &$this->angles);
 
-		$o=[['x']];
+		$o=[];
 		$this->cols = &$this->json['columns'];
 
 		if(
 			empty($category)
-			// && array_walk($nearests, $this->CollectToJson)
 		)
 		{
-			foreach($nearests as $cat=>$val)
+			foreach($nearests as $cat=>&$val)
 			{
+				/* if($cat === 'abs')
+				{
+					$moon = &$val['Moon'];
+					// $moon
+					$val= $moon;
+				}
+				else  */
 				$this->CollectToJson($val, $cat);
 			}
 			return;
 		}
 
-		foreach($nearests as $name=>$angles)
+		foreach($nearests as $name=>&$angles)
 		{
-			$col= $this->cols[$name];
-
-			$cur= [$name];
-			// $o[]= &$cur;
+			if(
+				!count($angles)
+			)
+				unset($nearests[$name]);
 
 			foreach($angles as $a=>&$data)
 			{
@@ -231,19 +237,18 @@ class EntryPointGraph
 					'range'=>
 				], $data); */
 
-				if(empty($data['exact']))
+				if($category === 'abs')
+				// if(!empty($data['exact']))
 				{
-					foreach($data as $d)
-					{
-						$this->logDates($category, $name, $a, $d);
-					}
-					continue;
+					$data= [$data];
 				}
-				else
-					$this->logDates($category, $name, $a, $data);
 
+				foreach($data as &$d)
+				{
+					$this->logDates($category, $name, $a, $d);
+					unset($d['range']);
+				}
 
-				$cur[]= $a;
 			}
 		}
 
@@ -253,7 +258,7 @@ class EntryPointGraph
 			// , $this->nearests
 		);
 
-		return $this->GetJSON($o);
+		// return $this->GetJSON($nearests);
 	}
 
 
@@ -279,7 +284,7 @@ class EntryPointGraph
 		}
 
 		// *Выводим даты
-		$o[]= "<b>$name $prefix exact - $a deg. " . date('d.m.Y - H:i:s', $data['exact']) . '</b>';
+		$o[]= "<b>$name $prefix exact - $a deg. " . date('d.m.Y - H:i:s', $data['exact']) . "</b> - {$data['exact']}";
 		$o[]= "$name val_1 - {$data[$val]} deg. ({$data['val']}) " . date('d.m.Y - H:i:s', $data['ts']);
 		$o[]= "$name val_2 - {$data['range'][0][$val]} deg. ({$data['range'][0]['val']}) " . date('d.m.Y - H:i:s', $data['range'][0]['ts']);
 

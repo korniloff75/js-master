@@ -65,7 +65,7 @@ class PlAngles extends PlAnglesRel
 			$nearests[$name]= [];
 
 			// *Углы планеты $name
-			foreach($col as $ind=>$f)
+			foreach($col as $ind=>&$f)
 			{
 				$ts_ind= $ind+1;
 
@@ -109,7 +109,11 @@ class PlAngles extends PlAnglesRel
 
 				}
 
-			}
+			} // *$col
+
+			/* uasort($nearests[$name], function($a,$b){
+				return $a['ts'] - $b['ts'];
+			}); */
 
 		}
 

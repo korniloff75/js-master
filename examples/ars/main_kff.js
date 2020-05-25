@@ -1,5 +1,7 @@
 'use strict';
 
+var start_time = Date.now();
+
 (()=>{
 	let styles= document.createElement('link');
 	styles.rel= 'stylesheet';
@@ -8,7 +10,7 @@
 })();
 
 
-import(location.href + 'mod_my_chart.js')
+var mod_my_chart_promise = import(location.href + 'mod_my_chart.js')
 .then(my_chart => {
 	console.log('my_chart= ', my_chart);
 
@@ -25,3 +27,21 @@ import(location.href + 'mod_my_chart.js')
 .catch(err => {
 	console.warn('my_chart.err.message= ', err.message);
 });
+
+var mod_konva_promise = import(location.href + 'mod_konva.js')
+.then(konva => {
+	console.log(
+		'konva= ', konva,
+		// init
+	);
+})
+.catch(err => {
+	console.warn('konva.err.message= ', err.message);
+});
+
+Promise.all([mod_my_chart_promise, mod_konva_promise])
+.then(
+	all=>{
+		console.info('Время исполнения KFF= ', `${Date.now() - start_time} ms`);
+	}
+)
