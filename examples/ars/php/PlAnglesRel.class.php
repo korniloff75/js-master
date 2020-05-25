@@ -26,24 +26,11 @@ class PlAnglesRel extends Graph
 			->FindNearests();
 
 		// *Controls
-		/* echo "<h3>" . __CLASS__ . "</h3>";
-		var_dump(
-			$this->acceptAngles(60,180),
-		); */
 
-		echo "<hr><h3>".__METHOD__."</h3>nearests_rel<br>";
+		// echo "<hr><h3>".__METHOD__."</h3>nearests_rel<br>";
 		// var_dump($this->nearests_rel);
 
 		return $this;
-	}
-
-
-	// *Генерируем углы для поиска
-	protected function acceptAngles($start=0, $end=360)
-	{
-		for ($a=$start; $a <= $end; $a+=30) {
-			yield $a;
-		}
 	}
 
 	/**
@@ -138,6 +125,7 @@ class PlAnglesRel extends Graph
 						return $a['diff_abs'] > $b['diff_abs'];
 					});
 
+					// *Фильтруем и вычисляем
 					$this->findExact($name, $cur, $a);
 
 				} //* $a iter
@@ -189,7 +177,7 @@ class PlAnglesRel extends Graph
 		$last_ind = null;
 		foreach($cur as $ind=>&$data)
 		{
-			$last_ind = $last_ind ?? $ind;
+			$val_1= $data['val'];
 			// *Разница с Луной
 			$d_val_1= $data['d_val'];
 
@@ -215,11 +203,10 @@ class PlAnglesRel extends Graph
 			$data['exact']= round(($data['ts'] * ($a * $data_2['sign'] - $d_val_2) + $data_2['ts'] * ($d_val_1 - $a * $data['sign'])) / ($d_val_1 - $d_val_2));
 			// note $data['exact']= round(($data['ts'] * ($a - $d_val_2) + $data_2['ts'] * ($d_val_1 - $a)) / ($d_val_1 - $d_val_2));
 
+			$data['deg']= ($val_1 * ($a * $data_2['sign'] - $d_val_2) + $val_2 * ($d_val_1 - $a * $data['sign'])) / ($d_val_1 - $d_val_2);
+
 			// *Удаляем дубли
-			/* if(
-				!empty($cur[$last_ind])
-				&& $data['exact'] === $cur[$last_ind]['exact']
-			) */
+
 			if(
 				!empty($cur[$ind-1])
 				&& $data['exact'] === $cur[$ind-1]['exact']

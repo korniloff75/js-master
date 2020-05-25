@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 
 <html lang="ru">
+	<head>
+		<script src="./assets/js/conva.min.js"></script>
+	</head>
 
 <?php
 

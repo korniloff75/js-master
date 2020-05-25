@@ -39,6 +39,15 @@ class PlAngles extends PlAnglesRel
 	}
 
 
+	// *Генерируем углы для поиска
+	protected function acceptAngles($start=0, $end=360)
+	{
+		for ($a=$start; $a <= $end; $a+=30) {
+			yield $a;
+		}
+	}
+
+
 	/**
 	 *
 	 */

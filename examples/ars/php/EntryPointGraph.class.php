@@ -183,6 +183,20 @@ class EntryPointGraph
 	}
 
 
+	public static function ConvertDeg($dec)
+	{
+		$deg= floor($dec);
+		$min= ($dec - $deg) * 60;
+		$mm= floor($min);
+		$ss= round(($min - $mm) * 60);
+
+		// *convert to Zodiac
+		$deg = $deg - floor($deg/30)*30;
+
+		return "{$deg}° $mm\' $ss\"";
+	}
+
+
 
 	public function CollectToJson(?array &$nearests=null, ?string $category= null)
 	{
@@ -256,6 +270,7 @@ class EntryPointGraph
 			$prefix = "relative";
 			$val = 'd_val';
 			$o[]= "diff_abs = {$data['diff_abs']}";
+			$o[]= "<b>{$data['deg']} deg. " . self::ConvertDeg($data['deg']) ."</b>";
 		}
 		else
 		{
@@ -265,8 +280,8 @@ class EntryPointGraph
 
 		// *Выводим даты
 		$o[]= "<b>$name $prefix exact - $a deg. " . date('d.m.Y - H:i:s', $data['exact']) . '</b>';
-		$o[]= "$name val_1 - {$data[$val]} deg. " . date('d.m.Y - H:i:s', $data['ts']);
-		$o[]= "$name val_2 - {$data['range'][0][$val]} deg. " . date('d.m.Y - H:i:s', $data['range'][0]['ts']);
+		$o[]= "$name val_1 - {$data[$val]} deg. ({$data['val']}) " . date('d.m.Y - H:i:s', $data['ts']);
+		$o[]= "$name val_2 - {$data['range'][0][$val]} deg. ({$data['range'][0]['val']}) " . date('d.m.Y - H:i:s', $data['range'][0]['ts']);
 
 		// $real=
 		if($name === 'Moon' && !$rel && !empty($hint[$a]))
