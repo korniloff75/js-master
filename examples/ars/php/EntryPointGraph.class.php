@@ -13,6 +13,7 @@ class EntryPointGraph
 	const
 		TEST = 1,
 		CACHE_ANGLES_PATH = __DIR__ . '/../angles.json',
+		CACHE_TSS_PATH = __DIR__ . '/../tss.json',
 		// *Путь к кэшу
 		CACHE_PATH = __DIR__ . "/../cache.json",
 		// *жизнь кэша, сек.
@@ -138,6 +139,9 @@ class EntryPointGraph
 			&& count(
 				($this->angles = json_decode(file_get_contents(self::CACHE_ANGLES_PATH), 1))
 			)
+			&& count(
+				($this->tss = json_decode(file_get_contents(self::CACHE_TSS_PATH), 1))
+			)
 		)
 		{
 			$this->json = json_decode(file_get_contents(self::CACHE_PATH), 1);
@@ -162,6 +166,7 @@ class EntryPointGraph
 
 			$this->json = &$Graph->json;
 			$this->angles = &$Graph->angles;
+			$this->tss = &$Graph->tss;
 			/* usort($this->angles['abs']['Moon'], function($a,$b){
 				return $a['ts'] - $b['ts'];
 			}); */
@@ -172,6 +177,10 @@ class EntryPointGraph
 			file_put_contents(
 				self::CACHE_ANGLES_PATH,
 				$this->GetJSON($Graph->angles)
+			);
+			file_put_contents(
+				self::CACHE_TSS_PATH,
+				$this->GetJSON($Graph->tss)
 			);
 		}
 	}
@@ -202,7 +211,6 @@ class EntryPointGraph
 	{
 		$nearests ?? ($nearests = &$this->angles);
 
-		$o=[];
 		$this->cols = &$this->json['columns'];
 
 		if(
@@ -232,7 +240,6 @@ class EntryPointGraph
 
 			foreach($angles as $a=>&$data)
 			{
-				// $o[0][]= $data['exact'] * 1e3;
 				/* $data= array_merge_recursive([
 					'range'=>
 				], $data); */
@@ -254,7 +261,6 @@ class EntryPointGraph
 
 		var_dump(
 			__METHOD__
-			// , $o
 			// , $this->nearests
 		);
 

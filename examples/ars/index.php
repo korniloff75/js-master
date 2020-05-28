@@ -28,14 +28,21 @@ echo "</pre>";
 <script>
 	let _json= <?=$JSON?>;
 	let _angles= <?=$ANGLES?>;
+	let _tss= <?=$Graph->GetJSON($Graph->tss)?>;
 </script>
 <script type="text/javascript" src="./main_kff.js"></script>
 
-<div id="konva_container">
-<!--  -->
+<style>
+	div.konvajs-content {display:inline-block;}
+</style>
+<div class="konva_wrapper">
+	<div id="konva_container" style="text-align:center;">
+		<!--  -->
+	</div>
 </div>
+
 
 <?php
 
 // *Вывожу все файлы из текущей папки для скачивания
-require_once './php/Dload.class.php';
+// require_once './php/Dload.class.php';

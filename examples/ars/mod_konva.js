@@ -1,21 +1,37 @@
 'use strict';
 // console.info('mod_konva runing!');
 
-var ABS= _angles.abs= _angles.abs.Moon;
-
-var stage = new Konva.Stage({
-	container: 'konva_container',  // индификатор div контейнера
-	get width() {
-		// return 500;
-		return Math.floor(parseInt(getComputedStyle(document.querySelector(`#${this.container}`)).width)) * .9;
+var STS= {
+		bottomLine: {
+			height: 50,
+			clrs: ['red', 'green', 'blue'],
+			clrs_A: {
+				0: 'blue',
+				60: 'green',
+				90: 'red',
+				120: 'green',
+				180: 'red',
+				abs: 'gray',
+			}
+		}
 	},
-	// width: '90%',
-	height: 500
-});
+	// *from server
+	ABS= _angles.abs= _angles.abs.Moon,
+	REL= _angles.rel,
+	TSS_KEYS = Object.keys(_tss);
+
+var STAGE = new Konva.Stage({
+		container: 'konva_container',  // индификатор div контейнера
+		get width() {
+			return Math.floor(parseInt(getComputedStyle(document.querySelector(`#${this.container}`)).width) * .9);
+		},
+		height: 500
+	});
 
 
-// *define ABS.arr
+// *define arrs
 Object.defineProperty(ABS, 'arr', {value:[], enumerable:0, writable:1,configurable:1});
+Object.defineProperty(REL, 'arr', {value:[], enumerable:0, writable:1,configurable:1});
 
 Object.keys(ABS).forEach(i=>{
 	// *i - abs angle
@@ -27,11 +43,25 @@ Object.keys(ABS).forEach(i=>{
 		a: i,
 		ts: curTS,
 		date: date,
-		// strDate: getStrDate(date),
-		strDate: `${fixZero(date.getDate())}.${fixZero(date.getMonth() + 1)}`,
+		strDate: getStrDate(date),
+		// strDate: `${fixZero(date.getDate())}.${fixZero(date.getMonth() + 1)}`,
 		strTime: getStrTime(date),
 	});
 });
+
+Object.keys(_tss).forEach(i=>{
+	// *i - php ts
+	// *sec -> ms
+	_tss[i].exact = i*1000;
+});
+
+
+var
+	// *Временной интервал, мс
+	TIME_RANGE = _tss[TSS_KEYS[TSS_KEYS.length-1]].exact - _tss[TSS_KEYS[0]].exact,
+	// *К-т длины к ts
+	Kt_X = STAGE.width() / TIME_RANGE;
+
 
 // *Сортируем по времени
 ABS.arr = ABS.arr.sort((a, b) => a.ts - b.ts);
@@ -67,7 +97,7 @@ function fixZero (n) {
 // *Calc time range
 
 Object.defineProperties(ABS, {
-	timeRange: {
+	TIME_RANGE: {
 		get() {
 			return this.last.ts - this.first.ts;
 		}
@@ -81,39 +111,35 @@ Object.defineProperties(ABS, {
 });
 
 
-console.log('ABS= ', ABS, ABS.arr,);
+console.log(
+	'ABS= ', ABS, ABS.arr,
+	// 'REL= ', REL, REL.arr,
+	'TSS= ', _tss
+);
 
 
 init();
 
 function init () {
-	bottomLine({
-		height: 50,
-	});
+	bottomLine();
+	bottomLine_2();
 
 	console.log(
-		'stage= ', stage,
-		stage.content,
+		'STAGE= ', STAGE,
+		STAGE.content,
 
 	);
 
 }
 
 
-function bottomLine (sts) {
-	// *defaults
-	sts = Object.assign({
-		height: 50,
-	}, sts);
-
-	var
-		clrs= ['red', 'green', 'blue'],
-		kt_X = stage.width() / ABS.timeRange,
+function bottomLine () {
+	var sts= STS.bottomLine,
 		firstPoint_X = 0;
 
 	console.log(
-		'stage.width()= ', stage.width(),
-		'ABS.timeRange= ', ABS.timeRange,
+		'STAGE.width()= ', STAGE.width(),
+		'ABS.TIME_RANGE= ', ABS.TIME_RANGE,
 	);
 
 	var layer = new Konva.Layer();
@@ -122,14 +148,15 @@ function bottomLine (sts) {
 		var next= ABS.arr[ind+1];
 		if(!next) return;
 
-		var d_X = (next.ts - ABS.first.ts) * kt_X - firstPoint_X,
+		var d_X = (next.ts - ABS.first.ts) * Kt_X - firstPoint_X,
 		lineSts = {
 			// name: 'bottomLine',
 			x: firstPoint_X,
-			y: stage.height(),
+			y: STAGE.height(),
 			width: d_X,
 			height: -sts.height,
-			fill: clrs[ind % clrs.length],
+			// fill: sts.clrs[ind % sts.clrs.length],
+			fill: 'gray',
 			stroke: 'black',
 			strokeWidth: 1,
 		},
@@ -140,19 +167,19 @@ function bottomLine (sts) {
 			'next.ts= ', next.ts,
 			'ABS.first.ts= ', ABS.first.ts,
 			'firstPoint_X= ', firstPoint_X,
-			'kt_X= ', kt_X,
-			'(next.ts - ABS.first.ts) * kt_X= ', (next.ts - ABS.first.ts) * kt_X,
+			'Kt_X= ', Kt_X,
+			'(next.ts - ABS.first.ts) * Kt_X= ', (next.ts - ABS.first.ts) * Kt_X,
 			'd_X= ', d_X,
 		); */
 
-		var dateRuler = setDateRuler(new Date(i.ts), kt_X);
+		/* var dateRuler = setDateRuler(new Date(i.ts), Kt_X);
 		layer.add(dateRuler);
-		dateRuler.zIndex(0);
+		dateRuler.zIndex(0); */
 
 		var txt = new Konva.Text({
 			x: firstPoint_X + 5,
 			// x: firstPoint_X + d_X / 2,
-			y: stage.height() - sts.height,
+			y: STAGE.height() - sts.height,
 			text: `${i.strDate}\n${i.strTime}\n${i.a}°`,
 			// align: 'center',
 			fontSize: 16,
@@ -162,7 +189,7 @@ function bottomLine (sts) {
 
 		firstPoint_X += d_X;
 
-		// console.log(kt_X, i.ts, d_X);
+		// console.log(Kt_X, i.ts, d_X);
 
 		layer.add(line);
 		layer.add(txt);
@@ -170,14 +197,14 @@ function bottomLine (sts) {
 		//
 		// var txtDate = document.createTextNode(`${i.strDate} -- lineSts.x= ${lineSts.x}, lineSts.width= ${lineSts.width}, d_X= ${d_X}` + ' | ');
 		var txtDate = document.createTextNode(`${i.date} -- date = ${i.strDate} -- time  = ${i.strTime} ||| `);
-		stage.attrs.container.append(txtDate);
+		STAGE.attrs.container.parentNode.append(txtDate);
 	});
 
 	Sun:
 	{
 		var circle = new Konva.Circle({
-			x: stage.width() / 2,
-			get y() {return stage.height() + this.radius},
+			x: STAGE.width() / 2,
+			get y() {return STAGE.height() + this.radius},
 			radius: 70,
 			fill: 'red',
 			stroke: 'black',
@@ -204,19 +231,121 @@ function bottomLine (sts) {
 	// console.log('circle= ', circle);
 
 
-	stage.add(layer);
+	STAGE.add(layer);
+}
+
+
+function bottomLine_2 () {
+	var sts= STS.bottomLine,
+		firstPoint_X = 0,
+		// *Подъём текста
+		maxWidth = 1;
+
+	var layer = new Konva.Layer();
+
+	TSS_KEYS.forEach((i,ind)=>{
+		var cur = _tss[i],
+			next= _tss[TSS_KEYS[ind+1]];
+
+		if(!next) return;
+
+		var d_X = (next.exact - _tss[TSS_KEYS[0]].exact) * Kt_X - firstPoint_X,
+		abs = next.cat && (next.cat === 'abs'),
+		lineSts = {
+			// name: 'bottomLine',
+			x: firstPoint_X,
+			y: STAGE.height(),
+			width: d_X,
+			height: -sts.height,
+			// fill: abs? 'gray': sts.clrs[ind % sts.clrs.length],
+			fill: abs? sts.clrs_A.abs: sts.clrs_A[next.a],
+			stroke: 'black',
+			strokeWidth: 1,
+		},
+
+		line = new Konva.Rect(lineSts);
+
+		/* console.log(
+			'next.ts= ', next.ts,
+			'ABS.first.ts= ', ABS.first.ts,
+			'firstPoint_X= ', firstPoint_X,
+			'Kt_X= ', Kt_X,
+			'(next.ts - ABS.first.ts) * Kt_X= ', (next.ts - ABS.first.ts) * Kt_X,
+			'd_X= ', d_X,
+		); */
+
+		var dateRuler = setDateRuler(new Date(_tss[i].exact), Kt_X);
+		layer.add(dateRuler);
+		dateRuler.zIndex(0);
+
+		var date = new Date(next.exact),
+			txt = new Konva.Text({
+				// x: firstPoint_X + d_X,
+				x: firstPoint_X + d_X,
+				y: STAGE.height() - sts.height,
+				text: `${next.a}°\n${next.pl}\n${getStrDate(date)} ${getStrTime(date)}`,
+				// width: -50,
+				// align: 'right',
+				fontSize: 16,
+				fontFamily: 'Calibri',
+				fill: abs?'#551':'black',
+			});
+
+		if(txt.textWidth * 1.05 > d_X)
+		{
+			var d_Y = STAGE.height() - sts.height * (++maxWidth);
+
+			(d_Y - sts.height < 0) && (maxWidth = 1);
+
+			txt.setAttrs({
+				y: d_Y
+			});
+			var outLine = new Konva.Line({
+				points: [firstPoint_X + d_X,STAGE.height(), firstPoint_X + d_X,txt.attrs.y],
+				stroke: 'gray',
+				strokeWidth: 1,
+				lineCap: 'round',
+				lineJoin: 'round',
+			});
+
+			layer.add(outLine);
+		} else {
+			maxWidth = 1;
+		}
+		txt.setAttrs({
+			x: firstPoint_X + d_X - txt.textWidth - 3
+		});
+
+		firstPoint_X += d_X;
+
+		// console.log('txt= ', txt);
+
+		layer.add(line);
+		layer.add(txt);
+
+		// txt.zIndex(10+ind);
+
+		txt.align('right');
+
+		//
+		// var txtDate = document.createTextNode(`${i.strDate} -- lineSts.x= ${lineSts.x}, lineSts.width= ${lineSts.width}, d_X= ${d_X}` + ' | ');
+		var txtDate = document.createTextNode(`${i.date} -- date = ${i.strDate} -- time  = ${i.strTime} ||| `);
+		STAGE.attrs.container.parentNode.append(txtDate);
+	});
+
+	STAGE.add(layer);
 }
 
 
 /**
  * @param {Date} date - дата прохождения
- * @param {float} kt_X
+ * @param {float} Kt_X
  * Линии по датам прохождения Луной контрольных точек
  * на 00.00
  */
-function setDateRuler (date, kt_X) {
+function setDateRuler (date, Kt_X) {
 	var m_of_n = new Date(date.getFullYear(), date.getMonth(), date.getDate()),
-	m_of_n_X = (+m_of_n - ABS.first.ts) * kt_X;
+	m_of_n_X = (+m_of_n - _tss[TSS_KEYS[0]].exact) * Kt_X;
 
 	// console.log('m_of_n= ', m_of_n);
 
@@ -227,7 +356,7 @@ function setDateRuler (date, kt_X) {
 	});
 
 	var ruler = new Konva.Line({
-		points: [m_of_n_X,0, m_of_n_X,stage.height()],
+		points: [m_of_n_X,0, m_of_n_X,STAGE.height()],
 		stroke: 'gray',
 		strokeWidth: 1,
 		lineCap: 'round',
@@ -260,21 +389,21 @@ function setDateRuler (date, kt_X) {
 function test() {
 	// console.info('mod_konva test runing!');
 	// сначала создаём контейнер
-	var stage = new Konva.Stage({
+	var STAGE = new Konva.Stage({
 		container: 'konva_container',  // индификатор div контейнера
 		width: 500,
 		height: 500
 	});
 
-	// console.log(stage);
+	// console.log(STAGE);
 
 	// далее создаём слой
 	var layer = new Konva.Layer();
 
 	// создаём фигуру
 	var circle = new Konva.Circle({
-		get x() {return stage.width() - this.radius},
-		get y() {return stage.height() - this.radius},
+		get x() {return STAGE.width() - this.radius},
+		get y() {return STAGE.height() - this.radius},
 		radius: 70,
 		fill: 'red',
 		stroke: 'black',
@@ -321,8 +450,8 @@ function test() {
 
 
 	var pentagon = new Konva.RegularPolygon({
-    x: stage.getWidth() / 2,
-    y: stage.getHeight() / 2,
+    x: STAGE.getWidth() / 2,
+    y: STAGE.getHeight() / 2,
     sides: 5,
     radius: 70,
     fill: 'red',
@@ -338,7 +467,7 @@ function test() {
 	layer.add(pentagon);
 
 	// добавляем слой
-	stage.add(layer);
+	STAGE.add(layer);
 
 	var tween = new Konva.Tween({
 		node: pentagon,

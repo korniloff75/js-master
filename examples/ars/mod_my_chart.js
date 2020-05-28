@@ -79,7 +79,7 @@ function chartInit (tchart) {
 		}
 	});
 
-	console.log('_json.columns= ', _json.columns, _json);
+	// console.log('_json.columns= ', _json.columns, _json);
 
 
 	_ch.tchart.setData(_json);

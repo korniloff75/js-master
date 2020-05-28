@@ -26,7 +26,7 @@ export function TChart(container, eventContainer) {
 		eventContainer = extractFromJQ(eventContainer) || container.parentNode;
 		container.caption = extractFromJQ(container.caption);
 
-		console.log('tchart container= ', container,  container.caption);
+		// console.log('tchart container= ', container,  container.caption);
 	}
 
 	function extractFromJQ(obj) {

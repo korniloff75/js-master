@@ -184,6 +184,15 @@ class PlAngles extends PlAnglesRel
 				/* var_dump(
 					$data['ts'], $data, $data_2
 				); */
+
+				if($name !== 'Moon') continue;
+
+				// *Добавляем Moon abs -> tss
+				$this->tss[$data['exact']] = [
+					'pl' => $name,
+					'a' => $a,
+					'cat' => 'abs',
+				];
 			}
 		}
 

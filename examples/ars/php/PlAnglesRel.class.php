@@ -14,6 +14,9 @@ class PlAnglesRel extends Graph
 	protected
 		$nearests_rel=[];
 
+	public
+		$tss=[];
+
 
 	/**
 	 *
@@ -46,6 +49,7 @@ class PlAnglesRel extends Graph
 
 		// print_r($moon);
 
+		// * {array} $col - последовательность углов
 		foreach($this->cols as $name=>$col)
 		{
 			if(
@@ -56,7 +60,7 @@ class PlAnglesRel extends Graph
 
 			$nearests[$name]= [];
 
-			// *Углы планеты $name
+			// *{float} $f - Углы планеты $name
 			foreach($col as $ind=>$f)
 			{
 				$ts_ind= $ind+1;
@@ -65,7 +69,8 @@ class PlAnglesRel extends Graph
 				foreach([ 0, 60, 90, 120, 180 ] as $a)
 				{
 					$nearests[$name][$a] = $nearests[$name][$a] ?? [];
-					// $nearests[$name][$a] = $nearests[$name][$a] ?? ['diff_abs'=>1e5];
+
+					$cur= &$nearests[$name][$a];
 
 					$d_val= abs($f - $moon[$ind]);
 					$sign= $f - $moon[$ind] > 0? 1: -1;
@@ -76,68 +81,91 @@ class PlAnglesRel extends Graph
 
 					$diff_abs= abs($d_val - $a);
 
-					// if (abs($diff_abs) < abs($nearests[$name][$a]['diff_abs']))
+					// if($diff)
+
+					$cur[$ind]= [
+						'ts'=> $this->cols[0][$ts_ind],
+						'ts_date'=> "control - " . date('d.m.Y - H:i:s', $this->cols[0][$ts_ind]),
+						'm_val'=> $moon[$ind],
+						'val'=> $f,
+						'd_val'=> $d_val * $sign,
+						'sign'=> $sign,
+						'a' => $a,
+						'diff_abs'=> $diff_abs,
+						'ind'=> $ind,
+						'range'=> [],
+					];
+
+					foreach([-1,1] as $d_ind)
 					{
-						$cur= &$nearests[$name][$a];
-						$cur[$ind]= [
-							'ts'=> $this->cols[0][$ts_ind],
-							'ts_date'=> "control - " . date('d.m.Y - H:i:s', $this->cols[0][$ts_ind]),
-							'm_val'=> $moon[$ind],
-							'val'=> $f,
+						$_i= $ind+$d_ind;
+
+						if(empty($col[$_i]))
+							continue;
+
+						$d_val = abs($col[$_i] - $moon[$_i]);
+						// $d_val_180= $d_val;
+						$d_val= $d_val>180 && $a !== 180
+							? 360-$d_val
+							: $d_val;
+						// $d_val= $d_val>180? 360-$d_val: $d_val;
+						$sign= $col[$_i] - $moon[$_i] > 0? 1: -1;
+
+						$cur[$ind]['range'][]= [
+							'ts'=> $this->cols[0][$_i+1],
+							'ts_date'=> "control - " . date('d.m.Y - H:i:s', $this->cols[0][$_i+1]),
+							'm_val'=> $moon[$_i],
+							'val'=> $col[$_i],
 							'd_val'=> $d_val * $sign,
+							// 'd_val_180'=> $d_val_180 * $sign,
 							'sign'=> $sign,
-							'diff_abs'=> $diff_abs,
-							'ind'=> $ind,
-							'range'=> [],
+							'diff_abs'=> abs($d_val - $a),
+							'ind'=> $_i,
 						];
-
-						foreach([-1,1] as $d_ind)
-						{
-							$_i= $ind+$d_ind;
-
-							if(empty($col[$_i]))
-								continue;
-
-							$d_val = abs($col[$_i] - $moon[$_i]);
-							// $d_val_180= $d_val;
-							$d_val= $d_val>180 && $a !== 180
-								? 360-$d_val
-								: $d_val;
-							// $d_val= $d_val>180? 360-$d_val: $d_val;
-							$sign= $col[$_i] - $moon[$_i] > 0? 1: -1;
-
-							$cur[$ind]['range'][]= [
-								'ts'=> $this->cols[0][$_i+1],
-								'ts_date'=> "control - " . date('d.m.Y - H:i:s', $this->cols[0][$_i+1]),
-								'm_val'=> $moon[$_i],
-								'val'=> $col[$_i],
-								'd_val'=> $d_val * $sign,
-								// 'd_val_180'=> $d_val_180 * $sign,
-								'sign'=> $sign,
-								'diff_abs'=> abs($d_val - $a),
-								'ind'=> $_i,
-							];
-						}
-					};
+					}
 
 
 					usort($cur[$ind]['range'], function ($a, $b){
-						return $a['diff_abs'] > $b['diff_abs'];
+						return $a['diff_abs'] - $b['diff_abs'];
 					});
 
 					// *Фильтруем и вычисляем
 					$this->findExact($name, $cur, $a);
 
-				} //* $a iter
+					if(empty($cur))
+					{
+						unset($nearests[$name][$a]);
+					}
+					else
+					{
+						$cur = array_values($cur);
+					}
+
+					foreach($cur as $ind=>&$i)
+					{
+						$this->tss[$i['exact']]= [
+							'pl' => $name,
+							'a' => $a,
+						];
+					}
+
+				} //* $a iter, $cur defined
 
 			}
 
 		} //* $names iter
 
+		/* foreach($this->tss as &$ts)
+		{
+			$ts = $ts[0];
+		} */
 
+		ksort($this->tss);
 
-		// echo "<h3>".__METHOD__."</h3>";
-		// var_dump($this->nearests_rel);
+		// echo "<h3>".__METHOD__." - \$this->tss</h3>";
+		// var_dump($this->tss);
+		echo "<h3>".__METHOD__." - \$this->nearests_rel</h3>";
+		var_dump($this->nearests_rel);
 
 		return $this;
 	}
@@ -185,13 +213,22 @@ class PlAnglesRel extends Graph
 			$val_2= $data_2['val'];
 			$d_val_2= $data_2['d_val'];
 
+			// todo find Sun
+			if($name === 'Sun' && $data['a'] == 90)
+			{
+				echo "<h4>SUN</h4>a={$data['a']}\n" . abs($d_val_1 - $d_val_2) . "\n";
+				var_dump($cur);
+			}
+			// */todo
+
+			// *Выкидываем данные вне диапазонов
 			if(
 				$a * $data['sign'] > $d_val_1 && $a * $data_2['sign'] > $d_val_2
 				|| $a * $data['sign'] < $d_val_1 && $a * $data_2['sign'] < $d_val_2
 				|| $a !== 0 && (
 					abs($d_val_1 - $d_val_2) > 30
 				)
-				|| $data['diff_abs'] > 30
+				|| $data['diff_abs'] > 10
 			)
 			{
 				unset($cur[$ind]);
