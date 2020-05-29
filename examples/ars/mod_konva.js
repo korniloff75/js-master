@@ -195,9 +195,8 @@ function bottomLine () {
 		layer.add(txt);
 
 		//
-		// var txtDate = document.createTextNode(`${i.strDate} -- lineSts.x= ${lineSts.x}, lineSts.width= ${lineSts.width}, d_X= ${d_X}` + ' | ');
-		var txtDate = document.createTextNode(`${i.date} -- date = ${i.strDate} -- time  = ${i.strTime} ||| `);
-		STAGE.attrs.container.parentNode.append(txtDate);
+		// var txtDate = document.createTextNode(`${i.date} -- date = ${i.strDate} -- time  = ${i.strTime} ||| `);
+		// STAGE.attrs.container.parentNode.append(txtDate);
 	});
 
 	Sun:
@@ -239,7 +238,8 @@ function bottomLine_2 () {
 	var sts= STS.bottomLine,
 		firstPoint_X = 0,
 		// *Подъём текста
-		maxWidth = 1;
+		maxWidth = 1,
+		pre = document.createElement('pre');
 
 	var layer = new Konva.Layer();
 
@@ -295,14 +295,14 @@ function bottomLine_2 () {
 		{
 			var d_Y = STAGE.height() - sts.height * (++maxWidth);
 
-			(d_Y - sts.height < 0) && (maxWidth = 1);
+			d_Y < sts.height && (maxWidth = 1);
 
 			txt.setAttrs({
 				y: d_Y
 			});
 			var outLine = new Konva.Line({
-				points: [firstPoint_X + d_X,STAGE.height(), firstPoint_X + d_X,txt.attrs.y],
-				stroke: 'gray',
+				points: [firstPoint_X + d_X,STAGE.height(), firstPoint_X + d_X,txt.attrs.y + sts.height, firstPoint_X,txt.attrs.y + sts.height],
+				stroke: '#aaa',
 				strokeWidth: 1,
 				lineCap: 'round',
 				lineJoin: 'round',
@@ -329,10 +329,12 @@ function bottomLine_2 () {
 
 		//
 		// var txtDate = document.createTextNode(`${i.strDate} -- lineSts.x= ${lineSts.x}, lineSts.width= ${lineSts.width}, d_X= ${d_X}` + ' | ');
-		var txtDate = document.createTextNode(`${i.date} -- date = ${i.strDate} -- time  = ${i.strTime} ||| `);
-		STAGE.attrs.container.parentNode.append(txtDate);
+		// var txtDate = document.createTextNode(`${cur.date} -- date = ${cur.strDate} -- time  = ${cur.strTime} ||| `);
+		var txtDate = document.createTextNode(`${cur.pl} ${cur.a}° = ${cur.date} = ${cur.deg} \n`);
+		pre.append(txtDate);
 	});
 
+	STAGE.attrs.container.parentNode.append(pre);
 	STAGE.add(layer);
 }
 

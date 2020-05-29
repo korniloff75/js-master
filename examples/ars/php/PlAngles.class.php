@@ -86,6 +86,8 @@ class PlAngles extends PlAnglesRel
 							'val'=> $f,
 							'diff_abs'=> abs($f - $a),
 							'ind'=> $ind,
+							'name' => $name,
+							'a' => $a,
 							'range'=> [],
 						];
 
@@ -188,11 +190,7 @@ class PlAngles extends PlAnglesRel
 				if($name !== 'Moon') continue;
 
 				// *Добавляем Moon abs -> tss
-				$this->tss[$data['exact']] = [
-					'pl' => $name,
-					'a' => $a,
-					'cat' => 'abs',
-				];
+				$this->CollectTSS($data);
 			}
 		}
 

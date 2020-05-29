@@ -5,7 +5,7 @@ class Graph
 	const
 		SWETEST_PATH = __DIR__ . "/../swetest.exe",
 		// see $modify - https://www.php.net/manual/ru/datetime.modify.php
-		DELTA_DATE = '13 day',
+		DELTA_DATE = '10 day',
 		// *Шаг запуска программы, сек.
 		EXEC_STEP = 3600 * 6,
 		INTER_PARTS = 2,

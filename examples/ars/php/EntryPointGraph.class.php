@@ -144,6 +144,7 @@ class EntryPointGraph
 			)
 		)
 		{
+			ksort($this->tss);
 			$this->json = json_decode(file_get_contents(self::CACHE_PATH), 1);
 
 			/* var_dump(
@@ -166,7 +167,7 @@ class EntryPointGraph
 
 			$this->json = &$Graph->json;
 			$this->angles = &$Graph->angles;
-			$this->tss = &$Graph->tss;
+			ksort($this->tss = &$Graph->tss);
 			/* usort($this->angles['abs']['Moon'], function($a,$b){
 				return $a['ts'] - $b['ts'];
 			}); */
@@ -194,6 +195,8 @@ class EntryPointGraph
 
 	public static function ConvertDeg($dec)
 	{
+		if(is_null($dec)) return null;
+
 		$deg= floor($dec);
 		$min= ($dec - $deg) * 60;
 		$mm= floor($min);
@@ -252,7 +255,7 @@ class EntryPointGraph
 
 				foreach($data as &$d)
 				{
-					$this->logDates($category, $name, $a, $d);
+					// $this->logDates($category, $name, $a, $d);
 					unset($d['range']);
 				}
 
