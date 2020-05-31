@@ -33,12 +33,17 @@ echo "</pre>";
 <script type="text/javascript" src="./main_kff.js"></script>
 
 <style>
+	div.konva_wrapper {width:100%; overflow:auto;}
+	div#konva_container {position: relative;}
 	div.konvajs-content {display:inline-block;}
 </style>
 <div class="konva_wrapper">
 	<div id="konva_container" style="text-align:center;">
 		<!--  -->
 	</div>
+</div>
+<div id="konva_data">
+	<!--  -->
 </div>
 
 

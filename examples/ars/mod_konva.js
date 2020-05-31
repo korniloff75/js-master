@@ -2,6 +2,7 @@
 // console.info('mod_konva runing!');
 
 var STS= {
+		width: 1700,
 		bottomLine: {
 			height: 50,
 			clrs: ['red', 'green', 'blue'],
@@ -15,15 +16,19 @@ var STS= {
 			}
 		}
 	},
+	container= document.querySelector('#konva_container'),
 	// *from server
 	ABS= _angles.abs= _angles.abs.Moon,
 	REL= _angles.rel,
 	TSS_KEYS = Object.keys(_tss);
 
+container.style.width = `${STS.width}px`;
+
 var STAGE = new Konva.Stage({
-		container: 'konva_container',  // индификатор div контейнера
+		container: container.id,  // индификатор div контейнера
+		// container: 'konva_container',  // индификатор div контейнера
 		get width() {
-			return Math.floor(parseInt(getComputedStyle(document.querySelector(`#${this.container}`)).width) * .9);
+			return Math.floor(parseInt(getComputedStyle(document.querySelector(`#${this.container}`)).width) * 1);
 		},
 		height: 500
 	});
@@ -79,6 +84,9 @@ function getStrDate (date) {
  * минуты округляем по секундам
  */
 function getStrTime (date) {
+	if(!(date instanceof Date)) {
+		date = new Date(date);
+	}
 	var hour = date.getHours(),
 		min = date.getMinutes(),
 		sec = date.getSeconds();
@@ -239,7 +247,15 @@ function bottomLine_2 () {
 		firstPoint_X = 0,
 		// *Подъём текста
 		maxWidth = 1,
-		pre = document.createElement('pre');
+		pre = document.createElement('pre'),
+		popUp = document.createElement('div');
+
+	popUp.style.position = 'absolute';
+	popUp.style.width = '70px';
+	popUp.style.height = '50px';
+	popUp.style.background = '#fff';
+	popUp.hidden = 1;
+	popUp.style.top = STAGE.height() - sts.height - parseInt(popUp.style.height) + 'px';
 
 	var layer = new Konva.Layer();
 
@@ -265,6 +281,25 @@ function bottomLine_2 () {
 
 		line = new Konva.Rect(lineSts);
 
+		line.cur = cur;
+		line.next = next;
+
+		// *Hover
+		line.on('mouseover', e=>{
+			var t = e.target;
+
+			popUp.hidden = 0;
+
+			popUp.style.left = t.attrs.x + 'px';
+			// popUp.textContent = t.cur.date;
+			popUp.textContent = `${getStrTime(t.cur.exact)} - ${getStrTime(t.next.exact)}`;
+
+			console.log(
+				t.next,
+				'popUp= ', popUp,
+			);
+		})
+
 		/* console.log(
 			'next.ts= ', next.ts,
 			'ABS.first.ts= ', ABS.first.ts,
@@ -283,7 +318,7 @@ function bottomLine_2 () {
 				// x: firstPoint_X + d_X,
 				x: firstPoint_X + d_X,
 				y: STAGE.height() - sts.height,
-				text: `${next.a}°\n${next.pl}\n${getStrDate(date)} ${getStrTime(date)}`,
+				text: `${next.pl} - ${next.a}°\n${getStrTime(date)}`,
 				// width: -50,
 				// align: 'right',
 				fontSize: 16,
@@ -291,17 +326,19 @@ function bottomLine_2 () {
 				fill: abs?'#551':'black',
 			});
 
+		// *Выноски
 		if(txt.textWidth * 1.05 > d_X)
 		{
 			var d_Y = STAGE.height() - sts.height * (++maxWidth);
 
-			d_Y < sts.height && (maxWidth = 1);
+			d_Y < sts.height * 2 && (maxWidth = 1);
 
 			txt.setAttrs({
 				y: d_Y
 			});
+
 			var outLine = new Konva.Line({
-				points: [firstPoint_X + d_X,STAGE.height(), firstPoint_X + d_X,txt.attrs.y + sts.height, firstPoint_X,txt.attrs.y + sts.height],
+				points: [firstPoint_X + d_X,STAGE.height(), firstPoint_X + d_X,txt.attrs.y + txt.textHeight*2, firstPoint_X + d_X - txt.textWidth,txt.attrs.y + txt.textHeight*2],
 				stroke: '#aaa',
 				strokeWidth: 1,
 				lineCap: 'round',
@@ -312,6 +349,7 @@ function bottomLine_2 () {
 		} else {
 			maxWidth = 1;
 		}
+
 		txt.setAttrs({
 			x: firstPoint_X + d_X - txt.textWidth - 3
 		});
@@ -334,7 +372,8 @@ function bottomLine_2 () {
 		pre.append(txtDate);
 	});
 
-	STAGE.attrs.container.parentNode.append(pre);
+	STAGE.attrs.container.appendChild(popUp);
+	document.querySelector('#konva_data').append(pre);
 	STAGE.add(layer);
 }
 
@@ -343,7 +382,7 @@ function bottomLine_2 () {
  * @param {Date} date - дата прохождения
  * @param {float} Kt_X
  * Линии по датам прохождения Луной контрольных точек
- * на 00.00
+ * на 00:00
  */
 function setDateRuler (date, Kt_X) {
 	var m_of_n = new Date(date.getFullYear(), date.getMonth(), date.getDate()),
