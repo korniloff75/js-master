@@ -31,8 +31,8 @@ class PlAnglesRel extends Graph
 
 		// *Controls
 
-		// echo "<hr><h3>".__METHOD__."</h3>nearests_rel<br>";
-		// var_dump($this->nearests_rel);
+		echo "<hr><h3>".__METHOD__."</h3>nearests_rel<br>";
+		var_dump($this->nearests_rel);
 
 		return $this;
 	}
@@ -66,11 +66,26 @@ class PlAnglesRel extends Graph
 			{
 				$ts_ind= $ind+1;
 
+				// $d_val_180 = $f - $moon[$ind];
 				$d_val= abs($f - $moon[$ind]);
 				$sign= $f - $moon[$ind] > 0? 1: -1;
 
-				$d_val_180 = $d_val;
 				$d_val_0= $f - $moon[$ind] + 180;
+				$d_val_180 = $d_val;
+
+				$ranges = [];
+				$directs = [];
+				if(!empty($col[$ind-1]))
+				{
+					$ranges['-1']= $col[$ind-1] - $moon[$ind-1];
+					$directs['-1']= $f - $moon[$ind] - $ranges['-1'];
+				}
+				if(!empty($col[$ind+1]))
+				{
+					$ranges['+1']= $col[$ind+1] - $moon[$ind+1];
+					$directs['+1']= $ranges['+1'] - ($f - $moon[$ind]);
+				}
+
 
 				$d_val= $d_val>180
 					? 360-$d_val
@@ -99,6 +114,8 @@ class PlAnglesRel extends Graph
 						'name' => $name,
 						'diff_abs'=> $diff_abs,
 						'ind'=> $ind,
+						'ranges'=> $ranges,
+						'directs'=> $directs,
 						'range'=> [],
 					];
 
@@ -114,6 +131,7 @@ class PlAnglesRel extends Graph
 						if(empty($col[$_i]))
 							continue;
 
+						// $d_val_180 = $col[$_i] - $moon[$_i];
 						$d_val_i = abs($col[$_i] - $moon[$_i]);
 						$d_val_0= $col[$_i] - $moon[$_i] + 180;
 						$d_val_180= $d_val_i;
@@ -155,9 +173,9 @@ class PlAnglesRel extends Graph
 
 		} //* $names iter
 
-		echo "<h3>".__METHOD__." - \$this->tss</h3>";
-		var_dump($this->tss);
-		echo "<h3>".__METHOD__." - \$this->nearests_rel</h3>";
+		// echo "<h3>".__METHOD__." - \$this->tss</h3>";
+		// var_dump($this->tss);
+		// echo "<h3>".__METHOD__." - \$this->nearests_rel</h3>";
 		// var_dump($this->nearests_rel);
 
 		return $this;
@@ -202,8 +220,8 @@ class PlAnglesRel extends Graph
 				}
 
 				// todo find $_P
-				// $_P = 'Uranus';
-				$_P = 'Sun';
+				$_P = 'Uranus';
+				// $_P = 'Sun';
 				if(
 					$name === $_P && $data['a'] == 180
 					&& (
@@ -361,6 +379,7 @@ class PlAnglesRel extends Graph
 			'date' => date('d.m.Y - H:i:s', $data['exact']),
 			'deg' => EntryPointGraph::ConvertDeg($data['deg']) ?? "{$data['a']}°",
 			'cat' => $data['name'] === 'Moon'? 'abs':'rel',
+			'diff_abs' => $data['diff_abs'],
 		];
 
 		return $this->tss[$data['exact']];

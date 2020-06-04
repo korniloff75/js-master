@@ -13,6 +13,13 @@ var STS= {
 				120: 'green',
 				180: 'red',
 				abs: 'gray',
+			},
+			imgs: {
+				0: '0 conjunct.svg',
+				60: '60 sextile.svg',
+				90: '90 square.svg',
+				120: '120 trine.svg',
+				180: '180 opposition.svg',
 			}
 		}
 	},
@@ -247,6 +254,8 @@ function bottomLine_2 () {
 		firstPoint_X = 0,
 		// *Подъём текста
 		maxWidth = 1,
+		lines = [],
+		groups = [],
 		pre = document.createElement('pre'),
 		popUp = document.createElement('div');
 
@@ -283,36 +292,7 @@ function bottomLine_2 () {
 
 		line.cur = cur;
 		line.next = next;
-
-		// *Image
-		/* var img = new Image();
-		// img.src = './img/aspects/0.png';
-		img.src = './img/aspects/0 conjunct.svg';
-
-		img.onload= ()=>{
-			var kImg = new Konva.Image({
-				x: line.attrs.x,
-				y: STAGE.height() - sts.height*2,
-				image: img,
-				// width: 30,
-				// height: 30,
-			});
-			layer.add(kImg);
-			layer.batchDraw();
-		} */
-
-		Konva.Image.fromURL('./img/aspects/0 conjunct.svg', node=> {
-			node.setAttrs({
-				x: line.attrs.x,
-				y: STAGE.height() - sts.height,
-				// scaleX: 0.5,
-				// scaleY: 0.5,
-				width: 25,
-				height: 25,
-			});
-			layer.add(node);
-			layer.batchDraw();
-		});
+		line.d_X = d_X;
 
 
 		// *cur Hover
@@ -329,7 +309,9 @@ function bottomLine_2 () {
 				t.next,
 				'popUp= ', popUp,
 			); */
-		})
+		});
+
+		lines[ind]= line;
 
 		/* console.log(
 			'next.ts= ', next.ts,
@@ -357,6 +339,56 @@ function bottomLine_2 () {
 				fill: abs?'#551':'black',
 			});
 
+		// *Images
+
+		loadImgs(line)
+		.then(imgs=>{
+			var imgsWidth = 0;
+			// *Группа изображений
+			var group = new Konva.Group({
+				// x: line.x() + line.width(),
+				// x: line.x(),
+				y: STAGE.height() - sts.height,
+			});
+
+			imgs.forEach((i,ind)=>{
+				// *Отступ в группе
+				i.offset = ind? imgs[0].width(): 0,
+				imgsWidth += i.width();
+				group.add(i);
+			});
+
+			group.setAttrs({
+				x: line.x() + line.width() - imgsWidth,
+				width: imgsWidth,
+				height: Math.max(imgs[0].height(), imgs[1]&&imgs[1].height() || 0),
+			});
+
+			if(group.children.length === 1) {
+				console.log(
+					'group= ', group,
+					'imgsWidth= ', imgsWidth,
+				);
+			}
+
+			groups[ind]= group;
+
+			// *Last async iteration
+			if(
+				groups.filter(i=>!!i).length === TSS_KEYS.length - 2
+			)
+			{
+				drawOutLines(lines, groups, layer);
+			}
+
+			/* console.log(
+				'groups.length= ', groups.length,
+				'groups.filter(i=>i!=0).length= ', groups.filter(i=>!!i).length,
+				'TSS_KEYS.length= ', TSS_KEYS.length,
+			); */
+
+		}); //* loadImgs
+
 		// *Выноски
 		if(txt.textWidth * 1.05 > d_X)
 		{
@@ -368,15 +400,6 @@ function bottomLine_2 () {
 				y: d_Y
 			});
 
-			var outLine = new Konva.Line({
-				points: [firstPoint_X + d_X,STAGE.height(), firstPoint_X + d_X,txt.attrs.y + txt.textHeight*2, firstPoint_X + d_X - txt.textWidth,txt.attrs.y + txt.textHeight*2],
-				stroke: '#aaa',
-				strokeWidth: 1,
-				lineCap: 'round',
-				lineJoin: 'round',
-			});
-
-			layer.add(outLine);
 		} else {
 			maxWidth = 1;
 		}
@@ -390,7 +413,7 @@ function bottomLine_2 () {
 		// console.log('txt= ', txt);
 
 		layer.add(line);
-		layer.add(txt);
+		// layer.add(txt);
 
 		// txt.zIndex(10+ind);
 
@@ -401,11 +424,119 @@ function bottomLine_2 () {
 		// var txtDate = document.createTextNode(`${cur.date} -- date = ${cur.strDate} -- time  = ${cur.strTime} ||| `);
 		var txtDate = document.createTextNode(`${cur.pl} ${cur.a}° = ${cur.date} = ${cur.deg} \n`);
 		pre.append(txtDate);
-	});
+	}); //*TSS_KEYS.forEach
 
 	STAGE.attrs.container.appendChild(popUp);
 	document.querySelector('#konva_data').append(pre);
 	STAGE.add(layer);
+}
+
+
+/**
+ *
+ * @param {Array} lines
+ * @param {Array} groups
+ * @param {Konva.Layer} layer
+ */
+function drawOutLines(lines, groups, layer) {
+	var sts= STS.bottomLine,
+		level= 1;
+
+	groups.forEach((group,ind)=>{
+		var line= lines[ind];
+
+		layer.add(group);
+		layer.batchDraw();
+
+		/* console.log(
+			'level= ', level,
+			'group= ', group,
+		); */
+
+		if(group.width() * 1.05 <= line.width()) {
+			level=1;
+			return;
+		}
+
+
+		var d_Y = STAGE.height() - sts.height * (++level);
+
+		group.setAttrs({
+			// x: group.x() + line.width() - group.width(),
+			y: d_Y,
+		});
+
+		group.y() < sts.height * 2 && (level = 1);
+
+		// *Выноски
+		var outLine = new Konva.Line({
+			points: [line.x() + line.width(),STAGE.height(), line.x() + line.width(),group.y() + group.height(), group.x(),group.y() + group.height()],
+			stroke: '#aaa',
+			strokeWidth: 1,
+			lineCap: 'round',
+			lineJoin: 'round',
+		});
+
+		layer.add(outLine);
+		outLine.zIndex(0);
+
+	});
+
+}
+
+
+/**
+ ** Загружаем асинхронно изображения в bottomLine
+ * @param {Konva.Rect} line - текущий элемент
+ */
+function loadImgs(line) {
+	var sts = STS.bottomLine,
+		name = line.next.pl,
+		a = line.next.a,
+		is_moon = name === 'Moon',
+		out = [];
+
+	var p1= is_moon ? null: new Promise((resolve, reject) => {
+		var img = new Image();
+
+		img.src = './img/aspects/' + sts.imgs[a];
+		// img.src = './img/aspects/0 conjunct.svg';
+
+		img.onload= ()=>{
+			var kImg = new Konva.Image({
+				x: 0,
+				y: 0,
+				image: img,
+				width: 20,
+				height: 20,
+			});
+			resolve(kImg);
+		}
+	});
+
+	p1&&out.push(p1);
+
+	var p2= new Promise((resolve, reject) => {
+		var img = new Image();
+
+		img.src = './img/planets/' + (is_moon ? 'moonVC': name.toLowerCase()) + '.png';
+		// img.src = './img/aspects/0 conjunct.svg';
+
+		img.onload= ()=>{
+			var kImg = new Konva.Image({
+				x: p1? 20: 0,
+				y: 0,
+				image: img,
+				width: 20,
+				height: 20,
+			});
+			resolve(kImg);
+		}
+	});
+
+	out.push(p2);
+
+	return Promise.all(out);
 }
 
 
@@ -489,11 +620,11 @@ function test() {
 	});
 
 	circle.on('xChange', function() {
-    console.log('position change');
+		console.log('position change');
 	});
 
 	circle.on('dragend', function() {
-    console.log('drag stopped');
+		console.log('drag stopped');
 	});
 
 	console.log(circle);
@@ -522,17 +653,17 @@ function test() {
 
 
 	var pentagon = new Konva.RegularPolygon({
-    x: STAGE.getWidth() / 2,
-    y: STAGE.getHeight() / 2,
-    sides: 5,
-    radius: 70,
-    fill: 'red',
-    stroke: 'black',
-    strokeWidth: 4,
-    shadowOffsetX : 20,
-    shadowOffsetY : 25,
-    shadowBlur : 40,
-    opacity : 0.5
+		x: STAGE.getWidth() / 2,
+		y: STAGE.getHeight() / 2,
+		sides: 5,
+		radius: 70,
+		fill: 'red',
+		stroke: 'black',
+		strokeWidth: 4,
+		shadowOffsetX : 20,
+		shadowOffsetY : 25,
+		shadowBlur : 40,
+		opacity : 0.5
 	});
 
 	// pentagon.draw();
