@@ -284,7 +284,38 @@ function bottomLine_2 () {
 		line.cur = cur;
 		line.next = next;
 
-		// *Hover
+		// *Image
+		/* var img = new Image();
+		// img.src = './img/aspects/0.png';
+		img.src = './img/aspects/0 conjunct.svg';
+
+		img.onload= ()=>{
+			var kImg = new Konva.Image({
+				x: line.attrs.x,
+				y: STAGE.height() - sts.height*2,
+				image: img,
+				// width: 30,
+				// height: 30,
+			});
+			layer.add(kImg);
+			layer.batchDraw();
+		} */
+
+		Konva.Image.fromURL('./img/aspects/0 conjunct.svg', node=> {
+			node.setAttrs({
+				x: line.attrs.x,
+				y: STAGE.height() - sts.height,
+				// scaleX: 0.5,
+				// scaleY: 0.5,
+				width: 25,
+				height: 25,
+			});
+			layer.add(node);
+			layer.batchDraw();
+		});
+
+
+		// *cur Hover
 		line.on('mouseover', e=>{
 			var t = e.target;
 
@@ -294,10 +325,10 @@ function bottomLine_2 () {
 			// popUp.textContent = t.cur.date;
 			popUp.textContent = `${getStrTime(t.cur.exact)} - ${getStrTime(t.next.exact)}`;
 
-			console.log(
+			/* console.log(
 				t.next,
 				'popUp= ', popUp,
-			);
+			); */
 		})
 
 		/* console.log(
