@@ -12,7 +12,7 @@ class Graph
 		// *Путь к кэшу
 		CACHE_PATH = __DIR__ . "/../cache.json",
 		// *жизнь кэша, сек.
-		CACHE_TIME = 3600 * 24;
+		CACHE_TIME = 3600 * 48;
 
 	protected $cols;
 

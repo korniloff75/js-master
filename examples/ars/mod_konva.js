@@ -13,6 +13,21 @@ var STS= {
 				120: 'green',
 				180: 'red',
 				abs: 'gray',
+			},
+			imgs: {
+				0: '0 conjunct.svg',
+				60: '60 sextile.svg',
+				90: '90 square.svg',
+				120: '120 trine.svg',
+				180: '180 opposition.svg',
+			}
+		},
+		gradient: {
+			delta: 50,
+			hasPlusDelta: 1,
+			fraction: 20,
+			get height() {
+				return Math.floor(STAGE.main.height() / TSS_KEYS.length)
 			}
 		}
 	},
@@ -34,9 +49,20 @@ var STAGE = new Konva.Stage({
 	});
 
 
+Object.defineProperty(STAGE, 'main', {
+	value: {
+		height: ()=> STAGE.height() - STS.bottomLine.height
+	},
+	configurable:1
+});
+
 // *define arrs
 Object.defineProperty(ABS, 'arr', {value:[], enumerable:0, writable:1,configurable:1});
 Object.defineProperty(REL, 'arr', {value:[], enumerable:0, writable:1,configurable:1});
+
+console.log(
+	'STAGE.main.height()= ', STAGE.main.height(),
+);
 
 Object.keys(ABS).forEach(i=>{
 	// *i - abs angle
@@ -129,18 +155,19 @@ console.log(
 init();
 
 function init () {
-	bottomLine();
+	// bottomLine();
 	bottomLine_2();
+	addControls();
 
-	console.log(
+	/* console.log(
 		'STAGE= ', STAGE,
 		STAGE.content,
-
-	);
+	); */
 
 }
 
 
+// note develop
 function bottomLine () {
 	var sts= STS.bottomLine,
 		firstPoint_X = 0;
@@ -180,14 +207,10 @@ function bottomLine () {
 			'd_X= ', d_X,
 		); */
 
-		/* var dateRuler = setDateRuler(new Date(i.ts), Kt_X);
-		layer.add(dateRuler);
-		dateRuler.zIndex(0); */
-
 		var txt = new Konva.Text({
 			x: firstPoint_X + 5,
 			// x: firstPoint_X + d_X / 2,
-			y: STAGE.height() - sts.height,
+			y: STAGE.main.height(),
 			text: `${i.strDate}\n${i.strTime}\n${i.a}°`,
 			// align: 'center',
 			fontSize: 16,
@@ -247,6 +270,8 @@ function bottomLine_2 () {
 		firstPoint_X = 0,
 		// *Подъём текста
 		maxWidth = 1,
+		lines = [],
+		groups = [],
 		pre = document.createElement('pre'),
 		popUp = document.createElement('div');
 
@@ -255,7 +280,7 @@ function bottomLine_2 () {
 	popUp.style.height = '50px';
 	popUp.style.background = '#fff';
 	popUp.hidden = 1;
-	popUp.style.top = STAGE.height() - sts.height - parseInt(popUp.style.height) + 'px';
+	popUp.style.top = STAGE.main.height() - parseInt(popUp.style.height) + 'px';
 
 	var layer = new Konva.Layer();
 
@@ -283,36 +308,7 @@ function bottomLine_2 () {
 
 		line.cur = cur;
 		line.next = next;
-
-		// *Image
-		/* var img = new Image();
-		// img.src = './img/aspects/0.png';
-		img.src = './img/aspects/0 conjunct.svg';
-
-		img.onload= ()=>{
-			var kImg = new Konva.Image({
-				x: line.attrs.x,
-				y: STAGE.height() - sts.height*2,
-				image: img,
-				// width: 30,
-				// height: 30,
-			});
-			layer.add(kImg);
-			layer.batchDraw();
-		} */
-
-		Konva.Image.fromURL('./img/aspects/0 conjunct.svg', node=> {
-			node.setAttrs({
-				x: line.attrs.x,
-				y: STAGE.height() - sts.height,
-				// scaleX: 0.5,
-				// scaleY: 0.5,
-				width: 25,
-				height: 25,
-			});
-			layer.add(node);
-			layer.batchDraw();
-		});
+		line.d_X = d_X;
 
 
 		// *cur Hover
@@ -329,7 +325,9 @@ function bottomLine_2 () {
 				t.next,
 				'popUp= ', popUp,
 			); */
-		})
+		});
+
+		lines[ind]= line;
 
 		/* console.log(
 			'next.ts= ', next.ts,
@@ -348,7 +346,7 @@ function bottomLine_2 () {
 			txt = new Konva.Text({
 				// x: firstPoint_X + d_X,
 				x: firstPoint_X + d_X,
-				y: STAGE.height() - sts.height,
+				y: STAGE.main.height(),
 				text: `${next.pl} - ${next.a}°\n${getStrTime(date)}`,
 				// width: -50,
 				// align: 'right',
@@ -357,7 +355,58 @@ function bottomLine_2 () {
 				fill: abs?'#551':'black',
 			});
 
-		// *Выноски
+		// *Images
+
+		loadImgs(line)
+		.then(imgs=>{
+			var imgsWidth = 0;
+			// *Группа изображений
+			var group = new Konva.Group({
+				// x: line.x() + line.width(),
+				// x: line.x(),
+				y: STAGE.main.height(),
+			});
+
+			imgs.forEach((i,ind)=>{
+				// *Отступ в группе
+				i.offset = ind? imgs[0].width(): 0,
+				imgsWidth += i.width();
+				group.add(i);
+			});
+
+			group.setAttrs({
+				x: line.x() + line.width() - imgsWidth,
+				width: imgsWidth,
+				height: Math.max(imgs[0].height(), imgs[1]&&imgs[1].height() || 0),
+			});
+
+			if(group.children.length === 1) {
+				console.log(
+					'group= ', group,
+					'imgsWidth= ', imgsWidth,
+				);
+			}
+
+			groups[ind]= group;
+
+			// *Last async iteration
+			if(
+				groups.filter(i=>!!i).length === TSS_KEYS.length - 2
+			)
+			{
+				drawOutLines(lines, groups, layer);
+			}
+
+			/* console.log(
+				'groups.length= ', groups.length,
+				'groups.filter(i=>i!=0).length= ', groups.filter(i=>!!i).length,
+				'TSS_KEYS.length= ', TSS_KEYS.length,
+			); */
+
+		}); //* loadImgs
+
+		// *Выноски контроль
+		// note develop
 		if(txt.textWidth * 1.05 > d_X)
 		{
 			var d_Y = STAGE.height() - sts.height * (++maxWidth);
@@ -368,15 +417,6 @@ function bottomLine_2 () {
 				y: d_Y
 			});
 
-			var outLine = new Konva.Line({
-				points: [firstPoint_X + d_X,STAGE.height(), firstPoint_X + d_X,txt.attrs.y + txt.textHeight*2, firstPoint_X + d_X - txt.textWidth,txt.attrs.y + txt.textHeight*2],
-				stroke: '#aaa',
-				strokeWidth: 1,
-				lineCap: 'round',
-				lineJoin: 'round',
-			});
-
-			layer.add(outLine);
 		} else {
 			maxWidth = 1;
 		}
@@ -390,7 +430,7 @@ function bottomLine_2 () {
 		// console.log('txt= ', txt);
 
 		layer.add(line);
-		layer.add(txt);
+		// layer.add(txt);
 
 		// txt.zIndex(10+ind);
 
@@ -401,11 +441,157 @@ function bottomLine_2 () {
 		// var txtDate = document.createTextNode(`${cur.date} -- date = ${cur.strDate} -- time  = ${cur.strTime} ||| `);
 		var txtDate = document.createTextNode(`${cur.pl} ${cur.a}° = ${cur.date} = ${cur.deg} \n`);
 		pre.append(txtDate);
-	});
+	}); //*TSS_KEYS.forEach
 
 	STAGE.attrs.container.appendChild(popUp);
 	document.querySelector('#konva_data').append(pre);
 	STAGE.add(layer);
+}
+
+
+/**
+ ** Элементы управления
+ */
+function addControls() {
+	var checkboxDelta = document.createElement('input');
+	checkboxDelta.type= 'checkbox';
+	checkboxDelta.addEventListener('change', e=>{
+
+	});
+	document.querySelector('#konva_data').append(checkboxDelta);
+}
+
+
+/**
+ **Выносные линии с изображениями
+ * @param {Array} lines - заполнения нижней полосы, собираются асинхронно
+ * @param {Array} groups - группы изображений, собираются асинхронно
+ * @param {Konva.Layer} layer
+ */
+function drawOutLines(lines, groups, layer) {
+	var sts= STS.bottomLine,
+		level= 1;
+
+	groups.forEach((group,ind)=>{
+		var line= lines[ind];
+
+		layer.add(group);
+		layer.batchDraw();
+
+		/* console.log(
+			'level= ', level,
+			'group= ', group,
+		); */
+
+		if(group.width() * 1.05 <= line.width()) {
+			level=1;
+			return;
+		}
+
+		var d_Y = STAGE.height() - sts.height * (++level);
+
+		group.setAttrs({
+			// x: group.x() + line.width() - group.width(),
+			y: d_Y,
+		});
+
+		group.y() < sts.height * 2 && (level = 1);
+
+		// *Выноски
+		var outLine = new Konva.Line({
+			points: [line.x() + line.width(),STAGE.height(), line.x() + line.width(),group.y() + group.height(), group.x(),group.y() + group.height()],
+			stroke: '#aaa',
+			strokeWidth: 1,
+			lineCap: 'round',
+			lineJoin: 'round',
+		});
+
+		layer.add(
+			drawGradients(line.x(), ind)
+		);
+
+		layer.add(outLine);
+		outLine.zIndex(0);
+
+	});
+
+}
+
+
+/**
+ ** Загружаем асинхронно изображения в bottomLine
+ * @param {Konva.Rect} line - текущий элемент
+ */
+function loadImgs(line) {
+	var sts = STS.bottomLine,
+		name = line.next.pl,
+		a = line.next.a,
+		is_moon = name === 'Moon',
+		out = [];
+
+	var p1= is_moon ? null: new Promise((resolve, reject) => {
+		var img = new Image();
+
+		img.src = './img/aspects/' + sts.imgs[a];
+		// img.src = './img/aspects/0 conjunct.svg';
+
+		img.onload= ()=>{
+			var kImg = new Konva.Image({
+				x: 0,
+				y: 0,
+				image: img,
+				width: 20,
+				height: 20,
+			});
+			resolve(kImg);
+		}
+	});
+
+	p1&&out.push(p1);
+
+	var p2= new Promise((resolve, reject) => {
+		var img = new Image();
+
+		img.src = './img/planets/' + (is_moon ? 'moonVC': name.toLowerCase()) + '.png';
+		// img.src = './img/aspects/0 conjunct.svg';
+
+		img.onload= ()=>{
+			var kImg = new Konva.Image({
+				x: p1? 20: 0,
+				y: 0,
+				image: img,
+				width: 20,
+				height: 20,
+			});
+			resolve(kImg);
+		}
+	});
+
+	out.push(p2);
+
+	return Promise.all(out);
+}
+
+
+function drawGradients (x, ind) {
+	var sts = STS.gradient,
+		grad = new Konva.Rect({
+		x: x - sts.delta,
+		y: sts.height * ind,
+		width: sts.hasPlusDelta? sts.delta * 2 : sts.delta,
+		height: sts.height,
+		fillRadialGradientStartPoint: { x: sts.delta, y: sts.height/2 },
+		fillRadialGradientStartRadius: sts.height/2,
+		fillRadialGradientEndPoint: { x: sts.delta, y: sts.height/2 },
+		fillRadialGradientEndRadius: sts.delta,
+		fillRadialGradientColorStops: [0, 'red', 1, 'transparent'],
+	});
+
+	/* for (var i = ts - sts.delta/2; i <= ts + sts.delta/2; i+=sts.delta/sts.fraction) {
+		const element = array[i];
+
+	} */
+	return grad;
 }
 
 
@@ -489,11 +675,11 @@ function test() {
 	});
 
 	circle.on('xChange', function() {
-    console.log('position change');
+		console.log('position change');
 	});
 
 	circle.on('dragend', function() {
-    console.log('drag stopped');
+		console.log('drag stopped');
 	});
 
 	console.log(circle);
@@ -502,15 +688,15 @@ function test() {
 	layer.add(circle);
 
 	var triangle = new Konva.Shape({
-		sceneFunc: function(context) {
-			context.beginPath();
-			context.moveTo(20, 50);
-			context.lineTo(220, 80);
-			context.quadraticCurveTo(150, 100, 260, 170);
-			context.closePath();
+		sceneFunc: function(ctx) {
+			ctx.beginPath();
+			ctx.moveTo(20, 50);
+			ctx.lineTo(220, 80);
+			ctx.quadraticCurveTo(150, 100, 260, 170);
+			ctx.closePath();
 
 			// special Konva.js method
-			context.fillStrokeShape(this);
+			ctx.fillStrokeShape(this);
 		},
 		fill: '#00D2FF',
 		stroke: 'black',
@@ -522,17 +708,17 @@ function test() {
 
 
 	var pentagon = new Konva.RegularPolygon({
-    x: STAGE.getWidth() / 2,
-    y: STAGE.getHeight() / 2,
-    sides: 5,
-    radius: 70,
-    fill: 'red',
-    stroke: 'black',
-    strokeWidth: 4,
-    shadowOffsetX : 20,
-    shadowOffsetY : 25,
-    shadowBlur : 40,
-    opacity : 0.5
+		x: STAGE.getWidth() / 2,
+		y: STAGE.getHeight() / 2,
+		sides: 5,
+		radius: 70,
+		fill: 'red',
+		stroke: 'black',
+		strokeWidth: 4,
+		shadowOffsetX : 20,
+		shadowOffsetY : 25,
+		shadowBlur : 40,
+		opacity : 0.5
 	});
 
 	// pentagon.draw();
