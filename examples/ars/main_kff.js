@@ -12,7 +12,7 @@ var start_time = Date.now();
 
 var mod_my_chart_promise = import(location.href + 'mod_my_chart.js')
 .then(my_chart => {
-	console.log('my_chart= ', my_chart);
+	// console.log('my_chart= ', my_chart);
 
 	// *Отрисовываем канвас, задаём настройки
 	my_chart.createCanvas(null, {

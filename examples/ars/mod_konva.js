@@ -1,7 +1,8 @@
 'use strict';
 // console.info('mod_konva runing!');
 
-var STS= {
+var SAVED_STS = JSON.parse(localStorage.getItem('KonvaSTS')),
+	STS= SAVED_STS || {
 		width: 1700,
 		bottomLine: {
 			height: 50,
@@ -31,23 +32,28 @@ var STS= {
 			}
 		}
 	},
-	container= document.querySelector('#konva_container'),
+	CONTAINER= document.querySelector('#konva_container'),
 	// *from server
 	ABS= _angles.abs= _angles.abs.Moon,
 	REL= _angles.rel,
-	TSS_KEYS = Object.keys(_tss);
-
-container.style.width = `${STS.width}px`;
-
-var STAGE = new Konva.Stage({
-		container: container.id,  // индификатор div контейнера
-		// container: 'konva_container',  // индификатор div контейнера
-		get width() {
-			return Math.floor(parseInt(getComputedStyle(document.querySelector(`#${this.container}`)).width) * 1);
-		},
+	TSS_KEYS = Object.keys(_tss).sort((a, b) => a - b),
+	STAGE = new Konva.Stage({
+		container: CONTAINER.id,  // индификатор div контейнера
+		width: STS.width,
 		height: 500
-	});
+	}),
+	LAYERS = {
+		bottomLine: new Konva.Layer(),
+		gradient: new Konva.Layer(),
+	},
+	LINES = [],
+	GROUPS = [],
+	IMGS = {
+		planet:{},
+		asp:{},
+	};
 
+CONTAINER.style.width = `${STS.width}px`;
 
 Object.defineProperty(STAGE, 'main', {
 	value: {
@@ -56,46 +62,22 @@ Object.defineProperty(STAGE, 'main', {
 	configurable:1
 });
 
-// *define arrs
-Object.defineProperty(ABS, 'arr', {value:[], enumerable:0, writable:1,configurable:1});
-Object.defineProperty(REL, 'arr', {value:[], enumerable:0, writable:1,configurable:1});
-
 console.log(
 	'STAGE.main.height()= ', STAGE.main.height(),
 );
 
-Object.keys(ABS).forEach(i=>{
-	// *i - abs angle
-	// *sec -> ms
-	var curTS = ABS[i][0].exact * 1000,
-		date = new Date(curTS);
-
-	ABS.arr.push({
-		a: i,
-		ts: curTS,
-		date: date,
-		strDate: getStrDate(date),
-		// strDate: `${fixZero(date.getDate())}.${fixZero(date.getMonth() + 1)}`,
-		strTime: getStrTime(date),
-	});
-});
-
-Object.keys(_tss).forEach(i=>{
-	// *i - php ts
-	// *sec -> ms
-	_tss[i].exact = i*1000;
-});
-
-
 var
 	// *Временной интервал, мс
-	TIME_RANGE = _tss[TSS_KEYS[TSS_KEYS.length-1]].exact - _tss[TSS_KEYS[0]].exact,
+	TIME_RANGE = (TSS_KEYS[TSS_KEYS.length-1] - TSS_KEYS[0]) * 1000,
 	// *К-т длины к ts
 	Kt_X = STAGE.width() / TIME_RANGE;
 
 
+
+
+
 // *Сортируем по времени
-ABS.arr = ABS.arr.sort((a, b) => a.ts - b.ts);
+// ABS.arr = ABS.arr.sort((a, b) => a.ts - b.ts);
 
 /**
  *
@@ -130,7 +112,7 @@ function fixZero (n) {
 
 // *Calc time range
 
-Object.defineProperties(ABS, {
+/* Object.defineProperties(ABS, {
 	TIME_RANGE: {
 		get() {
 			return this.last.ts - this.first.ts;
@@ -142,28 +124,63 @@ Object.defineProperties(ABS, {
 	last: {
 		value: ABS.arr[ABS.arr.length-1],
 	},
-});
+}); */
 
 
 console.log(
-	'ABS= ', ABS, ABS.arr,
+	// 'ABS= ', ABS, ABS.arr,
 	// 'REL= ', REL, REL.arr,
 	'TSS= ', _tss
 );
 
 
+/**
+ * init
+ */
 init();
 
 function init () {
+	// redraw();
+
 	// bottomLine();
 	bottomLine_2();
 	addControls();
+
+	// ?
+	// STAGE.draw();
 
 	/* console.log(
 		'STAGE= ', STAGE,
 		STAGE.content,
 	); */
 
+}
+
+
+function redraw() {
+	/* STAGE = STAGE || new Konva.Stage({
+		container: CONTAINER.id,  // индификатор div контейнера
+		get width() {
+			return Math.floor(parseInt(getComputedStyle(CONTAINER).width) * 1);
+		},
+		height: 500
+	}); */
+
+	/* Object.defineProperty(STAGE, 'main', {
+		value: {
+			height: ()=> STAGE.height() - STS.bottomLine.height
+		},
+		configurable:1
+	});
+
+	console.log(
+		'STAGE.main.height()= ', STAGE.main.height(),
+	);
+
+	Kt_X = STAGE.width() / TIME_RANGE; */
+
+	LAYERS.gradient.destroy();
+	// STAGE.remove(LAYERS.gradient);
 }
 
 
@@ -270,25 +287,27 @@ function bottomLine_2 () {
 		firstPoint_X = 0,
 		// *Подъём текста
 		maxWidth = 1,
-		lines = [],
-		groups = [],
 		pre = document.createElement('pre'),
 		popUp = document.createElement('div');
 
 	popUp.style.position = 'absolute';
 	popUp.style.width = '70px';
-	popUp.style.height = '50px';
+	popUp.style.height = 'auto';
 	popUp.style.background = '#fff';
+	popUp.style.zIndex = 100;
 	popUp.hidden = 1;
-	popUp.style.top = STAGE.main.height() - parseInt(popUp.style.height) + 'px';
-
-	var layer = new Konva.Layer();
 
 	TSS_KEYS.forEach((i,ind)=>{
+		// *i - php ts
+		// *sec -> ms
+		_tss[i].exact = i*1000;
+
 		var cur = _tss[i],
 			next= _tss[TSS_KEYS[ind+1]];
 
 		if(!next) return;
+
+		next.exact = TSS_KEYS[ind+1] * 1000;
 
 		var d_X = (next.exact - _tss[TSS_KEYS[0]].exact) * Kt_X - firstPoint_X,
 		abs = next.cat && (next.cat === 'abs'),
@@ -312,14 +331,17 @@ function bottomLine_2 () {
 
 
 		// *cur Hover
-		line.on('mouseover', e=>{
+		line.on('mouseenter', e=>{
 			var t = e.target;
 
 			popUp.hidden = 0;
+			popUp.style.width = '70px';
 
-			popUp.style.left = t.attrs.x + 'px';
+			popUp.style.left = t.x() + 'px';
 			// popUp.textContent = t.cur.date;
 			popUp.textContent = `${getStrTime(t.cur.exact)} - ${getStrTime(t.next.exact)}`;
+
+			popUp.style.top = STAGE.main.height() - parseInt(getComputedStyle(popUp).height) + 'px';
 
 			/* console.log(
 				t.next,
@@ -327,7 +349,32 @@ function bottomLine_2 () {
 			); */
 		});
 
-		lines[ind]= line;
+		line.on('mouseleave', e=>{
+			popUp.hidden = 1;
+		});
+
+		line.on('click', e=>{
+			var t = e.target;
+
+			popUp.hidden = 0;
+			popUp.style.width = '100px';
+
+			var gcs_popUp = getComputedStyle(popUp);
+
+			popUp.style.left = t.x() + t.width() - parseInt(gcs_popUp.width) + 'px';
+
+			popUp.textContent = `${next.pl} ${next.a}°\n ${next.date} = ${next.deg} \n`;
+
+			popUp.style.top = STAGE.main.height() - parseInt(gcs_popUp.height) + 'px';
+
+			console.log(
+				t.next,
+				'popUp= ', popUp,
+				'getComputedStyle(popUp).height= ', getComputedStyle(popUp).height,
+			);
+		});
+
+		LINES[ind]= line;
 
 		/* console.log(
 			'next.ts= ', next.ts,
@@ -339,7 +386,7 @@ function bottomLine_2 () {
 		); */
 
 		var dateRuler = setDateRuler(new Date(_tss[i].exact), Kt_X);
-		layer.add(dateRuler);
+		LAYERS.bottomLine.add(dateRuler);
 		dateRuler.zIndex(0);
 
 		var date = new Date(next.exact),
@@ -381,26 +428,26 @@ function bottomLine_2 () {
 			});
 
 			if(group.children.length === 1) {
-				console.log(
+				/* console.log(
 					'group= ', group,
 					'imgsWidth= ', imgsWidth,
-				);
+				); */
 			}
 
-			groups[ind]= group;
+			GROUPS[ind]= group;
 
 			// *Last async iteration
 			if(
-				groups.filter(i=>!!i).length === TSS_KEYS.length - 2
+				GROUPS.filter(i=>!!i).length === TSS_KEYS.length - 2
 			)
 			{
-				drawOutLines(lines, groups, layer);
+				drawOutLines();
 			}
 
 			/* console.log(
 				'groups.length= ', groups.length,
-				'groups.filter(i=>i!=0).length= ', groups.filter(i=>!!i).length,
-				'TSS_KEYS.length= ', TSS_KEYS.length,
+				// 'groups.filter(i=>i!=0).length= ', groups.filter(i=>!!i).length,
+				// 'TSS_KEYS.length= ', TSS_KEYS.length,
 			); */
 
 		}); //* loadImgs
@@ -429,8 +476,8 @@ function bottomLine_2 () {
 
 		// console.log('txt= ', txt);
 
-		layer.add(line);
-		// layer.add(txt);
+		LAYERS.bottomLine.add(line);
+		// LAYERS.bottomLine.add(txt);
 
 		// txt.zIndex(10+ind);
 
@@ -445,7 +492,7 @@ function bottomLine_2 () {
 
 	STAGE.attrs.container.appendChild(popUp);
 	document.querySelector('#konva_data').append(pre);
-	STAGE.add(layer);
+	STAGE.add(LAYERS.bottomLine);
 }
 
 
@@ -453,36 +500,68 @@ function bottomLine_2 () {
  ** Элементы управления
  */
 function addControls() {
-	var checkboxDelta = document.createElement('input');
-	checkboxDelta.type= 'checkbox';
-	checkboxDelta.addEventListener('change', e=>{
+	// *checkboxDelta
+	var checkboxDeltaLabel = document.createElement('label'),
+		checkboxDelta = document.createElement('input');
 
+	checkboxDelta.type= 'checkbox';
+	checkboxDeltaLabel.textContent= '+Delta ';
+	checkboxDeltaLabel.style.cssText= 'position:absolute; left:0; bottom:50%;';
+
+	checkboxDelta.addEventListener('change', e=>{
+		STS.gradient.hasPlusDelta = e.target.checked;
+		saveSTS();
+		// redraw();
+		LAYERS.gradient.destroy();
+		drawOutLines();
+		// ?
+		// STAGE.draw();
+		// LAYERS.gradient.draw();
 	});
-	document.querySelector('#konva_data').append(checkboxDelta);
+	checkboxDelta.checked = STS.gradient.hasPlusDelta;
+	checkboxDeltaLabel.append(checkboxDelta);
+	CONTAINER.append(checkboxDeltaLabel);
+	// document.querySelector('#konva_data').append(checkboxDeltaLabel);
+}
+
+/**
+ * Сохранение пользовательских настроек
+ */
+function saveSTS () {
+	localStorage.setItem('KonvaSTS', JSON.stringify(STS));
 }
 
 
 /**
  **Выносные линии с изображениями
- * @param {Array} lines - заполнения нижней полосы, собираются асинхронно
- * @param {Array} groups - группы изображений, собираются асинхронно
- * @param {Konva.Layer} layer
+ * Запускать после заполнения:
+ * {Array} GROUPS - группы изображений, собираются асинхронно
+ * {Array} LINES - заполнения нижней полосы, собираются асинхронно
  */
-function drawOutLines(lines, groups, layer) {
+function drawOutLines() {
 	var sts= STS.bottomLine,
 		level= 1;
 
-	groups.forEach((group,ind)=>{
-		var line= lines[ind];
+	console.log(
+		'IMGS= ', IMGS,
+	);
 
-		layer.add(group);
-		layer.batchDraw();
+	GROUPS.forEach((group,ind)=>{
+		var line= LINES[ind];
+
+		LAYERS.bottomLine.add(group);
+		LAYERS.bottomLine.batchDraw();
+
+		LAYERS.gradient.add(
+			drawGradients(line.x(), ind)
+		);
 
 		/* console.log(
 			'level= ', level,
 			'group= ', group,
 		); */
 
+		// !stop
 		if(group.width() * 1.05 <= line.width()) {
 			level=1;
 			return;
@@ -506,14 +585,13 @@ function drawOutLines(lines, groups, layer) {
 			lineJoin: 'round',
 		});
 
-		layer.add(
-			drawGradients(line.x(), ind)
-		);
-
-		layer.add(outLine);
+		LAYERS.bottomLine.add(outLine);
 		outLine.zIndex(0);
 
 	});
+
+	STAGE.add(LAYERS.gradient);
+	LAYERS.gradient.zIndex(0);
 
 }
 
@@ -543,6 +621,9 @@ function loadImgs(line) {
 				width: 20,
 				height: 20,
 			});
+
+			IMGS.asp[a] = IMGS.asp[a] || img;
+
 			resolve(kImg);
 		}
 	});
@@ -563,6 +644,9 @@ function loadImgs(line) {
 				width: 20,
 				height: 20,
 			});
+
+			IMGS.planet[name] = IMGS.planet[name] || img;
+
 			resolve(kImg);
 		}
 	});
@@ -573,24 +657,37 @@ function loadImgs(line) {
 }
 
 
+/**
+ * Отрисовка градиентов
+ * @param {float} x - coord
+ * @param {int} ind - index in array
+ * returns {Konva.Rect}
+ */
 function drawGradients (x, ind) {
 	var sts = STS.gradient,
 		grad = new Konva.Rect({
+			x: x - sts.delta,
+			y: sts.height * ind,
+			width: sts.hasPlusDelta? sts.delta * 2 : sts.delta,
+			height: sts.height,
+			fillLinearGradientStartPoint: { x: 0, y: 0 },
+			fillLinearGradientEndPoint: { x: sts.delta * 2, y: 0 },
+			fillLinearGradientColorStops: [0, '#f553', .5, '#f55f', 1, '#f553'],
+		}),
+		img = null;
+		/* grad = new Konva.Rect({
 		x: x - sts.delta,
 		y: sts.height * ind,
 		width: sts.hasPlusDelta? sts.delta * 2 : sts.delta,
 		height: sts.height,
 		fillRadialGradientStartPoint: { x: sts.delta, y: sts.height/2 },
-		fillRadialGradientStartRadius: sts.height/2,
+		fillRadialGradientStartRadius: sts.height/4,
 		fillRadialGradientEndPoint: { x: sts.delta, y: sts.height/2 },
 		fillRadialGradientEndRadius: sts.delta,
-		fillRadialGradientColorStops: [0, 'red', 1, 'transparent'],
-	});
+		fillRadialGradientColorStops: [0, '#f55f', .3, '#f555', .9, '#f551'],
+		// fillRadialGradientColorStops: [0, 'red', 1, 'transparent'],
+	}); */
 
-	/* for (var i = ts - sts.delta/2; i <= ts + sts.delta/2; i+=sts.delta/sts.fraction) {
-		const element = array[i];
-
-	} */
 	return grad;
 }
 
