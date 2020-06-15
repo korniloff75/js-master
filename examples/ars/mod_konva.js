@@ -24,7 +24,79 @@ var SAVED_STS = JSON.parse(localStorage.getItem('KonvaSTS')),
 			}
 		},
 		gradient: {
-			delta: 50,
+			delta: {
+				Sun: {
+					0: 12,
+					60: 6,
+					90: 10,
+					120: 12,
+					180: 12,
+				},
+				Moon: {
+					0: 10,
+					60: 6,
+					90: 10,
+					120: 8,
+					180: 10,
+				},
+				Mercury: {
+					0: 5,
+					60: 55,
+					90: 5,
+					120: 5,
+					180: 5,
+				},
+				Venus: {
+					0: 5,
+					60: 5,
+					90: 5,
+					120: 5,
+					180: 5,
+				},
+				Mars: {
+					0: 5,
+					60: 5,
+					90: 5,
+					120: 5,
+					180: 5,
+				},
+				Jupiter: {
+					0: 5,
+					60: 5,
+					90: 5,
+					120: 5,
+					180: 5,
+				},
+				Saturn: {
+					0: 5,
+					60: 5,
+					90: 5,
+					120: 5,
+					180: 5,
+				},
+				Uranus: {
+					0: 5,
+					60: 5,
+					90: 5,
+					120: 5,
+					180: 5,
+				},
+				Neptune: {
+					0: 5,
+					60: 5,
+					90: 5,
+					120: 5,
+					180: 5,
+				},
+				Pluto: {
+					0: 5,
+					60: 5,
+					90: 5,
+					120: 5,
+					180: 5,
+				},
+			},
+			delta_: 50,
 			hasPlusDelta: 1,
 			fraction: 20,
 			get height() {
@@ -542,9 +614,9 @@ function drawOutLines() {
 	var sts= STS.bottomLine,
 		level= 1;
 
-	console.log(
+	/* console.log(
 		'IMGS= ', IMGS,
-	);
+	); */
 
 	GROUPS.forEach((group,ind)=>{
 		var line= LINES[ind];
@@ -665,25 +737,28 @@ function loadImgs(line) {
  */
 function drawGradients (x, ind) {
 	var sts = STS.gradient,
+		// delta = sts.delta[name][0],
+		delta = 50,
+		// delta = sts.delta_,
 		grad = new Konva.Rect({
-			x: x - sts.delta,
+			x: x - delta,
 			y: sts.height * ind,
-			width: sts.hasPlusDelta? sts.delta * 2 : sts.delta,
+			width: sts.hasPlusDelta? delta * 2 : delta,
 			height: sts.height,
 			fillLinearGradientStartPoint: { x: 0, y: 0 },
-			fillLinearGradientEndPoint: { x: sts.delta * 2, y: 0 },
+			fillLinearGradientEndPoint: { x: delta * 2, y: 0 },
 			fillLinearGradientColorStops: [0, '#f553', .5, '#f55f', 1, '#f553'],
 		}),
 		img = null;
 		/* grad = new Konva.Rect({
-		x: x - sts.delta,
+		x: x - delta,
 		y: sts.height * ind,
-		width: sts.hasPlusDelta? sts.delta * 2 : sts.delta,
+		width: sts.hasPlusDelta? delta * 2 : delta,
 		height: sts.height,
-		fillRadialGradientStartPoint: { x: sts.delta, y: sts.height/2 },
+		fillRadialGradientStartPoint: { x: delta, y: sts.height/2 },
 		fillRadialGradientStartRadius: sts.height/4,
-		fillRadialGradientEndPoint: { x: sts.delta, y: sts.height/2 },
-		fillRadialGradientEndRadius: sts.delta,
+		fillRadialGradientEndPoint: { x: delta, y: sts.height/2 },
+		fillRadialGradientEndRadius: delta,
 		fillRadialGradientColorStops: [0, '#f55f', .3, '#f555', .9, '#f551'],
 		// fillRadialGradientColorStops: [0, 'red', 1, 'transparent'],
 	}); */
