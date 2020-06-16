@@ -1,7 +1,7 @@
 'use strict';
 // console.info('mod_konva runing!');
 
-var SAVED_STS = JSON.parse(localStorage.getItem('KonvaSTS')),
+export var SAVED_STS = JSON.parse(localStorage.getItem('KonvaSTS')),
 	STS= SAVED_STS || {
 		width: 1700,
 		bottomLine: {
@@ -105,6 +105,7 @@ var SAVED_STS = JSON.parse(localStorage.getItem('KonvaSTS')),
 		}
 	},
 	CONTAINER= document.querySelector('#konva_container'),
+	PRE = document.createElement('pre'),
 	// *from server
 	ABS= _angles.abs= _angles.abs.Moon,
 	REL= _angles.rel,
@@ -126,6 +127,8 @@ var SAVED_STS = JSON.parse(localStorage.getItem('KonvaSTS')),
 	};
 
 CONTAINER.style.width = `${STS.width}px`;
+
+PRE.style.whiteSpace = 'pre-wrap';
 
 Object.defineProperty(STAGE, 'main', {
 	value: {
@@ -359,7 +362,6 @@ function bottomLine_2 () {
 		firstPoint_X = 0,
 		// *Подъём текста
 		maxWidth = 1,
-		pre = document.createElement('pre'),
 		popUp = document.createElement('div');
 
 	popUp.style.position = 'absolute';
@@ -435,7 +437,7 @@ function bottomLine_2 () {
 
 			popUp.style.left = t.x() + t.width() - parseInt(gcs_popUp.width) + 'px';
 
-			popUp.textContent = `${next.pl} ${next.a}°\n ${next.date} = ${next.deg} \n`;
+			popUp.textContent = `${next.name} ${next.a}°\n ${next.date} = ${next.deg} \n`;
 
 			popUp.style.top = STAGE.main.height() - parseInt(gcs_popUp.height) + 'px';
 
@@ -466,7 +468,7 @@ function bottomLine_2 () {
 				// x: firstPoint_X + d_X,
 				x: firstPoint_X + d_X,
 				y: STAGE.main.height(),
-				text: `${next.pl} - ${next.a}°\n${getStrTime(date)}`,
+				text: `${next.name} - ${next.a}°\n${getStrTime(date)}`,
 				// width: -50,
 				// align: 'right',
 				fontSize: 16,
@@ -558,12 +560,12 @@ function bottomLine_2 () {
 		//
 		// var txtDate = document.createTextNode(`${i.strDate} -- lineSts.x= ${lineSts.x}, lineSts.width= ${lineSts.width}, d_X= ${d_X}` + ' | ');
 		// var txtDate = document.createTextNode(`${cur.date} -- date = ${cur.strDate} -- time  = ${cur.strTime} ||| `);
-		var txtDate = document.createTextNode(`${cur.pl} ${cur.a}° = ${cur.date} = ${cur.deg} \n`);
-		pre.append(txtDate);
+		var txtDate = document.createTextNode(`${cur.name} ${cur.a}° = ${cur.date} = ${cur.deg} \n`);
+		PRE.append(txtDate);
 	}); //*TSS_KEYS.forEach
 
 	STAGE.attrs.container.appendChild(popUp);
-	document.querySelector('#konva_data').append(pre);
+	document.querySelector('#konva_data').append(PRE);
 	STAGE.add(LAYERS.bottomLine);
 }
 
@@ -674,7 +676,7 @@ function drawOutLines() {
  */
 function loadImgs(line) {
 	var sts = STS.bottomLine,
-		name = line.next.pl,
+		name = line.next.name,
 		a = line.next.a,
 		is_moon = name === 'Moon',
 		out = [];

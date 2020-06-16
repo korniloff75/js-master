@@ -220,7 +220,7 @@ class PlAnglesRel extends Graph
 				}
 
 				// todo find $_P
-				$_P = 'Uranus';
+				$_P = 'Uranus_';
 				// $_P = 'Sun';
 				if(
 					$name === $_P && $data['a'] == 180
@@ -374,7 +374,7 @@ class PlAnglesRel extends Graph
 	protected function CollectTSS(array &$data)
 	{
 		$this->tss[$data['exact']] = [
-			'pl' => $data['name'],
+			'name' => $data['name'],
 			'a' => $data['a'],
 			'date' => date('d.m.Y - H:i:s', $data['exact']),
 			'deg' => EntryPointGraph::ConvertDeg($data['deg']) ?? "{$data['a']}°",

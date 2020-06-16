@@ -28,15 +28,6 @@ var mod_my_chart_promise = import(location.href + 'mod_my_chart.js')
 	console.warn('my_chart.err.message= ', err.message);
 });
 
-var mod_aspects_promise = import(location.href + 'mod_aspects.js')
-.then(aspects => {
-	console.log(
-		'aspects= ', aspects,
-	);
-})
-.catch(err => {
-	console.warn('aspects.err.message= ', err.message);
-});
 
 var mod_konva_promise = import(location.href + 'mod_konva.js')
 .then(konva => {
@@ -44,6 +35,16 @@ var mod_konva_promise = import(location.href + 'mod_konva.js')
 		'konva= ', konva,
 		// init
 	);
+
+	var mod_aspects_promise = import(location.href + 'mod_aspects.js')
+	.then(aspects => {
+		console.log('aspects= ', (aspects));
+
+		aspects.init(konva);
+	})
+	.catch(err => {
+		console.warn('aspects.err.message= ', err.message);
+	});
 })
 .catch(err => {
 	console.warn('konva.err.message= ', err.message);
