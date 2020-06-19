@@ -109,6 +109,7 @@ class PlAnglesRel extends Graph
 						// 'd_val'=> $d_val * $sign,
 						'd_val_0'=> $d_val_0,
 						'd_val_180'=> $d_val_180,
+						'd_val_orig'=> $d_val_180,
 						'sign'=> $sign,
 						'a' => $a,
 						'name' => $name,
@@ -151,6 +152,7 @@ class PlAnglesRel extends Graph
 							// 'd_val'=> $d_val_i * $sign_i,
 							'd_val_0'=> $d_val_0,
 							'd_val_180'=> $d_val_180,
+							'd_val_orig'=> $d_val_180,
 							'sign'=> $sign_i,
 							'diff_abs'=> abs($d_val_i - $a),
 							'ind'=> $_i,
@@ -242,15 +244,7 @@ class PlAnglesRel extends Graph
 				//? find $_P
 
 				// *Выкидываем данные вне диапазонов
-				/* if(
-					$a * $data['sign'] > $d_val_1 && $a * $data_2['sign'] > $d_val_2
-					|| $a * $data['sign'] < $d_val_1 && $a * $data_2['sign'] < $d_val_2
-					|| $a !== 0 && (
-						abs($d_val_1 - $d_val_2) > 30
-					)
-					|| $data['diff_abs'] > 30
-					// || $data['diff_abs'] > 10
-				) */
+				// ! not delete !
 				if(
 					$a_reduced > $d_val_1 && $a_reduced > $d_val_2
 					|| $a_reduced < $d_val_1 && $a_reduced < $d_val_2
@@ -259,6 +253,18 @@ class PlAnglesRel extends Graph
 					)
 					|| $data['diff_abs'] > 10
 				)
+
+				/* $d_val_orig_1= $data['d_val_orig'];
+				$d_val_orig_2= $data_2['d_val_orig'];
+
+				if(
+					$a_reduced > $d_val_orig_1 && $a_reduced > $d_val_orig_2
+					|| $a_reduced < $d_val_orig_1 && $a_reduced < $d_val_orig_2
+					|| $a !== 0 && (
+						abs($d_val_1 - $d_val_2) > 30
+					)
+					|| $data['diff_abs'] > 10
+				) */
 				{
 					unset($cur[$ind]);
 					continue;
@@ -267,11 +273,11 @@ class PlAnglesRel extends Graph
 				//note Составляем пропорцию
 
 				$data['exact']= round(($data['ts'] * ($a_reduced - $d_val_2) + $data_2['ts'] * ($d_val_1 - $a_reduced)) / ($d_val_1 - $d_val_2));
-				// $data['exact']= round(($data['ts'] * ($a * $data_2['sign'] - $d_val_2) + $data_2['ts'] * ($d_val_1 - $a * $data['sign'])) / ($d_val_1 - $d_val_2));
+
 				// note $data['exact']= round(($data['ts'] * ($a - $d_val_2) + $data_2['ts'] * ($d_val_1 - $a)) / ($d_val_1 - $d_val_2));
 
 				$data['deg']= ($val_1 * ($a_reduced - $d_val_2) + $val_2 * ($d_val_1 - $a_reduced)) / ($d_val_1 - $d_val_2);
-				// $data['deg']= ($val_1 * ($a * $data_2['sign'] - $d_val_2) + $val_2 * ($d_val_1 - $a * $data['sign'])) / ($d_val_1 - $d_val_2);
+
 
 				// *Удаляем дубли
 

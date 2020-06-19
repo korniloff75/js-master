@@ -17,17 +17,18 @@ export async function init (konva) {
 
 	calculateOpponentsAngles();
 
-	// var request = requestData();
-	var request = await requestData(),
+	// var request = sendRequest();
+	var request = await sendRequest(),
 		response = await request.text();
 	console.log(
-		'request= ', request,
+		// 'request= ', request,
 		// 'request.json= ', await request.json(),
 		// 'request.text= ', response,
 		'OPPONENTS_ANGLES= ', OPPONENTS_ANGLES,
 	);
 
-	PRE.append(response);
+	PRE.innerHTML += response;
+	// PRE.append(response);
 
 }
 
@@ -50,10 +51,16 @@ function calculateOpponentsAngles () {
 		// *Вычисляем OPPONENTS_ANGLES
 
 		OPPONENTS_ANGLES[name] = CONTROL_ANGLES.reduce((acc, controlA)=>{
+			var min= i - controlA;
+			// acc[controlA]= [];
+
+			min = min<0? 360+min:min;
+
+
 			acc[controlA]= [
-				Math.abs(i - controlA),
+				Math.abs(min),
 				i + controlA
-			].map(i=> i > 180 ? 360 - i : i);
+			]; // .map(a=> a > 180 ? 360 - a : a);
 			return acc;
 		}, {});
 
@@ -76,7 +83,7 @@ function calculateOpponentsAngles () {
 	}); //*NATAL.forEach
 }
 
-async function requestData () {
+async function sendRequest () {
 	return await fetch('./php/fetchHandler.class.php', {
 		method: 'POST',
 		headers: {
