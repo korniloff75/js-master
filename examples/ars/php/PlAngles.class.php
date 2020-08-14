@@ -151,7 +151,7 @@ class PlAngles extends PlAnglesRel
 				}
 
 				usort($data['range'], function (&$n, &$p){
-					return $n['diff_abs'] > $p['diff_abs'];
+					return $n['diff_abs'] - $p['diff_abs'];
 				});
 
 				$data_2= $data['range'][0];

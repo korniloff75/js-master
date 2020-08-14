@@ -6,12 +6,17 @@
  * $log->add("message", errorLevel, dump);
  * output log to the screen
  * $log->print();
+ * Если в запросе имеется параметр dev != false лог отображается автоматически внизу страницы
  */
+
+//* Включение протоколирования ошибок
+error_reporting(-1);
 
 class Logger
 {
 	const
 		FATALS = [E_ERROR, E_PARSE, E_COMPILE_ERROR],
+		// * STR_LEN = 0 - infinity
 		STR_LEN = 250;
 
 	protected
@@ -21,6 +26,8 @@ class Logger
 		$rewriteLog,
 		# array with a current log
 		$log = [];
+
+	static $printed = false;
 
 	/**
 	 * @name - name of the log file
@@ -37,8 +44,9 @@ class Logger
 		$this->rewriteLog = (bool) $rewriteLog;
 	}
 
+
 	/**
-	 * @message - string to the log
+	 * @param message - string to the log
 	 * optional @level - error constant || code
 	 * optional mixed @dump - will be output in the log by the function var_dump
 	 */
@@ -46,7 +54,8 @@ class Logger
 	{
 		$bt = debug_backtrace();
 		$caller = array_shift($bt);
-		$fileName = basename($caller['file']);
+		// $fileName = basename($caller['file']);
+		$fileName = $this->_getFileName($caller['file']);
 
 		$log = $this->_formatLog($fileName, $caller['line'], $message, $level);
 
@@ -54,7 +63,7 @@ class Logger
 		if(count($dump))
 		{
 			foreach ($dump as $d) {
-				$d = $this->CutLength($d, $message);
+				$d = $this->_CutLength($d, $message);
 				ob_start();
 				echo PHP_EOL;
 				var_dump($d);
@@ -70,16 +79,25 @@ class Logger
 		return $this->log;
 	}
 
-	private function CutLength($item, $message)
+	private function _getFileName($fileName)
 	{
-		if(is_string($item) && (strpos($message, 'response') === false) && strlen($item) > self::STR_LEN * 1.1)
+		return basename(dirname($fileName)) . DIRECTORY_SEPARATOR . basename($fileName);
+	}
+
+	private function _CutLength($item, $message)
+	{
+		if(
+			self::STR_LEN && is_string($item)
+			&& (strpos($message, 'response') === false)
+			&& strlen($item) > self::STR_LEN * 1.1
+		)
 			return mb_substr($item, 0, self::STR_LEN) . " ...[Обрезано]";
 
 		if(is_array($item))
 		{
 			foreach($item as &$i)
 			{
-				$i = $this->CutLength($i, $message);
+				$i = $this->_CutLength($i, $message);
 			}
 		}
 		return $item;
@@ -110,6 +128,8 @@ class Logger
 				$errorLevel = "$errorLevel ERROR";
 				break;
 			default:
+			case E_USER_NOTICE:
+				$errorLevel = " INFO:";
 				break;
 		}
 		return "[{$fileName}:{$line} " . date('Y/M/d H:i:s',time()) . " $errorLevel] $message";
@@ -123,25 +143,23 @@ class Logger
 		?>
 		<meta charset="UTF-8">
 		<style>
-		pre {
+		pre.log {
 			box-sizing: border-box;
 			white-space: pre-wrap;
 			border: inset 1px #eee;
 		}
 		</style>
 		<?php
-		print_r("<h3>Log</h3><pre>\n");
+		print_r("<h3>Log</h3><pre class='log'>\n");
 		foreach ($this->log as &$string) {
 			print_r($string . "\n");
 		}
 		echo "</pre>";
+		self::$printed = 1;
 	}
 
 	public function printTG()
 	{
-		/* array_map(function($i) {
-			return strip_tags($i);
-		}, $this->log ); */
 		ob_start();
 			$this->print();
 		return strip_tags(ob_get_clean());
@@ -158,12 +176,12 @@ class Logger
 
 		# Убираем ошибки парсера
 		if(
-			class_exists('CommonBot') &&
+			class_exists('CommonBot', false) &&
 			CommonBot::stripos_array($errstr, ["loadHTML"]) !== false
 		)
 			return false;
 
-		$fileName = basename($errfile);
+		$fileName = $this->_getFileName($errfile);
 
 		switch ($errno) {
 			case E_ERROR:
@@ -208,8 +226,9 @@ class Logger
 		$this->_addToLog($error['file'], $error['line'],$error['message'], $error['type']);
 		// $this->add("PHP Fatal: ".$error['message']." in ".$error['file'].":".$error['line']);
 
+		$_GET['dev']= 1;
 		$this->__destruct();
-		$this->print();
+
 		// die();
 
 	} // handleFatals
@@ -217,22 +236,27 @@ class Logger
 
 	public function __destruct()
 	{
-		$this->add('check bot->is_owner =',null,[$GLOBALS['_bot']->is_owner ?? '_bot NOT exist!!!']);
-
-		if(
-			is_object(@$GLOBALS['_bot'])
-			&& !$GLOBALS['_bot']->is_owner
-		)
+		$txt = __METHOD__;
+		$dump = null;
+		// $this->add();
+		if(!empty($GLOBALS['_bot']))
 		{
-			echo __METHOD__ . " is_owner = {$GLOBALS['_bot']->is_owner}";
-			return;
+			$txt .= ": check bot->is_owner =";
+			$dump = [$GLOBALS['_bot']->is_owner ?? '_bot NOT exist!!!'];
 		}
+		else
+		{
+			$txt .= ": was started without bot";
+		}
+
+		$this->add("INFO: $txt",null,$dump);
 
 		$this->log = array_map(function($i) {
 			return strip_tags($i);
 		}, $this->log );
 		// echo __METHOD__ . " {$this->file} " . realpath($this->file);
-		if(!empty($_GET['dev']))
+
+		if(!empty($_GET['dev']) && !self::$printed)
 		{
 			$this->print();
 		}
@@ -241,7 +265,8 @@ class Logger
 } // Logger
 
 
-// Не работает...
+// todo
+
 // Нужно передать аргументы.
 /* require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Singleton.trait.php";
 

@@ -4,6 +4,7 @@
 export var SAVED_STS = JSON.parse(localStorage.getItem('KonvaSTS')),
 	STS= SAVED_STS || {
 		width: 1700,
+		// width: 'auto',
 		bottomLine: {
 			height: 50,
 			clrs: ['red', 'green', 'blue'],
@@ -113,6 +114,7 @@ export var SAVED_STS = JSON.parse(localStorage.getItem('KonvaSTS')),
 	STAGE = new Konva.Stage({
 		container: CONTAINER.id,  // индификатор div контейнера
 		width: STS.width,
+		// width: 'auto',
 		height: 500
 	}),
 	LAYERS = {
@@ -127,6 +129,7 @@ export var SAVED_STS = JSON.parse(localStorage.getItem('KonvaSTS')),
 	};
 
 CONTAINER.style.width = `${STS.width}px`;
+// CONTAINER.style.width = `100%`;
 
 PRE.style.whiteSpace = 'pre-wrap';
 

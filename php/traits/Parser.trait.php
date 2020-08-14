@@ -6,7 +6,7 @@ trait Parser {
 
 	protected
 		$baseDir = 'base/',
-		$botDir;
+		$botDir; //* defined in tg.class.php
 
 
 	/**
@@ -30,11 +30,16 @@ trait Parser {
 			die;
 		}
 
-		$this->botDir = $this->botDir ?? __DIR__;
-
 		if(substr($this->baseDir, 0, 1) !== DIRECTORY_SEPARATOR)
 			$this->baseDir = "{$this->botDir}/" . basename($this->baseDir);
 		// $baseDir = "{$this->botDir}/" . basename($this->baseDir);
+
+		$this->log->add(__METHOD__.' $this->baseDir= ',null, [$this->baseDir]);
+
+		if(!file_exists($this->baseDir))
+		{
+			mkdir($this->baseDir, 0755, 1);
+		}
 
 		# Collect $this->baseSource
 		$this->baseSource = $this->CollectBaseArray();
@@ -49,16 +54,23 @@ trait Parser {
 			# Получаем файл для текущего chat_id
 			if(isset($base[$this->chat_id]))
 			{
-				$currentItem = "{$this->baseDir}/" . $base[$this->chat_id];
+				$currentItem = "{$this->baseDir}/{$base[$this->chat_id]}";
 				$this->log->add(__METHOD__ . ' - $currentItem = ' . $currentItem);
-				$this->objBase = new DbJSON($currentItem);
-				$this->savedBase = $this->objBase->get();
+				// $this->savedBase = $this->objBase->get();
 
 			}
+			else
+			{
+				$currentItem = "{$this->baseDir}/{$this->chat_id}.$bSource.json";
+			}
 
+			$this->objBase = new DbJSON($currentItem);
+
+			$this->savedBase = $this->objBase->get();
 
 			if(!$this->AddLocalParser($source, $opts))
 				continue;
+
 			// $this->log->add(__METHOD__ . " - \$this->savedBase = ", null, [$this->savedBase]);
 		}
 

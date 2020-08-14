@@ -96,7 +96,9 @@ ob_start();
 		'nvidia\\.ru',
 
 		// ВадимZ
-		'kinozal\\.', 'pornolab\\.', 'erokomiksixxx\\.', 'svscomics\\.', 'abook-club\\.', 'nnm\-club', 'rutracker', '4pna\\.', 'rutor\.', '7\-zip',
+		'kinozal\\.', 'pornolab\\.', 'erokomiksixxx\\.', 'svscomics\\.', 'abook-club\\.',
+		// 'nnm\-club',
+		'rutracker', '4pna\\.', 'rutor\.', '7\-zip',
 	];
 
 	function FindProxyForURL(url, host)

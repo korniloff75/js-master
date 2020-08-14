@@ -12,9 +12,15 @@ class DbJSON {
 	public function __construct(string $path)
 	{
 		//* fix 4 __destruct
-		$this->path= realpath($path);
+		$this->path= substr($path, 0, 1) !== DIRECTORY_SEPARATOR
+		? realpath($path)
+		: $path;
+
 		$dir= realpath(dirname($this->path));
+
 		if(!$this->path) $this->path= $_SERVER['DOCUMENT_ROOT']. '/' . $path;
+
+		trigger_error(__METHOD__.": \$this->path= {$this->path}; \$path= $path; \$dir= $dir");
 
 		// var_dump($this->path);
 

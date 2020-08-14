@@ -26,8 +26,8 @@ class KorniloFF_news extends CommonBot
 
 		$baseDir = 'base/',
 		$cron = [
-			'chat'=> ['id' => -1001223951491,],
-			// 'chat'=> ['id' => 673976740,],
+			'chat'=> ['id' => -1001223951491],
+			// 'chat'=> ['id' => 673976740],
 			'from'=> ['id' => 673976740],
 		],
 		// Specify headers

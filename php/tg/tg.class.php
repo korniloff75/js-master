@@ -25,7 +25,8 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Get_set.trait.php";
 require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Curl.trait.php";
 
 
-class TG {
+class TG
+{
 	const
 		HOST= 'https://js-master.ru',
 		OWNER= 673976740;
@@ -325,7 +326,9 @@ class TG {
 		$this->log->add("URL - {$this->api}$method\n\$postFields in " . __METHOD__, null, [$postFields]);
 
 		//* Выполняем Curl
-		$response = $this->CurlRequestProxy($this->api . $method, [
+		// $response = $this->CurlRequestProxy($this->api . $method, [
+		// note Отключаем прокси
+		$response = $this->CurlRequest($this->api . $method, [
 			'sendMethod' => 'post',
 			'headers' => $this->headers,
 			'params' => $postFields
@@ -448,7 +451,7 @@ class TG {
 			// *Если один элемент больше лимита
 			if(strlen($i) > self::$textLimit)
 			{
-				$strContent = explode("\n", $i);
+				$strContent = array_filter(explode("\n", $i));
 				if(count($strContent) > 1)
 				{
 					$this->sendMessage($strContent, $postFields, "\n");

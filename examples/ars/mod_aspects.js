@@ -28,7 +28,6 @@ export async function init (konva) {
 	);
 
 	PRE.innerHTML += response;
-	// PRE.append(response);
 
 }
 
@@ -51,16 +50,15 @@ function calculateOpponentsAngles () {
 		// *Вычисляем OPPONENTS_ANGLES
 
 		OPPONENTS_ANGLES[name] = CONTROL_ANGLES.reduce((acc, controlA)=>{
-			var min= i - controlA;
-			// acc[controlA]= [];
+			var min= i - controlA,
+			plus= i + controlA;
 
-			min = min<0? 360+min:min;
+			// if(plus>360) console.log('plus= ', plus);
 
-
-			acc[controlA]= [
-				Math.abs(min),
-				i + controlA
-			]; // .map(a=> a > 180 ? 360 - a : a);
+			acc[controlA]= Array.from(new Set([
+				min<0? 360+min:min,
+				plus>360? plus-360: plus
+			])); //.filter((a,ind,arr)=> !arr.includes(a));
 			return acc;
 		}, {});
 

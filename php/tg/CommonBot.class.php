@@ -79,7 +79,7 @@ class CommonBot extends TG
 		{
 			require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
 
-			$this->log = new Logger($logFile ?? 'tg.class.log', $this->botDir ?? __DIR__);
+			$this->log = new Logger($logFile ?? (__CLASS__.'.log'), $this->botDir);
 		}
 
 		return $this;
