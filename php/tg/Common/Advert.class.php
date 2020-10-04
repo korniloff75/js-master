@@ -24,7 +24,7 @@ class Advert extends TG
 		$this->DIR= str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__);
 		$this->urlDIR = 'https://js-master.ru/' . $this->DIR;
 
-		$this->base= new DbJSON($this->DIR . self::BASE);
+		$this->base= new DbJSON(__DIR__ . self::BASE);
 
 		$this->addChat($chat);
 
@@ -38,7 +38,7 @@ class Advert extends TG
 		{
 			//* Оставляем только мою рекламу
 			$this->advert = array_filter($this->advert, function($i){
-				return in_array($i, ['cap_my_1','wod_my_1','invs','js-master']);
+				return in_array($i, ['cap_my_1','wod_my_1','firstvds','js-master']);
 			}, ARRAY_FILTER_USE_KEY);
 		}
 
@@ -89,7 +89,8 @@ class Advert extends TG
 			],]
 		]);
 
-		$this->base->set([$this->cron['chat']['id']=> $log['message_id']]);
+		$curMessId= [$this->cron['chat']['id']=> $log['message_id']];
+		$this->base->set($curMessId);
 
 		$this->log->add(__METHOD__.' $log=',null,[$log]);
 	}
@@ -217,10 +218,11 @@ class Advert extends TG
 			],
 			'href'=>"https://t.me/WorldDogs_bot?start=673976740"
 		], */
-		'invs'=> [
+		'firstvds'=> [
 			'alt'=> "Дешевый хостинг",
+			'title'=> 'Кто хочет скидку, ловите промокод - <b>6481055129</b>',
 			'src'=> '/assets/invs_240_lh.png',
-			'href'=>"https://invs.ru?utm_source=partner&ref=ueQYF"
+			'href'=>"https://firstvds.ru/?from=1055129"
 		],
 		'proxy6.net'=> [
 			'title'=> "Стабильные прокси от 25р/мес.

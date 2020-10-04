@@ -18,7 +18,7 @@ e = $().e.fix(e);
 */
 'use strict';
 
-jQuery && !jQuery.fn.e && Object.defineProperties(jQuery.fn,
+window.jQuery && !jQuery.fn.e && Object.defineProperties(jQuery.fn,
 	{e:	{
 		get: function () {
 			var self = this.get(0);
@@ -370,3 +370,6 @@ Object.defineProperties(jQuery, {
 		}
 	},
 }); // $.fn()
+
+// console.log($().e);
+// window.watch('jQuery', e=>alert('Попался!'));

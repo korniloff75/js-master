@@ -185,7 +185,12 @@ class Anekdot extends CommonBot
 		// $this->log->add(__METHOD__ . " - \$photos = ", null, [$photos]);
 
 		if(count($content))
-			$out['sendMessage'] = $content;
+			// $out['sendMessage'] = $content;
+			$out['sendMessage'] = array_map(
+				function($i) {
+				// ^([\d\.\s]+)$
+				return preg_replace('/^\s*\d+(>|&gt;|\s)*$/im', '');
+			}, $content);
 		if(count($photos))
 			$out['sendMediaGroup'] = $photos;
 

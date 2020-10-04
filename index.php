@@ -5,10 +5,22 @@ if (version_compare(PHP_VERSION, '7.1', '<') ) die("Извини, брат, с �
 
 date_default_timezone_set('Europe/Moscow');
 
+define('DR', $_SERVER['DOCUMENT_ROOT']);
+
+// *Автозагрузка классов
+function _autoloader($class) {
+	if(file_exists($path= DR."/php/classes/$class.php")){
+		include_once $path;
+	}
+}
+
+spl_autoload_register('_autoloader');
 
 # Open main buff
 # closed in Render
 ob_start();
+$log = new Logger('kff.log', DR);
+
 session_start();
 
 

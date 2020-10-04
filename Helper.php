@@ -288,7 +288,7 @@ class H {
 	}
 
 
-	public static function translit(string $s, $napr = 0)
+	public static function translit(string $s, $direct = 0)
 	:string
 	{
 		$translit = [
@@ -298,7 +298,7 @@ class H {
 
 		];
 
-		if($napr) {
+		if($direct) {
 			$translit = array_flip(
 				array_diff_key($translit, [
 				'Ь' => 1, 'Ъ' => 1

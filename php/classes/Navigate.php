@@ -8,13 +8,17 @@ class Navigate
 	const
 		ALLOWED = \CONT . "((?!thumb|img|PHPMailer|assets).)*";
 
+	private static $log;
+
 	public $firstPage;
 
 
 	function __construct($dir=null)
 
 	{
-		global $First_page;
+		global $log, $First_page;
+
+		self::$log= &$log;
 
 		$dir = self::checkContDir($dir ?? \CONT);
 
@@ -27,12 +31,17 @@ class Navigate
 
 		#
 		$this->mapObj = new \DbJSON($map_path);
+		// $this->mapObj->test=1;
 
-		if(!count($this->mapObj->db))
+		self::$log->add(__METHOD__,null,['count($this->mapObj)'=>count($this->mapObj), '$this->mapObj->get()'=>$this->mapObj->get()]);
+
+		if(!count($this->mapObj))
 		{
 			$this->mapObj->replace($this->createMap());
 			// trigger_error(__METHOD__." \$this->mapObj->db has count ");
 		}
+
+		// self::$log->add(__METHOD__,null,['$this->mapObj'=>$this->mapObj]);
 
 
 		# Flat file array
@@ -238,7 +247,7 @@ class Navigate
 		<nav id="menu_content">\n
 			<ul id="menu">
 
-			<?php $this->readMap($this->mapObj->db[$dir])?>
+			<?php $this->readMap($this->mapObj->get($dir))?>
 
 			</ul>
 		<!-- #menu -->

@@ -190,7 +190,7 @@ trait Curl
 	public function CurlRequestProxy(string $url, array $opts=[])
 	{
 		$ch = $this->CurlSetOpt($url, $opts);
-		// curl_setopt($ch, CURLOPT_PROXY, $this->findAnzProxy());
+
 		curl_setopt($ch, CURLOPT_PROXY, $this->findProxy());
 
 		return $this->execCurl($ch);

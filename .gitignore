@@ -15,7 +15,8 @@ js/db/*.*
 *.pem
 *.key
 */tg/*/*.trigger
-*/tg/*/token*
+token*
+cfg.*
 
 # local env files
 .env.local

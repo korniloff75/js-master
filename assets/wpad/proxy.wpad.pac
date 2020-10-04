@@ -86,7 +86,7 @@ ob_start();
 		'\\.appspot\\.com',
 		'\\.googleapis',
 		'\\.gstatic.com',
-		'telegram\\.org', 't\\.me','telegra\\.ph',
+		// 'telegram\\.org', 't\\.me','telegra\\.ph',
 		'kinorai\\.net',
 		'spotify',
 		'dot\\.tk',

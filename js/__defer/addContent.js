@@ -125,7 +125,7 @@ _H.ADs = {
 		//* Создаем рекламный блок после случайного <p> и наполняем его
 		this['$img'] = $($.rnd(this['$pars'])).cr('div', { class: 'Adv center pointer' }, 'after').cr('img', { src: b, alt: sel.alt });
 		this['$img'].parent().on('click', e => location.href = g);
-		this['$img'].parent().after(this.LinkSlot);
+		// this['$img'].parent().after(this.LinkSlot);
 
 		// Отлов блокировщиков
 		setTimeout(function() {
@@ -148,4 +148,5 @@ _H.ADs = {
 	}
 }; //== /_H.ADs
 ///////////////////////////////////
-_H.defer.add(_H.ADs.init.bind(_H.ADs));
+// ! Отключил
+// _H.defer.add(_H.ADs.init.bind(_H.ADs));

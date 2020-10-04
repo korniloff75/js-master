@@ -3,6 +3,7 @@
 # Anekdot bot.class.php
 # https://t.me/smiles_me
 0 6-23 * * * /var/www/js-master.ru/php/tg/Anekdot_parser_bot/bot.class.php "Anekdot.class" >/var/www/js-master.ru/php/tg/Anekdot_parser_bot/cron_multi.log 2>&1
+#
 # Sport bot.class.php
 # https://t.me/SportTimeNews
 */15 6-19 * * * /var/www/js-master.ru/php/tg/Anekdot_parser_bot/bot.class.php "Sport.class" >/var/www/js-master.ru/php/tg/Anekdot_parser_bot/cron_sport.log 2>&1

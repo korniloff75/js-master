@@ -16,6 +16,7 @@ class Logger
 {
 	const
 		FATALS = [E_ERROR, E_PARSE, E_COMPILE_ERROR],
+		BACKTRACE = 'BACKTRACE',
 		// * STR_LEN = 0 - infinity
 		STR_LEN = 250;
 
@@ -57,18 +58,25 @@ class Logger
 		// $fileName = basename($caller['file']);
 		$fileName = $this->_getFileName($caller['file']);
 
-		$log = $this->_formatLog($fileName, $caller['line'], $message, $level);
-
 		if(!is_array($dump)) $dump = [$dump];
-		if(count($dump))
-		{
-			foreach ($dump as $d) {
-				$d = $this->_CutLength($d, $message);
-				ob_start();
-				echo PHP_EOL;
-				var_dump($d);
-				$log .= ob_get_clean();
-			}
+
+		if($level === self::BACKTRACE){
+			$dump[self::BACKTRACE]= array_shift($bt);;
+			$log = $this->_formatLog($fileName, $caller['line'], $message, $level);
+		}
+		else{
+			$log = $this->_formatLog($fileName, $caller['line'], $message, $level);
+		}
+		$log .= PHP_EOL;
+
+
+		if(count($dump)) foreach ($dump as $n=>&$d) {
+			$d = $this->_CutLength($d, $message);
+			ob_start();
+			echo PHP_EOL;
+			if(!is_numeric($n)) echo "$n = ";
+			var_dump($d);
+			$log .= ob_get_clean();
 		}
 
 		$this->log[]= $log . PHP_EOL . PHP_EOL;
@@ -127,6 +135,9 @@ class Logger
 			case E_USER_ERROR:
 				$errorLevel = "$errorLevel ERROR";
 				break;
+			case self::BACKTRACE:
+				$errorLevel = "WARNING $level:";
+				break;
 			default:
 			case E_USER_NOTICE:
 				$errorLevel = " INFO:";
@@ -140,6 +151,7 @@ class Logger
 	 */
 	public function print()
 	{
+		ob_start();
 		?>
 		<meta charset="UTF-8">
 		<style>
@@ -150,12 +162,35 @@ class Logger
 		}
 		</style>
 		<?php
-		print_r("<h3>Log</h3><pre class='log'>\n");
+		print_r("<h3 class='logCaption' style='text-align:center;'>Log</h3><pre class='log'>\n");
 		foreach ($this->log as &$string) {
 			print_r($string . "\n");
 		}
 		echo "</pre>";
 		self::$printed = 1;
+		return ob_get_clean();
+	}
+
+	public function printCode()
+	{
+		ob_start();
+		?>
+		<meta charset="UTF-8">
+		<style>
+		pre.log {
+			box-sizing: border-box;
+			white-space: pre-wrap;
+			border: inset 1px #eee;
+		}
+		</style>
+		<?php
+		print_r("<h3 class='logCaption' style='text-align:center;'>Log</h3><pre class='log'>\n");
+		foreach ($this->log as &$string) {
+			print_r(htmlspecialchars($string) . "\n");
+		}
+		echo "</pre>";
+		self::$printed = 1;
+		return ob_get_clean();
 	}
 
 	public function printTG()
@@ -189,7 +224,7 @@ class Logger
 			case E_COMPILE_ERROR:
 			case E_PARSE:
 				$this->_addToLog($fileName, $errline, $errstr, $errno);
-				$this->__destruct();
+				// $this->__destruct();
 				die("Завершение работы.<br />\n");
 				break;
 
@@ -251,14 +286,14 @@ class Logger
 
 		$this->add("INFO: $txt",null,$dump);
 
-		$this->log = array_map(function($i) {
+		$this->log = array_map(function(&$i) {
 			return strip_tags($i);
 		}, $this->log );
 		// echo __METHOD__ . " {$this->file} " . realpath($this->file);
 
 		if(!empty($_GET['dev']) && !self::$printed)
 		{
-			$this->print();
+			echo $this->print();
 		}
 		file_put_contents($this->file, $this->log, !$this->rewriteLog ? FILE_APPEND : null);
 	}

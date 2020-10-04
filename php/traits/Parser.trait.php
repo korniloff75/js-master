@@ -148,6 +148,7 @@ trait Parser {
 		//* use custom handler if EXIST =====
 		if(!method_exists($this, $handlerName))
 			return false;
+
 		$this->log->add("method $handlerName is exist");
 
 		if(
@@ -312,8 +313,8 @@ trait Parser {
 
 		$links = [];
 		foreach($mainLinks as $link) {
-			$href = $link->getAttribute("href");
-			if(!strlen($href))
+
+			if(!strlen($href = $link->getAttribute("href")))
 				continue;
 
 			$href = (stripos($href, 'http') === false) ? $source . preg_replace("~^/+~", '', $href) : $href;
@@ -402,8 +403,8 @@ trait Parser {
 		// $innerHTML = str_ireplace($remove, '', $innerHTML);
 		//* FIX 4 TG
 		$innerHTML = preg_replace(
-			["/^[\\d\\.\\s]+$/", "/\\s*[\r\n]{2,}|[\r\n]*?<br\\s*?\\/?>[\r\n]*?/"
-		], ['', PHP_EOL], $innerHTML);
+			["/^[\\d\\.\\s]+$/", "/\\s*[\r\n]{2,}|[\r\n]*?<br\\s*?\\/?>[\r\n]*?/", '~<p>([\s\S]+?)</p>~i'
+		], ['', PHP_EOL, PHP_EOL."$1".PHP_EOL], $innerHTML);
 		// trigger_error(__METHOD__ . ' $innerHTML= ' . $innerHTML);
 
 		return strip_tags($innerHTML, self::$allowedTags);
