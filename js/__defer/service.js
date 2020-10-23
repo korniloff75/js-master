@@ -99,7 +99,8 @@ var _S = {
 			window.DizSel && _H.defer.add(DizSel.prevent);
 			window.CC && _H.defer.add(CC.init);
 			window._A && _H.defer.add(_A.init);
-			_H.ADs && _H.defer.add(_H.ADs.init.bind(_H.ADs));
+			// _H.ADs && _H.defer.add(_H.ADs.init.bind(_H.ADs));
+			_H.RSYa && _H.defer.add(_H.RSYa.init.bind(_H.RSYa));
 
 			// Update #adm
 			if(sv.ADMIN) {

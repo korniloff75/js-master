@@ -5,16 +5,17 @@ class DbJSON implements Iterator, Countable
 
 	static
 		$log,
-		$convertPath = false;
+		$convertPath = false,
+		$defaultDB;
 
 	private
 		$position = 0,
 		$changed = 0,
+		$reversed = false,
 		$values,
 		$path;
 
 	private
-		$sequence = [],
 		$db = [];# DataBase # Array
 
 
@@ -54,8 +55,12 @@ class DbJSON implements Iterator, Countable
 			$this->db = json_decode($json, true) ?? [];
 
 			if(empty($this->db)){
-				is_object($log) && $log->add(__METHOD__.": DB is EMPTY!", $log::BACKTRACE)
-				|| trigger_error(__METHOD__.": DB is empty from {$this->path}", E_USER_WARNING);
+				if(is_object($log)){
+					$log->add(__METHOD__.": DB is EMPTY!", $log::BACKTRACE);
+				}
+				else{
+					trigger_error(__METHOD__.": DB is empty from {$this->path}", E_USER_WARNING);
+				}
 			}
 			else{
 				$this->rewind();
@@ -64,6 +69,17 @@ class DbJSON implements Iterator, Countable
 		} //if(!empty($path))
 	} // __construct
 
+
+	/**
+	 * *Проверка в дефолтном массиве
+	 */
+	public function __get($key) {
+		// trigger_error('$key= '. $key . " {$this->db[$key]}");
+		if(is_null($v= $this->db[$key]) && self::$defaultDB){
+			return self::$defaultDB[$key];
+		}
+		return $v;
+	}
 
 	public function rewind() {
 		$this->position = 0;
@@ -110,60 +126,53 @@ class DbJSON implements Iterator, Countable
 
 	/**
 	 * *Clear base
-	 * @id optional <string|int>
+	 * @key optional <string|int>
 	 */
-	public function clear($id=null)
+	public function clear($key=null)
 	{
-		if(!empty($id))
-			unset($this->db[$id]);
+		if(!is_null($key)){
+			unset($this->db[$key]);
+			// *Удаляем null
+			$this->db= array_filter($this->db);
+		}
 		else $this->db = [];
 		$this->changed= 1;
 		return $this;
 	}
 
-	public function remove($id=null)
+	public function remove($key=null)
 	{
-		return $this->clear($id);
+		return $this->clear($key);
 	}
 
 
 	/**
-	 * @id optional <string|int>
+	 * @key optional <string|int>
 	 */
-	public function get($id=null)
+	public function get($key=null)
 	{
-		$db = array_diff_key($this->db, ['change'=>1]);
-		return empty($id)?
+		// $db = array_diff_key($this->db, ['change'=>1]);
+		$db = &$this->db;
+		return is_null($key)?
 			$db : (
-				$db[$id] ?? null
+				$db[$key] ?? null
 			);
 	}
 
 	/**
 	 * Получаем ключи базы
 	 */
-	public function getKeys($id=null)
+	public function getKeys()
 	{
 		return array_keys($this->get());
 	}
 
 	/**
-	 * @param sequence - массив с последовательностью ключей
-	 * ???
-	 * todo ...
+	 * Проверяем наличие ключа
 	 */
-	public function getSequence(array $sequence)
+	public function key_exists($key)
 	{
-		$db=[];
-		if(count($sequence) !== count($this->get())){
-			// return false;
-		}
-
-		foreach($sequence as $i){
-			if(empty($this->db[$i])) continue;
-			$db[$i]= &$this->db[$i];
-		}
-		return $db;
+		return array_key_exists($key, $this->get());
 	}
 
 
@@ -182,8 +191,58 @@ class DbJSON implements Iterator, Countable
 	}
 
 	/**
-	 * alias $this->set()
-	 * можно передавать массив как аргумент
+	 * *db - линейный массив с ассоциативными
+	 * [{},{},...]
+	 * @param key - ключ для поиска
+	 * @param val - искомое значение key
+	 * @return индекс ассоциативного массива
+	 */
+	public function getInd($key, $val, $strict=1)
+	{
+		foreach($this->db as $ind=>&$i){
+			if(
+				$strict && $i[$key] === $val
+				|| !$strict && $i[$key] == $val
+			) {
+				return $i['ind']= $ind;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * *db - [{},{},...]
+	 * *Добавление / замена элемента $this->db с индексом $this->getInd(@key, @val)
+	 * @param item {array} - ассоциативный массив
+	 */
+	public function setInd(array $item, $key, $val, $strict=1)
+	{
+		$ind= $this->getInd($key,$val,$strict);
+
+		$this->db[$ind]= $item;
+
+		return $this;
+	}
+
+	/**
+	 * *db - [{},{},...]
+	 * *Поиск в базе по значению ключа
+	 */
+	public function find($key, $val, $strict=1)
+	{
+		$ind= $this->getInd($key,$val,$strict);
+
+		if(empty($this->db[$ind])){
+			self::$log->add(__METHOD__,\Logger::BACKTRACE,['$this->db'=>$this->db, '$key'=>$key, '$val'=>$val]);
+			return null;
+		}
+		else return $this->db[$ind];
+	}
+
+
+	/**
+	 * alias $this->set() без перезаписи
 	 */
 	public function append(array $data)
 	{
@@ -202,29 +261,15 @@ class DbJSON implements Iterator, Countable
 		return $this;
 	}
 
-	public function filter($key)
+	// ?
+	/* public function filter($key)
 	{
 		return array_filter($this->db, function(&$i) use($key){
 			if(!is_array($i)) return;
 			return isset($i[$key]);
 		});
-	}
+	} */
 
-
-	/**
-	 * *Поиск в базе 2-мерного массива по значению ключа
-	 *
-	 */
-	public function find($key, $val, $strict=1)
-	{
-		if(count($searches= $this->filter($key))) foreach($searches as &$i){
-			if(
-				$strict && $i[$key] === $val
-				|| !$strict && $i[$key] == $val
-			) return $i;
-		}
-		return;
-	}
 
 	/**
 	 * Меняем местами элементы
@@ -260,10 +305,40 @@ class DbJSON implements Iterator, Countable
 	}
 
 
+	public function reverse($force=0)
+	{
+		if(!$force) $this->reversed= !$this->reversed;
+		$this->db= array_reverse($this->db);
+	}
+
+
 	# Массив в JSON
 	public static function toJSON(array $arr)
 	{
 		return json_encode($arr, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR |JSON_HEX_QUOT | JSON_HEX_APOS );
+	}
+
+
+	public function save()
+	{
+		global $log;
+
+		$this->saved= 1;
+
+		if($this->reversed){
+			$this->reverse(1);
+		}
+
+		if(empty($this->path))
+			is_object($log) && $log->add(__METHOD__.': Не указан путь записи базы',$log::BACKTRACE,['$this->path'=>$this->path]);
+		else {
+			file_put_contents(
+				$this->path,
+				self::toJSON($this->db), LOCK_EX
+			);
+			$this->changed= 0;
+			return true;
+		}
 	}
 
 
@@ -272,23 +347,19 @@ class DbJSON implements Iterator, Countable
 		global $log;
 		// note test
 		// $this->changed= 1;
-		trigger_error('is_object($log) - '.is_object($log));
 		if(!empty($this->db['test']) || $this->test){
-			is_object($log) && $log->add(__METHOD__.': База перед записью',E_USER_WARNING,[$this->db]);
+			$log->add(__METHOD__.': База перед записью',E_USER_WARNING,[$this->db]);
 			// *Deprecated
 			unset($this->db['test']);
 		}
 
 		// *check changes
-		if(!$this->changed) return;
+		if(
+			!empty($this->saved)
+			|| !$this->changed
+		) return;
 
-		if(empty($this->path))
-		is_object($log) && $log->add(__METHOD__.': Не указан путь записи базы',$log::BACKTRACE,['$this->path'=>$this->path]);
-		else
-			file_put_contents(
-				$this->path,
-				self::toJSON($this->db), LOCK_EX
-			);
+		$this->save();
 
 		/* if(!file_put_contents(
 			$this->path,

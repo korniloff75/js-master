@@ -228,14 +228,7 @@ class TG
 		//* Определяем владельца скрипта
 		$this->is_owner = $this->set('is_owner', $this->user_id == self::OWNER);
 
-		$this->log->add(' $this->user_id=',null,[$this->user_id]);
-
-		$this->log->add(__METHOD__."
-		\$cbn = $cbn\n
-		\$this->chat_id = {$this->chat_id}
-		\$this->user_id = {$this->user_id}
-		\$this->is_group = {$this->is_group}
-		\$this->cbn= ", null, [$this->cbn]);
+		$this->log->add(__METHOD__.": \$cbn = $cbn", null, ['$this->chat_id'=>$this->chat_id, '$this->user_id'=>$this->user_id, '$this->is_group'=>$this->is_group, '$this->cbn'=>$this->cbn]);
 
 		return $cb;
 	} // findCallback
@@ -323,7 +316,7 @@ class TG
 	{
 		$this->checkSendData($postFields);
 
-		$this->log->add("URL - {$this->api}$method\n\$postFields in " . __METHOD__, null, [$postFields]);
+		$this->log->add("URL - {$this->api}$method\n\$postFields in " . __METHOD__, null, ['$postFields'=>$postFields]);
 
 		//* Выполняем Curl
 		// $response = $this->CurlRequestProxy($this->api . $method, [

@@ -21,7 +21,7 @@ class H {
 
 	private function __construct()
 	{
-		global $Nav, $__Start;
+		global $log, $Nav, $__Start;
 
 		ini_set('short_open_tag', 'On');
 
@@ -51,9 +51,7 @@ class H {
 		if (realpath('') !== realpath(\HOME))
 			return;
 
-		\H::log([
-			'echo "Helper started from ROOT" ',
-		], __FILE__, __LINE__);
+		$log->add(__METHOD__.'Helper started from ROOT');
 
 
 		if(ADMIN || \TEST)

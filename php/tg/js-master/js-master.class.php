@@ -40,7 +40,7 @@ class jsMaster extends TG
 				// 'chat_id'=> $reply['from']['id'],
 				'text'=> "Привет, " . $this->showUsername($from, 'tag') . "!\n\nЕсли можно, давай перейдём сразу к делу. На сообщения из серии \"Привет, как дела?\" я могу не найти времени ответить. <a href=\"https://neprivet.ru\">Подробнее</a>\n\nЕсли сообщение по делу, но я сразу не ответил, пожалуйста, подожди. Возможно, меня просто сейчас нет в сети.\n\nСпасибо за понимание.\n=======\n\nПо кнопке под этим сообщением ты можешь, если есть возможность, оказать материальную поддержку моим бесплатным проектам, например:\n\nhttps://t.me/CrimeanNewss\nhttps://t.me/SportTimeNews\nhttps://t.me/smiles_me",
 				'reply_markup'=> ['inline_keyboard'=>[
-					[['text'=>'Поддержать бесплатные проекты', 'url'=>'https://js-master.ru/content/1000.Contacts/Rekvizity/']]
+					[['text'=>'Поддержать бесплатные проекты', 'url'=>'https://sobe.ru/na/tg_bots_hosting']]
 				]],
 			]);
 			die;

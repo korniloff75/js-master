@@ -48,7 +48,8 @@ echo php\classes\Render::finalPage();
 # /html
 
 // Переделать логирование на Logger
-file_put_contents('kffLog.txt', H::$log);
+// file_put_contents('kffLog.txt', H::$log);
+
 # Write input data
 // $testInputData = file_get_contents('php://input');
 // if(strlen($testInputData)) file_put_contents('testInputData.json', $testInputData);

@@ -3,14 +3,16 @@ AddDefaultCharset UTF-8
 
 RewriteEngine On
 
-# redirect http://этуаль-крым.рф
-# with subdomains
-RewriteCond %{HTTP_HOST} ^.*xn----7sb5achxji1fgg\.xn--p1ai$ [NC]
-RewriteRule ^(.*)$ http://germes-ubk.ru/Etual/$1 [R=301,L]
-
 # kpa-ing.ru
 RewriteCond %{HTTP_HOST} ^.*kpa-ing\.ru$ [NC]
 RewriteRule ^(.*)$ https://js-master.ru/$1 [R=301,L,QSA]
+
+# etual-crimea.ru
+# ?
+# RewriteCond %{HTTP_HOST} ^.*etualcrimea\..+\.ru$ [OR,NC]
+RewriteCond %{HTTP_HOST} ^.*etualcrimea\..+ [OR,NC]
+RewriteCond %{HTTP_HOST} ^.*etual-crimea\.ru$ [NC]
+RewriteRule ^(.*)$ https://etual-crimea.ru/$1 [R=301,L,QSA]
 
 
 

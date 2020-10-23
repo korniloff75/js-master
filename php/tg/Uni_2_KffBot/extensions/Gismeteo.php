@@ -17,17 +17,17 @@ class Gismeteo extends CommonBot implements Game
 	 */
 	public function __construct(UniKffBot &$UKB, ?array $cmd=null)
 	{
-		$this->setConstruct($UKB, $cmd)->init();
+		$this->setConstruct($UKB, $cmd)->_init();
 
 	} //* __construct
 
 
-	private function init()
+	private function _init()
 	{
 		//* Локация. Если нет в базе
 		if(empty($this->getLocation()->location))
 		{
-			$this->log->add('$this->location is EMPTY!', E_USER_WARNING, [$this->location]);
+			$this->log->add('$this->location is EMPTY!', E_USER_WARNING, ['$this->location'=>$this->location]);
 
 			//* Запрашиваем
 			$this->userPermission();
@@ -77,7 +77,7 @@ class Gismeteo extends CommonBot implements Game
 				break;
 		}
 
-	} //* init
+	} //* _init
 
 	private function getLocation()
 	:object

@@ -33,15 +33,17 @@ class Navigate
 		$this->mapObj = new \DbJSON($map_path);
 		// $this->mapObj->test=1;
 
-		self::$log->add(__METHOD__,null,['count($this->mapObj)'=>count($this->mapObj), '$this->mapObj->get()'=>$this->mapObj->get()]);
+		self::$log->add(__METHOD__,null,['count($this->mapObj)'=>count($this->mapObj), /* '$this->mapObj->get()'=>$this->mapObj->get() */]);
 
 		if(!count($this->mapObj))
 		{
 			$this->mapObj->replace($this->createMap());
+			// note Нужно сразу записать, понять нельзя!
+			$this->mapObj->__destruct();
 			// trigger_error(__METHOD__." \$this->mapObj->db has count ");
 		}
 
-		// self::$log->add(__METHOD__,null,['$this->mapObj'=>$this->mapObj]);
+		self::$log->add(__METHOD__,null,['count($this->mapObj)'=>count($this->mapObj), $this->mapObj->count()]);
 
 
 		# Flat file array
@@ -72,7 +74,7 @@ class Navigate
 	}
 
 
-	# Remove skipSlashes
+	# skipSlashes
 	# /path/to/ -> path/to
 	public static function skipSlashes(string $path)
 	:string
@@ -128,7 +130,7 @@ class Navigate
 	} // createMap
 
 
-	# В разработке
+	// todo В разработке
 	public function createGlobalMap($map = null, $ref=\CONT)
 	{
 		$map = $map ?? $this->mapObj->get();

@@ -1,1 +1,73 @@
-{"meta":{"message":"","code":200},"response":{"precipitation":{"type_ext":null,"intensity":0,"correction":null,"amount":0,"duration":0,"type":0},"pressure":{"h_pa":1014,"mm_hg_atm":761,"in_hg":39.9},"humidity":{"percent":55},"icon":"n_c1","gm":2,"wind":{"direction":{"degree":340,"scale_8":1},"speed":{"km_h":7,"m_s":2,"mi_h":4}},"cloudiness":{"type":1,"percent":25},"date":{"UTC":"2020-03-31 18:00:00","local":"2020-03-31 21:00:00","time_zone_offset":180,"hr_to_forecast":null,"unix":1585677600},"phenomenon":0,"radiation":{"uvb_index":null,"UVB":null},"city":86111,"kind":"Obs","storm":false,"temperature":{"comfort":{"C":1,"F":33.9},"water":{"C":8.6,"F":47.5},"air":{"C":3.5,"F":38.4}},"description":{"full":"Малооблачно"}}}
+{
+	"meta": {
+		"message": "",
+		"code": 200
+	},
+	"response": {
+		"precipitation": {
+			"type_ext": null,
+			"intensity": 0,
+			"correction": null,
+			"amount": 0,
+			"duration": 0,
+			"type": 0
+		},
+		"pressure": {
+			"h_pa": 1018,
+			"mm_hg_atm": 764,
+			"in_hg": 40.1
+		},
+		"humidity": {
+			"percent": 99
+		},
+		"icon": "d",
+		"gm": 3,
+		"wind": {
+			"direction": {
+				"degree": null,
+				"scale_8": 0
+			},
+			"speed": {
+				"km_h": 0,
+				"m_s": 0,
+				"mi_h": 0
+			}
+		},
+		"cloudiness": {
+			"type": 0,
+			"percent": 0
+		},
+		"date": {
+			"UTC": "2020-10-23 03:00:00",
+			"local": "2020-10-23 06:00:00",
+			"time_zone_offset": 180,
+			"hr_to_forecast": null,
+			"unix": 1603422000
+		},
+		"phenomenon": 10,
+		"radiation": {
+			"uvb_index": null,
+			"UVB": null
+		},
+		"city": 86111,
+		"kind": "Obs",
+		"storm": false,
+		"temperature": {
+			"comfort": {
+				"C": 8.7,
+				"F": 47.7
+			},
+			"water": {
+				"C": 3,
+				"F": 37.4
+			},
+			"air": {
+				"C": 8.7,
+				"F": 47.7
+			}
+		},
+		"description": {
+			"full": "Ясно, дымка"
+		}
+	}
+}

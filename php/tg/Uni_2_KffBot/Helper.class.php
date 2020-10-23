@@ -194,7 +194,7 @@ class Helper extends CommonBot implements Game
 		//* Бот или чат?
 		if(!$this->is_group)
 		{
-			$txt= 'Вы находитесь в боте чата <a href="https://t.me/joinchat/KCwRpEeG8OoZmye-5Cz55Q">Бюро Добрых Услуг</a>.';
+			$txt= 'Вы находитесь в боте чата.';
 		}
 		else
 		{

@@ -24,6 +24,10 @@ class Draws extends Helper
 	{
 		// parent::__construct();
 
+		// *Запрет запуска из комментариев
+		// if($UKB->chat_id === -1001305018802)
+		// 	die;
+
 		$this->setConstruct($UKB, $cmd)
 			->init()
 			->routerCmd();
@@ -252,7 +256,7 @@ class Draws extends Helper
 		//note Подготовка и отправка
 		if($o)
 		{
-			$this->log->add(__METHOD__.' Подготовка и отправка $this->is_owner',null,[$this->is_owner]);
+			$this->log->add(__METHOD__.': Подготовка и отправка',null,['$this->is_owner'=>$this->is_owner]);
 			/* if(is_null($this->is_owner))
 				$this->log->add(__METHOD__.' is_null $this->is_owner this=',null,[$this]); */
 
@@ -280,7 +284,9 @@ class Draws extends Helper
 			}
 			//* Создать
 			else
-				$keyboard = [['text' => self::CMD['Draws']['new draw']]];
+				// $keyboard = [['text' => self::CMD['Draws']['new draw']]];
+				// *Убираем розыгрыши
+				$keyboard = [];
 
 			//* Добавляем кнопки
 			if(
