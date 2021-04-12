@@ -1,0 +1,109 @@
+
+aside .tabsitem {
+	margin-right: 1em;
+	cursor: pointer;
+	display: inline-block;
+	padding: .5rem 1rem;
+	border-bottom: 1px transparent;
+}
+aside .tabsitem:hover {
+	background: #eee;
+	color: #555;
+}
+aside .tabsitem.active {
+	font-weight: 700;
+}
+aside #tabsBlock {
+	position: relative;
+	/* background: inherit; */
+	border: #eee 1px solid;
+}
+aside #tabsBlock::after {
+	content: '▼';
+	padding-left: 1em;
+	right: .5em;
+	position: absolute;
+	top: .5em;
+	color: #ccc;
+}
+
+aside #tabsBlock ul {
+	position: absolute;
+	background: #fff;
+	top: 100%;
+	box-shadow: 0 0 .25rem rgba(0,0,0,.1);
+
+	z-index: 100;
+
+}
+
+aside #contentBlock {
+	height: 300px;
+	overflow-y: auto;
+}
+
+#contentBlock > ul {
+	padding-right: .5em;
+}
+
+nav li {
+	line-height: 150%;
+}
+
+nav a.active {
+	position: relative;
+	/* border-left: 3px solid #aaa; */
+}
+
+
+
+/* ▼ Scroll ▼ */
+
+/* width */
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+/* button */
+::-webkit-scrollbar-button {
+	background: #234;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+	background: #777;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+	background: #555;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+	background: #aaa;
+}
+
+
+/* Corner */
+::-webkit-scrollbar-corner {
+	background: #999;
+}
+
+/* Resizer */
+::-webkit-resizer {
+	background: #111;
+}
+
+
+/* Dark */
+
+aside a.styles::after {
+	content: '';
+	background-image: url('https://blogas.info/img/darkthem1.png');
+	background-size: cover;
+	display: inline-block;
+	width: 1.5em;
+	height: 1.5em;
+	margin-left: .5em;
+}

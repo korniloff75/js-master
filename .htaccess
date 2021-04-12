@@ -3,14 +3,20 @@ AddDefaultCharset UTF-8
 
 RewriteEngine On
 
-# redirect http://этуаль-крым.рф
-# with subdomains
-RewriteCond %{HTTP_HOST} ^.*xn----7sb5achxji1fgg\.xn--p1ai$ [NC]
-RewriteRule ^(.*)$ http://germes-ubk.ru/Etual/$1 [R=301,L]
-
 # kpa-ing.ru
 RewriteCond %{HTTP_HOST} ^.*kpa-ing\.ru$ [NC]
 RewriteRule ^(.*)$ https://js-master.ru/$1 [R=301,L,QSA]
+
+# etual-crimea.ru
+# ?
+# RewriteCond %{HTTP_HOST} ^.*etualcrimea\..+\.ru$ [OR,NC]
+RewriteCond %{HTTP_HOST} ^.*etualcrimea\..+ [OR,NC]
+RewriteCond %{HTTP_HOST} ^.*etual-crimea\.ru$ [NC]
+RewriteRule ^(.*)$ https://etual-crimea.ru/$1 [R=301,L,QSA]
+
+# Универсальный редирект с www
+RewriteCond %{HTTP_HOST} ^www\.(.*) [NC]
+RewriteRule ^(.*)$ http://%1/$1 [R=301,L]
 
 
 
@@ -66,9 +72,16 @@ RewriteRule .* error [F,L]
 
 
 # Begin - Prevent Browsing and Set Default Resources
-Options -Indexes
+Options -Indexes +ExecCGI +FollowSymLinks
 DirectoryIndex index.php index.html index.htm
 php_value short_open_tag 1
+
+# 4 UniServer
+AddHandler cgi-script .pl .cgi
+
+
+RemoveHandler .html .htm
+AddType application/x-httpd-php .php .htm .html
 # End - Prevent Browsing and Set Default Resources
 
 # 4 UniServer

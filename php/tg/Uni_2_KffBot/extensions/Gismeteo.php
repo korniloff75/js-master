@@ -17,17 +17,17 @@ class Gismeteo extends CommonBot implements Game
 	 */
 	public function __construct(UniKffBot &$UKB, ?array $cmd=null)
 	{
-		$this->setConstruct($UKB, $cmd)->init();
+		$this->setConstruct($UKB, $cmd)->_init();
 
 	} //* __construct
 
 
-	private function init()
+	private function _init()
 	{
 		//* Локация. Если нет в базе
 		if(empty($this->getLocation()->location))
 		{
-			$this->log->add('$this->location is EMPTY!', E_USER_WARNING, [$this->location]);
+			$this->log->add('$this->location is EMPTY!', E_USER_WARNING, ['$this->location'=>$this->location]);
 
 			//* Запрашиваем
 			$this->userPermission();
@@ -40,7 +40,8 @@ class Gismeteo extends CommonBot implements Game
 				$this->userPermission("Поменяйте вашу геолокацию, нажав на кнопку внизу экрана.\n\nТекущие данные о погоде будут отображены сразу, а новые данные по прогнозу будут доступны в течение часа после вашего последнего запроса прогноза по прежней геолокации.");
 				break;
 			case 'forecast_aggregate':
-				$this->requestGM('aggregate')->methodSwitcher();
+				$this->requestGM('aggregate')
+					->methodSwitcher();
 				break;
 			case 'by_day_part':
 				$this->requestGM('by_day_part')->methodSwitcher();
@@ -73,22 +74,10 @@ class Gismeteo extends CommonBot implements Game
 						"selective" => true
 					]
 				], $this->location), 'sendVenue');
-
-				/* $this->apiRequest([
-					'chat_id' => $this->user_id,
-					'text' => "Показать прогноз?",
-					'reply_markup' => [
-						"inline_keyboard" => $forecastButs,
-						"one_time_keyboard" => true,
-						"resize_keyboard" => true,
-						"selective" => true
-					]
-					// 'callback_data' =>
-				]); */
 				break;
 		}
 
-	} //* init
+	} //* _init
 
 	private function getLocation()
 	:object

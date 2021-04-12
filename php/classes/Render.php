@@ -194,8 +194,14 @@ class Render
 		{
 			# Microtemplater
 			$content = str_replace(
-				['{DIR}'],
-				['/' . \H::$Dir],
+				[
+					'{DIR}',
+					'--', '---'
+				],
+				[
+					'/' . \H::$Dir,
+					'–', '—'
+				],
 			$content);
 			$content = "<div class=\"content\">\n{$content}\n</div>\n<!-- /.content -->\n";
 			# Add comments & return

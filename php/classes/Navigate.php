@@ -8,15 +8,17 @@ class Navigate
 	const
 		ALLOWED = \CONT . "((?!thumb|img|PHPMailer|assets).)*";
 
+	// private static $log;
+
 	public $firstPage;
 
 
-	function __construct($dir=\CONT)
+	function __construct($dir=null)
 
 	{
 		global $First_page;
 
-		$dir = self::checkContDir($dir);
+		$dir = self::checkContDir($dir ?? \CONT);
 
 		$this->allowed_dir = "#^" . self::ALLOWED . "$#u";
 		$this->allowed_file = "#^" . self::ALLOWED . "\.(php|htm)$#u";
@@ -25,29 +27,24 @@ class Navigate
 
 		#
 		$this->mapObj = new \DbJSON($map_path);
+		// $this->mapObj->test=1;
 
-		if(!count($this->mapObj->db))
+		tolog(__METHOD__,null,['count($this->mapObj)'=>count($this->mapObj), /* '$this->mapObj->get()'=>$this->mapObj->get() */]);
+
+		if(!count($this->mapObj))
 		{
-			$this->mapObj->set($this->createMap());
+			$this->mapObj->replace($this->createMap());
+			// note Нужно сразу записать, понять нельзя!
+			$this->mapObj->save();
+			// trigger_error(__METHOD__." \$this->mapObj->db has count ");
+			tolog(__METHOD__,null,['count($this->mapObj)'=>count($this->mapObj), $this->mapObj->count()]);
 		}
-
 
 		# Flat file array
 		$this->map_flat = $this->mapObj->getFlat();
 		natsort($this->map_flat);
 
 		$this->firstPage = $this->map_flat[0];
-		// $this->firstPage = $this->mapObj->get(0);
-
-		// $this->createMap();
-
-		/* echo '<pre>';
-		var_dump(
-			$this->mapObj->db,
-			$this->map_flat
-		);
-		echo '</pre>';
-		exit; */
 
 	}
 
@@ -60,20 +57,21 @@ class Navigate
 	}
 
 
-	# Remove skipSlashes
+	# skipSlashes
 	# /path/to/ -> path/to
 	public static function skipSlashes(string $path)
 	:string
 	{
-		$re = preg_replace("#^/|/$#", "", $path);
+		$path = preg_replace("#^/|/$#", "", $path);
 		// var_dump($re);
-		return $re;
+		return $path;
 	}
 
 
-	public static function checkContDir($dir = \CONT)
+	public static function checkContDir($dir=null)
 
 	{
+		$dir= $dir ?? \CONT;
 		if(!is_dir($dir)) mkdir($dir);
 		if(!file_exists("$dir.htaccess"))
 			copy('assets/htaccess4content.txt', "$dir.htaccess");
@@ -115,10 +113,10 @@ class Navigate
 	} // createMap
 
 
-	# В разработке
+	// todo В разработке
 	public function createGlobalMap($map = null, $ref=\CONT)
 	{
-		$map = $map ?? $this->mapObj->db;
+		$map = $map ?? $this->mapObj->get();
 
 		foreach($map as $title => &$item_val) {
 			$path = $ref . $title . '/';
@@ -234,7 +232,7 @@ class Navigate
 		<nav id="menu_content">\n
 			<ul id="menu">
 
-			<?php $this->readMap($this->mapObj->db[$dir])?>
+			<?php $this->readMap($this->mapObj->get($dir))?>
 
 			</ul>
 		<!-- #menu -->

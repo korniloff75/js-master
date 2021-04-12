@@ -25,7 +25,8 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Get_set.trait.php";
 require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Curl.trait.php";
 
 
-class TG {
+class TG
+{
 	const
 		HOST= 'https://js-master.ru',
 		OWNER= 673976740;
@@ -47,13 +48,12 @@ class TG {
 		$proxy,
 		# define in child classes
 		$botFileInfo,
-		$log, # instanceof Logger
-		//*
-		$cron=[],
+		$log, //* instanceof Logger
+		$cron=[], //* cron start
 
 		$botDir,
 		$botDirFromRoot,
-		# take object message
+		//* take object message
 		$message,
 		$cbn,
 		$user_id,
@@ -98,7 +98,7 @@ class TG {
 
 		$this->log->add(basename(__FILE__) . ' inited');
 
-		# Обрабатываем входящие данные
+		//* Обрабатываем входящие данные
 		$this->message = $this->webHook()->findCallback();
 		return $this;
 	} // __construct
@@ -108,7 +108,7 @@ class TG {
 	{
 		if($this->log) return;
 
-		# Если не логируется из дочернего класса
+		//* Если не логируется из дочернего класса
 		require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
 		if($this->botFileInfo)
 		{
@@ -147,9 +147,9 @@ class TG {
 	}
 
 
-	public function getData()
+	public function getInputData()
 	{
-		$this->log->add("getData() started = " . (is_null($this->inputData) ? 'TRUE' : 'FALSE'));
+		$this->log->add("getInputData() started = " . (is_null($this->inputData) ? 'TRUE' : 'FALSE'));
 		if(is_null($this->inputData))
 		{
 			# Ловим входящий поток
@@ -161,7 +161,7 @@ class TG {
 		}
 
 		return $this;
-	} // getData
+	} // getInputData
 
 
 	/**
@@ -169,9 +169,9 @@ class TG {
 	 */
 	public function findCallback()
 	{
-		if(!$this->getData()->inputData)
+		if(!$this->getInputData()->inputData)
 		{
-			// Проверяем cron
+			//* Проверяем cron
 			if(empty($this->cron))
 			{
 				$this->log->add("inputData is EMPTY!", E_USER_WARNING, [$this->inputData]);
@@ -228,14 +228,7 @@ class TG {
 		//* Определяем владельца скрипта
 		$this->is_owner = $this->set('is_owner', $this->user_id == self::OWNER);
 
-		$this->log->add(' $this->user_id=',null,[$this->user_id]);
-
-		$this->log->add(__METHOD__."
-		\$cbn = $cbn\n
-		\$this->chat_id = {$this->chat_id}
-		\$this->user_id = {$this->user_id}
-		\$this->is_group = {$this->is_group}
-		\$this->cbn= ", null, [$this->cbn]);
+		$this->log->add(__METHOD__.": \$cbn = $cbn", null, ['$this->chat_id'=>$this->chat_id, '$this->user_id'=>$this->user_id, '$this->is_group'=>$this->is_group, '$this->cbn'=>$this->cbn]);
 
 		return $cb;
 	} // findCallback
@@ -323,10 +316,12 @@ class TG {
 	{
 		$this->checkSendData($postFields);
 
-		$this->log->add("URL - {$this->api}$method\n\$postFields in " . __METHOD__, null, [$postFields]);
+		$this->log->add("URL - {$this->api}$method\n\$postFields in " . __METHOD__, null, ['$postFields'=>$postFields]);
 
 		//* Выполняем Curl
-		$response = $this->CurlRequestProxy($this->api . $method, [
+		// $response = $this->CurlRequestProxy($this->api . $method, [
+		// note Отключаем прокси
+		$response = $this->CurlRequest($this->api . $method, [
 			'sendMethod' => 'post',
 			'headers' => $this->headers,
 			'params' => $postFields
@@ -423,72 +418,53 @@ class TG {
 	/**
 	 ** Wrapper 4 $this->apiRequest
 	 * @param content - array with content strings
-	 * optional:
-	 * @param postFields - array with custom settings
-	 * @param break - break between message in bus
+	 **optional:
+	 * @param postFields - array with custom send data
+	 * @param break - break between messages in bus
 	 *
 	 * Проверяет длину каждого элемента из @content
 	 * Если превышает лимит - создаёт массив из строк и передаёт в рекурсию
 	 * Если нет - собирает шину элементов до лимита и отправляет в ТГ
+	 * Почему не отсылается последний элемент?
 	 */
 	public function sendMessage(array &$content, array $postFields= [], string $break="\n\n")
 	{
-		$postFields = array_merge([
-			'chat_id' => $this->chat_id,
-			'parse_mode' => 'html',
+		$postFields[] = array_merge([
 			'disable_web_page_preview' => true,
 		], $postFields);
 
-		# Делим на шины по self::$textLimit символов
+		//* Делим на шины по self::$textLimit символов
 		$bus = '';
 		$diffLength = count($content);
 
 		foreach($content as $i) {
 			--$diffLength;
-			if(!strlen(trim($i)))
+			if(empty(trim($i)))
 				continue;
-			# Если один элемент больше лимита
+			// *Если один элемент больше лимита
 			if(strlen($i) > self::$textLimit)
 			{
-				$content = explode("\n", $i);
-				if(count($content) < 2) continue;
-				$this->sendMessage($content, $postFields, "\n");
-				continue;
+				$strContent = array_filter(explode("\n", $i));
+				if(count($strContent) > 1)
+				{
+					$this->sendMessage($strContent, $postFields, "\n");
+					continue;
+				}
 			}
-			# Разбиваем на строки фикс. размера
-			elseif(strlen($bus) + strlen($i) < self::$textLimit)
+
+			// * Разбиваем на строки фикс. размера
+			elseif((strlen($bus) + strlen($i)) < self::$textLimit)
 			{
 				$bus .= "{$i}{$break}";
 				if($diffLength) continue;
 			}
 
-			// if(!strlen(trim($bus)))
-			// 	continue;
-
 			$postFields['text'] = strip_tags($bus, self::$allowedTags);
-
-			/* if(class_exists('CommonBot'))
-			{
-				$postFields['reply_markup'] = ["inline_keyboard" => [
-					//* Rows
-					[
-						CommonBot::setAdvButton(),
-					]
-				]];
-
-				if(empty($this->cron) && $this->is_owner)
-				{
-					$postFields['reply_markup']["inline_keyboard"][]= [
-						"text" => "More",
-						"callback_data" => '/more',
-					];
-				}
-			} */
 
 			//* Отправляем в канал.
 			$respTG[]= $this->apiRequest($postFields);
 
-			$bus = '';
+			$bus = "{$i}{$break}";
 
 		}
 

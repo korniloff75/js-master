@@ -1,26 +1,36 @@
 #!/usr/bin/php
 <?php
-require_once __DIR__ . "/../CommonBot.class.php";
+// require_once __DIR__ . "/../CommonBot.class.php";
+
 require_once __DIR__ . "/../tg.class.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/DbJSON.php";
 // trigger_error(__FILE__.' inited');
 
 class Advert extends TG
 {
+	const BASE= '/base.jsonc';
+
 	protected $cron = [];
 
-	private $test;
+	private $test,
+		$DIR,
+		$urlDIR;
 
 	public function __construct($chat=null)
 	{
 		// trigger_error(__CLASS__.' inited');
 		$this->botFileInfo = new SplFileInfo(__FILE__);
 
-		$this->urlDIR = 'https://js-master.ru/' . str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__);
+		$this->DIR= str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__);
+		$this->urlDIR = 'https://js-master.ru/' . $this->DIR;
+
+		$this->base= new DbJSON(__DIR__ . self::BASE);
 
 		$this->addChat($chat);
 
 		$this->log->add(__METHOD__.' botFileInfo,$this->cron= ',null,[$this->botFileInfo,$_SERVER['argv']]);
 	}
+
 
 	private function getAdvert()
 	{
@@ -28,7 +38,7 @@ class Advert extends TG
 		{
 			//* Оставляем только мою рекламу
 			$this->advert = array_filter($this->advert, function($i){
-				return in_array($i, ['cap_my_1','wod_my_1','invs','js-master']);
+				return in_array($i, ['cap_my_1','wod_my_1','firstvds','js-master']);
 			}, ARRAY_FILTER_USE_KEY);
 		}
 
@@ -56,27 +66,42 @@ class Advert extends TG
 
 		$this->log->add(__METHOD__.' src,txt=',null,[$src,$txt]);
 
-		$this->apiRequest([
+		//* Удаляем предыдущую рекламу
+		if(!empty($previous= $this->base->get($this->cron['chat']['id'])))
+		{
+			$this->apiRequest([
+				'chat_id' => $this->cron['chat']['id'],
+				'message_id'=> $previous
+			], 'deleteMessage');
+		}
+
+		$log= $this->apiRequest([
 			'text' => $txt,
 			'chat_id' => $this->cron['chat']['id'],
 			'disable_web_page_preview' => false,
-			'reply_markup' => [
-				"inline_keyboard" => [
+			'reply_markup' => ["inline_keyboard" => [
+				[
 					[
-						[
-							'text' => $rnd['alt'],
-							'url' => $href
-						],
+						'text' => $rnd['alt'],
+						'url' => $href
 					],
+				],
 			],]
 		]);
+
+		$curMessId= [$this->cron['chat']['id']=> $log['message_id']];
+		$this->base->set($curMessId);
+
+		$this->log->add(__METHOD__.' $log=',null,[$log]);
 	}
+
 
 	public function addChat(?string $chat)
 	{
 		if(is_string($chat)) $chat= strtolower($chat);
 
-		if($chat && !empty($this->argv[$chat])) $this->cron['chat'] = $this->argv[$chat];
+		if($chat && !empty($this->argv[$chat]))
+			$this->cron['chat'] = $this->argv[$chat];
 		elseif (php_sapi_name() == 'cli')
 		{
 			$this->cron['chat'] = $this->argv[$_SERVER['argv'][1]];
@@ -88,9 +113,8 @@ class Advert extends TG
 		$this->getTokens($this->cron['chat']['token']);
 		$this->webHook = 0;
 
-		parent::__construct();
-
-		$this->getAdvert();
+		parent::__construct()
+			->getAdvert();
 	}
 
 	private $argv= [
@@ -114,7 +138,7 @@ class Advert extends TG
 
 	public $advert = [
 
-		'AliExpress' => [
+		/* 'AliExpress' => [
 			'base' =>'https://alitems.com',
 			'alt' =>'Aliexpress INT',
 			'links' =>[
@@ -177,7 +201,7 @@ class Advert extends TG
 				'/assets/Cap_2.jpg',
 			],
 			'href'=>"https://t.me/CapitalistGameBot?start=673976740"
-		],
+		], */
 		/* 'wod_my_1'=> [
 			'alt'=> "💣RPG в Telegram",
 			'title'=> "Достигни первым максимального лэвела и получи миллион(!!!) рублей.
@@ -194,10 +218,11 @@ class Advert extends TG
 			],
 			'href'=>"https://t.me/WorldDogs_bot?start=673976740"
 		], */
-		'invs'=> [
+		'firstvds'=> [
 			'alt'=> "Дешевый хостинг",
+			'title'=> 'Кто хочет скидку, ловите промокод - <b>6481055129</b>',
 			'src'=> '/assets/invs_240_lh.png',
-			'href'=>"https://invs.ru?utm_source=partner&ref=ueQYF"
+			'href'=>"https://firstvds.ru/?from=1055129"
 		],
 		'proxy6.net'=> [
 			'title'=> "Стабильные прокси от 25р/мес.
@@ -224,7 +249,7 @@ if (php_sapi_name() === 'cli' && $_SERVER['argv'][1] === 'test')
 else
 {
 	$adv = new Advert('anekdot');
-	$adv->addChat('news');
+	// $adv->addChat('news');
 	$adv->addChat('sport');
 }
 

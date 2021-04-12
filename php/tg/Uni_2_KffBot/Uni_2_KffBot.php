@@ -6,6 +6,8 @@ require_once __DIR__."/Helper.class.php";
 
 class UniKffBot extends CommonBot implements Game
 {
+	const OPTS_SEPARATOR = '__';
+
 	public
 		$webHook=0;
 	protected
@@ -43,8 +45,14 @@ class UniKffBot extends CommonBot implements Game
 		//* Завершаем скрипт без входящего JSON
 		if(empty($this->inputData)) die ('Нет входящего запроса');
 
+		// $this->log->add(__METHOD__,null,['$this->inputData'=>$this->inputData]);
+
 		//* Определяем точку запуска
 		$this->is_group = !is_numeric(substr($this->chat_id,0,1));
+
+		// *FIX hidden admin
+		if($this->user_id === 1087968824)
+			$this->user_id= self::OWNER;
 
 		//* Защищаем от чужих чатов
 		$allowedGrop= !$this->is_group || in_array($this->chat_id, self::CHATS);
@@ -118,10 +126,10 @@ class UniKffBot extends CommonBot implements Game
 	{
 		$inputData = $this->cbn['data'] ?? $this->message["text"];
 
-		/* if(!empty($this->message))
+		if(!empty($this->message))
 			$this->setStatement([
 				'last'=> $this->message
-			]); */
+			]);
 
 		//* FIX multibots
 		$inputData= explode('@', $inputData)[0];
@@ -135,20 +143,20 @@ class UniKffBot extends CommonBot implements Game
 			is_array($res= $this->findCommand($inputArr, $this->message))
 		)
 		{
-			$this->log->add(__METHOD__.' findCommand',null,[$res]);
+			$this->log->add(__METHOD__.' findCommand',null,['$res'=>$res]);
 
 			$cmdName = $res['cmdName'];
 			$cmd = $res['cmd'];
 		}
 		else
 		{
-			$this->log->add(__METHOD__.' findCommand FAIL',E_USER_WARNING,[$res]);
+			$this->log->add(__METHOD__.' findCommand FAIL',E_USER_WARNING,['$res'=>$res]);
 		}
 
 		if(empty($this->statement))
 			$this->getStatement();
 
-		$this->log->add(__METHOD__.' $this->statement_1',null,[$this->statement,$cmdName,$cmd]);
+		$this->log->add(__METHOD__.' $this->statement_1',null,['statement'=>$this->statement, '$cmdName'=>$cmdName, '$cmd'=>$cmd]);
 
 
 		if(!empty($cmdName))
@@ -194,7 +202,7 @@ class UniKffBot extends CommonBot implements Game
 	{
 		list($cmdName, $cmd) = $inputArr;
 
-		$this->log->add(__METHOD__ . ' inputData: $inputArr,$cmdName, $cmd = ', null, [$inputArr,$cmdName, $cmd]);
+		$this->log->add(__METHOD__ . ' inputData:', null, ['$inputArr'=>$inputArr, '$cmdName'=>$cmdName, '$cmd'=>$cmd]);
 
 		//* Приходит локация
 		if(!empty($message['location']) && empty($message['venue']))
@@ -208,12 +216,13 @@ class UniKffBot extends CommonBot implements Game
 		{
 			return [
 				'cmdName'=>$cmdName,
-				'cmd'=> array_values(array_filter(explode('__', $cmd)))
+				'cmd'=> array_values(array_filter(explode(self::OPTS_SEPARATOR, $cmd)))
 			];
 		}
-		else $cmd= [$cmdName];
+		// else $cmd= [$cmdName];
+		else $cmd= array_values(array_filter(explode(self::OPTS_SEPARATOR, $cmdName)));
 
-		$this->log->add(__METHOD__ . ' NEW $cmd = ', null, [$cmd]);
+		$this->log->add(__METHOD__ . ' NEW', null, ['$cmd'=>$cmd]);
 
 		foreach(self::CMD as $cmdName=>&$commands)
 		{
@@ -224,7 +233,7 @@ class UniKffBot extends CommonBot implements Game
 				$this->setStatement([
 					'cmdName'=>$cmdName,
 					//* Отменяем ожидание вводимых данных
-					'wait familiar data'=>0,
+					'wait data'=>0,
 				]);
 
 				$this->log->add(__METHOD__.' $this->statement_2',null,[$this->statement]);
@@ -245,7 +254,7 @@ class UniKffBot extends CommonBot implements Game
 			}
 		}
 
-		$this->log->add(__METHOD__.' не найдено в self::CMD  $cmdName, $cmd',null,[$cmdName, $cmd]);
+		$this->log->add(__METHOD__.' не найдено в self::CMD',null,['$cmdName'=>$cmdName, '$cmd'=>$cmd]);
 
 		//* Внутренняя команда
 		return [
@@ -268,7 +277,10 @@ class UniKffBot extends CommonBot implements Game
 
 interface Game {
 	//* Command list
-	const CHATS = [-1001200025834],
+	const CHATS = [-1001200025834, -1001251056203,
+		// *Новости Крыма - https://t.me/crimeanNewsComments
+		-1001305018802,
+	],
 	CMD = [
 		'Draws'=>[
 			'general'=>'⬅️Главная',
@@ -310,9 +322,15 @@ interface Game {
 			'remove_self'=>'❌Удалить данные',
 		],
 
+		'Converter'=> [
+			'converter'
+		],
+		'Reviews'=> [
+			'Reviews'
+		],
 		'Admin'=> [
 			'adm'
-		]
+		],
 	],
 
 	BTNS = [
@@ -324,8 +342,9 @@ interface Game {
 	CATEGORIES = ['Медицина','Образование','IT','SEO','PR','Строительство','Торговля','Финансы','Искусство','Общепит','Другое'],
 
 	INFO = [
-		'about'=>"Бот имеет расширенный функционал.\n<b>Основные команды:</b>\n/gismeteo - Показ текущей погоды по вашей геолокации с возможностью посмотреть прогноз на ближайшие дни.
-		/draws - Создание розыгрышей для всех желающих.",
+		// 'about'=>"Бот имеет расширенный функционал.\n<b>Доступные команды боту:</b>\n/gismeteo - Показ текущей погоды по вашей геолокации с возможностью посмотреть прогноз на ближайшие дни.
+		// /draws - Создание розыгрышей для всех желающих.",
+		'about'=>"<b>Доступные команды боту:</b>\n/gismeteo - Показ текущей погоды по вашей геолокации с возможностью посмотреть прогноз на ближайшие дни.",
 		'balance'=>'У нас - коммунизм, товагисчи!!! Какие деньги?',
 		'settings'=>'Какие нужны индивидуальные настройки? Пишите @js_master_bot',
 		/* 'advanced'=> [
@@ -337,14 +356,14 @@ interface Game {
 				],
 			],],
 		], */
-		'help'=>"При возникновении трудностей с использованием бота обратитесь по одной из указанных ссылок.",
+		// 'help'=>"При возникновении трудностей с использованием бота обратитесь по одной из указанных ссылок.",
 		'help'=> [
 			'text' => "При возникновении трудностей с использованием бота обратитесь по одной из указанных ссылок.",
 			'reply_markup' => ["inline_keyboard" => [
 				[
 					// ['text' => 'Support', 'url' => 'https://t.me/js_master_bot'],
 					['text' => 'Development', 'url' => 'https://t.me/js_master_bot'],
-					['text' => '💬Community', 'url' => 'https://t.me/joinchat/KCwRpEeG8OoZmye-5Cz55Q'],
+					['text' => '💬Community', 'url' => 'https://t.me/joinchat/KCwRpEeG8OqYEb1bUKU6RA'],
 				],
 			],],
 		],
@@ -352,8 +371,6 @@ interface Game {
 	];
 }
 
-interface PumpInt {
-}
 
 interface DrawsInt {
 }

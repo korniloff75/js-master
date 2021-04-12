@@ -1,6 +1,8 @@
 <?php
 
 require_once __DIR__."/../CommonBot.class.php";
+require_once __DIR__."/UniConstruct.trait.php";
+require_once __DIR__."/Helper.class.php";
 
 
 class UniKffBot extends CommonBot implements Game,PumpInt,DrawsInt

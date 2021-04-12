@@ -1,4 +1,5 @@
-<Files "token.json">
+# <Files "token.json">
+<Files "*.json">
 	Require all denied
 	Deny from all
 </Files>

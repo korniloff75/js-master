@@ -6,7 +6,7 @@ trait Parser {
 
 	protected
 		$baseDir = 'base/',
-		$botDir;
+		$botDir; //* defined in tg.class.php
 
 
 	/**
@@ -25,16 +25,21 @@ trait Parser {
 
 		if($opts['onlyOwner'] && !$this->is_owner)
 		{
-			$this->NoUpdates();
+			$this->NoUpdatesTG();
 			$this->log->add(__METHOD__.' not OWNER',E_USER_ERROR);
 			die;
 		}
 
-		$this->botDir = $this->botDir ?? __DIR__;
-
 		if(substr($this->baseDir, 0, 1) !== DIRECTORY_SEPARATOR)
 			$this->baseDir = "{$this->botDir}/" . basename($this->baseDir);
 		// $baseDir = "{$this->botDir}/" . basename($this->baseDir);
+
+		$this->log->add(__METHOD__.' $this->baseDir= ',null, [$this->baseDir]);
+
+		if(!file_exists($this->baseDir))
+		{
+			mkdir($this->baseDir, 0755, 1);
+		}
 
 		# Collect $this->baseSource
 		$this->baseSource = $this->CollectBaseArray();
@@ -49,23 +54,30 @@ trait Parser {
 			# Получаем файл для текущего chat_id
 			if(isset($base[$this->chat_id]))
 			{
-				$currentItem = "{$this->baseDir}/" . $base[$this->chat_id];
+				$currentItem = "{$this->baseDir}/{$base[$this->chat_id]}";
 				$this->log->add(__METHOD__ . ' - $currentItem = ' . $currentItem);
-				$this->objBase = new DbJSON($currentItem);
-				$this->savedBase = $this->objBase->get();
+				// $this->savedBase = $this->objBase->get();
 
 			}
+			else
+			{
+				$currentItem = "{$this->baseDir}/{$this->chat_id}.$bSource.json";
+			}
 
+			$this->objBase = new DbJSON($currentItem);
+
+			$this->savedBase = $this->objBase->get();
 
 			if(!$this->AddLocalParser($source, $opts))
 				continue;
+
 			// $this->log->add(__METHOD__ . " - \$this->savedBase = ", null, [$this->savedBase]);
 		}
 
 		# If not exist new content
 
 		if (!$this->countDiff)
-			return $this->NoUpdates();
+			return $this->NoUpdatesTG();
 	} // Parser
 
 
@@ -136,6 +148,7 @@ trait Parser {
 		//* use custom handler if EXIST =====
 		if(!method_exists($this, $handlerName))
 			return false;
+
 		$this->log->add("method $handlerName is exist");
 
 		if(
@@ -219,7 +232,7 @@ trait Parser {
 	 * @param xBlock - parent node for parsing
 	 * optional @param srcName - img attribute name
 	 */
-	public static function DOMcollectImgs(string $source, DOMXpath &$xpath, DOMNode &$xBlock, string $srcName = 'src')
+	public static function DOMcollectImgs(string $source, DOMXpath &$xpath, DOMNode &$xBlock, ?string $srcName = 'src')
 	:array
 	{
 		$xImgs = $xpath->query(".//img[@$srcName]", $xBlock);
@@ -230,10 +243,19 @@ trait Parser {
 		foreach($xImgs as $img) {
 			if(!strlen($src = $img->getAttribute($srcName)))
 				continue;
-			if(strpos($src, 'http') !== 0)
+
+			// trigger_error("\$src= $src");
+			// trigger_error(strpos($src, '//'));
+
+			if(strpos($src, '//') === 0)
+			{
+				// $scheme= parse_url($src, PHP_URL_SCHEME);
+				$src = "http:{$src}";
+			}
+			elseif(strpos($src, 'http') !== 0)
 			{
 				$src = preg_replace("~^/+~", '', $src);
-				$src = "$source$src";
+				$src = "{$source}{$src}";
 			}
 
 			$toCont []= "$src|||" . ($img->getAttribute('alt') ?? '');
@@ -252,7 +274,7 @@ trait Parser {
 	 * @param excludes - array with excludes words in src
 	 * Возвращает массив, пригодный для отправки в ТГ методом sendMediaGroup
 	 */
-	public static function ExtractImages(string $source, DOMXpath &$xpath, DOMNode &$xBlock, string $srcName = 'src', array $excludes=[])
+	public static function ExtractImages(string $source, DOMXpath &$xpath, DOMNode &$xBlock, ?string $srcName = 'src', array $excludes=[])
 	:array
 	{
 		$imgArr = self::DOMcollectImgs($source, $xpath, $xBlock, $srcName);
@@ -291,8 +313,8 @@ trait Parser {
 
 		$links = [];
 		foreach($mainLinks as $link) {
-			$href = $link->getAttribute("href");
-			if(!strlen($href))
+
+			if(!strlen($href = $link->getAttribute("href")))
 				continue;
 
 			$href = (stripos($href, 'http') === false) ? $source . preg_replace("~^/+~", '', $href) : $href;
@@ -306,7 +328,7 @@ trait Parser {
 	}
 
 
-	protected function NoUpdates()
+	protected function NoUpdatesTG()
 	{
 		if (!array_key_exists('callback_query', $this->inputData)) return;
 
@@ -381,8 +403,8 @@ trait Parser {
 		// $innerHTML = str_ireplace($remove, '', $innerHTML);
 		//* FIX 4 TG
 		$innerHTML = preg_replace(
-			["/^\s*[\d\.]+\s*$/m", "/\s*[\r\n]{2,}/"
-		], ['', PHP_EOL], $innerHTML);
+			["/^[\\d\\.\\s]+$/", "/\\s*[\r\n]{2,}|[\r\n]*?<br\\s*?\\/?>[\r\n]*?/", '~<p>([\s\S]+?)</p>~i'
+		], ['', PHP_EOL, PHP_EOL."$1".PHP_EOL], $innerHTML);
 		// trigger_error(__METHOD__ . ' $innerHTML= ' . $innerHTML);
 
 		return strip_tags($innerHTML, self::$allowedTags);

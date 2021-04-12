@@ -8,7 +8,7 @@
 </div>
 
 <script id="prim" type="text/javascript">
-// Суммирование одинаковых свойств
+// *Суммирование одинаковых свойств
 var a = [
 {prop_1: 1, prop_2: 2, prop_3: 5},
 {prop_1: 2, prop_2: 4},
@@ -16,7 +16,8 @@ var a = [
 {prop_1: 4, prop_2: 8, prop_4: 5}
 ];
 
-function sumProps (arr) {
+// *1 вариант, низкоуровневое решение
+function sumProps_1 (arr) {
 	var out = {};
 	arr.forEach(function(i) {
 		for (var p in i) {
@@ -28,10 +29,27 @@ function sumProps (arr) {
 	});
 	return out;
 }
-console.log(sumProps (a));
+
+// *2 вариант, высокоуровневое решение, ES-6
+function sumProps_2 (arr) {
+	return arr.reduce((acc,i)=>{
+		Object.keys(i).forEach(p=>{
+			acc[p] = acc[p] || 0;
+			acc[p] += i[p];
+		});
+
+		return acc;
+	}, {});
+}
+
+console.log(sumProps_1 (a), sumProps_2 (a));
 </script>
 
-<button class=button onclick="arr.innerHTML = printObj(sumProps (a));">Суммировать свойства</button>
+<button class="button" onclick="arr.innerHTML = printObj(sumProps_1 (a));">Суммировать свойства 1</button>
+
+<button class="button" onclick="arr.innerHTML = printObj(sumProps_2 (a));">Суммировать свойства 2</button>
+
+<button class="button" onclick="arr.innerHTML = printObj(a);">Возврат</button>
 
 <script>
 	// Рекурсивный листинг объекта
@@ -56,5 +74,15 @@ console.log(sumProps (a));
 </script>
 
 
+<h5>UPD 10.05.2020:</h5>
+
+<div>
+	<p></p>
+
+По дельному совету Виталия из комментариев, я привёл также более современный способ решения этой задачи -- с использованием нативного метода из <i>ES-6</i> -- <b>Array.prototype.reduce</b><p></p>
+</div>
+
+
+
 <h3>Исходный код javascript</h3>
-<pre><code for="#prim"></code></pre>
+<pre><code for="#prim" data-lib="native ES-5/6"></code></pre>

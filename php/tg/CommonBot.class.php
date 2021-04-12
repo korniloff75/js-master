@@ -22,18 +22,16 @@ class CommonBot extends TG
 
 	private
 		$is_owner = null; */
+	static $protecText = "Вы пытаетесь воспользоваться частным ботом.\nДля его разблокировки свяжитесь с автором <b>@js_master_bot</b>",
+		$noUdatesText = "Обновлений пока нет. Попробуйте позже.";
 
 	protected
 		// $is_owner = false,
 		$responseData,
-		$license = [],
+		$objLicense = [],
 		$savedBase = [],
 		//* from tg.class.php
-		$botDir,
-		# Счётчик обновлений
-		$countDiff = 0,
-		$protecText = "Вы пытаетесь воспользоваться частным ботом.\nДля его разблокировки свяжитесь с автором <b>@js_master_bot</b>",
-		$noUdatesText = "Обновлений пока нет. Попробуйте позже.";
+		$botDir;
 
 	public function __construct()
 	{
@@ -79,7 +77,7 @@ class CommonBot extends TG
 		{
 			require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
 
-			$this->log = new Logger($logFile ?? 'tg.class.log', $this->botDir ?? __DIR__);
+			$this->log = new Logger($logFile ?? (__CLASS__.'.log'), $this->botDir);
 		}
 
 		return $this;
@@ -160,7 +158,7 @@ class CommonBot extends TG
 			}
 
 			$responseData = $responseData ?? $this->responseData;
-			$responseData['text'] = $this->protecText;
+			$responseData['text'] = self::$protecText;
 			$responseData['disable_web_page_preview'] = false;
 			$this->apiResponseJSON($responseData);
 
@@ -186,10 +184,10 @@ class CommonBot extends TG
 	{
 		if(
 			empty($this->license)
-			&& ($license = new DbJSON("{$this->botDir}/license.json"))
+			&& ($this->objLicense = new DbJSON("{$this->botDir}/license.json"))
 		)
 		{
-			$this->license = $license->get();
+			$this->license = $this->objLicense->get();
 			// $this->license = json_decode($license,1);
 		}
 
@@ -199,13 +197,13 @@ class CommonBot extends TG
 			|| array_key_exists($this->user_id, $this->license)
 		) return;
 
-		$license->set([$this->user_id=> [
+		$this->objLicense->set([$this->user_id=> [
 			$user_data['term'] ?? "3000-01-01",
 			"{$this->message['from']['first_name']} "
 			. ($this->message['from']['last_name']??'')
 			. " {$this->message['from']['username']}"
 		]]);
-		// $this->license['change']= 1;
+
 	}
 
 
@@ -218,7 +216,7 @@ class CommonBot extends TG
 		# Advert
 		if(!count($db= $_adv->get()))
 		{
-			$this->log->add('realpath Common/Adv.json = ' . realpath(__DIR__ . '/Common/Adv.json') . "\nDIR = " . __DIR__, E_USER_WARNING, [$db]);
+			$this->log->add('realpath Common/Adv.json = ' . realpath(__DIR__ . '/Common/Adv.json'), E_USER_WARNING, ['__DIR__'=>__DIR__, '$db'=>$db]);
 			return false;
 		}
 
@@ -232,10 +230,10 @@ class CommonBot extends TG
 	}
 
 
-		/**
+	/**
 	 * @param haystack
-	 * @param string||array needles
-	 * @param service posArr
+	 * @param needles {string|array} 
+	 * @param posArr service
 	 * Возвращает вхождение первой подстроки из mixed @needles
 	 */
 	public static function stripos_array(string $haystack, $needles, ?int $offset= 0, $posArr= [])
@@ -319,23 +317,14 @@ class CommonBot extends TG
 
 	public function __destruct()
 	{
-		if( !empty($this->license['change']) )
+		if( !empty($this->objLicense->change) )
 		{
 			array_walk($this->license, function(&$data,$id){
 				$data= [$data['term'],$data['name'],$data['blocked']];
 			});
-
-			/* unset($this->license['change']);
-
-			file_put_contents(
-				"{$this->botDir}/license.json",
-				json_encode($this->license, JSON_UNESCAPED_UNICODE|JSON_NUMERIC_CHECK|JSON_UNESCAPED_SLASHES), LOCK_EX
-			); */
 		}
 
-		$this->log->add(__METHOD__,null,$this->license);
+		// $this->log->add(__METHOD__,null,$this->license);
 
-		# Выводим логи
-		// if($this->__test) $this->log->print();
 	}
 } // CommonBot

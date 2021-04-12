@@ -14,6 +14,7 @@ if(php_sapi_name() === 'cli' && empty($_SERVER['DOCUMENT_ROOT']))
 }
 require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Parser.trait.php";
 
+
 class KorniloFF_news extends CommonBot
 {
 	//* Include Parser trait
@@ -25,8 +26,8 @@ class KorniloFF_news extends CommonBot
 
 		$baseDir = 'base/',
 		$cron = [
-			'chat'=> ['id' => -1001223951491,],
-			// 'chat'=> ['id' => 673976740,],
+			'chat'=> ['id' => -1001223951491],
+			// 'chat'=> ['id' => 673976740],
 			'from'=> ['id' => 673976740],
 		],
 		// Specify headers
@@ -61,7 +62,7 @@ class KorniloFF_news extends CommonBot
 		$remoteSource = [
 			'https://crimea-news.com/',
 			'http://m.allcrimea.net/',
-			'http://www.yalta-24.ru/',
+			// 'http://www.yalta-24.ru/',
 		];
 
 	private
@@ -71,13 +72,15 @@ class KorniloFF_news extends CommonBot
 
 	public function __construct()
 	{
-		// \H::profile('base');
 		# Set local data
 		$this->botFileInfo = new kffFileInfo(__FILE__);
 
 		# Запускаем скрипт
 		# Protect from CommonBot
-		parent::__construct()->checkLicense()->init();
+		parent::__construct()
+			->findCommand()
+			->checkLicense()
+			->init();
 
 	} //__construct
 
@@ -94,6 +97,18 @@ class KorniloFF_news extends CommonBot
 		die('OK');
 
 	} // init
+
+
+	private function findCommand()
+	{
+		$this->log->add(__METHOD__ . " - \$this->text", null, [
+			$this->text,
+		]);
+
+		if(!$this->text) return $this;
+
+		return $this;
+	}
 
 
 	protected function parser_crimea_news_com($source, &$doc)
@@ -165,14 +180,18 @@ class KorniloFF_news extends CommonBot
 		$content = [];
 
 		//todo Отключаю изображения на время на crimea-news.com
-		$_photos = [];
-		$imgXpath = $this->imgXpath ?? "//div[@class=\"__news_c\"][1]";
+		if($this->chat_id === 673976740 || true)
+		{
+			$imgXpath = $this->imgXpath ?? "//div[@class=\"news_c\"][1]";
+		}
+
 		//todo правильный вариант для сохранения
 		$_imgXpath = $this->imgXpath ?? "//div[@class=\"news_c\"][1]";
 
 		//* Перебираем все новые ссылки и грузим из них в контент
 		foreach ($diff as &$link) {
 			$s = parse_url($link);
+			$s['host']= str_ireplace('crimea-news.com', 'cdn-crimea-news.com', $s['host']);
 			$source = "{$s['scheme']}://{$s['host']}/";
 			$addContent = '';
 
@@ -184,24 +203,20 @@ class KorniloFF_news extends CommonBot
 			)
 				continue;
 
-			$xImg = $imgXpath === $xpathToBlock ? $xBlock : $xpath->query($imgXpath)->item(0);
+			if($this->chat_id === 673976740 || true)
+			{
+				$xImg = $imgXpath === $xpathToBlock ? $xBlock : $xpath->query($imgXpath)->item(0);
+			}
+
 
 			if(is_object($xImg))
 			{
+
 				$imgArr = self::ExtractImages($source, $xpath, $xImg, 'src', ['crimeanews.jpg', 'size100/']);
 				// $this->log->add('$imgArr', null, [$imgArr]);
 				$photos = array_merge_recursive($photos, $imgArr);
 			}
 
-			//todo START
-			$_xImg = $xpath->query($_imgXpath)->item(0);
-			if(is_object($_xImg))
-				{
-					$_imgArr = self::ExtractImages($source, $xpath, $_xImg, '*', ['crimeanews.jpg', 'size100/']);
-					// $this->log->add('$imgArr', null, [$imgArr]);
-					$_photos = array_merge_recursive($_photos, $_imgArr);
-				}
-			//todo END
 
 			//* Собираем для добавления в $content
 			$header = $xpath->query(".//h1[1]")->item(0)->textContent;
@@ -214,7 +229,7 @@ class KorniloFF_news extends CommonBot
 				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
 		}
 
-		$this->log->add('count($photos) = ' . count($photos));
+		$this->log->add('count($photos) = ' . count($photos), null, [$photos]);
 
 		# На отсылку
 		if(count($content))
@@ -222,9 +237,9 @@ class KorniloFF_news extends CommonBot
 		if(count($photos))
 			$out['sendMediaGroup'] = $photos;
 
-		//todo Ловим изображения
-		if(count($_photos))
-			file_put_contents(__DIR__.'/photos.txt',$_photos);
+		//note Ловим изображения
+		if(count($photos))
+			file_put_contents(__DIR__.'/photos.txt',json_encode($photos));
 
 		return $out;
 	} //* handler_crimea_news_com

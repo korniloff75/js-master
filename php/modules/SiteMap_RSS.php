@@ -49,6 +49,7 @@ class SiteMap_RSS
 			$data = \H::json($page . '/data.json');
 			// var_dump($page . '/data.json', $data);
 
+			// *Скрытые
 			if(!empty($data['hidden'])) continue;
 
 			// $page = \Path::fromRootStat($page);
@@ -62,28 +63,9 @@ class SiteMap_RSS
 			# RSS
 			# Собираем контент
 			$itemContent = php\classes\Render::contentCollect($page);
-			# Удаляем скрипты и коды
-			// $itemContent = preg_replace("#<(script|pre)[\s\S]+?</\\1>#ui", "\n", $itemContent); // |&[\S]+?;
 
 			# Чистка
-			$itemContent = str_replace(['/>'], ['>'], $itemContent);
-			// $itemContent = str_replace(['&', '/>'], ['&amp;amp;', '>'], $itemContent);
-
-			$itemContent = preg_replace([
-				# Удаляем скрипты и коды
-				'#<(script|pre)[\s\S]+?</\1>#ui',
-				# Оборачиваем значения атрибутов в кавычки
-				"#\s(id|class|rel)=\s*([^\"\'\d][^\s\b>]*)#ui",
-				"#\s(value|data-[^\s=]+|title|name|border)=\s*([^\"\'\s\b>]+)#ui",
-				"#\s+(hidden|checked|required)\s*(?!=)#ui"
-			], [
-				"\n",
-				" $1=\"$2\"",
-				" $1=\"$2\"",
-				" $1=\"\" "
-			], $itemContent);
-
-			$itemContent = preg_replace_callback_array([
+			/* $itemContent = preg_replace_callback_array([
 				"#<(=|\s*\d+)#ui" => function($matches) {
 				return htmlspecialchars($matches[0]);
 				},
@@ -95,22 +77,15 @@ class SiteMap_RSS
 				'#<(code)>(.+?)</\1>#ui' => function($matches) {
 				return "<{$matches[1]}>" . htmlspecialchars($matches[2]) . "</{$matches[1]}>";
 				},
-				# Закрываем одиночные теги
-				/* "#(<(?:img|input|br|hr|link|source)[^>]*?)\s*>#ui" => function($matches) {
-					// "$1 />",
-				return "{$matches[1]} />";
-				}, */
-			], $itemContent);
 
-			# Закрываем одиночные теги
-			$itemContent = preg_replace("#(<(?:img|input|br|hr|link|source|stop|path)[^>]*?)\s*>#ui", "$1 />", $itemContent);
+			], $itemContent); */
 
 
 			$this->rss .= '<item turbo="true">'
 			. "\n<link>" . \BASE_URL . $page . "</link>\n"
 			. "\n<turbo:content>
 				<![CDATA[\n"
-			. $itemContent
+			. $this->_addToRss($itemContent)
 			. "\n]]>
 				</turbo:content>\n"
 			. "</item>\n\n";
@@ -131,6 +106,36 @@ class SiteMap_RSS
 
 		return $this->sitemap;
 	} // build
+
+
+	/**
+	 * *Добавляем элемент в RSS
+	 * обязательный header добавляется при генерации контента
+	 */
+	private function _addToRss($itemContent)
+	{
+		// $doc = new DOMDocument('1.0','utf-8');
+		$doc = new DOMDocument();
+		@$doc->loadHTML($itemContent);
+
+		$doc->normalizeDocument();
+
+		$xpath= new \DOMXPath($doc);
+
+		// $body= $xpath->query('//body/descendant::*');
+		$scripts= $xpath->query('//script|//code|//pre|//style');
+
+		foreach($scripts as $s){
+			$s->parentNode->removeChild($s);
+		}
+
+		$body= $xpath->query('//body')->item(0);
+
+		$xml= utf8_decode($doc->saveXML($body));
+		// $xml= $doc->saveXML($body);
+
+		return preg_replace('~<body>([\s\S]+)</body>~u', '$1', $xml, 1);
+	}
 
 } // SiteMap_RSS
 

@@ -20,35 +20,17 @@ class BDU extends Helper
 	public function __construct(UniKffBot &$UKB, ?array $cmd=null)
 	{
 		$this->setConstruct($UKB, $cmd)
+			// https://js-master.ru/php/tg/Uni_2_KffBot/BDU/base.json
+			->getCurData()
+			->inputDataRouter('save')
 			->init()
 			->routerCmd();
-		// $this->setConstruct($UKB, $cmd)->init()->routerCmd()->saveCurData();
 
 	} //* __construct
 
 
 	private function init()
 	{
-		// $this->log->add('$this->BTNS=',null,[$this->BTNS]);
-
-		$this->getCurData();
-
-		/* $this->drawsOwner = isset($this->data['current draws']['owner'])
-		&& $this->user_id === $this->data['current draws']['owner']['id']; */
-
-		$this->data['change'] = 0;
-
-		//* Ждем данные
-		if(!empty($this->statement['wait familiar data']))
-		{
-			//* Отправляем на приём данных
-			$this->checkFamilar($this->statement['dataName']);
-			$this->UKB->setStatement([
-				'wait familiar data'=>0,
-			]);
-			die;
-		}
-
 		$from= &$this->message['from'];
 		$curBase= &$this->data["{$from['id']}"];
 
@@ -78,6 +60,12 @@ class BDU extends Helper
 
 		if(count($o))
 		{
+			/* if(!$this->is_group && !empty($this->message['message_id']))
+			{
+				$o['message_id'] = $this->message['message_id'];
+				$this->apiRequest($o, 'editMessageText');
+			}
+			else  */
 			$this->send($o);
 		}
 		$this->log->add(__METHOD__.' $o...=',null,[$o,$cmd]);
@@ -130,7 +118,7 @@ class BDU extends Helper
 		if($notRealName = empty($curBase['realName']))
 		{
 			$this->UKB->setStatement([
-				'wait familiar data'=>1,
+				'wait data'=>1,
 				// 'familiar from'=>$curBase['from'],
 				'dataName'=>'fio'
 			]);
@@ -156,7 +144,7 @@ class BDU extends Helper
 	private function hashtags()
 	{
 		$this->UKB->setStatement([
-			'wait familiar data'=>1,
+			'wait data'=>1,
 			'dataName'=>'hashtags'
 		]);
 		// if($this->statement[])
@@ -169,7 +157,7 @@ class BDU extends Helper
 	private function region()
 	{
 		$this->UKB->setStatement([
-			'wait familiar data'=>1,
+			'wait data'=>1,
 			'dataName'=>'region'
 		]);
 		// if($this->statement[])
@@ -182,86 +170,35 @@ class BDU extends Helper
 	private function category()
 	{
 		$o= [
-			'text' => $this->about(),
-			// 'text' => "Выберите категорию для <u>добавления</u> \n\n".$this->about(),
+			// 'text' => $this->about(),
+			'text' => "Здесь вы можете подключать или отключать подходящие вам категории \n\n".$this->about(),
 			'message_id' => $this->message['message_id'],
-			'reply_markup' => [
+			/* 'reply_markup' => [
 				"inline_keyboard" => [],
-			],
+			], */
 		];
 
-		$this->show_category_buttons($o['reply_markup']['inline_keyboard']);
+		$this->show_category_buttons($o/* ['reply_markup']['inline_keyboard'] */);
 
 		// $this->apiResponseJSON($o, 'editMessageText');
 		return $o;
 	}
 
-	private function show_category_buttons(&$ikb,$method='save')
+
+	private function show_category_buttons(&$o,$method='save')
 	{
+		$ikb= &$o['reply_markup']['inline_keyboard'];
 		foreach(array_chunk(self::CATEGORIES,3) as $nr=>$row)
 		{
 			$ikb[]= [];
-			foreach($row as $spec)
+			foreach($row as $btn)
 			{
 				$ikb[$nr][]= [
-					'text'=> $spec,
-					'callback_data'=> "/BDU/{$method}_category__$spec",
+					'text'=> $btn,
+					'callback_data'=> "/BDU/{$method}_category__$btn",
 				];
 			}
 		}
-	}
-
-	/* private function toggle_category()
-	{
-		$this->UKB->setStatement([
-			'wait familiar data'=>1,
-			'dataName'=>'category'
-		]);
-
-		$o= [
-			'text' => "Выберите категорию для <u>добавления</u> \n\n".$this->about(),
-			'message_id' => $this->message['message_id'],
-			'reply_markup' => [
-				"inline_keyboard" => [],
-			],
-		];
-
-		$this->show_category_buttons($o['reply_markup']['inline_keyboard']);
-
-		$this->apiResponseJSON($o, 'editMessageText');
-		die;
-		// return $o;
-	} */
-
-	/* private function remove_category()
-	{
-
-		$o= [
-			'text' => "Выберите категорию для <u>удаления</u> \n\n".$this->about(),
-			'reply_markup' => [
-				"inline_keyboard" => [],
-			],
-		];
-
-		$this->show_category_buttons($o['reply_markup']['inline_keyboard'], 'unsave');
-
-		return $o;
-	} */
-
-
-	//* Приём и сохранение данных
-	private function checkFamilar($dataName)
-	{
-		$this->log->add(__METHOD__.' $this->message,$dataName',null,[$this->message,$dataName]);
-
-		$txt= trim($this->message['text']);
-
-		if(method_exists(__CLASS__, "save_$dataName"))
-		{
-			$this->{"save_$dataName"}(explode("\n",$txt));
-		}
-		else
-			$this->log->add(__METHOD__." method save_$dataName is FAIL",E_USER_WARNING);
 	}
 
 
@@ -273,7 +210,7 @@ class BDU extends Helper
 		$this->log->add(__METHOD__." \$opts,\$this->cmd",null,[$opts,$this->cmd]);
 
 		$this->UKB->setStatement([
-			'wait familiar data'=>1,
+			'wait data'=>1,
 			'dataName'=>$dataName
 		]);
 
@@ -281,7 +218,7 @@ class BDU extends Helper
 	}
 
 
-	private function save_fio($arrStr)
+	protected function save_fio($arrStr)
 	{
 		$name= $arrStr[0];
 
@@ -337,7 +274,7 @@ class BDU extends Helper
 	} //* save_name
 
 
-	private function save_hashtags($arrStr)
+	protected function save_hashtags($arrStr)
 	{
 		$curBase= &$this->data[$this->user_id];
 		$curBase['hashtags']= $arrStr;
@@ -345,7 +282,7 @@ class BDU extends Helper
 		$this->apiResponseJSON(['text'=>$this->about()]);
 	} //* save_hashtags
 
-	private function save_region($arrStr)
+	protected function save_region($arrStr)
 	{
 		$curBase= &$this->data[$this->user_id];
 		$curBase['region']= $arrStr;
@@ -356,7 +293,7 @@ class BDU extends Helper
 	/**
 	 * Добавление / удаление категории
 	 */
-	private function save_category($arrStr)
+	protected function save_category($arrStr)
 	{
 		$curBase= &$this->data[$this->user_id];
 		if(in_array($arrStr[0], $curBase['category']))
@@ -376,30 +313,15 @@ class BDU extends Helper
 		$o= [
 			'text'=>$this->about($curBase),
 			'message_id' => $this->message['message_id'],
-			'reply_markup' => [
-				"inline_keyboard" => [],
-			],
 		];
 
-		$this->show_category_buttons($o['reply_markup']['inline_keyboard']);
+		$this->show_category_buttons($o);
 
 		$this->apiResponseJSON($o, 'editMessageText');
 
 		$this->log->add(__METHOD__." \$arrStr[0]=",null,[$arrStr[0]]);
 	} //* save_category
 
-	/* private function unsave_category($arrStr)
-	{
-		$curBase= &$this->data[$this->user_id];
-
-		$curBase['category']= array_filter($curBase['category'], function(&$i)use($arrStr){
-			return $i !== $arrStr[0];
-		});
-		$this->data['change']++;
-		$this->apiResponseJSON(['text'=>$this->about($curBase)]);
-		// $this->log->add(__METHOD__." curBase=",null,[$curBase]);
-	}
- */
 
 	//* Текущие данные
 	private function about($curBase=null)
@@ -441,9 +363,9 @@ class BDU extends Helper
 		$users= '';
 		$iKeyboard= [];
 
-		foreach($this->data as $id=>$curBase)
+		foreach($this->data as $id=>&$curBase)
 		{
-			foreach($curBase as $fName=>$fld)
+			foreach($curBase as $fName=>&$fld)
 			{
 				switch ($fName) {
 					case 'from':
@@ -464,12 +386,13 @@ class BDU extends Helper
 			}
 			$users.= "\n";
 
+			//* Кнопки удаления данных
 			if(!is_numeric($id)) continue;
 
 			$name= $curBase['from']['first_name']??$id;
 
 			$iKeyboard[]= [
-				'text'=> $name,
+				'text'=> "❌$name",
 				'callback_data'=> "/BDU/remove_user__{$id}__$name",
 			];
 		}
@@ -482,7 +405,7 @@ class BDU extends Helper
 		if($this->is_owner)
 		{
 			$ikb= [];
-			$o['text'].= "\n\n<u>Удаление данных:</u>";
+			$o['text'].= "\n\n<u>❌Удаление данных❌</u>";
 
 			foreach(array_chunk($iKeyboard,4) as $nr=>&$row)
 			{
@@ -553,7 +476,7 @@ class BDU extends Helper
 				if(!empty($uData['region'])) $region= '(' . implode(', ',$uData['region']) . ')';
 
 				$tag= str_replace([' ','-'],'_',$tag);
-				$strTag= "#$tag - ".$this->showUsername($data[$id]) . $region . PHP_EOL;
+				$strTag= "#$tag - ".$this->showUsername($data[$id], 'tag') . $region . PHP_EOL;
 
 				//* Добавляем в каждую категорию
 				foreach($curCats as &$cat)
@@ -575,12 +498,9 @@ class BDU extends Helper
 		// $this->show_category_buttons()
 		$o= [
 			'text' => "Выберите категорию для <u>просмотра</u> \n\n",
-			'reply_markup' => [
-				"inline_keyboard" => [],
-			],
 		];
 
-		$this->show_category_buttons($o['reply_markup']['inline_keyboard'], 'list');
+		$this->show_category_buttons($o, 'list');
 		return $o;
 	}
 
@@ -604,16 +524,16 @@ class BDU extends Helper
 
 		$o= [
 			'text'=>"<u><b>$catName</b></u>\n\n$txt",
-			'reply_markup' => [
-				"inline_keyboard" => [],
-			],
+			'message_id'=> $this->statement['last']['message_id'],
 		];
 
-		$this->show_category_buttons($o['reply_markup']['inline_keyboard'], 'list');
+		$this->show_category_buttons($o, 'list');
 
-		$this->apiResponseJSON($o);
+		// $this->apiRequest($o, 'editMessageText');
+		$this->apiResponseJSON($o, 'editMessageText');
 
 		$this->log->add(__METHOD__." \$catName,curCat=",null,[$catName,$curCat]);
+		die;
 	}
 
 
@@ -637,6 +557,9 @@ class BDU extends Helper
 	{
 		unset($this->data[$this->user_id]);
 		$this->data['change']++;
+
+		unset($this->license[$this->user_id]);
+		$this->objLicense->replace($this->license);
 
 		return $this->routerCmd('familiar');
 	}
@@ -666,6 +589,9 @@ class BDU extends Helper
 	{
 		unset($this->data[$arrStr[0]]);
 		$this->data['change']++;
+
+		unset($this->license[$arrStr[0]]);
+		$this->objLicense->replace($this->license);
 
 		$this->apiResponseJSON([
 			'text'=> "Данные удалены",

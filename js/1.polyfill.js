@@ -30,9 +30,11 @@ if (!NodeList.prototype.forEach) {
 
 // closest && fix matches
 ;(function(EL) {
+	if(EL.closest) return;
+
 	EL.matches = EL.matches || EL.mozMatchesSelector || EL.msMatchesSelector || EL.oMatchesSelector || EL.webkitMatchesSelector;
 
-	EL.closest = EL.closest || function closest(selector) {
+	EL.closest = function closest(selector) {
 		if (!this) return null;
 		if (this.matches(selector)) return this;
 		if (!this.parentElement) {return null}
