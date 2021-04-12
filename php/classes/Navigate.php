@@ -8,7 +8,7 @@ class Navigate
 	const
 		ALLOWED = \CONT . "((?!thumb|img|PHPMailer|assets).)*";
 
-	private static $log;
+	// private static $log;
 
 	public $firstPage;
 
@@ -16,9 +16,7 @@ class Navigate
 	function __construct($dir=null)
 
 	{
-		global $log, $First_page;
-
-		self::$log= &$log;
+		global $First_page;
 
 		$dir = self::checkContDir($dir ?? \CONT);
 
@@ -27,41 +25,26 @@ class Navigate
 
 		$this->map_path = $map_path = $dir . 'map_content.json';
 
-		// trigger_error(__METHOD__." \$this->map_path= " . $this->map_path.' called from= '. realpath('.').'$dir= '.realpath($dir));
-
 		#
 		$this->mapObj = new \DbJSON($map_path);
 		// $this->mapObj->test=1;
 
-		self::$log->add(__METHOD__,null,['count($this->mapObj)'=>count($this->mapObj), /* '$this->mapObj->get()'=>$this->mapObj->get() */]);
+		tolog(__METHOD__,null,['count($this->mapObj)'=>count($this->mapObj), /* '$this->mapObj->get()'=>$this->mapObj->get() */]);
 
 		if(!count($this->mapObj))
 		{
 			$this->mapObj->replace($this->createMap());
 			// note Нужно сразу записать, понять нельзя!
-			$this->mapObj->__destruct();
+			$this->mapObj->save();
 			// trigger_error(__METHOD__." \$this->mapObj->db has count ");
+			tolog(__METHOD__,null,['count($this->mapObj)'=>count($this->mapObj), $this->mapObj->count()]);
 		}
-
-		self::$log->add(__METHOD__,null,['count($this->mapObj)'=>count($this->mapObj), $this->mapObj->count()]);
-
 
 		# Flat file array
 		$this->map_flat = $this->mapObj->getFlat();
 		natsort($this->map_flat);
 
 		$this->firstPage = $this->map_flat[0];
-		// $this->firstPage = $this->mapObj->get(0);
-
-		// $this->createMap();
-
-		/* echo '<pre>';
-		var_dump(
-			$this->mapObj->db,
-			$this->map_flat
-		);
-		echo '</pre>';
-		exit; */
 
 	}
 
@@ -79,9 +62,9 @@ class Navigate
 	public static function skipSlashes(string $path)
 	:string
 	{
-		$re = preg_replace("#^/|/$#", "", $path);
+		$path = preg_replace("#^/|/$#", "", $path);
 		// var_dump($re);
-		return $re;
+		return $path;
 	}
 
 

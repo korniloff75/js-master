@@ -18,12 +18,20 @@ class Login
 		LOGIN_PATH = 'db/login.json',
 		TRYDB_PATH = 'db/tryDB.json';
 
+	private
+		$attempts;
+
 	function __construct()
 	{
 		extract($_REQUEST);
-		$this->uip = \H::realIP();
 
-		$this->tryDB = \H::json(self::TRYDB_PATH)[$this->uip] ?? 0;
+		if(empty($_SESSION)) session_start();
+
+		$this->IP = \H::realIP();
+
+		// todo
+		$this->attempts = new DbJSON(self::TRYDB_PATH);
+		$this->DB = new DbJSON(self::LOGIN_PATH);
 
 		if($login === 'logout')
 		{
@@ -34,21 +42,22 @@ class Login
 		elseif(!isset($login) && empty($action))
 		{
 			$this->tryLogin(1);
-			throw new Exception('В запросе нет $action' . "\nIP - {$this->uip}" , 1);
+			throw new Exception('В запросе нет $action' . "\nIP - {$this->IP}" , 1);
 		}
 
 
 		switch ($action) {
 			case 'authorize':
 				if(empty($pswd)) throw new Exception('В запросе нет $pswd', 1);
-				$this->DB = \H::json(self::LOGIN_PATH);
+				// $this->DB = \H::json(self::LOGIN_PATH);
 
-				# Если в базе нет админа - создаём нового
-				if(empty($this->DB['admin']))
+				//* Если в базе нет админа - создаём нового
+				if(empty($this->DB->admin))
 				{
-					$this->DB['admin'] = password_hash($pswd, PASSWORD_DEFAULT);
+					// $this->DB['admin'] = password_hash($pswd, PASSWORD_DEFAULT);
+					$this->DB->set(['admin' => password_hash($pswd, PASSWORD_DEFAULT)]);
 
-					\H::json(self::LOGIN_PATH, ['admin' => $this->DB['admin']]);
+					// \H::json(self::LOGIN_PATH, ['admin' => $this->DB['admin']]);
 					// var_dump($this->DB);
 					// die;
 				}
@@ -72,38 +81,34 @@ class Login
 
 	private function auth(string $login, string $pswd)
 	{
-		// var_dump($login);
-		\H::$tmp['db'] = $this->DB;
-		\H::$tmp['login'] = $login;
-		\H::$tmp['pswd'] = $pswd;
-		\H::log([
-			'echo "\$login = " . self::$tmp[\'login\'] . "; \$pswd = " . self::$tmp[\'pswd\']',
-			// 'echo "\$this->DB[\$login] = {$db[$login]}"',
-			'echo "password_verify(\$pswd, \$this->DB[\$login]) = "',
-			'var_dump(password_verify(self::$tmp[\'pswd\'], self::$tmp[\'db\'][self::$tmp[\'login\']]))'
-		], __FILE__, __LINE__);
+		tolog(__METHOD__,null,[
+			'$login'=>$login, '$this->DB->{$login}'=>$this->DB->{$login}, empty($this->DB->{$login}), '$pswd'=>$pswd, 'password_verify($pswd, $this->DB->{$login})'=>password_verify($pswd, $this->DB->{$login}), ($this->attempts->{$this->IP} <= self::TRY_ADMIN), !empty($this->DB->{$login})
+		]);
+
 		if(
-			$this->tryDB <= self::TRY_ADMIN
-			&& !empty($this->DB[$login])
-			&& password_verify($pswd, $this->DB[$login])
+			$this->attempts->{$this->IP} <= self::TRY_ADMIN
+			&& !empty($this->DB->{$login})
+			&& password_verify($pswd, $this->DB->{$login})
 		)
 		{
 			# Success
 			$_SESSION['auth'] = [
 				'group' => $login === 'admin' ? 'admin' : 'users',
-				'IP' => $this->uip,
+				'IP' => $this->IP,
 				'login' => $login,
 			];
 
-			$adm_db = \H::json('db/adm.json', $this->uip) ?? [
+			tolog(['session'=>$_SESSION]);
+
+			$adm_db = \H::json('db/adm.json', $this->IP) ?? [
 				'attempts' => 0,
 			];
 			++$adm_db['attempts'];
 			array_push($adm_db, date(\CF['date']['format']));
 
-			$adm_db = \H::json('db/adm.json', [$this->uip => $adm_db] );
+			$adm_db = \H::json('db/adm.json', [$this->IP => $adm_db] );
 
-			if($this->tryDB)
+			if($this->attempts->{$this->IP})
 				$this->tryLogin(0);
 		}
 		else
@@ -118,16 +123,14 @@ class Login
 
 	protected function tryLogin($bool)
 	{
+		$attempt= $this->attempts->{$this->IP};
+
 		if($bool)
-			++$this->tryDB;
+			++$attempt;
 		elseif(!empty($_SESSION['auth']['login']))
-			$this->tryDB = 0;
+			$attempt = 0;
 
-		// var_dump($this->tryDB, $this->uip);
-
-		\H::json(self::TRYDB_PATH, [
-			$this->uip => $this->tryDB
-		]);
+		$this->attempts->set([$this->IP=>$attempt]);
 
 	}
 

@@ -7,11 +7,20 @@
 if(!function_exists('tolog')){
 	function tolog()
 	{
-		// return $this->add(func_get_args());
 		global $log;
 
+		/* foreach($args= func_get_args() as &$a){
+
+		} */
+
+		$args= func_get_args();
+
+		if(is_array($args[0])){
+			$args= [__FUNCTION__,null,$args[0]];
+		}
+
 		$log = $log ?? new Logger();
-		return call_user_func_array([$log,'add'], func_get_args());
+		return call_user_func_array([$log,'add'], $args);
 	}
 }
 

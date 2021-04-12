@@ -1,6 +1,6 @@
 <?php
 
-define('VERSION', 'KFF-2.0');
+define('VERSION', 'KFF-3.0');
 
 define('HOME', $_SERVER['DOCUMENT_ROOT'] . '/');
 
@@ -100,6 +100,7 @@ define('OWNER', [
 define('HOST_IP', '185.117.153.195');
 
 define('TEMPLATE', 'templates/portfolio/');
+// define('TEMPLATE', 'templates/__default__/');
 
 define('SITENAME', 'Portfolio');
 

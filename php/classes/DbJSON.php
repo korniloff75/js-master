@@ -81,6 +81,12 @@ class DbJSON implements Iterator, Countable
 		return $v;
 	}
 
+
+	public function __isset($key) {
+		// return isset($this->{$key}) || isset($this->db[$key]);
+		return isset($this->db[$key]);
+	}
+
 	public function rewind() {
 		$this->position = 0;
 		// return $this;
@@ -119,6 +125,9 @@ class DbJSON implements Iterator, Countable
 			|| isset($this->values()[$this->position]);
 	}
 
+	/**
+	 * optional @param mode -  COUNT_NORMAL | COUNT_RECURSIVE
+	 */
 	public function count($mode=null)
 	{
 		return count($this->db, $mode);

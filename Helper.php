@@ -21,11 +21,11 @@ class H {
 
 	private function __construct()
 	{
-		global $log, $Nav, $__Start;
+		global $log, $Nav;
 
 		ini_set('short_open_tag', 'On');
 
-		require_once $_SERVER['DOCUMENT_ROOT'] . '/CONST.php';
+		require_once \DR . '/CONST.php';
 
 
 		if(array_key_exists('login', $_REQUEST))
@@ -34,27 +34,28 @@ class H {
 		/* # Обрабатываем фаталы
 		$this->handleFatals(); */
 
+		// todo ->is_adm()
 		define('ADMIN',
 			isset($_SESSION['auth']['login'])
 			&& $_SESSION['auth']['login'] === 'admin'
 			// && $_SERVER['SERVER_ADDR'] === HOST_IP
 			&& (
-				strpos(self::realIP(), \ADM) === 0
+				strpos(Site::realIP(), \ADM) === 0
 				|| LOCALHOST
 			)
 		);
 
 		// var_dump(\ADMIN, $_SESSION, self::realIP(), (strpos(self::realIP(), \ADM) === 0));
-		define('BASE_URL', (self::is('https') ? 'https' : 'http') . '://' . \HOST . '/');
+		define('BASE_URL', (Site::is('https') ? 'https' : 'http') . '://' . \HOST . '/');
 
 		# Для подключение не через ROOT
-		if (realpath('') !== realpath(\HOME))
+		if (realpath('') !== realpath(\DR))
 			return;
 
-		tolog(__METHOD__.'Helper started from ROOT');
+		tolog('Helper started from ROOT');
 
 
-		if(ADMIN || \TEST)
+		if(ADMIN || \TEST || Site::DEV)
 		{
 			# Develop
 			ini_set('display_errors', 1);
@@ -68,17 +69,10 @@ class H {
 			error_reporting(0);
 		}
 
-		require_once \HOME . 'php/funcs.php';
+		require_once \DR . '/php/funcs.php';
 		self::profile('base');
-		require_once \HOME . 'php/Path.php';
-		# before classes
-		require_once \HOME . 'php/modules/Iterator.php';
 
-
-		# Include all classes
-		eval (self::addFromDir('php/classes/', 'php'));
-
-		# create map ...
+		//* create map ...
 		// echo phpversion();
 		$Nav = new \php\classes\Navigate;
 
@@ -115,31 +109,22 @@ class H {
 	}
 
 
-	/* public static function log($data=[], $file='', $line='')
-	{
-		ob_start();
-			echo basename($file) . " : $line\n";
-			foreach($data as $i) {
-				eval($i . ';');
-				echo "\nOK ";
-			}
-		self::$log[] = ob_get_clean();
-
-	} */
-
-
+	/**
+	 * Add all items from the dir
+	 */
 	public static function addFromDir($dir, $opts=[])
 	:string
 	{
 		// echo "Запустили addFromDir.";
 		if(is_string($opts)) $opts = ['ext' => $opts];
+
 		$opts = array_merge([
 			'defer' => 0,
 			'except' => '0' // исплючения
 		], $opts);
 
 		if(!file_exists($dir)) {
-			note("dir $dir not exist", __FILE__);
+			tolog("dir $dir not exist");
 			return '';
 		}
 
@@ -198,7 +183,7 @@ class H {
 					// var_dump($fn);
 					$css = $pi['dirname'] . "/$fn.css";
 
-					note(["css = " => [$css, realpath('./'.$css), realpath('./templates/../' . "$fn.css")]], __FILE__, __LINE__);
+					tolog(["css = " => [$css, realpath('./'.$css), realpath('./templates/../' . "$fn.css")]], __FILE__, __LINE__);
 					if(!\ADMIN && file_exists($css)) return;
 
 					$patt = "<link rel=\"stylesheet/less\" type=\"text/css\" href=\"/$i\">";
@@ -209,7 +194,7 @@ class H {
 						(!is_file($css) || filemtime($i) > filemtime($css))
 					)
 					{
-						// require_once \HOME . 'php/modules/lessc.inc.php';
+						// require_once \DR . '/php/modules/lessc.inc.php';
 						try {
 
 							/* compile file $in to file $out if $in is newer than $out
@@ -225,7 +210,7 @@ class H {
 
 							// var_dump($less, $r);
 
-							note("Compille LESS $i\nreturn $r", __FILE__, __LINE__);
+							tolog("Compille LESS $i\nreturn $r", __FILE__, __LINE__);
 
 						} catch (exception $e) {
 							debug_zval_dump ("LESS not compilled.\nFatal error: \n" . $e->getMessage() . "\n" . __FILE__ . __LINE__);
@@ -233,10 +218,10 @@ class H {
 						}
 					}
 					else
-						note("NO class <b>lessc</b>", __FILE__);
+						tolog("NO class <b>lessc</b>", __FILE__);
 				break;
 
-				case 'php':
+				case 'php': //Legacy
 					$patt = file_exists($i) ? "include_once(\"$i\");\n" : "var_dump(\"$i\");";
 					// var_dump($patt);
 				break;
@@ -253,11 +238,11 @@ class H {
 			// var_dump($i->getPathName());
 			$nf = $next($i);
 			// $nf = $next($i->getPathName());
-			// note('patt = ' . $i, __FILE__, __LINE__);
+
 			$o .= $nf . "\n";
 		}
 
-		note('o = ' . $o);
+		// tolog('o = ' . $o);
 
 		// var_dump(self::$notes, $o);
 		return $o;
@@ -358,7 +343,7 @@ class H {
 
 	public static function includeModule ($name)
 	{
-		require_once \HOME . "php/modules/$name.php";
+		include_once \DR . "/php/modules/$name.php";
 		return new $name();
 	}
 
@@ -400,14 +385,6 @@ class H {
 	   return (int)$iValue;
 	}
 
-
-	public static function _json($path)
-	{
-		self::$_instance->add = function ($arr) {
-			return self::json($path, $arr, 0);
-		};
-		return self::$_instance;
-	}
 
 	/**
 	* returns mixed

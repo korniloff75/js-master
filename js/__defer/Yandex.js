@@ -33,24 +33,26 @@ _H.RSYa = {
 		console.log({s});
 	},
 
-	init: function addRSYa() {
+	init: function addRSYa(area) {
+		area = area || 'body .content'
+		if(!(area instanceof HTMLElement)){
+			area= document.querySelector(area);
+		}
+
 		var
 			that = this,
-			area = $('body article, body #sidebar')[0],
 			// Exceptions
 			noAD = /Sajt_dlya_slabovidyashhix\/(PRO|Lite)|Rekvizity/i,
-			parsMin = 5, interval = 3;
+			parsMin = 5;
 
 		// console.log(this);
-		this['$pars'] = $(area).find('p');
+
 
 		if (
-			//== Собираем все <p> в area. Если их меньше, чем parsMin - уходим
-			this['$pars'].length < parsMin
-			|| !area
+			!area
+			//* Собираем все <p> в area и удаляем скрытые. Если их меньше, чем parsMin - уходим
+			|| (this['$pars'] = $(area).find('p').filter((ind, i) => !i.closest || !i.closest('[hidden]'))) && this['$pars'].length < parsMin
 			|| noAD.test(location.href)
-			//* Удаляем скрытые
-			|| (this['$pars'] = this['$pars'].filter((ind, i) => !i.closest || !i.closest('[hidden]'))) && !this['$pars'].length
 		) return;
 		/* console.log(
 			area,
@@ -64,13 +66,15 @@ _H.RSYa = {
 			$pars : { enumerable: false},
 		});
 
+		var rnd= $.rnd(this['$pars']);
+
 		// if (!Object.keys(this).length) return;
 
 		//* Создаем рекламный блок после случайного <p> и наполняем его
 		// this.$adBlock = $('<div id="y'+(Math.random()*1000+2000)+'">').insertAfter($.rnd(this['$pars']));
-		this.$adBlock = $('<div id="yandex_rtb_R-A-486456-1"/>').insertAfter($.rnd(this['$pars']));
+		this.$adBlock = $('<div id="yandex_rtb_R-A-486456-1"/>').insertAfter(rnd);
 
-		console.log("this = ", this, "\nthis.$adBlock= ", this.$adBlock, this.$adBlock[0].id);
+		console.log("this = ", this, 'rnd=',rnd, "\nthis.$adBlock= ", this.$adBlock, this.$adBlock[0].id);
 
 		// *Yandex.RTB R-A-486456-1
 		$(window).on('load', this.prepare);
