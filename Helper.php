@@ -51,7 +51,7 @@ class H {
 		if (realpath('') !== realpath(\HOME))
 			return;
 
-		$log->add(__METHOD__.'Helper started from ROOT');
+		tolog(__METHOD__.'Helper started from ROOT');
 
 
 		if(ADMIN || \TEST)
@@ -115,7 +115,7 @@ class H {
 	}
 
 
-	public static function log($data=[], $file='', $line='')
+	/* public static function log($data=[], $file='', $line='')
 	{
 		ob_start();
 			echo basename($file) . " : $line\n";
@@ -125,7 +125,7 @@ class H {
 			}
 		self::$log[] = ob_get_clean();
 
-	}
+	} */
 
 
 	public static function addFromDir($dir, $opts=[])
@@ -519,7 +519,7 @@ class H {
 
 	private function __clone() {}
 
-	private function __wakeup() {}
+	public function __wakeup() {}
 } // H
 
 

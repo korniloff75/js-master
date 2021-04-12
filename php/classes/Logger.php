@@ -1,16 +1,28 @@
 <?php
+/*
+ *example
+	tolog(__METHOD__,null,$_SERVER);
+	tolog(__METHOD__,Logger::BACKTRACE,['SERVER'=>$_SERVER]);
+ */
+if(!function_exists('tolog')){
+	function tolog()
+	{
+		// return $this->add(func_get_args());
+		global $log;
+
+		$log = $log ?? new Logger();
+		return call_user_func_array([$log,'add'], func_get_args());
+	}
+}
 
 /**
- * $log = new Logger('sample.log', 'path/to');
+ * $log = new Logger('sample.log'[, 'path/to'[, bool $rewriteLog]]);
  * write to sample.log
- * $log->add("message", errorLevel, dump);
+ * $log->add(string "message"[, errorLevel[, array dump]]);
  * output log to the screen
  * $log->print();
- * Если в запросе имеется параметр dev != false лог отображается автоматически внизу страницы
+ * if( $_GET['dev'] != false ) лог отображается автоматически внизу страницы
  */
-
-//* Включение протоколирования ошибок
-error_reporting(-1);
 
 class Logger
 {
@@ -28,21 +40,32 @@ class Logger
 		# array with a current log
 		$log = [];
 
-	static $printed = false;
+	static
+		$pathdir = '.',
+		$filename = 'my.log',
+		$printed = false,
+		$notWrite;
 
 	/**
 	 * @name - name of the log file
 	 * optional @dir - realpath to the directory
 	 * optional bool @rewriteLog - If == true (default) then log file should rewriting
 	 */
-	public function __construct($name, $dir='.', $rewriteLog=true)
+	public function __construct(?string $filename=null, ?string $dir='.', $rewriteLog=true)
 	{
+		//* Включение протоколирования ошибок
+		error_reporting(-1);
+
 		set_error_handler([&$this, 'userErrorHandler']);
 		# Обрабатываем фаталы
 		register_shutdown_function([&$this, 'handleFatals']);
 
-		$this->file = $dir . "/$name";
+		$dir= $dir ?? self::$pathdir;
+		$filename= $filename ?? self::$filename;
+
+		$this->file = $dir . "/$filename";
 		$this->rewriteLog = (bool) $rewriteLog;
+
 	}
 
 
@@ -53,15 +76,29 @@ class Logger
 	 */
 	public function add(string $message, $level=null, $dump=[])
 	{
+		// ini_set('display_errors', 1);
+		// ini_set('display_startup_errors', 1);
+
 		$bt = debug_backtrace();
-		$caller = array_shift($bt);
+		// $caller = array_shift($bt);
 		// $fileName = basename($caller['file']);
-		$fileName = $this->_getFileName($caller['file']);
+
 
 		if(!is_array($dump)) $dump = [$dump];
 
+		// *
+		do {
+			$caller = array_shift($bt);
+			// $dump['$caller']= $caller;
+		}
+		while (!empty($caller['file']) && basename($caller['file']) === basename(__FILE__));
+
+		// if(!array_key_exists('file',$caller)) return;
+
+		$fileName = $this->_getFileName($caller['file']);
+
 		if($level === self::BACKTRACE){
-			$dump[self::BACKTRACE]= array_shift($bt);;
+			$dump[self::BACKTRACE]= array_shift($bt);
 			$log = $this->_formatLog($fileName, $caller['line'], $message, $level);
 		}
 		else{
@@ -164,7 +201,9 @@ class Logger
 		<?php
 		print_r("<h3 class='logCaption' style='text-align:center;'>Log</h3><pre class='log'>\n");
 		foreach ($this->log as &$string) {
-			print_r($string . "\n");
+			// ?
+			// print_r($string . "\n");
+			print_r(htmlspecialchars($string) . "\n");
 		}
 		echo "</pre>";
 		self::$printed = 1;
@@ -204,7 +243,7 @@ class Logger
 	public function userErrorHandler($errno, $errstr, $errfile, $errline) :bool
 	{
 		if (!(error_reporting() & $errno)) {
-			// Этот код ошибки не включен в error_reporting,
+			//* Этот код ошибки не включен в error_reporting,
 			// так что пусть обрабатываются стандартным обработчиком ошибок PHP
 			// return false;
 		}
@@ -271,6 +310,9 @@ class Logger
 
 	public function __destruct()
 	{
+		// *Не логируем серверную обработку 404
+		if(self::$notWrite) return;
+
 		$txt = __METHOD__;
 		$dump = null;
 		// $this->add();
@@ -293,8 +335,9 @@ class Logger
 
 		if(!empty($_GET['dev']) && !self::$printed)
 		{
-			echo $this->print();
+			$this->print();
 		}
+
 		file_put_contents($this->file, $this->log, !$this->rewriteLog ? FILE_APPEND : null);
 	}
 } // Logger
@@ -308,9 +351,9 @@ class Logger
 class Log extends Logger
 {
 	use Singleton;
-	public function __construct($name, $dir='.', $rewriteLog=true)
+	public function __construct($filename, $dir='.', $rewriteLog=true)
 	{
-		parent::__construct($name, $dir, $rewriteLog);
+		parent::__construct($filename, $dir, $rewriteLog);
 	}
 }
  */

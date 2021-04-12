@@ -49,6 +49,7 @@ class SiteMap_RSS
 			$data = \H::json($page . '/data.json');
 			// var_dump($page . '/data.json', $data);
 
+			// *Скрытые
 			if(!empty($data['hidden'])) continue;
 
 			// $page = \Path::fromRootStat($page);
@@ -109,6 +110,7 @@ class SiteMap_RSS
 
 	/**
 	 * *Добавляем элемент в RSS
+	 * обязательный header добавляется при генерации контента
 	 */
 	private function _addToRss($itemContent)
 	{
@@ -121,7 +123,7 @@ class SiteMap_RSS
 		$xpath= new \DOMXPath($doc);
 
 		// $body= $xpath->query('//body/descendant::*');
-		$scripts= $xpath->query('//script|//code|//pre');
+		$scripts= $xpath->query('//script|//code|//pre|//style');
 
 		foreach($scripts as $s){
 			$s->parentNode->removeChild($s);

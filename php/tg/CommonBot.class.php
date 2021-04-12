@@ -203,7 +203,7 @@ class CommonBot extends TG
 			. ($this->message['from']['last_name']??'')
 			. " {$this->message['from']['username']}"
 		]]);
-		// $this->license['change']= 1;
+
 	}
 
 
@@ -230,10 +230,10 @@ class CommonBot extends TG
 	}
 
 
-		/**
+	/**
 	 * @param haystack
-	 * @param string||array needles
-	 * @param service posArr
+	 * @param needles {string|array} 
+	 * @param posArr service
 	 * Возвращает вхождение первой подстроки из mixed @needles
 	 */
 	public static function stripos_array(string $haystack, $needles, ?int $offset= 0, $posArr= [])

@@ -326,7 +326,7 @@ _H = {
 			this.complete = 1;
 			console.log(
 				'_H.defer.complete = ' + this.complete
-				// , "\nfuncs ", this.funcs
+				, "\nfuncs ", this.funcs
 			);
 		},
 	}
