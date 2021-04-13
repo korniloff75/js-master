@@ -1,9 +1,12 @@
 <?php
 require_once __DIR__."/../Helpers.trait.php";
+require_once __DIR__."/../traits/Get_set.trait.php";
 
 class Site
 {
 	use Helpers;
+
+	use Get_set;
 
 	const
 		DEV= true,
@@ -24,10 +27,18 @@ class Site
 
 		// ?
 		define( "POLLING", isset($_REQUEST["mode"]) && $_REQUEST["mode"] === 'list' );
+		define( "COOKIEPATH", "/" );
 
 		// autoload
 
-		$this->_initLog();
+		$this->_initLog()
+			->_api();
+
+		# Use singleton H
+		// todo remake to Helper.trait
+		require_once DR.'/Helper.php';
+
+		$this->_route();
 
 		// $this->test();
 
@@ -39,9 +50,7 @@ class Site
 			return !empty($_SESSION['adm']);
 		}
 
-		# Use singleton H
-		// todo remake to Helper.trait
-		require_once DR.'/Helper.php';
+
 
 		// var_dump($_REQUEST);
 
@@ -69,6 +78,8 @@ class Site
 
 	private function _bufferOpen()
 	{
+		date_default_timezone_set ('Europe/Moscow');
+
 		mb_internal_encoding( "UTF-8" );
 		mb_http_output( "UTF-8" );
 		// mb_http_input( "UTF-8" );
@@ -78,10 +89,6 @@ class Site
 		//* Open main buff
 		# closed in Render
 		ob_start( "mb_output_handler" );
-
-		date_default_timezone_set ('Europe/Moscow');
-
-		define( "COOKIEPATH", "/" );
 	}
 
 
@@ -98,8 +105,52 @@ class Site
 		}
 
 		tolog(__METHOD__,null,['DR'=>DR,'GDR'=>GDR, 'POLLING'=>POLLING]);
+		return $this;
 	}
 
+
+	// *api
+	protected function _api()
+	{
+		// *fix 4 polling
+		$_SESSION = $_SESSION ?? [];
+
+		// *Получаем данные из fetch
+		$inp_data= json_decode(
+			file_get_contents('php://input'),1
+		) ?? [];
+		tolog(__METHOD__,null,['$inp_data'=>$inp_data]);
+
+		// *Собираем все входящие в $_REQUEST
+		$_REQUEST= array_merge($_REQUEST, $inp_data);
+
+		if(empty($mode= @$_REQUEST['mode'])){
+			return $this;
+		}
+
+		$this->set('mode',$mode);
+
+		unset($_REQUEST['mode']);
+
+		// *isset $mode
+		foreach($_REQUEST as $cmd=>&$val){
+
+			if(file_exists($api= __DIR__."/../api/$cmd.php")){
+				tolog(__METHOD__,null,['$cmd'=>$cmd, '$val'=>$val]);
+				// ? Доходят ли $params до $api?
+				$params= $val;
+				include $api;
+			}
+		}
+		return $this;
+	}
+
+
+	protected function _route()
+	{
+		global $Router;
+		$Router = new Router;
+	}
 
 	function test()
 	{

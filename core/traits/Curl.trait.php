@@ -30,7 +30,7 @@ trait Curl
 			//* Если прокси из файла доступен - возвращаем его
 			if($fp = fsockopen($p['host'], $p['port'], $errCode, $errStr, self::$timeoutInSeconds))
 			{
-				$this->log->add("Proxy $proxyURL - is <font color=green size=4><b>AVAILABLE</b></font>\n");
+				tolog("Proxy $proxyURL - is <font color=green size=4><b>AVAILABLE</b></font>\n");
 				return $proxyURL;
 			}
 			//* Если недоступен - удаляем файл + рекурсия
@@ -84,12 +84,12 @@ trait Curl
 			//* Если прокси из файла доступен - возвращаем его
 			if($fp = fsockopen($p['host'], $p['port'], $errCode, $errStr, self::$timeoutInSeconds))
 			{
-				$this->log->add(__METHOD__." Proxy $proxyURL - is <font color=green size=4><b>AVAILABLE</b></font>\n");
+				tolog(__METHOD__." Proxy $proxyURL - is <font color=green size=4><b>AVAILABLE</b></font>\n");
 				return $proxyURL;
 			}
 		}
 
-		$this->log->add(__METHOD__." ALL Proxies is <font color=red size=4><b>FAIL</b></font>\n");
+		tolog(__METHOD__." ALL Proxies is <font color=red size=4><b>FAIL</b></font>\n");
 	} // findProxy
 
 
@@ -121,7 +121,7 @@ trait Curl
 			'headers' => ["Content-Type:multipart/form-data"]
 		], $opts);
 
-		$this->log->add(__METHOD__ . " \$url, \$opts = ", null, [$url, $opts]);
+		tolog(__METHOD__,null,['$url'=>$url,'$opts'=>$opts]);
 
 		$ch = curl_init();
 
@@ -153,7 +153,7 @@ trait Curl
 					}
 				}
 				curl_setopt($ch, CURLOPT_POSTFIELDS, $opts['params']);
-				$this->log->add(__METHOD__ . 'params= ', null, [$opts['params']]);
+				tolog(__METHOD__ . 'params= ', null, [$opts['params']]);
 			}
 
 		}
@@ -172,8 +172,6 @@ trait Curl
 		}
 
 		curl_setopt($ch, CURLOPT_URL, $url);
-
-		// $response = curl_exec($ch);
 
 		return $ch;
 	}
@@ -237,7 +235,7 @@ trait Curl
 			)
 				$fullResp['body'] = json_decode($fullResp['body'], 1);
 
-			// $this->log->add(__METHOD__,null,[$fullResp['headers']['content-type'], $fullResp['body']]);
+			// tolog(__METHOD__,null,[$fullResp['headers']['content-type'], $fullResp['body']]);
 		}
 		else $fullResp['body'] = $response;
 
@@ -257,7 +255,7 @@ trait Curl
 		], $opts);
 
 		$response = &$this->response;
-		$this->log->add(__METHOD__ . " resourse, \$opts: ",null, [$ch,$opts]);
+		tolog(__METHOD__ . " resourse, \$opts: ",null, [$ch,$opts]);
 
 		//note deprecated
 		if($opts['chunked'])
@@ -272,7 +270,7 @@ trait Curl
 		{
 			$errno = curl_errno($ch);
 			$error = curl_error($ch);
-			$this->log->add("Curl returned error $errno: $error", E_USER_WARNING);
+			tolog("Curl returned error $errno: $error", E_USER_WARNING);
 			curl_close($ch);
 
 			return false;
@@ -281,12 +279,12 @@ trait Curl
 		$this->curlInfo = curl_getinfo($ch);
 		$http_code = intval($this->curlInfo['http_code']);
 
-		if(!is_string($response)) $this->log->add(__METHOD__ . ' $response_orig NOT STRING! = ', E_USER_WARNING, [$response]);
+		if(!is_string($response)) tolog(__METHOD__ . ' $response_orig NOT STRING! = ', E_USER_WARNING, [$response]);
 
 		$fullResp = $this->splitResponse($response);
 		list('headers'=>&$respHeaders, 'body'=>&$response) = $fullResp;
 
-		$this->log->add(__METHOD__ . ' $http_code = ', null, [$http_code, $respHeaders /* , $fullResp, gzdecode($response), $this->curlInfo */]);
+		tolog(__METHOD__ . ' $http_code = ', null, [$http_code, $respHeaders /* , $fullResp, gzdecode($response), $this->curlInfo */]);
 
 		if ($http_code >= 500)
 		{
@@ -303,11 +301,11 @@ trait Curl
 		}
 		elseif ($http_code === 401)
 		{
-			$this->log->add('Invalid access token provided', E_USER_WARNING);
+			tolog('Invalid access token provided', E_USER_WARNING);
 		}
 		elseif ($http_code === 200)
 		{
-			$this->log->add(__METHOD__ . " was SUCCESSFUL");
+			tolog(__METHOD__ . " was SUCCESSFUL");
 		}
 
 		curl_close($ch);
@@ -319,7 +317,7 @@ trait Curl
 				'description' => 'cURL is failed convert to JSON array in ' . __METHOD__ . __LINE__,
 				'curlInfo' => $this->curlInfo
 			];
-			$this->log->add(__METHOD__ . " response must be JSON string", null, [$response]);
+			tolog(__METHOD__ . " response must be JSON string", null, [$response]);
 		}
 
 		return $response;

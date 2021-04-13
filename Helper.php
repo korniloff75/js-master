@@ -21,7 +21,7 @@ class H {
 
 	private function __construct()
 	{
-		global $log, $Nav;
+		global $Nav;
 
 		ini_set('short_open_tag', 'On');
 
@@ -39,10 +39,10 @@ class H {
 			isset($_SESSION['auth']['login'])
 			&& $_SESSION['auth']['login'] === 'admin'
 			// && $_SERVER['SERVER_ADDR'] === HOST_IP
-			&& (
+		/* 	&& (
 				strpos(Site::realIP(), \ADM) === 0
 				|| LOCALHOST
-			)
+			) */
 		);
 
 		// var_dump(\ADMIN, $_SESSION, self::realIP(), (strpos(self::realIP(), \ADM) === 0));

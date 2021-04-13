@@ -31,10 +31,8 @@ $_SERVER['DOCUMENT_ROOT']= Site::fixSlashes(__DIR__);
 define( "DR", $_SERVER['DOCUMENT_ROOT'] );
 
 
-// *Логгер и основные константы
 $Site= new Site;
 
-$Router = new Router;
 
 // var_dump($Nav->map);
 // exit;

@@ -66,19 +66,20 @@ _H.RSYa = {
 			$pars : { enumerable: false},
 		});
 
-		var rnd= $.rnd(this['$pars']);
+		var rnd= $.rnd(this['$pars'],{min:parsMin-1});
 
 		// if (!Object.keys(this).length) return;
+
+		console.log({rnd});
 
 		//* Создаем рекламный блок после случайного <p> и наполняем его
 		// this.$adBlock = $('<div id="y'+(Math.random()*1000+2000)+'">').insertAfter($.rnd(this['$pars']));
 		this.$adBlock = $('<div id="yandex_rtb_R-A-486456-1"/>').insertAfter(rnd);
 
-		console.log("this = ", this, 'rnd=',rnd, "\nthis.$adBlock= ", this.$adBlock, this.$adBlock[0].id);
+		console.log("this = ", this, "\nthis.$adBlock= ", this.$adBlock, this.$adBlock[0].id);
 
 		// *Yandex.RTB R-A-486456-1
 		$(window).on('load', this.prepare);
-	// (window, window.document, "yandexContextAsyncCallbacks");
 
 
 		// Отлов блокировщиков
