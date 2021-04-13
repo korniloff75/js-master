@@ -136,11 +136,6 @@ class H {
 			$ext = end($ext);
 		}
 
-		// var_dump($opts, $ext);
-
-		// $items = glob($dir . "*.$ext");
-		// natsort($items); // , GLOB_NOSORT
-		// var_dump((new \DirFilter ($dir, "#\.$ext$#i")));
 		$items = (new \DirFilter ($dir, "#\.$ext$#i"))->natSort();
 
 
@@ -148,7 +143,7 @@ class H {
 		# 1.file.php
 		# 2.file.php
 		# 3... etc.
-		// var_dump($ext, $items);
+		// var_dump($opts, $ext, $items);
 
 
 		# include file by its extension

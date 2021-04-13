@@ -14,7 +14,7 @@ if(php_sapi_name() === 'cli' && empty($_SERVER['DOCUMENT_ROOT']))
 		'DOCUMENT_ROOT' => realpath(__DIR__ . '/../..'),
 	]);
 }
-require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Parser.trait.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/core/traits/Parser.trait.php";
 
 
 class BotRouter
@@ -29,17 +29,17 @@ class BotRouter
 		//* Start from crontab
 		if(!empty($_SERVER['argv'][1]))
 		{
-			$this->route($_SERVER['argv'][1]);
+			$this->execBot($_SERVER['argv'][1]);
 		}
 		//* Start from array
 		else foreach (self::CLASSES as $fn)
 		{
-			$this->route($fn);
+			$this->execBot($fn);
 		}
 	}
 
 
-	private function route($fn)
+	private function execBot($fn)
 	{
 		$class = explode('.',$fn)[0];
 		require_once __DIR__."/$fn.php";

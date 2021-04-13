@@ -14,7 +14,13 @@ trait Get_set
 
 	public function __get($pname)
 	{
-		return $this->{$pname} ?? $this->get($pname);
+		// return $this->{$pname} ?? $this->get($pname);
+		return $this->get($pname);
+	}
+
+	public function __isset($pname)
+	{
+		return !is_null($this->get($pname));
 	}
 
 	protected function set($pname, $pval)

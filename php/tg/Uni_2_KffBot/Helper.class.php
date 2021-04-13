@@ -13,11 +13,11 @@ class Helper extends CommonBot implements Game
 	{
 		if(empty(static::FOLDER))
 		{
-			$this->log->add('static::FOLDER is empty!', E_USER_WARNING);
+			tolog('static::FOLDER is empty!', E_USER_WARNING);
 		}
 		elseif(!file_exists(static::FOLDER))
 		{
-			$this->log->add('folder '.static::FOLDER.' was created!');
+			tolog('folder '.static::FOLDER.' was created!');
 			mkdir(static::FOLDER, 0755);
 		}
 
@@ -36,11 +36,11 @@ class Helper extends CommonBot implements Game
 
 	/* protected function saveCurData()
 	{
-		// $this->log->add('$this->BTNS=',null,[$this->BTNS]);
+		// tolog('$this->BTNS=',null,[$this->BTNS]);
 		if(!$this->data['change']) return;
 		unset($this->data['change']);
 
-		// $this->log->add('$this->data[\'pumps\']=',null,[$this->data['pumps']]);
+		// tolog('$this->data[\'pumps\']=',null,[$this->data['pumps']]);
 
 		if(!file_put_contents(
 			static::BASE,
@@ -119,7 +119,7 @@ class Helper extends CommonBot implements Game
 			return $this;
 
 		$dataName= $this->statement['dataName'];
-		$this->log->add(__METHOD__.' $this->message,$dataName',null,[$this->message,$dataName]);
+		tolog(__METHOD__.' $this->message,$dataName',null,[$this->message,$dataName]);
 
 		$txt= trim($this->message['text']);
 
@@ -128,7 +128,7 @@ class Helper extends CommonBot implements Game
 			$this->{"{$prefix}_$dataName"}(explode("\n",$txt));
 		}
 		else
-			$this->log->add(__METHOD__." method {$prefix}_$dataName is FAIL",E_USER_WARNING);
+			tolog(__METHOD__." method {$prefix}_$dataName is FAIL",E_USER_WARNING);
 
 		$this->UKB->setStatement([
 			'wait data'=>0,
@@ -173,7 +173,7 @@ class Helper extends CommonBot implements Game
 
 			// unset($markup['keyboard']);
 
-		$this->log->add(__METHOD__.' $markup',null,[$markup]);
+		tolog(__METHOD__.' $markup',null,[$markup]);
 	}
 
 
@@ -221,7 +221,7 @@ class Helper extends CommonBot implements Game
 
 		// $this->fixBtns4Chat($o);
 
-		// $this->log->add(__METHOD__.' $o',null,[$o]);
+		// tolog(__METHOD__.' $o',null,[$o]);
 
 		//* Send
 		$o['chat_id'] = $o['chat_id'] ?? $this->user_id;
@@ -234,7 +234,7 @@ class Helper extends CommonBot implements Game
 	{
 		if(!$this->data['change']) return;
 
-		// $this->log->add(__METHOD__." \$this->data=",null,[$this->data]);
+		// tolog(__METHOD__." \$this->data=",null,[$this->data]);
 
 		$this->objData->replace($this->data);
 		// $this->saveCurData();

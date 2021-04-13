@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__."/Helpers.trait.php";
+require_once __DIR__."/../Helpers.trait.php";
 
 class Site
 {
@@ -22,26 +22,26 @@ class Site
 	{
 		$this->_bufferOpen();
 
-		// *dagam fix
-		$_SERVER['DOCUMENT_ROOT']= str_replace('private_html','public_html', self::fixSlashes($_SERVER['DOCUMENT_ROOT']));
-		// *Глобальный корень
-		define( "GDR", $_SERVER['DOCUMENT_ROOT'] );
-		// *Корень сайта
-		$_SERVER['DOCUMENT_ROOT']= self::fixSlashes(dirname(__DIR__));
-		define( "DR", $_SERVER['DOCUMENT_ROOT'] );
-
 		// ?
 		define( "POLLING", isset($_REQUEST["mode"]) && $_REQUEST["mode"] === 'list' );
 
-		spl_autoload_register([__CLASS__,'_autoloader']);
+		// autoload
 
 		$this->_initLog();
 
 		// $this->test();
 
+		// todo make auth
+
+		// *Admin
+		function is_adm()
+		{
+			return !empty($_SESSION['adm']);
+		}
+
 		# Use singleton H
 		// todo remake to Helper.trait
-		require_once 'Helper.php';
+		require_once DR.'/Helper.php';
 
 		// var_dump($_REQUEST);
 
@@ -52,16 +52,18 @@ class Site
 
 	}
 
-	private static function _autoloader($class)
+	public static function autoloader()
 	{
-		$parts = explode('\\', $class);
-		// tolog(__METHOD__,null,$parts);
-		// var_dump($parts);
+		spl_autoload_register(function($class){
+			$namespace = explode('\\', $class);
+			// tolog(__METHOD__,null,$namespace);
+			// var_dump($namespace);
 
-		$className = end($parts);
-		if(file_exists($path= \DR."/core/classes/$className.php")){
-			include_once $path;
-		}
+			$className = end($namespace);
+			if(file_exists($path= \DR."/core/classes/$className.php")){
+				include_once $path;
+			}
+		});
 	}
 
 
@@ -107,10 +109,3 @@ class Site
 	}
 } //Site
 
-
-
-// *Admin
-function is_adm()
-{
-	return !empty($_SESSION['adm']);
-}

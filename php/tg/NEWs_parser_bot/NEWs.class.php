@@ -12,7 +12,7 @@ if(php_sapi_name() === 'cli' && empty($_SERVER['DOCUMENT_ROOT']))
 		'DOCUMENT_ROOT' => realpath(__DIR__ . '/../..'),
 	]);
 }
-require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Parser.trait.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/core/traits/Parser.trait.php";
 
 
 class KorniloFF_news extends CommonBot
