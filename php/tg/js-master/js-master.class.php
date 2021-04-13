@@ -1,10 +1,25 @@
 <?php
-// require_once __DIR__ . "/../CommonBot.class.php";
-require_once $_SERVER['DOCUMENT_ROOT'] . "/php/Path.php";
+// *Autoload
+if(!class_exists('Path')){
+	spl_autoload_register(function ($class)
+	{
+		$parts = explode('\\', $class);
+		// tolog(__METHOD__,null,$parts);
+
+		$className = end($parts);
+		if(file_exists($path= \DR."/php/classes/$className.php")){
+			include_once $path;
+		}
+	});
+}
+
+// require_once $_SERVER['DOCUMENT_ROOT'] . "/php/Path.php";
+
 require_once __DIR__ . "/../tg.class.php";
 
+
+
 class jsMaster extends TG
-// class jsMaster extends CommonBot
 {
 
 	public function __construct()

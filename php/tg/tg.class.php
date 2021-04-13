@@ -109,7 +109,7 @@ class TG
 		if($this->log) return;
 
 		//* Если не логируется из дочернего класса
-		require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
+		require_once $_SERVER['DOCUMENT_ROOT'] . "/core/classes/Logger.php";
 		if($this->botFileInfo)
 		{
 			// $path = $this->botFileInfo->getPathname();

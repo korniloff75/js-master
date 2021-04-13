@@ -30,6 +30,7 @@ class Site
 		$_SERVER['DOCUMENT_ROOT']= self::fixSlashes(dirname(__DIR__));
 		define( "DR", $_SERVER['DOCUMENT_ROOT'] );
 
+		// ?
 		define( "POLLING", isset($_REQUEST["mode"]) && $_REQUEST["mode"] === 'list' );
 
 		spl_autoload_register([__CLASS__,'_autoloader']);
@@ -58,7 +59,7 @@ class Site
 		// var_dump($parts);
 
 		$className = end($parts);
-		if(file_exists($path= \DR."/php/classes/$className.php")){
+		if(file_exists($path= \DR."/core/classes/$className.php")){
 			include_once $path;
 		}
 	}
