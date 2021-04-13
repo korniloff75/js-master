@@ -2,15 +2,27 @@
 //* FIX cron
 if(php_sapi_name() === 'cli' && empty($_SERVER['DOCUMENT_ROOT']))
 {
+	define('DR', realpath(__DIR__ . '/../..'));
 	$_SERVER = array_merge($_SERVER, [
-		'DOCUMENT_ROOT' => realpath(__DIR__ . '/../..'),
+		'DOCUMENT_ROOT' => DR,
 	]);
+
+	spl_autoload_register(function ($class)
+	{
+		$parts = explode('\\', $class);
+		// tolog(__METHOD__,null,$parts);
+
+		$className = end($parts);
+		if(file_exists($path= \DR."/php/classes/$className.php")){
+			include_once $path;
+		}
+	});
+
 }
 
-require_once $_SERVER['DOCUMENT_ROOT'] . "/php/Path.php";
-require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/DbJSON.php";
+// require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Path.php";
+// require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/DbJSON.php";
 
-// require_once $_SERVER['DOCUMENT_ROOT'] . "/Helper.php";
 # TG
 require_once __DIR__ . "/tg.class.php";
 // require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Get_set.trait.php";
@@ -75,7 +87,7 @@ class CommonBot extends TG
 		# Если не логируется из дочернего класса
 		if(!$this->log)
 		{
-			require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
+			// require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
 
 			$this->log = new Logger($logFile ?? (__CLASS__.'.log'), $this->botDir);
 		}
@@ -232,7 +244,7 @@ class CommonBot extends TG
 
 	/**
 	 * @param haystack
-	 * @param needles {string|array} 
+	 * @param needles {string|array}
 	 * @param posArr service
 	 * Возвращает вхождение первой подстроки из mixed @needles
 	 */
