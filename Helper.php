@@ -36,8 +36,8 @@ class H {
 
 		// todo ->is_adm()
 		define('ADMIN',
-			isset($_SESSION['auth']['login'])
-			&& $_SESSION['auth']['login'] === 'admin'
+			isset($_SESSION['auth']['group'])
+			&& $_SESSION['auth']['group'] === 'admin'
 			// && $_SERVER['SERVER_ADDR'] === HOST_IP
 		/* 	&& (
 				strpos(Site::realIP(), \ADM) === 0

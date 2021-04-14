@@ -29,10 +29,14 @@ class Site
 		define( "POLLING", isset($_REQUEST["mode"]) && $_REQUEST["mode"] === 'list' );
 		define( "COOKIEPATH", "/" );
 
-		// autoload
+		// autoload ->index.php
 
 		$this->_initLog()
 			->_api();
+
+		// *before Helper.php
+		if( !POLLING )
+			session_start();
 
 		# Use singleton H
 		// todo remake to Helper.trait
@@ -54,8 +58,7 @@ class Site
 
 		// var_dump($_REQUEST);
 
-		if( !POLLING )
-			session_start();
+
 
 		// todo Plugins
 
