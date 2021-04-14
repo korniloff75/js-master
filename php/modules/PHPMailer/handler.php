@@ -9,6 +9,10 @@ $mailToAdminStorage = new DbJSON(
 	__DIR__.'/cfg.db.dat'
 );
 
+if(!$mailToAdminStorage->count()){
+	tolog("Config file is empty!",E_USER_ERROR);
+}
+
 $cfg = $mailToAdminStorage->get();
 
 // *init MailPlain

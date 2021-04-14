@@ -258,7 +258,7 @@ trait Helpers
 
 		foreach ($element->childNodes as $child)
 		{
-				$innerHTML .= $element->ownerDocument->saveHTML($child);
+			$innerHTML .= $element->ownerDocument->saveHTML($child);
 		}
 
 		return $innerHTML;

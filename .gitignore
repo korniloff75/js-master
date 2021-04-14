@@ -18,6 +18,9 @@ js/db/*.*
 token*
 cfg.*
 
+# In Modules
+email.json
+
 # local env files
 .env.local
 .env.*.local

@@ -45,7 +45,7 @@ class UniKffBot extends CommonBot implements Game
 		//* Завершаем скрипт без входящего JSON
 		if(empty($this->inputData)) die ('Нет входящего запроса');
 
-		// $this->log->add(__METHOD__,null,['$this->inputData'=>$this->inputData]);
+		// tolog(__METHOD__,null,['$this->inputData'=>$this->inputData]);
 
 		//* Определяем точку запуска
 		$this->is_group = !is_numeric(substr($this->chat_id,0,1));
@@ -79,7 +79,7 @@ class UniKffBot extends CommonBot implements Game
 		$folder = __DIR__.'/statement';
 		if(!file_exists($folder))
 		{
-			$this->log->add('folder '.$folder.' was created!');
+			tolog('folder '.$folder.' was created!');
 			mkdir($folder, 0755);
 		}
 
@@ -111,7 +111,7 @@ class UniKffBot extends CommonBot implements Game
 			$this->statement['file']
 		);
 
-		// $this->log->add('$this->data[\'pumps\']=',null,[$this->data['pumps']]);
+		// tolog('$this->data[\'pumps\']=',null,[$this->data['pumps']]);
 
 		file_put_contents(
 			$file,
@@ -143,20 +143,20 @@ class UniKffBot extends CommonBot implements Game
 			is_array($res= $this->findCommand($inputArr, $this->message))
 		)
 		{
-			$this->log->add(__METHOD__.' findCommand',null,['$res'=>$res]);
+			tolog(__METHOD__.' findCommand',null,['$res'=>$res]);
 
 			$cmdName = $res['cmdName'];
 			$cmd = $res['cmd'];
 		}
 		else
 		{
-			$this->log->add(__METHOD__.' findCommand FAIL',E_USER_WARNING,['$res'=>$res]);
+			tolog(__METHOD__.' findCommand FAIL',E_USER_WARNING,['$res'=>$res]);
 		}
 
 		if(empty($this->statement))
 			$this->getStatement();
 
-		$this->log->add(__METHOD__.' $this->statement_1',null,['statement'=>$this->statement, '$cmdName'=>$cmdName, '$cmd'=>$cmd]);
+		tolog(__METHOD__.' $this->statement_1',null,['statement'=>$this->statement, '$cmdName'=>$cmdName, '$cmd'=>$cmd]);
 
 
 		if(!empty($cmdName))
@@ -165,7 +165,7 @@ class UniKffBot extends CommonBot implements Game
 
 			if(file_exists("extensions/$cmdName.php"))
 			{
-				require_once("extensions/$cmdName.php");
+				require_once "extensions/$cmdName.php";
 				new $cmdName($this, $cmd);
 			}
 			else switch ($cmdName)
@@ -175,7 +175,7 @@ class UniKffBot extends CommonBot implements Game
 					break;
 
 				default:
-					$this->log->add(__METHOD__ . ' switch default', E_USER_WARNING);
+					tolog(__METHOD__ . " Undefined command [$cmdName]", E_USER_WARNING);
 					break;
 			}
 		}
@@ -202,7 +202,7 @@ class UniKffBot extends CommonBot implements Game
 	{
 		list($cmdName, $cmd) = $inputArr;
 
-		$this->log->add(__METHOD__ . ' inputData:', null, ['$inputArr'=>$inputArr, '$cmdName'=>$cmdName, '$cmd'=>$cmd]);
+		tolog(__METHOD__ . ' inputData:', null, ['$inputArr'=>$inputArr, '$cmdName'=>$cmdName, '$cmd'=>$cmd]);
 
 		//* Приходит локация
 		if(!empty($message['location']) && empty($message['venue']))
@@ -222,7 +222,7 @@ class UniKffBot extends CommonBot implements Game
 		// else $cmd= [$cmdName];
 		else $cmd= array_values(array_filter(explode(self::OPTS_SEPARATOR, $cmdName)));
 
-		$this->log->add(__METHOD__ . ' NEW', null, ['$cmd'=>$cmd]);
+		tolog(__METHOD__ . ' NEW', null, ['$cmd'=>$cmd]);
 
 		foreach(self::CMD as $cmdName=>&$commands)
 		{
@@ -236,7 +236,7 @@ class UniKffBot extends CommonBot implements Game
 					'wait data'=>0,
 				]);
 
-				$this->log->add(__METHOD__.' $this->statement_2',null,[$this->statement]);
+				tolog(__METHOD__.' $this->statement_2',null,[$this->statement]);
 
 				// $this->BTNS = $commands;
 				$this->BTNS = array_merge(self::BTNS, $commands);
@@ -254,7 +254,7 @@ class UniKffBot extends CommonBot implements Game
 			}
 		}
 
-		$this->log->add(__METHOD__.' не найдено в self::CMD',null,['$cmdName'=>$cmdName, '$cmd'=>$cmd]);
+		tolog(__METHOD__.' не найдено в self::CMD',null,['$cmdName'=>$cmdName, '$cmd'=>$cmd]);
 
 		//* Внутренняя команда
 		return [
@@ -266,7 +266,7 @@ class UniKffBot extends CommonBot implements Game
 
 	public function __destruct()
 	{
-		$this->log->add(__METHOD__.' $this->statement_3',null,[$this->statement]);
+		tolog(__METHOD__.' $this->statement_3',null,[$this->statement]);
 		$this->saveStatement();
 
 		parent::__destruct();

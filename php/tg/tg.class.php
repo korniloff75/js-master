@@ -11,8 +11,6 @@ if(php_sapi_name() === 'cli' && empty($_SERVER['DOCUMENT_ROOT']))
 	]);
 }
 
-// ob_start();
-
 # Для дочерних классов
 interface iBotTG
 {
@@ -20,13 +18,13 @@ interface iBotTG
 	// protected function init();
 }
 
-// require_once $_SERVER['DOCUMENT_ROOT'] . '/Helper.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Get_set.trait.php";
-require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Curl.trait.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/core/traits/Get_set.trait.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/core/traits/Curl.trait.php";
 
 
 class TG
 {
+	// todo- define in adm panel
 	const
 		HOST= 'https://js-master.ru',
 		OWNER= 673976740;
@@ -76,7 +74,7 @@ class TG
 	{
 		$this->tg_startTime= new DateTime;
 		$this->checkLog();
-		$this->log->add("tg.class.php started");
+		tolog("tg.class.php started");
 
 		if($this->botFileInfo)
 		{
@@ -88,7 +86,7 @@ class TG
 				$this->botDirFromRoot = $this->botFileInfo->getPathInfo()->fromRoot();
 			}
 
-			$this->log->add("\$this->botDirFromRoot = {$this->botDirFromRoot}\n\$this->botDir = {$this->botDir}");
+			tolog("\$this->botDirFromRoot = {$this->botDirFromRoot}\n\$this->botDir = {$this->botDir}");
 		}
 
 		if(!count($this->tokens))
@@ -96,7 +94,7 @@ class TG
 
 		$this->api = "https://api.telegram.org/bot{$this->tokens['tg']}/";
 
-		$this->log->add(basename(__FILE__) . ' inited');
+		tolog(basename(__FILE__) . ' inited');
 
 		//* Обрабатываем входящие данные
 		$this->message = $this->webHook()->findCallback();
@@ -109,7 +107,7 @@ class TG
 		if($this->log) return;
 
 		//* Если не логируется из дочернего класса
-		require_once $_SERVER['DOCUMENT_ROOT'] . "/php/classes/Logger.php";
+		require_once $_SERVER['DOCUMENT_ROOT'] . "/core/classes/Logger.php";
 		if($this->botFileInfo)
 		{
 			// $path = $this->botFileInfo->getPathname();
@@ -117,7 +115,7 @@ class TG
 			$file = $this->botFileInfo->getBasename() . '.log';
 		}
 		$this->log = new Logger($file ?? 'tg.class.log', $path ?? __DIR__);
-		$this->log->add(__METHOD__.' botFileInfo= ',null,[$this->botFileInfo]);
+		tolog(__METHOD__.' botFileInfo= ',null,[$this->botFileInfo]);
 	}
 
 
@@ -135,12 +133,12 @@ class TG
 			file_get_contents($file), true
 		) : ['tg' => $this->token]);
 
-		$this->log->add(__METHOD__ . ' $this->tokens', null, [$this->tokens]);
+		tolog(__METHOD__ . ' $this->tokens', null, [$this->tokens]);
 
 
 		if(!is_string($this->tokens['tg']))
 		{
-			$this->log->add(__METHOD__ . " There is no TOKEN from child class to continue execution!", E_USER_ERROR, [$this->tokens]);
+			tolog(__METHOD__ . " There is no TOKEN from child class to continue execution!", E_USER_ERROR, ['$this->tokens'=>$this->tokens]);
 			$this->__destruct();
 			die();
 		}
@@ -149,7 +147,7 @@ class TG
 
 	public function getInputData()
 	{
-		$this->log->add("getInputData() started = " . (is_null($this->inputData) ? 'TRUE' : 'FALSE'));
+		tolog("getInputData() started = " . (is_null($this->inputData) ? 'TRUE' : 'FALSE'));
 		if(is_null($this->inputData))
 		{
 			# Ловим входящий поток
@@ -174,14 +172,14 @@ class TG
 			//* Проверяем cron
 			if(empty($this->cron))
 			{
-				$this->log->add("inputData is EMPTY!", E_USER_WARNING, [$this->inputData]);
+				tolog("inputData is EMPTY!", E_USER_WARNING, [$this->inputData]);
 				return null;
 			}
 			else
 			{
 				$this->inputData['cron'] = $this->cron;
 				$this->webHook=0;
-				$this->log->add("inputData from \$this->cron", E_USER_WARNING, [$this->inputData]);
+				tolog("inputData from \$this->cron", E_USER_WARNING, [$this->inputData]);
 			}
 		}
 
@@ -228,7 +226,7 @@ class TG
 		//* Определяем владельца скрипта
 		$this->is_owner = $this->set('is_owner', $this->user_id == self::OWNER);
 
-		$this->log->add(__METHOD__.": \$cbn = $cbn", null, ['$this->chat_id'=>$this->chat_id, '$this->user_id'=>$this->user_id, '$this->is_group'=>$this->is_group, '$this->cbn'=>$this->cbn]);
+		tolog(__METHOD__.": \$cbn = $cbn", null, ['$this->chat_id'=>$this->chat_id, '$this->user_id'=>$this->user_id, '$this->is_group'=>$this->is_group, '$this->cbn'=>$this->cbn]);
 
 		return $cb;
 	} // findCallback
@@ -248,7 +246,7 @@ class TG
 		)
 		{
 			// $this->__destruct();
-			$this->log->add(__METHOD__ . " aborted with FAIL - \$this->webHook=", E_USER_WARNING, [$this->webHook]);
+			tolog(__METHOD__ . " aborted with FAIL", E_USER_WARNING, ['$this->webHook'=>$this->webHook]);
 			return $this;
 		}
 
@@ -256,12 +254,12 @@ class TG
 		$botURL = self::HOST . "/{$this->botDirFromRoot}/" . $this->botFileInfo->getBaseName();
 		$trigger = $this->botDir . "/webHookRegistered.trigger";
 
-		$this->log->add("\$trigger= $trigger",null, [file_exists($trigger)]);
+		tolog("\$trigger= $trigger",null, [file_exists($trigger)]);
 
 		# Однократно запускаем webHook
 		if(file_exists($trigger))
 		{
-			$this->log->add("Webhook уже зарегистрирован.\nEND of webHook.", E_USER_WARNING);
+			tolog("Webhook уже зарегистрирован.\nEND of webHook.", E_USER_WARNING);
 		}
 		else
 		{
@@ -271,14 +269,14 @@ class TG
 				// 'allowed_updates' => true,
 			], 'setWebhook') ?? [];
 
-			$this->log->add("\$botURL = {$botURL}");
-			$this->log->add("response after setWebhook", null, [$responseSetWebhook]);
+			tolog("\$botURL = {$botURL}");
+			tolog("response after setWebhook", null, [$responseSetWebhook]);
 
 			if(
 				$responseSetWebhook
 				&& file_put_contents($trigger, json_encode($responseSetWebhook, JSON_UNESCAPED_UNICODE))
 			)
-			$this->log->add("Был создан файл - $trigger", E_USER_WARNING);
+			tolog("Был создан файл - $trigger", E_USER_WARNING);
 		}
 
 		return $this;
@@ -293,14 +291,14 @@ class TG
 	{
 		if(headers_sent() || !$this->inputData)
 		{
-			$this->log->add("The headers were sent previously or not an external request. The request was made to TG.", E_USER_WARNING);
+			tolog("The headers were sent previously or not an external request. The request was made to TG.", E_USER_WARNING);
 			return $this->apiRequest($postFields, $method);
 		}
 
 		$this->checkSendData($postFields);
 
 		$postFields["method"] = $method;
-		$this->log->add('$postFields in ' . __METHOD__, null, [$postFields]);
+		tolog('$postFields in ' . __METHOD__, null, [$postFields]);
 
 		ob_start();
 		header("Content-Type: application/json");
@@ -316,7 +314,7 @@ class TG
 	{
 		$this->checkSendData($postFields);
 
-		$this->log->add("URL - {$this->api}$method\n\$postFields in " . __METHOD__, null, ['$postFields'=>$postFields]);
+		tolog("URL - {$this->api}$method\n\$postFields in " . __METHOD__, null, ['$postFields'=>$postFields]);
 
 		//* Выполняем Curl
 		// $response = $this->CurlRequestProxy($this->api . $method, [
@@ -370,7 +368,7 @@ class TG
 			|| empty($this->curlInfo)
 		)
 		{
-			$this->log->add(__METHOD__ . ' $response = ', null, $response);
+			tolog(__METHOD__ . ' $response = ', null, $response);
 			return $response;
 		}
 
@@ -379,16 +377,16 @@ class TG
 
 		if ($http_code != 200)
 		{
-			$this->log->add(__METHOD__ . " has failed with error {$response['error_code']}: {$response['description']}", E_USER_WARNING);
+			tolog(__METHOD__ . " has failed with error {$response['error_code']}: {$response['description']}", E_USER_WARNING);
 			if ($http_code == 401)
 			{
-				$this->log->add('Invalid access token provided', E_USER_WARNING);
+				tolog('Invalid access token provided', E_USER_WARNING);
 			}
 			return false;
 		} else {
 			if (isset($response['description']))
 			{
-				$this->log->add(__METHOD__ . " was SUCCESSFUL: {$response['description']}");
+				tolog(__METHOD__ . " was SUCCESSFUL: {$response['description']}");
 				usleep(10);
 			}
 			return $response['result'];
@@ -469,7 +467,7 @@ class TG
 		}
 
 		# Test server response
-		$this->log->add("\$respTG", null, [$respTG ?? null]);
+		tolog("\$respTG", null, [$respTG ?? null]);
 	}
 
 	/**
@@ -477,7 +475,7 @@ class TG
 	 */
 	public function sendMediaGroup(array $media)
 	{
-		$this->log->add(__METHOD__ . 'count($media) = ', null, [count($media)]);
+		tolog(__METHOD__ . 'count($media) = ', null, [count($media)]);
 
 		if(count($media))
 			$media = array_chunk($media, 10);
@@ -509,7 +507,7 @@ class TG
 	{
 		// if(!$this->__test) return;
 
-		$this->log->add(__METHOD__.' EVALUATE');
+		tolog(__METHOD__.' EVALUATE');
 
 		# Выводим логи
 		// if($this->__test) $this->log->print();

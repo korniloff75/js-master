@@ -358,13 +358,17 @@ Object.defineProperties(jQuery, {
 
 
 	rnd: {
-		value: function (arr) {
+		value: function (arr,opts) {
 			if(!(arr instanceof Array)) {
 				arr = Object.values(arr);
 				// console.info('argument is not array');
 			}
+			opts= Object.assign({
+				min:0,
+				max:arr.length-1
+			},opts||{});
 			// console.log("arr= ", arr);
-			var rnd = Math.floor(Math.random() * (arr.length-1));
+			var rnd = Math.floor(opts.min + Math.random() * (opts.max-opts.min));
 
 			return arr[rnd];
 		}
