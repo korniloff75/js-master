@@ -66,7 +66,7 @@ _H.RSYa = {
 			$pars : { enumerable: false},
 		});
 
-		var rndNum= Math.floor(parsMin - 1 + Math.random() * (this['$pars'].length-parsMin)),
+		var rndNum= Math.floor(parsMin - 1 + Math.random() * (this['$pars'].length - parsMin)),
 			rnd= this['$pars'][rndNum];
 
 		// if (!Object.keys(this).length) return;
@@ -84,7 +84,7 @@ _H.RSYa = {
 		this.prepare();
 
 
-		// Отлов блокировщиков
+		// todo Отлов блокировщиков
 		setTimeout(function() {
 			// console.log(this['$img']);
 			var $anAD;
@@ -111,7 +111,8 @@ _H.RSYa = {
 				// , $('.Adv')
 			);
 		}, 1500);
-	}
+	}//init()
+	
 }; //_H.RSYa
 
 

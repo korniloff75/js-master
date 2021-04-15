@@ -46,15 +46,24 @@ class Render
 		}
 
 		# favicon
-		foreach(['ico', 'gif', 'png'] as &$ext) {
-			if(!file_exists('favicon.' . $ext)) continue;
-			$meta .= '<link rel="icon" type="image/' . ($ext === 'ico' ? 'x-icon' : $ext) . '" href="/favicon.' . $ext . '" />'
-			. '<link rel="shortcut icon" type="image/x-icon" href="/favicon.' . $ext . '" />';
-			break;
-		}
+		$meta.= self::_findIcon($Data['template']) ?? self::_findIcon('./') ?? '';
+
 		// var_dump(__FILE__, __LINE__, $meta);
 		return $meta;
 	} // meta
+
+
+	private static function _findIcon(string $path)
+	:?string
+	{
+		foreach(['svg','ico','gif','png'] as &$ext) {
+			if(!file_exists($iconpath= $path.'favicon.' . $ext)) continue;
+			$iconLink = '<link rel="icon" type="image/' . ($ext === 'ico' ? 'x-icon' : $ext) . '" href="/' . $iconpath . '" />'
+			. '<link rel="shortcut icon" type="image/x-icon" href="/' . $iconpath . '" />';
+			break;
+		}
+		return $iconLink ?? null;
+	}
 
 
 	public static function head()
@@ -66,17 +75,8 @@ class Render
 		. "\n<title>{$Data['title']} - " . \SITENAME . '</title>'
 		. "\n" . '<link rel="stylesheet" type="text/css" href="/css/base.css">'
 		. "\n" . '<link rel="stylesheet" type="text/css" href="/assets/font-awesome/css/font-awesome.min.css">'
-		. (\ADMIN ? '<link rel="stylesheet/less" type="text/css" href="/css/admin.less">' : '')
-		. "\n" . (
-			\ADMIN && \USE_BROWS_LESS ? (
-
-				\H::addFromDir($Data['template'], 'less')
-			) :
-			\H::addFromDir($Data['template'], 'css')
-			)
 		. "\n"
 		. $SV
-		. "\n" . ($opts['link'] ?? '')
 		. "\n" . \H::addFromDir('js/')
 		. \Plugins::getHook('head');
 	}
@@ -264,6 +264,7 @@ class Render
 
 	}
 
+	// todo
 	public static function breadCrumbsRecurse($arr = [])
 
 	{
@@ -300,25 +301,7 @@ class Render
 	public static function footer()
 	: string
 	{
-		$f= \Plugins::getHook('footer')
-		. '<script>
-		// less options in template
-		var less = {
-			env: \'' . (LOCALHOST ? 'development' : 'production') . '\',
-			javascriptEnabled: false
-		}
-		</script>';
-
-		if(UPD_LESS_FROM_BROUSER) {
-			# Не нашел способа получить контент из тега style, либо из результата работы less в броузере.
-			$f .= "<script>
-				$.post('css/handler.php', {
-						css: $('#less:css-less-core')
-					},
-					function() {}
-				);
-			</script>";
-		}
+		$f= \Plugins::getHook('footer');
 
 		$f .= \H::addFromDir('js/__defer/', [
 			'ext' => 'js',

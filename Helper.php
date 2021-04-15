@@ -122,7 +122,10 @@ class H {
 			'except' => '0' // исплючения
 		], $opts);
 
-		if(!file_exists($dir)) {
+		if(
+			!file_exists($dir)
+			&& !file_exists($dir= Site::getPathFromRoot($dir))
+		) {
 			tolog("dir $dir not exist");
 			return '';
 		}
@@ -170,17 +173,17 @@ class H {
 					break;
 
 				case 'css':
-					$patt = "<link rel=\"stylesheet\" type=\"text/css\" href=\"/$i\">";
+					$patt = "<link rel=\"stylesheet\" type=\"text/css\" href=\"/" . Site::getPathFromRoot($i) . "\">";
 					break;
 
 				case 'less':
 					// var_dump($fn);
 					$css = $pi['dirname'] . "/$fn.css";
 
-					tolog(["css = " => [$css, realpath('./'.$css), realpath('./templates/../' . "$fn.css")]], __FILE__, __LINE__);
+					tolog(['$i'=>$i,"css" => [$css, realpath('./'.$css), realpath('./templates/../' . "$fn.css")]], __FILE__, __LINE__);
 					if(!\ADMIN && file_exists($css)) return;
 
-					$patt = "<link rel=\"stylesheet/less\" type=\"text/css\" href=\"/$i\">";
+					$patt = "<link rel=\"stylesheet/less\" type=\"text/css\" href=\"/" . Site::getPathFromRoot($i) . "\">";
 					// var_dump($patt);
 					// return;
 
