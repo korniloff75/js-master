@@ -258,7 +258,8 @@ class Navigate
 	{
 		# \H::$fileInfo
 		# Current page - object SplFileInfo
-		if(is_object($path))
+		// if(is_object($path))
+		if($path instanceof SplFileInfo)
 		{
 			$dir = \H::$Dir;
 			$name = self::skipNum($path->getFilename());

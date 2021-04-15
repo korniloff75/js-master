@@ -7,8 +7,6 @@ if (version_compare(PHP_VERSION, '7.1', '<') ) die("Извини, брат, с �
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1); */
 
-$START_PROFILE = microtime(true);
-
 // *Автозагрузка
 spl_autoload_register(function($class){
 	$namespace = explode('\\', $class);
@@ -39,5 +37,7 @@ $Site= new Site;
 
 # Rendering full page
 header('Content-type: text/html; charset=utf-8');
-echo php\classes\Render::finalPage();
+$html= php\classes\Render::finalPage();
+// \Plugins::getHook('integration_end');
+echo $html;
 # /html

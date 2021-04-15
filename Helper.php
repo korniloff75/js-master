@@ -70,7 +70,6 @@ class H {
 		}
 
 		require_once \DR . '/php/funcs.php';
-		self::profile('base');
 
 		//* create map ...
 		// echo phpversion();
@@ -243,27 +242,6 @@ class H {
 		return $o;
 
 	} // addFromDir
-
-
-	public static function profile($n, $rem='')
-	// :string
-	{
-		// if(!\ADMIN) return '';
-
-		$cn = 'profile_' . $n;
-
-		if(empty(self::$tmp[$cn]))
-		{
-			self::$tmp[$cn] = gettime();
-		}
-		else
-		{
-			$info = '<p>Page generation - ' . bcsub(gettime(), self::$tmp[$cn], 5)*1000 . 'ms | Memory usage - now ( '. round (memory_get_usage()/1024) . ') max (' . round (memory_get_peak_usage()/1024) . ') Kbytes</p>';
-			// self::$tmp[$cn]= null;
-			return  "<div class='core info'><b>Used PHP-" . phpversion() . " block $n Technical Info $rem </b>: $info</div>";
-		}
-
-	}
 
 
 	public static function translit(string $s, $direct = 0)

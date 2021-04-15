@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang=<?=LANG?>>
 
-<head>
-</head>
+<head></head>
 
 <body>
 
@@ -61,9 +60,7 @@
 
 	</aside>
 
-	<footer>
-
-	</footer>
+	<footer></footer>
 </section>
 
 

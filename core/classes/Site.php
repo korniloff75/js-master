@@ -31,6 +31,7 @@ class Site
 
 		// autoload ->index.php
 
+		// *Включаем логирование и проверяем доступ к api
 		$this->_initLog()
 			->_api();
 
@@ -54,15 +55,12 @@ class Site
 			return !empty($_SESSION['adm']);
 		}
 
-
-
 		// var_dump($_REQUEST);
-
-
 
 		// todo Plugins
 
-	}
+	}//__construct
+
 
 	public static function autoloader()
 	{
@@ -155,6 +153,7 @@ class Site
 		$Router = new Router;
 	}
 
+	
 	function test()
 	{
 		$n= new \php\classes\Navigate;

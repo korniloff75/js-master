@@ -361,6 +361,7 @@ Object.defineProperties(jQuery, {
 		value: function (arr,opts) {
 			if(!(arr instanceof Array)) {
 				arr = Object.values(arr);
+				// arr = Array.from(arr);
 				// console.info('argument is not array');
 			}
 			opts= Object.assign({

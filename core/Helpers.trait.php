@@ -178,25 +178,6 @@ trait Helpers
 	}
 
 
-	public static function profile($rem='')
-	:string
-	{
-		global $START_PROFILE;
-
-		if(empty($START_PROFILE))
-		{
-			return '';
-		}
-		else
-		{
-			$info = '<p>Page generation - ' . round((microtime(true) - $START_PROFILE)*1e4)/10 . 'ms | Memory usage - now ( '. round (memory_get_usage()/1024) . ') max (' . round (memory_get_peak_usage()/1024) . ') kB</p>';
-
-			return  "<div class='core info'><b>Used PHP-" . phpversion() . " Technical Info $rem </b>: $info</div>";
-		}
-
-	}
-
-
 	public static function translit(string $s, $direct = 0)
 	:string
 	{
@@ -253,6 +234,7 @@ trait Helpers
 	// *DOMNode extensions
 
 	public static function getDOMinnerHTML(DOMNode $element)
+	:string
 	{
 		$innerHTML = "";
 
@@ -265,7 +247,16 @@ trait Helpers
 	}
 
 
-	function setDOMinnerHTML(DOMNode $element, $html)
+	static function appendDOMinnerHTML(DOMNode &$element, $html)
+	{
+		$fragment = $element->ownerDocument->createDocumentFragment();
+		$fragment->appendXML($html);
+
+		$element->appendChild($fragment);
+	}
+
+
+	static function setDOMinnerHTML(DOMNode &$element, $html)
 	{
 		$fragment = $element->ownerDocument->createDocumentFragment();
 		$fragment->appendXML($html);
@@ -274,5 +265,36 @@ trait Helpers
 		}
 
 		$element->appendChild($fragment);
+	}
+
+
+	/**
+	 * @param haystack {string}
+	 * @param needles {string|array}
+	 * @param posArr service
+	 * Возвращает вхождение первой подстроки из mixed @needles
+	 */
+	public static function stripos_array(string $haystack, $needles, ?int $offset= 0, $posArr= [])
+	{
+		if ( !is_array($needles) )
+			return mb_stripos($haystack, $needles, $offset);
+		elseif (!count($needles))
+			return false;
+
+		foreach ($needles as $str) {
+			if ( is_array($str) ) {
+				$pos = self::stripos_array($haystack, $str, $offset, $posArr);
+			} else {
+				$pos = mb_stripos($haystack, $str, $offset);
+			}
+
+			if ($pos !== false)
+				$posArr[] = $pos;
+		}
+
+		sort($posArr, SORT_NATURAL);
+		// ksort($posArr, SORT_NATURAL);
+		return $posArr[0] ?? false;
+		// return array_keys($posArr)[0] ?? false;
 	}
 }

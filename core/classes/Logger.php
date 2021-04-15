@@ -53,7 +53,9 @@ class Logger
 		$pathdir = '.',
 		$filename = 'my.log',
 		$printed = false,
-		$notWrite;
+		$notWrite,
+		// Не логируется с вхождениями
+		$excludes = ['DOMDocument::'];
 
 	/**
 	 * @name - name of the log file
@@ -159,8 +161,9 @@ class Logger
 
 
 	protected function _addToLog($fileName, $line, $message, $level=null)
-	:string
+	:?string
 	{
+		// if()
 		return $this->log[]= $this->_formatLog($fileName, $line, $message, $level) . PHP_EOL . PHP_EOL;
 	}
 
@@ -259,8 +262,8 @@ class Logger
 
 		# Убираем ошибки парсера
 		if(
-			class_exists('CommonBot', false) &&
-			CommonBot::stripos_array($errstr, ["loadHTML"]) !== false
+			class_exists('Site', true) &&
+			Site::stripos_array($errstr, self::$excludes) !== false
 		)
 			return false;
 

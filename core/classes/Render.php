@@ -6,7 +6,7 @@ class Render
 {
 	function __construct()
 	{
-		// updateCaptcha();
+		\Plugins::getHook('integration_system');
 	} // __construct
 
 
@@ -77,7 +77,8 @@ class Render
 		. "\n"
 		. $SV
 		. "\n" . ($opts['link'] ?? '')
-		. "\n" . \H::addFromDir('js/');
+		. "\n" . \H::addFromDir('js/')
+		. \Plugins::getHook('head');
 	}
 
 
@@ -134,10 +135,14 @@ class Render
 
 		$content = ob_get_clean();
 
+		$content.= \Plugins::getHook('content');
+		$content.= \Plugins::getHook('integration_pages');
+
 		return "<header>
 		<h1" . (!empty($Data['hidden']) ? " class=hidden" : "") . ">{$data['title']}</h1>
 		</header>\n$content";
 	}
+
 
 
 	public static function content()
@@ -226,7 +231,7 @@ class Render
 				}
 
 			}
-			$content .= \H::profile('base', basename(__FILE__) . ' : ' . __LINE__);
+
 			$content .= '</div> <!--/.DA_del-->';
 		}
 
@@ -295,7 +300,8 @@ class Render
 	public static function footer()
 	: string
 	{
-		$f = '<script>
+		$f= \Plugins::getHook('footer')
+		. '<script>
 		// less options in template
 		var less = {
 			env: \'' . (LOCALHOST ? 'development' : 'production') . '\',
@@ -372,24 +378,6 @@ class Render
 		<button id="add_setting" class="core note button" onclick="_A.addSetting($('#page_settings'))">Add NEW</button>
 
 		<?php
-		// print_r(\H::$notes);
-
-		foreach(\H::$notes as $fn => &$n) {
-			?>
-
-			<h5 style="margin: 1em 0;"><?=$fn?></h5>
-			<div>
-				<?php
-				foreach($n as $l => &$t) {
-					echo "<h6>$l</h6>";
-					var_dump($t);
-				}
-				?>
-			</div>
-
-			<?php
-		}
-
 		return "<pre id=\"adm\" class=\"DA_del\">" . ob_get_clean() . '</pre>';
 
 		/* if(LOCALHOST) echo "<!-- livereload -->
@@ -398,35 +386,43 @@ class Render
 	} // adminBlock
 
 
+	/**
+	 * final Output
+	 */
 	public static function finalPage ($opts = [])
 	: string
 	{
-		# final rendering
-		global $Data, $Nav, $notes;
+		global $Data, $Nav;
 
-		note($Data, __FILE__, __LINE__);
+		tolog(['$Data'=>$Data]);
 
 		# Wrap content in template
-		eval (\H::addFromDir($Data['template'], 'php'));
+
+		require_once "{$Data['template']}/template.php";
 
 
 		# Close main buff
-		# opened in Index
+		# opened in Site
 		$html = ob_get_clean();
 
 		// var_dump($html);
 
+		// todo Admin
 		if(\ADMIN) $html = preg_replace('~(<body)[^>]*>~', "$1 style=\"/*padding-top:15px;*/\">\n" . self::adminBlock(), $html, 1);
 
 
 		$html = preg_replace([
-			'~</head>~', '~<!--\s*\$TITLE\$\s*-->~', '~<!--\s*\$CONTENT\$\s*-->~', '~</body>~'
+			'~</head>~', '~</header>~', '~<!--\s*\$TITLE\$\s*-->~', '~<!--\s*\$CONTENT\$\s*-->~', '~</body>~'
 		], [
 			self::head() . "\n$0",
+			\Plugins::getHook('header') . "\n$0",
 			$Data['title'],
 			'<div id="ajax-content">' . self::content() . "</div>\n",
 			self::footer() . "\n$0"
 		], $html, 1);
+
+		\Plugins::$html= &$html;
+		\Plugins::getHook('integration_end');
 
 		// var_dump($Data);
 		// var_dump($html);

@@ -42,7 +42,7 @@ _H.RSYa = {
 		var
 			that = this,
 			// Exceptions
-			noAD = /Sajt_dlya_slabovidyashhix\/(PRO|Lite)|Rekvizity/i,
+			noAD = /Sajt_dlya_slabovidyashhix\/(PRO|Lite)|Rekvizity|feedback/i,
 			parsMin = 5;
 
 		// console.log(this);
@@ -66,11 +66,12 @@ _H.RSYa = {
 			$pars : { enumerable: false},
 		});
 
-		var rnd= $.rnd(this['$pars'],{min:parsMin-1});
+		var rndNum= Math.floor(parsMin - 1 + Math.random() * (this['$pars'].length-parsMin)),
+			rnd= this['$pars'][rndNum];
 
 		// if (!Object.keys(this).length) return;
 
-		console.log({rnd});
+		console.log({rndNum,rnd});
 
 		//* Создаем рекламный блок после случайного <p> и наполняем его
 		// this.$adBlock = $('<div id="y'+(Math.random()*1000+2000)+'">').insertAfter($.rnd(this['$pars']));
@@ -79,7 +80,8 @@ _H.RSYa = {
 		console.log("this = ", this, "\nthis.$adBlock= ", this.$adBlock, this.$adBlock[0].id);
 
 		// *Yandex.RTB R-A-486456-1
-		$(window).on('load', this.prepare);
+		// $(window).on('load', this.prepare);
+		this.prepare();
 
 
 		// Отлов блокировщиков

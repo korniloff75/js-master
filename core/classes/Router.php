@@ -6,7 +6,7 @@ class Router
 		# Main globals
 		global $Nav, $Data, $Render, $SV;
 
-		# Remove first slash
+		//* Remove first slash
 		if(strpos($_SERVER['REQUEST_URI'], '/') === 0) $_SERVER['REQUEST_URI'] = substr($_SERVER['REQUEST_URI'], 1);
 
 		$Data = $Nav->setData(\H::$fileInfo);
