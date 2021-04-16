@@ -71,7 +71,7 @@
 	// Run after LESS
 	window.addEventListener('DOMContentLoaded', function() {
 		main.inited = 1;
-		if(!window.less || less && !less.pageLoadFinished) main();
+		if(!window.less || !less.pageLoadFinished) main();
 		else less.pageLoadFinished.then(main);
 	});
 

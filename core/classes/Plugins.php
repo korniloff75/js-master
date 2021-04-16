@@ -29,38 +29,72 @@ class Plugins
 
 	static
 		// $pathname=
-		$list=[],
+		$listHooks=[],
 		$html,
-		$doc,
-		$xpath;
+		$DOM=[];
+
+	public static function available(string $plName)
+	:bool
+	{
+		return !file_exists(self::BASE . "/$plName/" . self::TOKENS['disable']);
+	}
+
+	public static function enable(string $plName)
+	:bool
+	{
+		unlink(self::BASE . "/$plName/" . self::TOKENS['disable']);
+
+		if($bool= self::available($plName)){
+			self::_resetHooks();
+		}
+		return $bool;
+	}
+
+	public static function disable(string $plName)
+	:bool
+	{
+		if($bool= file_put_contents(self::BASE . "/$plName/" . self::TOKENS['disable'],'') === 0){
+			self::_resetHooks();
+		}
+		return $bool;
+	}
+
+
+	protected static function _resetHooks()
+	{
+		self::$listHooks = [];
+		return self::_listHooks();
+	}
 
 
 	/**
 	 * Составляем массив плагинов, разобранных по хукам
 	 * ['hookname'=>{string} code]
 	 */
-	private static function _list()
+	private static function _listHooks()
+	:array
 	{
-		$list= &self::$list;
-		if(count($list)) return $list;
+		$listHooks= &self::$listHooks;
+		if(count($listHooks)) return $listHooks;
 
 		Site::createDir(self::BASE);
 
 		foreach(new FilesystemIterator(self::BASE) as $dirname=>$fi){
 			if(
 				!$fi->isDir()
-				|| file_exists("$dirname/".self::TOKENS['disable'])
+				// || file_exists("$dirname/".self::TOKENS['disable'])
+				|| !self::available($fi->getFilename())
 			) continue;
 
 			foreach(self::HOOKS as $hook){
 				if(!file_exists($pathname= "$dirname/$hook.php")) continue;
 
-				$list[$hook]= $list[$hook] ?? [];
-				$list[$hook][]= $pathname;
+				$listHooks[$hook]= $listHooks[$hook] ?? [];
+				$listHooks[$hook][]= $pathname;
 			}
 		}
 
-		return $list;
+		return $listHooks;
 	}
 
 
@@ -70,12 +104,12 @@ class Plugins
 	static function getHook(string $hookname)
 	:string
 	{
-		$list= self::_list();
-		if(empty($list[$hookname])) return '';
+		$listHooks= self::_listHooks();
+		if(empty($listHooks[$hookname])) return '';
 
 		ob_start();
 		echo "<!--$hookname-plugin-->";
-		foreach($list[$hookname] as $pathname){
+		foreach($listHooks[$hookname] as $pathname){
 			include_once $pathname;
 		}
 		echo "<!--/$hookname-plugin-->";
@@ -87,8 +121,8 @@ class Plugins
 	:array
 	{
 		$out= [
-			'doc'=> &self::$doc,
-			'xpath'=> &self::$xpath
+			'doc'=> &self::$DOM['doc'],
+			'xpath'=> &self::$DOM['xpath']
 		];
 
 		if(

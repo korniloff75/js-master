@@ -119,21 +119,23 @@ class Site
 		// *Получаем данные из fetch
 		$inp_data= json_decode(
 			file_get_contents('php://input'),1
-		) ?? [];
+		);
 		tolog(__METHOD__,null,['$inp_data'=>$inp_data]);
 
 		// *Собираем все входящие в $_REQUEST
-		$_REQUEST= array_merge($_REQUEST, $inp_data);
+		if($inp_data){
+			$_REQUEST= array_merge($_REQUEST, $inp_data);
+		}
 
-		if(empty($mode= @$_REQUEST['mode'])){
+		if(empty($_REQUEST['mode'])){
 			return $this;
 		}
 
-		$this->set('mode',$mode);
+		// *isset $mode
+		$this->set('mode',filter_var($_REQUEST['mode']));
 
 		unset($_REQUEST['mode']);
 
-		// *isset $mode
 		foreach($_REQUEST as $cmd=>&$val){
 
 			if(file_exists($api= __DIR__."/../api/$cmd.php")){
@@ -153,7 +155,7 @@ class Site
 		$Router = new Router;
 	}
 
-	
+
 	function test()
 	{
 		$n= new \php\classes\Navigate;
