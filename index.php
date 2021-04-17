@@ -7,6 +7,8 @@ if (version_compare(PHP_VERSION, '7.1', '<') ) die("Извини, брат, с �
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1); */
 
+date_default_timezone_set ('Europe/Moscow');
+
 // *Автозагрузка
 spl_autoload_register(function($class){
 	$namespace = explode('\\', $class);
@@ -19,16 +21,20 @@ spl_autoload_register(function($class){
 	}
 });
 
+// *before Site
+define( "TRAITS", __DIR__."/core/traits" );
 
 // *dagam fix
 $_SERVER['DOCUMENT_ROOT']= str_replace('private_html','public_html', Site::fixSlashes($_SERVER['DOCUMENT_ROOT']));
+
 // *Глобальный корень
 define( "GDR", $_SERVER['DOCUMENT_ROOT'] );
+
 // *Корень сайта
 $_SERVER['DOCUMENT_ROOT']= Site::fixSlashes(__DIR__);
 define( "DR", $_SERVER['DOCUMENT_ROOT'] );
 
-
+// *front controller
 $Site= new Site;
 
 

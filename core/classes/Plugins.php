@@ -1,12 +1,14 @@
 <?php
 
 /**
- * static class
- * Буферизируем исполнение всех активных плагинов и выводим результаты по мере необходимости через Plugins::getHook('hookname')
+ ** Буферизируем исполнение всех активных плагинов и выводим результаты по мере необходимости через Plugins::getHook('hookname')
  */
 class Plugins
 {
-	// use Get_set;
+	// *static class
+	private function __construct() {}
+	private function __clone() {}
+
 
 	const
 		BASE= \DR.'/plugins', //* Plugins dir
@@ -15,7 +17,7 @@ class Plugins
 			'integration_system', // after core exec
 			'integration_pages', // after page content on all pages
 			'integration_page',
-			'integration_blok', // in sidebar
+			'integration_blok', // in sidebar - include in template
 			'integration_end', // after render html
 			'admin',
 			'integration_admin',
@@ -28,9 +30,9 @@ class Plugins
 		];
 
 	static
-		// $pathname=
 		$listHooks=[],
-		$html,
+		$availables=[], //список доступных плагинов
+		$html, //defined in Render::finalPage()
 		$DOM=[];
 
 	public static function available(string $plName)
@@ -45,7 +47,7 @@ class Plugins
 		unlink(self::BASE . "/$plName/" . self::TOKENS['disable']);
 
 		if($bool= self::available($plName)){
-			self::_resetHooks();
+			self::_reinstallHooks();
 		}
 		return $bool;
 	}
@@ -54,15 +56,16 @@ class Plugins
 	:bool
 	{
 		if($bool= file_put_contents(self::BASE . "/$plName/" . self::TOKENS['disable'],'') === 0){
-			self::_resetHooks();
+			self::_reinstallHooks();
 		}
 		return $bool;
 	}
 
 
-	protected static function _resetHooks()
+	protected static function _reinstallHooks()
 	{
 		self::$listHooks = [];
+		self::$availables = [];
 		return self::_listHooks();
 	}
 
@@ -82,9 +85,10 @@ class Plugins
 		foreach(new FilesystemIterator(self::BASE) as $dirname=>$fi){
 			if(
 				!$fi->isDir()
-				// || file_exists("$dirname/".self::TOKENS['disable'])
-				|| !self::available($fi->getFilename())
+				|| !self::available($plName= $fi->getFilename())
 			) continue;
+
+			self::$availables[]= $plName;
 
 			foreach(self::HOOKS as $hook){
 				if(!file_exists($pathname= "$dirname/$hook.php")) continue;
@@ -117,25 +121,28 @@ class Plugins
 	}
 
 
+	/**
+	 * used in integration_end hook
+	 * return array with cash of the DOMDocument & DOMXpath
+	 */
 	static function getDocXpath()
 	:array
 	{
-		$out= [
-			'doc'=> &self::$DOM['doc'],
-			'xpath'=> &self::$DOM['xpath']
-		];
+		$DOM= &self::$DOM;
+		$fixCyrillicUtf= "\xEF\xBB\xBF";
 
 		if(
 			!self::$html
-			|| $out['xpath']
+			|| !empty($DOM['xpath'])
 		){
-			return $out;
+			return $DOM;
 		}
 
-		$out['doc'] = new DOMDocument("1.0","UTF-8");
-		@$out['doc']->loadHTML("\xEF\xBB\xBF" . self::$html);
-		$out['xpath'] = new DOMXpath($out['doc']);
-		return $out;
+		$DOM['doc'] = new DOMDocument("1.0","UTF-8");
+
+		@$DOM['doc']->loadHTML($fixCyrillicUtf . self::$html);
+		$DOM['xpath'] = new DOMXpath($DOM['doc']);
+		return $DOM;
 	}
 
 

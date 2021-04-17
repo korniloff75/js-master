@@ -23,7 +23,6 @@ $Nav = new \php\classes\Navigate;
 		</div>
 	</div>
 </div>
-
 <!--/DECOR-->
 
 <section id="menu_block">

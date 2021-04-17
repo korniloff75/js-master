@@ -1,6 +1,6 @@
 <?php
 
-define('VERSION', 'KFF-3.0');
+define('VERSION', 'KFF-3.1');
 
 define('HOME', $_SERVER['DOCUMENT_ROOT'] . '/');
 

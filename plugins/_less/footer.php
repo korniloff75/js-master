@@ -1,5 +1,5 @@
 <script>
-// less options in template
+// less options in template;
 var less = {
 	env: "<?=\LOCALHOST ? 'development' : 'production'?>",
 	javascriptEnabled: false

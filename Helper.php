@@ -25,8 +25,6 @@ class H {
 
 		ini_set('short_open_tag', 'On');
 
-		require_once \DR . '/CONST.php';
-
 
 		if(array_key_exists('login', $_REQUEST))
 			self::includeModule('Login');
@@ -46,7 +44,6 @@ class H {
 		);
 
 		// var_dump(\ADMIN, $_SESSION, self::realIP(), (strpos(self::realIP(), \ADM) === 0));
-		define('BASE_URL', (Site::is('https') ? 'https' : 'http') . '://' . \HOST . '/');
 
 		# Для подключение не через ROOT
 		if (realpath('') !== realpath(\DR))
@@ -66,7 +63,7 @@ class H {
 			#Production
 			ini_set('display_errors', 0);
 			ini_set('display_startup_errors', 0);
-			error_reporting(0);
+			// error_reporting(0);
 		}
 
 		require_once \DR . '/php/funcs.php';
@@ -75,17 +72,7 @@ class H {
 		// echo phpversion();
 		$Nav = new \php\classes\Navigate;
 
-		# Define current page
-		self::$fileInfo = new kffFileInfo($_REQUEST['page'] ?? $Nav->firstPage);
-
-		self::$Dir = self::$fileInfo->fromRoot() . '/';
-
-		define('DIR', self::$Dir);
-
-		if(!is_dir(self::$Dir)) self::shead(404);
-
-		// var_dump($bg, IMAGES, BG);
-		// exit;
+		//note Define current page -> Page::setData
 	} // __construct
 
 

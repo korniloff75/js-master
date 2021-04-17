@@ -8,8 +8,6 @@ RewriteCond %{HTTP_HOST} ^.*kpa-ing\.ru$ [NC]
 RewriteRule ^(.*)$ https://js-master.ru/$1 [R=301,L,QSA]
 
 # etual-crimea.ru
-# ?
-# RewriteCond %{HTTP_HOST} ^.*etualcrimea\..+\.ru$ [OR,NC]
 RewriteCond %{HTTP_HOST} ^.*etualcrimea\..+ [OR,NC]
 RewriteCond %{HTTP_HOST} ^.*etual-crimea\.ru$ [NC]
 RewriteRule ^(.*)$ https://etual-crimea.ru/$1 [R=301,L,QSA]
@@ -17,7 +15,6 @@ RewriteRule ^(.*)$ https://etual-crimea.ru/$1 [R=301,L,QSA]
 # Универсальный редирект с www
 RewriteCond %{HTTP_HOST} ^www\.(.*) [NC]
 RewriteRule ^(.*)$ http://%1/$1 [R=301,L]
-
 
 
 ## Begin - Exploits
@@ -58,11 +55,6 @@ RewriteRule ^(cgi-bin)/(.*) error [F,L]
 # |php
 ## End - Security
 
-# ЧПУ
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^(content.+)/($|\?) index.php?page=$1 [L]
-# RewriteRule (content.+)/($|\?) index.php?page=$1 [L]
-# RewriteRule ^(.+)/($|\?) index.php?page=$1 [L]
 
 # BAN domains
 # (urmsosh-komsml|shigsosh-batyr|3izbshem-shemur|chemur-rcheb|sosh8-gkan|sosh5-nowch|obrazov-yaltch)\.edu21\.cap
@@ -84,11 +76,23 @@ RemoveHandler .html .htm
 AddType application/x-httpd-php .php .htm .html
 # End - Prevent Browsing and Set Default Resources
 
+# 404 -> index
+# RewriteCond %{SCRIPT_FILENAME} !-d
+RewriteCond %{SCRIPT_FILENAME} !-f
+RewriteRule ^(.*)$ ./index.php?route=$1 [QSA,L]
+
+# ЧПУ deprecated
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^(content.+)/($|\?) index.php?page=$1 [L]
+# RewriteRule (content.+)/($|\?) index.php?page=$1 [L]
+# RewriteRule ^(.+)/($|\?) index.php?page=$1 [L]
+
 ## Error pages
 ErrorDocument 400 /templates/errorpages/400.htm
 ErrorDocument 401 /templates/errorpages/401.htm
 ErrorDocument 403 /templates/errorpages/403.htm
 ErrorDocument 404 /templates/errorpages/404.htm
+# ErrorDocument 404 /index.php
 ErrorDocument 500 /templates/errorpages/500.htm
 ## / Error pageses
 

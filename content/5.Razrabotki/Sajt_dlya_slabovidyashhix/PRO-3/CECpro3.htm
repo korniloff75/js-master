@@ -17,7 +17,7 @@
 }
 </style>
 <div>
-		<input class="imgPU no-size btn min700 DA_del" style="padding: 3px 5px 3px 50px; margin:0 auto; font-size:20px; background: url('/<?=\H::$Dir ?>assets/eye.gif') no-repeat scroll 3px center, #ddd linear-gradient(#ccc, #eee, #ccc) repeat scroll 0 0;border: 1px solid #58a; border-radius:5px; z-index:9949; position:static; left:5px; top:20px; cursor: url('/<?=\H::$Dir ?>assets/glasses.png'), pointer;" id="RDS" value="Для слабовидящих" title="Для слабовидящих" type="button">
+		<input class="imgPU no-size btn min700 DA_del" style="padding: 3px 5px 3px 50px; margin:0 auto; font-size:20px; background: url('{DIR}/assets/eye.gif') no-repeat scroll 3px center, #ddd linear-gradient(#ccc, #eee, #ccc) repeat scroll 0 0;border: 1px solid #58a; border-radius:5px; z-index:9949; position:static; left:5px; top:20px; cursor: url('{DIR}/assets/glasses.png'), pointer;" id="RDS" value="Для слабовидящих" title="Для слабовидящих" type="button">
 </div>
 
 <div>
@@ -87,20 +87,20 @@
 
 <h4 id=install>Установка скрипта на сайт</h4>
 <ol>
-	<li><a href="/?module=php/modules/Download.php&file=<?=\H::$Dir ?>/assets/&nameZIP=CC-Pro-3" >Скачать архив</a> с файлами скрипта</li>
+	<li><a href="/?module=php/modules/Download.php&file={DIR}/assets/&nameZIP=CC-Pro-3" >Скачать архив</a> с файлами скрипта</li>
 	<li>Распаковать его себе на сервер в корневой каталог <strong>js</strong>. Если его нет, требуется его создать.</li>
 	<li>Написать мне в Обратную связь адрес сайта, на котором вы планируете использовать скрипт и получить от меня письмо с актуальными условиями его приобретения. Без этого пункта скрипт работать не будет.</li>
 	<li>Подключить скрипт у себя в сайте, прописав в header:
 		<pre><code saldom=noLib>
-		<script src="/<?=\H::$Dir ?>assets/KFF_Lite.min.js" type="text/javascript" charset="utf-8" ant="no"></script>
-		<script src="/<?=\H::$Dir ?>assets/DA_pro_v3_local.prod.js" type="text/javascript" charset="utf-8"></script>
+		<script src="{DIR}/assets/KFF_Lite.min.js" type="text/javascript" charset="utf-8" ant="no"></script>
+		<script src="{DIR}/assets/DA_pro_v3_local.prod.js" type="text/javascript" charset="utf-8"></script>
 		</code></pre>
 	</li>
 	<li>Внести дополнительные тонкие настройки, согласно разделу <b>API версии PRO-3</b>.
 		<p>Пример таких настроек:</p>
 		<pre><code saldom=noLib>
 		<script type="text/javascript">
-		DizSel.checkUrl = '/<?=\H::$Dir ?>assets/'; //== Путь к каталогу со скачанным скриптом
+		DizSel.checkUrl = '{DIR}/assets/'; //== Путь к каталогу со скачанным скриптом
 		//== Опциональные настройки:
 		DizSel.SlabovidButtonParent = _K.G('$.content');
 
@@ -135,6 +135,6 @@
 <p>Если вы оценили проделанную мной работу по улучшению скрипта, можете заказать переход со старой версии через Обратную связь или сразу мне на почту, если не удалили мой адрес.</p>
 
 <div>
-<h4 onclick="if(!$('#man' ).text()) $.get('/<?=\H::$Dir ?>img/API_slabovtd_PRO-3.php').done(function(resp){$('#man').html(resp)}) " title="Открыть" style="font-family: monospace;" class="pointer center">API версии PRO-3 <span class="small">(загружается по клику)</span></h4>
+<h4 onclick="if(!$('#man' ).text()) $.get('{DIR}/img/API_slabovtd_PRO-3.php').done(function(resp){$('#man').html(resp)}) " title="Открыть" style="font-family: monospace;" class="pointer center">API версии PRO-3 <span class="small">(загружается по клику)</span></h4>
 <div style="color: #147; background: rgb(221, 238, 255) none repeat scroll 0% 0%; border: 1px solid; font-size: 14px;" id="man"></div>
 </div>

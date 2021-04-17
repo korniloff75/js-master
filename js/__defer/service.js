@@ -86,7 +86,7 @@ var _S = {
 
 		_S.v.$menu.removeClass('opened');
 
-		_S.v.$bg.css({
+		sv.IMAGES && _S.v.$bg.css({
 			backgroundImage: 'url(\'/' + $.rnd(sv.IMAGES.length && sv.IMAGES || sv.BG) + '\')'
 		});
 

@@ -1,4 +1,5 @@
 <?php
+// note deprecated
 function note($i, $file = null, $line = null)
 
 {
@@ -24,14 +25,6 @@ function gettime()
 	$real_time = $part_time[1].substr($part_time[0], 1);
 	return $real_time;
 }
-
-
-/* function updateCaptcha()
-{
-	if(empty($_SESSION)) session_start();
-	return $_SESSION['captcha'] = random_int(1e3,1e6);
-	// $GLOBALS['captcha']= random_int(1e3,1e6);
-} */
 
 
 

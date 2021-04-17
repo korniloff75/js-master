@@ -2,15 +2,15 @@
 namespace php\classes;
 \H::protectScript(basename(__FILE__));
 
-class Navigate
 
+class Navigate
 {
 	const
 		ALLOWED = \CONT . "((?!thumb|img|PHPMailer|assets).)*";
 
 	// private static $log;
 
-	public $firstPage;
+	public static $firstPage;
 
 
 	function __construct($dir=null)
@@ -44,7 +44,7 @@ class Navigate
 		$this->map_flat = $this->mapObj->getFlat();
 		natsort($this->map_flat);
 
-		$this->firstPage = $this->map_flat[0];
+		self::$firstPage = $this->map_flat[0];
 
 	}
 
@@ -120,7 +120,7 @@ class Navigate
 
 		foreach($map as $title => &$item_val) {
 			$path = $ref . $title . '/';
-			$data = self::setData($path);
+			$data = self::getData($path);
 			// var_dump($data);
 			$class = '';
 
@@ -174,7 +174,7 @@ class Navigate
 	{
 		foreach($map as $title => $cont_d) {
 			$path = $ref . $title . '/';
-			$data = self::setData($path);
+			$data = self::getData($path);
 			// var_dump($data);
 			$class = '';
 
@@ -224,7 +224,7 @@ class Navigate
 	public function genMenu(string $dir = null)
 	:string
 	{
-		$dir = $dir ?? self::skipSlashes(\CONT);
+		$dir = $dir ?? trim(\CONT,'/');
 
 		ob_start();
 		?>
@@ -253,26 +253,10 @@ class Navigate
 	}
 
 
-	public static function setData($path)
+	public static function getData($path)
 
 	{
-		# \H::$fileInfo
-		# Current page - object SplFileInfo
-		// if(is_object($path))
-		if($path instanceof SplFileInfo)
-		{
-			$dir = \H::$Dir;
-			$name = self::skipNum($path->getFilename());
-		}
-		else $dir = $path;
-
-		$Data = \H::json($dir . '/data.json');
-
-		$Data['title'] = $Data['title'] ?? \H::translit(self::skipNum($path), 1);
-
-		// var_dump($Data);
-
-		return $Data;
+		return \Page::getData($path);
 	}
 
 
@@ -282,7 +266,7 @@ class Navigate
 		$out='<nav id="nav_block">';
 
 		foreach($this->map_flat as $i) {
-			$out .= "\n<div class=\"nav_item\" data-page=\"" . \Path::fromRootStat($i) . "\" title=\"" . $i . "\"><div></div></div>";
+			$out .= "\n<div class=\"nav_item\" data-page=\"" . str_replace('content/','site/',\Site::getPathFromRoot($i)) . "\" title=\"" . $i . "\"><div></div></div>";
 		}
 		return $out . "\n</nav>";
 	}

@@ -1,6 +1,4 @@
 <?php
-global $Data;
-
 if(\ADMIN){
 ?>
 <link rel="stylesheet/less" type="text/css" href="/css/admin.less">
@@ -8,4 +6,4 @@ if(\ADMIN){
 <?php
 }
 
-echo \H::addFromDir(\DR."/{$Data['template']}", \ADMIN && \USE_BROWS_LESS ? 'less' : 'css');
+echo \H::addFromDir(\DR."/" . \Page::$Data['template'], \ADMIN && \USE_BROWS_LESS ? 'less' : 'css');

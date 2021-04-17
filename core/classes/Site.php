@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__."/../Helpers.trait.php";
-require_once __DIR__."/../traits/Get_set.trait.php";
+require_once \TRAITS."/Get_set.trait.php";
+
 
 class Site
 {
@@ -20,6 +21,9 @@ class Site
 		],
 		TEMPLATE_DEFAULT= '_default_';
 
+	public
+		$Page;
+
 
 	public function __construct()
 	{
@@ -29,11 +33,18 @@ class Site
 		define( "POLLING", isset($_REQUEST["mode"]) && $_REQUEST["mode"] === 'list' );
 		define( "COOKIEPATH", "/" );
 
+		require_once \DR . '/CONST.php';
+
+		define('BASE_URL', 'http' . (self::is('https') ? 's' : '') . '://' . \HOST . '/');
+		define('AJAX', self::is('ajax'));
+
 		// autoload ->index.php
 
 		// *Включаем логирование и проверяем доступ к api
 		$this->_initLog()
 			->_api();
+
+		tolog(['$_GET'=>$_GET]);
 
 		// *before Helper.php
 		if( !POLLING )
@@ -43,26 +54,26 @@ class Site
 		// todo remake to Helper.trait
 		require_once DR.'/Helper.php';
 
-		$this->_route();
+		tolog(__METHOD__,null,['$_SERVER[REQUEST_URI]'=>$_SERVER['REQUEST_URI']]);
 
-		// $this->test();
+		// *routing
+		$this->_route();
 
 		// todo make auth
 
 		// *Admin
 		function is_adm()
 		{
-			return !empty($_SESSION['adm']);
+			return isset($_SESSION['auth']['group'])
+			&& $_SESSION['auth']['group'] === 'admin';
 		}
 
 		// var_dump($_REQUEST);
 
-		// todo Plugins
-
 	}//__construct
 
 
-	public static function autoloader()
+	/* public static function autoloader()
 	{
 		spl_autoload_register(function($class){
 			$namespace = explode('\\', $class);
@@ -74,13 +85,11 @@ class Site
 				include_once $path;
 			}
 		});
-	}
+	} */
 
 
 	private function _bufferOpen()
 	{
-		date_default_timezone_set ('Europe/Moscow');
-
 		mb_internal_encoding( "UTF-8" );
 		mb_http_output( "UTF-8" );
 		// mb_http_input( "UTF-8" );
@@ -151,9 +160,38 @@ class Site
 
 	protected function _route()
 	{
-		global $Router;
-		$Router = new Router;
+		// Page::$fileInfo= new kffFileInfo(\DR."/content/{$req['matches'][0]}");
+		// tolog(__METHOD__,null,['AJAX request'=>$_REQUEST]);
+
+		Router::route('(?:site|content)/(.+)', function($req){
+			// tolog([func_get_args()]);
+			tolog(['$req'=>$req]);
+			\Page::$fileInfo= new kffFileInfo(\DR."/content/{$req['matches'][0]}");
+			// *Current folder uri
+			define('DIR', \Page::$fileInfo->fromRoot() . '/');
+			$this->Page= new Page();
+		});
+
+		// *If AJAX flush Render::content() & exit
+		if(\AJAX){
+			Router::execute($_REQUEST['page']);
+
+			tolog(__METHOD__,null,['AJAX request'=>$_REQUEST]);
+
+			header('Content-type: text/html; charset=utf-8');
+			# CONST to ajax variable sv
+			echo $SV;
+			echo php\classes\Render::content();
+			// echo $Render->content();
+
+			die;
+		}
+
+		tolog(php\classes\Navigate::$firstPage);
+
+		Router::execute();
 	}
+
 
 
 	function test()
@@ -163,4 +201,3 @@ class Site
 		die;
 	}
 } //Site
-

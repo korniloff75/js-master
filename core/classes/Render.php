@@ -1,19 +1,20 @@
 <?php
-
 namespace php\classes;
+
+\Plugins::getHook('integration_system');
 
 class Render
 {
 	function __construct()
 	{
-		\Plugins::getHook('integration_system');
+		// \Plugins::getHook('integration_system');
 	} // __construct
 
 
 	public static function meta()
 	:string
 	{
-		global $Data;
+		$Data= &\Page::$Data;
 
 		$_SESSION['captcha'] = random_int(1e3,1e6);
 
@@ -69,15 +70,15 @@ class Render
 	public static function head()
 	: string
 	{
-		global $Data, $SV;
+		$Data= &\Page::$Data;
 
 		return self::meta()
 		. "\n<title>{$Data['title']} - " . \SITENAME . '</title>'
 		. "\n" . '<link rel="stylesheet" type="text/css" href="/css/base.css">'
 		. "\n" . '<link rel="stylesheet" type="text/css" href="/assets/font-awesome/css/font-awesome.min.css">'
 		. "\n"
-		. $SV
-		. "\n" . \H::addFromDir('js/')
+		. \Page::setSV()
+		. "\n" . \H::addFromDir('js/') //todo в продакшне собрать в 1 файл
 		. \Plugins::getHook('head');
 	}
 
@@ -85,17 +86,18 @@ class Render
 	public static function contentCollect($dir, $opts = [])
 	: string
 	{
-		global $Data;
+		$Data= &\Page::$Data;
 
 		$current = $dir === \DIR;
-		\H::$Dir = $dir;
-		// echo $dir;
-		// define('DIR', $dir);
+		\Page::$DIR = $dir;
+
+		tolog(__METHOD__,null,['DIR'=>\Page::$DIR, '$dir'=>$dir]);
+
 		ob_start();
 
 		$idf = new \DirFilter($dir);
-		$data = $current ? $Data : Navigate::setData($dir);
-		$images = $current ? \IMAGES : (new \DirFilter($dir, "#\.(jpe?g|png)$#"))->natSort();
+		$data = $current ? $Data : \Page::getData($dir);
+		$images = (new \DirFilter($dir, "#\.(jpe?g|png)$#"))->natSort();
 		$cond = \ADMIN && empty($opts['rss']);
 		$hidden = !\ADMIN && !empty($data['hidden']);
 
@@ -117,6 +119,7 @@ class Render
 		}
 
 		# Add thumbs
+		// todo -> plugins
 		if(\MODULES['Thumb']['enable'] && (!isset($data['thumb']) || $data['thumb'] == true) && $images)
 			echo \H::includeModule('Thumb')->toPage();
 			// exit;
@@ -151,50 +154,18 @@ class Render
 		global $Data, $SV;
 		$out = '';
 
+		$Data= $Data ?? \Page::$Data;
+
 		if(!\ADMIN && !empty($Data['hidden']))
-			\H::shead(404);
+			\Site::shead(404);
 
-		/* ob_start();
-
-		// var_dump($Data); exit;
-		// var_dump(\H::shead(403)); exit;
-
-		# Create DIR iterator
-		# Add htm
-		$idf = new \DirFilter(\DIR);
-
-		if(count($content_htm = $idf->natSort()))
-			foreach($content_htm as &$htm) {
-				if(\ADMIN) echo "$eswitcher<div data-path=\"$htm\" class=\"editor\">";
-				include_once $htm;
-				if(\ADMIN) echo "</div>";
-			}
-
-		# Add thumbs
-		if(\MODULES['Thumb']['enable'] && (!isset($Data['thumb']) || $Data['thumb'] == true) && \IMAGES)
-			echo \H::includeModule('Thumb')->toPage();
-			// exit;
-
-		# Add content from *.md files
-		if(count($content_md = (new \DirFilter($idf->iterator, "#\.(md)$#"))->natSort()))
-		{
-			foreach($content_md as &$md) {
-				$out .= file_get_contents($md);
-			}
-
-			echo \H::includeModule('Parsedown')->text($out);
-			// require_once 'php/modules/Parsedown.php';
-			// echo (new \Parsedown)->text($out);
-		}
-
-		$content = ob_get_clean(); */
-
-
-		$content = self::contentCollect(\H::$Dir);
+		$content = self::contentCollect(\Page::$DIR);
 		// var_dump(\DIR, $content); exit;
 
-		if(!strlen($content) || !empty($data['hidden']))
-			die (\H::shead(404));
+		if(!strlen($content) || !empty($data['hidden'])){
+
+			// die (\H::shead(404));
+		}
 		else
 		{
 			# Microtemplater
@@ -204,7 +175,7 @@ class Render
 					'--', '---'
 				],
 				[
-					'/' . \H::$Dir,
+					'/' . \DIR,
 					'–', '—'
 				],
 			$content);
@@ -223,6 +194,8 @@ class Render
 			}
 
 			$content .= '<div class="DA_del">';
+
+			// note deprecated
 			if(\ADMIN || \TEST)
 			{
 				# Выводим логи
@@ -336,8 +309,6 @@ class Render
 	public static function adminBlock ()
 	:string
 	{
-		global $Data;
-
 		if(!\ADMIN) return '';
 
 		ob_start();
@@ -349,7 +320,7 @@ class Render
 		// var_dump($Data);
 		// if(!count($Data)) $Data = ["title" => "Untitled"];
 
-		foreach($Data as $name => &$val) {
+		foreach(\Page::$Data as $name => &$val) {
 			// echo self::createAdminItem($name, str_replace('"', '', json_encode($val, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK)));
 			if($name === 'template' && $val === \TEMPLATE) continue;
 			echo self::createAdminItem($name, $val);
@@ -375,7 +346,9 @@ class Render
 	public static function finalPage ($opts = [])
 	: string
 	{
-		global $Data, $Nav;
+		global $Nav;
+
+		$Data= &\Page::$Data;
 
 		tolog(['$Data'=>$Data]);
 

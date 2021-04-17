@@ -297,4 +297,41 @@ trait Helpers
 		return $posArr[0] ?? false;
 		// return array_keys($posArr)[0] ?? false;
 	}
+
+
+	public static function shead ($s, $o = '')
+	{
+		header('Content-type: text/html; charset=utf-8');
+
+		if ($s == 401)
+			header('HTTP/1.0 401 Unauthorized');
+
+		elseif ($s == 404)
+		{
+			header('HTTP/1.0 404 Not Found');
+			$o = "<div>
+				<p>Данная страница не найдена...</p>
+				<p>Пожалуйсла, перейдите на <a href=\"/\">Главную страницу</a> сайта.</p>
+			<div>";
+		}
+		elseif ($s == 403)
+		{
+			header('HTTP/1.0 403 Forbidden');
+		}
+
+		$title = "Error $s";
+
+		if(!include("templates/errorpages/$s.htm"))
+		 echo '<h1>' . $title . "</h1>\n" . $o;
+
+		 die;
+
+	}
+
+	# Remove numbers from names like 1.file.pfp
+	public static function skipNum(string $name)
+	:string
+	{
+		return preg_replace("#^(\d+\.)?(.+?)(\..+)?$#", "$2", basename($name));
+	}
 }
