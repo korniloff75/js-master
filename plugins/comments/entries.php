@@ -1,5 +1,5 @@
 <?php
-self::$log->add(__METHOD__,null,['$this->check_no_comm()'=>$this->check_no_comm()]);
+tolog(__METHOD__,null,['$this->check_no_comm()'=>$this->check_no_comm()]);
 ?>
 
 <div id="wrapEntries">
@@ -7,12 +7,12 @@ self::$log->add(__METHOD__,null,['$this->check_no_comm()'=>$this->check_no_comm(
 
 	<?php //* Comments BLOCK
 	if (
-		self::is_adm()
+		is_adm()
 		&& $this->check_no_comm()
 	) echo self::T_DISABLED;
 
-	if(self::is_adm()):
-		// self::$log->add(__METHOD__,null,['self::$artDB->{\'enable-comments\'}'=>self::$artDB->{'enable-comments'}]);
+	if(is_adm()):
+		// tolog(__METHOD__,null,['self::$artDB->{\'enable-comments\'}'=>self::$artDB->{'enable-comments'}]);
 	?>
 
 	<div class="uk-text-center uk-margin">
@@ -40,7 +40,7 @@ self::$log->add(__METHOD__,null,['$this->check_no_comm()'=>$this->check_no_comm(
 	?>
 
 
-	<?php if(self::is_adm() && !empty($this->err)): ?>
+	<?php if(is_adm() && !empty($this->err)): ?>
 		<div class="core warning">
 			<pre>
 				<?php

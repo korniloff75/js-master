@@ -4,7 +4,7 @@ if(realpath('.') === __DIR__) die(__FILE__);
 // var_dump($kff);
 require_once \TRAITS . "/Paginator.trait.php";
 
-class Comments /* extends BlogKff */
+class _Comments extends Page
 {
 	use Paginator;
 
@@ -40,36 +40,24 @@ class Comments /* extends BlogKff */
 	function __construct()
 
 	{
-		global $act;
-
-		$artDB= &self::$artDB;
-		$artDB= $artDB ?? self::getArtDB();
-
-		$this->path= self::$storagePath. "/{$artDB->catId}/{$artDB->id}.comments.json";
+		$this->path= \Page::$fileInfo->getPathname(). "/comments.json";
 
 		$this->file = new DbJSON($this->path);
 
-		self::$SPAM_IP = self::$dir.'/db/badIP.json';
+		self::$SPAM_IP = \DR.'/db/badIP.json';
 
-		// var_dump($act);
-
-		// if($act==='comments' && $this->_InputController()) die;
 
 		// *При Аякс-запросе открываем сессию
 		// if(!headers_sent() && !isset($_SESSION)) session_start();
 
-		$this->artData= &self::$map->get($artDB->ind[0])['items'][$artDB->ind[1]];
-
-		// tolog(__METHOD__,null,['$this->artData'=>$this->artData]);
-
-		if($_REQUEST['act']==='comments' &&  $this->_InputController()) die;
+		tolog(__METHOD__,null,[__CLASS__.'::$DB'=>self::$DB]);
 
 
 		// ?
-		self::$captcha = self::realIP();
+		self::$captcha = \Site::realIP();
 
 		// ?
-		$this->p_name= $artDB->title;
+		$this->p_name= self::$DB->title;
 
 		// var_dump($this->file);
 
@@ -89,7 +77,7 @@ class Comments /* extends BlogKff */
 
 		$moder_panel= ' <a href="mailto:'.$email.'" rel="nofollow">'.$email.'</a> <span style="float:right;">IP: '.$IP.' &nbsp; <span uk-icon="icon: file-edit" onclick="commFns.Edit.open('.$num.')" title="Редактировать" style="cursor:pointer; color:green;" ></span> <span uk-icon="icon: close" onclick="commFns.Edit.del('.$num.')" title="Удалить" style="cursor:pointer; color:red;" /></span></span>' ;
 
-		$res= '<div id="ent_page'.$num.'" class="container entry"><div class="head_entry"><span class="uname">'.$num.' '.$name.' &nbsp; CMS: ' . $cms . '</span> <span style="font-size:0.7em;">( '.$time.' )</span>' . "\n" . (!self::is_adm()? '': '<div class="core bar">' . $moder_panel . '</div>');
+		$res= '<div id="ent_page'.$num.'" class="container entry"><div class="head_entry"><span class="uname">'.$num.' '.$name.' &nbsp; CMS: ' . $cms . '</span> <span style="font-size:0.7em;">( '.$time.' )</span>' . "\n" . (!is_adm()? '': '<div class="core bar">' . $moder_panel . '</div>');
 		$res.= '</div><div class="entry_mess">' . self::smiles(self::BBcode($mess));
 
 		if(trim($answer)) {
@@ -105,7 +93,7 @@ class Comments /* extends BlogKff */
 	function check_no_comm()
 
 	{ # return true - комменты
-		return !filter_var(self::$artDB->get('enable-comments'), FILTER_VALIDATE_BOOLEAN);
+		return !filter_var(self::$DB->get('enable-comments'), FILTER_VALIDATE_BOOLEAN);
 	}
 
 
@@ -115,22 +103,22 @@ class Comments /* extends BlogKff */
 
 	{
 		ob_clean();
-		if (!self::is_adm()) die("<p class='core warning'>У тебя нет прав для данного действия!</p>");
+		if (!is_adm()) die("<p class='core warning'>У тебя нет прав для данного действия!</p>");
 
 		$bool= filter_var($bool,FILTER_VALIDATE_BOOLEAN);
 
 		// \H::json(\DIR . 'data.json', $comments);
-		self::$artDB->set(['enable-comments'=>$bool]);
+		self::$DB->set(['enable-comments'=>$bool]);
 
 		// *Обновляем карту
 
-		$map= self::getBlogMap();
-		$ind= self::$artDB->get('ind');
+		/* $map= self::getBlogMap();
+		$ind= self::$DB->get('ind');
 
 		$newData= [$ind[0]=>[
-			'items'=>[$ind[1]=>self::$artDB->get()]
+			'items'=>[$ind[1]=>self::$DB->get()]
 		]];
-		$map->set($newData);
+		$map->set($newData); */
 
 		$this->read();
 		ob_end_flush();
@@ -163,7 +151,7 @@ class Comments /* extends BlogKff */
 	function c_Save_Edit_Comm($form)
 
 	{ # call Ajax
-		if(!self::is_adm()) return;
+		if(!is_adm()) return;
 
 		ob_clean();
 
@@ -197,7 +185,7 @@ class Comments /* extends BlogKff */
 		$this->file->set([$ind=>$arr]) ;
 
 		# блокируем файл и производим запись обновлённого массива
-		// if (!self::is_adm() || !\H::json($path, [$ind => $arr]))
+		// if (!is_adm() || !\H::json($path, [$ind => $arr]))
 			// echo '<div class="core warning">Невозможно записать новые данные!</div>';
 
 		// var_dump($GLOBALS['sendToMail']);
@@ -210,7 +198,7 @@ class Comments /* extends BlogKff */
 
 			self::sendMail([
 				"Уважаемый(ая) " . $name . "!\nАдминистрация сайта " . \HOST
-				. " ответила на Ваш комментарий на странице - " . self::$artDB->title,
+				. " ответила на Ваш комментарий на странице - " . self::$DB->title,
 				'Комментарий' => $e,
 				'Ответ' => $o,
 				'email' => $_POST['email'],
@@ -231,8 +219,6 @@ class Comments /* extends BlogKff */
 
 		ob_clean();
 
-		// $opts= &$this->opts;
-
 		# Невидимая каптча
 		# compare without types
 		if ($form['keyCaptcha'] != self::realIP())
@@ -251,7 +237,7 @@ class Comments /* extends BlogKff */
 		if(empty($form['email']))
 			$this->err[] = "Не указан email";
 
-		if(self::is_adm())
+		if(is_adm())
 			$form = array_merge([
 				'name' => self::$cfg['admin']['name'],
 				'homepage' => \BASE_URL
@@ -300,8 +286,8 @@ class Comments /* extends BlogKff */
 		# Если указан, то отсылаем на мыло
 		if(self::TO_EMAIL == true)
 		{
-			$subject = "Комментарий со страницы " . self::$artDB->title . "- ". ($_REQUEST['curpage'] ?? \HOST);
-			tolog(__METHOD__,null,['self::$artDB->get()'=>self::$artDB->get()]);
+			$subject = "Комментарий со страницы " . self::$DB->title . "- ". ($_REQUEST['curpage'] ?? \HOST);
+			tolog(__METHOD__,null,['self::$DB->get()'=>self::$DB->get()]);
 
 			// !
 			// return;
@@ -329,7 +315,7 @@ class Comments /* extends BlogKff */
 	function c_Del_Comm($num)
 
 	{
-		if(!self::is_adm()) return;
+		if(!is_adm()) return;
 
 		ob_clean();
 
@@ -380,7 +366,7 @@ class Comments /* extends BlogKff */
 			echo self::T_FAIL_SEND;
 		else return;
 
-		if(self::is_adm()) var_dump($send_succ);
+		if(is_adm()) var_dump($send_succ);
 	}
 
 
@@ -405,7 +391,7 @@ class Comments /* extends BlogKff */
 				print_r( $ent);
 				echo '</pre>'; */
 
-				if (self::is_adm() && count($ent) <= 3) {
+				if (is_adm() && count($ent) <= 3) {
 					echo "<h1>fucking URL</h1>";
 					var_dump($ent);
 				}
@@ -434,7 +420,7 @@ class Comments /* extends BlogKff */
 
 
 		# Rendering comments
-		$m_path = self::getPathFromRoot(__DIR__);
+		$m_path = \Site::getPathFromRoot(__DIR__);
 		?>
 
 		<link rel="stylesheet" href="/<?=$m_path?>/style.css">
@@ -442,7 +428,7 @@ class Comments /* extends BlogKff */
 		<?php
 		/*===============<Enabled comments. Start code source>=================
 		#########################*/
-		if (self::is_adm()):
+		if (is_adm()):
 
 		?>
 
@@ -450,12 +436,12 @@ class Comments /* extends BlogKff */
 
 			<h5 class="center" style="display: inline;"> COMMENTS</h5>
 
-			<p>self::is_adm()= <?=self::is_adm()?></p>
+			<p>is_adm()= <?=is_adm()?></p>
 			<p>this->path= <?=$this->path?></p>
 
 			<hr>
-			<p>this->p_name= <?=self::$artDB->title?></p>
-			<p>check_no_comm(this->p_name)= <? var_dump($this->check_no_comm(self::$artDB->title))?></p>
+			<p>this->p_name= <?=self::$DB->title?></p>
+			<p>check_no_comm(this->p_name)= <? var_dump($this->check_no_comm(self::$DB->title))?></p>
 
 		</div>
 
@@ -487,10 +473,10 @@ class Comments /* extends BlogKff */
 		global $Config, $user;
 
 		return DbJSON::toJSON([
-			'adm' => self::is_adm(),
+			'adm' => is_adm(),
 			'email' => $Config->adminEmail,
 			// 'refPage' => $_REQUEST['page'],
-			'p_name' => self::$artDB->title,
+			'p_name' => self::$DB->title,
 			'check_no_comm' => $this->check_no_comm(),
 			'name_request' => 'p_comm',
 			'MAX_LEN' => self::MAX_LEN,
@@ -549,7 +535,7 @@ class Comments /* extends BlogKff */
 	{
 		?>
 		<section id="comments">
-			<link rel="stylesheet" href="/<?=self::getPathFromRoot(__DIR__);?>/style.css">
+			<link rel="stylesheet" href="/<?=\Site::getPathFromRoot(__DIR__);?>/style.css">
 
 			<?=$this->read()?>
 

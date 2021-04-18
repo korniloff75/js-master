@@ -7,9 +7,15 @@ class Page
 {
 	use Get_set;
 
+	public
+		$headhtml='';
+
 	static
 		$fileInfo,
+		// todo
+		$cfg= ['admin'=>['name'=>'KorniloFF']],
 		$Data,
+		$DB,
 		$DIR;
 
 	protected static
@@ -27,10 +33,17 @@ class Page
 	function defineData()
 	{
 		global $Data;
-		// $fi= new kffFileInfo();
-		self::$Data = self::$Data ?? self::setData(self::$fileInfo);
 		$Data= &self::$Data;
-		return self::$Data;
+
+		self::$DIR = self::$fileInfo->getPathname();
+		self::$DB= new DbJSON(self::$DIR . '/data.json');
+
+		$Data = $Data ?? self::setData(self::$fileInfo);
+		/* self::$DB= new DbJSON;
+		self::$DB->set($Data); */
+		tolog(['Page::$DB'=>self::$DB]);
+
+		return $Data;
 	}
 
 
@@ -40,11 +53,10 @@ class Page
 	 */
 	public static function setData(kffFileInfo $kfi)
 	{
-		self::$DIR = $kfi->getPathname();
-
 		$name = Site::skipNum($kfi->getFilename());
 
-		$Data = \H::json(self::$DIR . '/data.json');
+		// $Data = \H::json(self::$DIR . '/data.json');
+		$Data = self::$DB->get();
 
 		$Data['title'] = $Data['title'] ?? \Site::translit(Site::skipNum($kfi), 1);
 		$Data['template'] = $Data['template'] ?? \TEMPLATE;

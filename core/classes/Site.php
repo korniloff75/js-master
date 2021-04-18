@@ -21,7 +21,7 @@ class Site
 		],
 		TEMPLATE_DEFAULT= '_default_';
 
-	public
+	static
 		$Page;
 
 
@@ -129,9 +129,11 @@ class Site
 			$_REQUEST= array_merge($_REQUEST, $inp_data);
 		}
 
-		if(empty($api=$_REQUEST['api'])){
+		if(empty($_REQUEST['api'])){
 			return $this;
 		}
+
+		// $api=$_REQUEST['api']
 
 		// *isset $api
 		$this->set('api',filter_var($api));
@@ -151,6 +153,12 @@ class Site
 
 	protected function _route()
 	{
+		global $Page;
+
+		// *Define $Page
+		// $GLOBALS['Page']= &self::$Page;
+		$Page= &self::$Page;
+
 		// Page::$fileInfo= new kffFileInfo(\DR."/content/{$req['matches'][0]}");
 		// tolog(__METHOD__,null,['AJAX request'=>$_REQUEST]);
 
@@ -158,13 +166,17 @@ class Site
 			// tolog([func_get_args()]);
 			tolog(['$req'=>$req]);
 			\Page::$fileInfo= new kffFileInfo(\DR."/content/{$req['matches'][0]}");
+
 			// *Current folder uri
 			define('DIR', \Page::$fileInfo->fromRoot() . '/');
-			$this->Page= new Page();
+			self::$Page= new Page();
+			tolog(__METHOD__ . ": \$Page defined",null,['Site::$Page'=>self::$Page]);
 		});
 
-		// *Запрос к модулю
+
 		if(!empty($_REQUEST['module'])){
+			// *Запрос к модулю (комменты)
+			if(!defined('DIR')) define('DIR', $_REQUEST['page'] . '/');
 			tolog(['Request to module'=>$_REQUEST]);
 			require_once \DR . "/{$_REQUEST['module']}";
 			die;
@@ -190,7 +202,7 @@ class Site
 		// tolog(php\classes\Navigate::$firstPage);
 
 		Router::execute();
-	}
+	}//_route()
 
 
 

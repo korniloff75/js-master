@@ -197,6 +197,10 @@ section#comments .name {
 	background: #eee;
 }
 
+#form-container textarea {
+	height: 7em;
+}
+
 #form-container #c_subm {
 	flex: 1 1 auto;
 }

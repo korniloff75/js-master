@@ -41,16 +41,6 @@ var commFns = {
 				console.info('err=', err);
 			}
 		);
-
-		/* commFns.$comments.load(
-			sts.handler,
-			data,
-			function(response) {
-				location.replace(sts.hash);
-				if(typeof sts.cb === 'function') sts.cb.call(null, response);
-				commFns.refreshed = 1;
-			}
-		); */
 	},
 
 
@@ -147,8 +137,7 @@ var commFns = {
 		}
 
 		var ajaxData = {
-			name: "Write_Comm",
-			value: formData,
+			Write_Comm: formData,
 		}
 
 		// ?
@@ -175,16 +164,8 @@ var commFns = {
 	en_com: function (c) {
 		//== enaible / disable on page
 		commFns.refresh({
-			name: 'Enabled_Comm',
-			value: this.checked,
+			Enabled_Comm: this.checked,
 		});
-
-		/* $.post(comm_vars.ajaxPath, {
-			enable_comm: this.checked, p_name : decodeURIComponent(comm_vars.pageName), s_method : 'enable_comm'
-		})
-		.done(function(response) {
-			commFns.render(response);
-		}); */
 	},
 
 	paginator : function paginator() {
@@ -226,7 +207,7 @@ var commFns = {
 } //== /commFns
 
 
-kff.checkLib('UIkit', '/modules/kff_basic/modules/kff_uikit-3.5.5/js/uikit.min.js').then(UIkit=>{
+kff.checkLib('UIkit', '/plugins/_uikit-3.5.5/js/uikit.min.js').then(UIkit=>{
 	window.U= window.U || UIkit.util;
 	commFns.init(window);
 });

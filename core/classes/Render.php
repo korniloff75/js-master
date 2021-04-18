@@ -182,7 +182,8 @@ class Render
 			#
 			// $content = self::breadCrumbs() . $content;
 
-			if(\MODULES['comments'])
+			// !Disabled
+			if(false && \MODULES['comments'])
 				$content .= self::comments();
 
 			/*  */
@@ -343,7 +344,7 @@ class Render
 	public static function finalPage ($opts = [])
 	: string
 	{
-		global $Nav;
+		global $Nav, $Page;
 
 		$Data= &\Page::$Data;
 
@@ -358,20 +359,26 @@ class Render
 		# opened in Site
 		$html = ob_get_clean();
 
+		$content = self::content();
+		$footer = self::footer();
+
 		// var_dump($html);
 
 		// todo Admin
 		if(\ADMIN) $html = preg_replace('~(<body)[^>]*>~', "$1 style=\"/*padding-top:15px;*/\">\n" . self::adminBlock(), $html, 1);
 
+		tolog(__METHOD__,null,['\Site::$Page'=>\Site::$Page, $Page]);
+		tolog(__METHOD__);
 
 		$html = preg_replace([
 			'~</head>~', '~</header>~', '~<!--\s*\$TITLE\$\s*-->~', '~<!--\s*\$CONTENT\$\s*-->~', '~</body>~'
 		], [
-			self::head() . "\n$0",
+			self::head() . "\n<!--Site::\$Page->headhtml-->\n"
+			. \Site::$Page->headhtml . "\n<!--/Site::\$Page->headhtml-->\n$0",
 			\Plugins::getHook('header') . "\n$0",
 			$Data['title'],
-			'<div id="ajax-content">' . self::content() . "</div>\n",
-			self::footer() . "\n$0"
+			'<div id="ajax-content">' . $content . "</div>\n",
+			$footer . "\n$0"
 		], $html, 1);
 
 		\Plugins::$html= &$html;

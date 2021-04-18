@@ -1,4 +1,4 @@
-<h5 id="comments_name"><?=$this->Title?></h5>
+<h4 id="comments_name"><?=$this->Title?></h4>
 
 <div id="form-outbox">
 
@@ -11,7 +11,7 @@
 				<label for="entry">Сообщение *: </label>
 
 				<div class="item-block">
-					<p>Вы можете ввести <span class=strong id="maxLen"><?=Comments::MAX_LEN?></span> символов</p>
+					<p>Вы можете ввести <span class=strong id="maxLen"><?=\_Comments::MAX_LEN?></span> символов</p>
 					<textarea name="entry" id="entry" class="uk-resize-vertical" required="required" onkeyup="commFns.countChars.call(this, $('#maxLen')[0], event)"><?=$_POST['entry']??''?></textarea>
 				</div>
 
@@ -21,14 +21,13 @@
 				</div>
 			</div>
 
-			<div class="uk-flex-between uk-margin-small">
-				<!-- <div class="min700 name">Имя : </div> -->
-				<label for="name">Имя</label>
+			<div class="uk-flex-between uk-flex-middle uk-margin-small">
+				<label for="name" class="uk-margin-small-right">Имя</label>
 				<input type="text" class="item-block" name="name" id="name" value="<?=$user? $user : $_POST['name']??''?>" placeholder="Имя">
 			</div>
 
-			<div class="uk-flex-between">
-				<label for="email">Почта * (для обратной связи) </label>
+			<div class="uk-flex-between uk-flex-middle">
+				<label for="email" class="uk-margin-small-right">Почта * (для обратной связи) </label>
 				<input type="text" class="item-block uk-width-expand" required="required" name="email" id="email" value="<?=$user? $_SESSION['auth']['data'][1] : $_POST['email']??''?>" placeholder="email">
 			</div>
 
@@ -37,7 +36,6 @@
 			</div>
 
 			<h6 class="uk-margin-remove uk-text-center uk-h4">По желанию:</h6>
-			<!-- <p style="margin: 0;text-align: center;" class="bold">По желанию:</p> -->
 
 			<div class="uk-flex-wrap uk-flex-between uk-child-width-1-3@m">
 				<div>

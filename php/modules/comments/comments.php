@@ -26,7 +26,7 @@ class Comments
 		$err = [],
 		$dataMap= ['Дата'=>'','Имя'=>'','Post'=>'','Site'=>'','Email'=>'','IP'=>'','Ответ'=>'','CMS'=>''],
 		# Путь к файлу комментариев
-		$path =  \DIR . "comments.json",
+		$path =  \DIR . "/comments.json",
 		# Arr with comments
 		$file;
 
@@ -109,7 +109,7 @@ class Comments
 		elseif ($bool === 'true')
 			$comments = ['comments'=>1];
 
-		\H::json(\DIR . 'data.json', $comments);
+		\H::json(\DIR . '/data.json', $comments);
 
 		$this->read();
 		die;
@@ -122,6 +122,8 @@ class Comments
 ############################
 	{
 		$ind = $_REQUEST['num'] - 1;
+
+		tolog(__METHOD__,null,['$this->file'=>$this->file]);
 
 		@list($u_date, $u_name, $u_mess, $u_home, $u_email, $u_ip, $u_otvet, $u_CMS) = $this->file[$ind];
 		// var_dump($this->path, $this->file);
@@ -287,7 +289,7 @@ class Comments
 				'print_r(self::$tmp[\'comm\'][\'file\'])',
 			], __FILE__, __LINE__);
 		}
-			
+
 
 		$this->read();
 		die;

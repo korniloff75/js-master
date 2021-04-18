@@ -7,6 +7,7 @@ MAPS компиллятор не тянет
 @color-hidden: #d48;
 @help_color: #d8d7d6;
 @help_color_add: #ccc2bf;
+@a_color: #159;
 @pattern_url: url('/images/bg_pattern.png');
 @all_bg: transparent;
 
@@ -43,7 +44,7 @@ MAPS компиллятор не тянет
 }
 
 
-// MIXINDS
+// MIXINS
 
 .desktop(@rules) {
   @media (min-width: 768px) { @rules(); }
@@ -351,7 +352,7 @@ MAPS компиллятор не тянет
 
 /* @end */
 
-// /MIXINDS
+// /MIXINS
 
 
 html, body {
@@ -369,7 +370,10 @@ html, body {
 	.transition(@transition_all, ~'', ~'', ~'');
 }
 
-.flex, [class|="flex"] {
+
+/* flex */
+
+.flex, [class|="flex"], [class|="uk-flex"] {
 	.display(flex);
 }
 .flex.inline, [class|="flex"][class*="-inline"] {
@@ -481,9 +485,9 @@ html, body {
 	}
 
 	a {
-		color: #159;
+		color: @a_color;
 	}
 	a:hover {
-		color: #159 + #444;
+		color: @a_color + #444;
 	}
 } // .core

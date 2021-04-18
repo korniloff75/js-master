@@ -77,11 +77,11 @@ function scan_recurse ($dir = null, $arr=[])
 };
 
 
-function addData($path)
+/* function addData($path)
 {
 	$data_path = $path . '/data.json';
 	var_dump($data_path);
 
 	return isset($data_path ) ? json_decode(file_get_contents($data_path ), 1) : [];
-}
+} */
 
