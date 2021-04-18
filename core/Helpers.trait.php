@@ -13,6 +13,15 @@ interface BasicClassInterface
 }
 
 
+// *Admin
+function is_adm()
+{
+	if(empty($_SESSION)) session_start();
+	return isset($_SESSION['auth']['group'])
+	&& $_SESSION['auth']['group'] === 'admin';
+}
+
+
 /**
  *
  */
@@ -333,5 +342,19 @@ trait Helpers
 	:string
 	{
 		return preg_replace("#^(\d+\.)?(.+?)(\..+)?$#", "$2", basename($name));
+	}
+
+	public static function protectScript(string $fn, $checkAdm = 0)
+
+	{
+		if (preg_match('/' . $fn . '/i', $_SERVER['SCRIPT_NAME'])) self::shead('403');
+
+		if($checkAdm) {
+			if(!is_adm()) {
+				self::shead('403', '<p class="core warning">Access in ' . $fn . ' Denied!</p>');
+			} else {
+				// success;
+			}
+		}
 	}
 }

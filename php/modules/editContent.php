@@ -1,9 +1,9 @@
 <?php
 /**
-* Обработчик сохранения изменений контента
+* Обработчик изменений контента
 *
 */
-\H::protectScript(basename(__FILE__), 'checkAdm');
+\Site::protectScript(basename(__FILE__), 'checkAdm');
 if(\DEMO) die ("DEMO enabled!");
 
 extract ($_REQUEST);
@@ -24,7 +24,7 @@ $clean_arr = [
 
 switch ($action) {
 	case 'load':
-		$cont = file_get_contents(HOME . SUBSITE . $path);
+		$cont = file_get_contents(\DR . "/$path");
 		echo strtr($cont, array_flip($clean_arr));
 		break;
 
@@ -33,7 +33,7 @@ switch ($action) {
 		# FIX php in content
 		$art = strtr($art, $clean_arr);
 
-		if(!file_put_contents(HOME . SUBSITE . $path, $art)) die ('<p class="core warning">Данные не сохранены!</p>');
+		if(!file_put_contents(\DR . "/$path", $art)) die ('<p class="core warning">Данные не сохранены!</p>');
 		break;
 
 	default:

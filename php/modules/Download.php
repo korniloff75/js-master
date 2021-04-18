@@ -5,7 +5,6 @@ class Download
 	{
 		$filename = $_REQUEST['filename'] ?? $_REQUEST['file'];
 
-		# Если есть ключ toZip или ссылка ведет на директорию - упаковываем в архив
 		if (empty($filename)) die ('Укажите корректный запрос в формате ?file=...');
 
 		if(!file_exists($filename) && !is_array($filename))
@@ -14,9 +13,7 @@ class Download
 		}
 
 
-		ob_end_clean();
-
-		ob_start();
+		ob_clean();
 
 		if(isset($_REQUEST['toZip']) || is_dir($filename))
 			$filename = $this->pack($filename);

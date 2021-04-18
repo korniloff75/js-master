@@ -61,13 +61,6 @@ class Site
 
 		// todo make auth
 
-		// *Admin
-		function is_adm()
-		{
-			return isset($_SESSION['auth']['group'])
-			&& $_SESSION['auth']['group'] === 'admin';
-		}
-
 		// var_dump($_REQUEST);
 
 	}//__construct
@@ -136,24 +129,22 @@ class Site
 			$_REQUEST= array_merge($_REQUEST, $inp_data);
 		}
 
-		if(empty($_REQUEST['mode'])){
+		if(empty($api=$_REQUEST['api'])){
 			return $this;
 		}
 
-		// *isset $mode
-		$this->set('mode',filter_var($_REQUEST['mode']));
+		// *isset $api
+		$this->set('api',filter_var($api));
 
-		unset($_REQUEST['mode']);
+		unset($_REQUEST['api']);
 
-		foreach($_REQUEST as $cmd=>&$val){
 
-			if(file_exists($api= __DIR__."/../api/$cmd.php")){
-				tolog(__METHOD__,null,['$cmd'=>$cmd, '$val'=>$val]);
-				// ? Доходят ли $params до $api?
-				$params= $val;
-				include $api;
-			}
+		if(file_exists($api= __DIR__."/../api/$api.php")){
+			tolog(__METHOD__,null,['$api'=>$api, ]);
+
+			include_once $api;
 		}
+
 		return $this;
 	}
 
@@ -163,7 +154,7 @@ class Site
 		// Page::$fileInfo= new kffFileInfo(\DR."/content/{$req['matches'][0]}");
 		// tolog(__METHOD__,null,['AJAX request'=>$_REQUEST]);
 
-		Router::route('(?:site|content)/(.+)', function($req){
+		Router::route('^(?:site|content)/(.+)', function($req){
 			// tolog([func_get_args()]);
 			tolog(['$req'=>$req]);
 			\Page::$fileInfo= new kffFileInfo(\DR."/content/{$req['matches'][0]}");
@@ -172,8 +163,17 @@ class Site
 			$this->Page= new Page();
 		});
 
-		// *If AJAX flush Render::content() & exit
+		// *Запрос к модулю
+		if(!empty($_REQUEST['module'])){
+			tolog(['Request to module'=>$_REQUEST]);
+			require_once \DR . "/{$_REQUEST['module']}";
+			die;
+
+		}
+
+
 		if(\AJAX){
+			// *flush Render::content() & exit
 			Router::execute($_REQUEST['page']);
 
 			tolog(__METHOD__,null,['AJAX request'=>$_REQUEST]);
@@ -187,7 +187,7 @@ class Site
 			die;
 		}
 
-		tolog(php\classes\Navigate::$firstPage);
+		// tolog(php\classes\Navigate::$firstPage);
 
 		Router::execute();
 	}

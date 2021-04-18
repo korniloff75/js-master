@@ -108,7 +108,7 @@ var _A = {
 			.replace(addBr(Br), "$1\n");
 
 		$.post('/', {
-			module : 'php/modules/editContent.php',
+			api : 'editContent',
 			path: opts.path,
 			art : art,
 			action : 'save'
@@ -166,7 +166,7 @@ var _A = {
 
 		var $esws = $f('.editorSwitcher');
 
-		$esws.on('change', function(i) {
+		$esws.on('change', function() {
 			var $area = $(this).siblings('.editor'),
 			area = $area[0],
 			path = $area.attr('data-path'),
@@ -186,7 +186,7 @@ var _A = {
 
 					_A.editPanel($area, path);
 					data = {
-						module: 'php/modules/editContent.php',
+						api: 'editContent',
 						path: path,
 						action: 'load'
 					};

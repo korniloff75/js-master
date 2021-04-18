@@ -83,36 +83,37 @@ class Render
 	}
 
 
-	public static function contentCollect($dir, $opts = [])
+	public static function contentCollect($dirPathname, $opts = [])
 	: string
 	{
-		$Data= &\Page::$Data;
+		$Data= \Page::$Data;
 
-		$current = $dir === \DIR;
-		\Page::$DIR = $dir;
+		$current = $dirPathname === \DIR;
+		\Page::$DIR = $dirPathname;
 
-		tolog(__METHOD__,null,['DIR'=>\Page::$DIR, '$dir'=>$dir]);
+		tolog(__METHOD__,null,['DIR'=>\Page::$DIR, '$dirPathname'=>$dirPathname]);
 
 		ob_start();
 
-		$idf = new \DirFilter($dir);
-		$data = $current ? $Data : \Page::getData($dir);
-		$images = (new \DirFilter($dir, "#\.(jpe?g|png)$#"))->natSort();
+		$idf = new \DirFilter($dirPathname);
+		$Data = $current ? $Data : \Page::getData($dirPathname);
+		$images = (new \DirFilter($dirPathname, "#\.(jpe?g|png)$#"))->natSort();
 		$cond = \ADMIN && empty($opts['rss']);
-		$hidden = !\ADMIN && !empty($data['hidden']);
+		$hidden = !\ADMIN && !empty($Data['hidden']);
 
 		if($hidden) return '';
 
 		$eswitcher = '<select size="1" class="core note editorSwitcher">
 		<option class="core info" title="Без редактирования" selected="selected">normal</option>
 		<option class="core note" title="Визуальный редактор">contentEditable</option>
-		<option class="core warning" title="Открыть файл">editFile</option>
+		<!-- <option class="core warning" title="Открыть файл">editFile</option> -->
 		</select>';
 
 		if(count($content_htm = $idf->natSort()))
 		{
 			foreach($content_htm as &$htm) {
-				if($cond) echo "$eswitcher<div data-path=\"$htm\" class=\"editor\">";
+				$path= \Site::getPathFromRoot($htm);
+				if($cond) echo "$eswitcher<div data-path=\"$path\" class=\"editor\">";
 				include_once $htm;
 				if($cond) echo "</div>";
 			}
@@ -120,7 +121,7 @@ class Render
 
 		# Add thumbs
 		// todo -> plugins
-		if(\MODULES['Thumb']['enable'] && (!isset($data['thumb']) || $data['thumb'] == true) && $images)
+		if(\MODULES['Thumb']['enable'] && (!isset($Data['thumb']) || $Data['thumb'] == true) && $images)
 			echo \H::includeModule('Thumb')->toPage();
 			// exit;
 
@@ -141,8 +142,10 @@ class Render
 		$content.= \Plugins::getHook('content');
 		$content.= \Plugins::getHook('integration_pages');
 
+		tolog(__METHOD__,null,['$Data'=>$Data,$Data]);
+
 		return "<header>
-		<h1" . (!empty($Data['hidden']) ? " class=hidden" : "") . ">{$data['title']}</h1>
+		<h1" . (!empty($Data['hidden']) ? " class=hidden" : "") . ">{$Data['title']}</h1>
 		</header>\n$content";
 	}
 
@@ -151,10 +154,9 @@ class Render
 	public static function content()
 
 	{
-		global $Data, $SV;
 		$out = '';
 
-		$Data= $Data ?? \Page::$Data;
+		$Data= &\Page::$Data;
 
 		if(!\ADMIN && !empty($Data['hidden']))
 			\Site::shead(404);
@@ -162,12 +164,7 @@ class Render
 		$content = self::contentCollect(\Page::$DIR);
 		// var_dump(\DIR, $content); exit;
 
-		if(!strlen($content) || !empty($data['hidden'])){
-
-			// die (\H::shead(404));
-		}
-		else
-		{
+		if(strlen($content)){
 			# Microtemplater
 			$content = str_replace(
 				[
@@ -180,6 +177,7 @@ class Render
 				],
 			$content);
 			$content = "<div class=\"content\">\n{$content}\n</div>\n<!-- /.content -->\n";
+
 			# Add comments & return
 			#
 			// $content = self::breadCrumbs() . $content;
@@ -239,7 +237,6 @@ class Render
 
 	// todo
 	public static function breadCrumbsRecurse($arr = [])
-
 	{
 		global $Nav;
 

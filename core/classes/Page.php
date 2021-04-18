@@ -62,6 +62,8 @@ class Page
 	public static function getData($path)
 	{
 		// tolog($path);
+		$path= Site::getPathFromRoot($path);
+
 		$Data= \H::json(\DR . "/$path/data.json");
 		$Data['title'] = $Data['title'] ?? \Site::translit(Site::skipNum($path), 1);
 		return $Data;

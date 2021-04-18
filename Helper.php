@@ -258,16 +258,7 @@ class H {
 	public static function protectScript(string $fn, $checkAdm = 0)
 
 	{
-		if (preg_match('/' . $fn . '/i', $_SERVER['SCRIPT_NAME'])) self::shead('403');
-
-		if($checkAdm) {
-			if(!\ADMIN) {
-				self::shead('403', '<p class="core warning">Access in ' . $fn . ' Denied!</p>');
-			} else {
-				// success;
-			}
-		}
-
+		call_user_func_array('\Site::protectScript', func_get_args());
 	}
 
 
