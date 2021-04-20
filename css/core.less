@@ -207,7 +207,7 @@ MAPS компиллятор не тянет
 }
 
 //Специальный вариант для none
-.transition (@property,@duration: @transition_dur, @delay: @transition_delay, @ease: ease-in-out) when (@property=none) {
+.transition (@property:none,@duration: @transition_dur, @delay: @transition_delay, @ease: ease-in-out) when (@property=none) {
 	-webkit-transition: @property;
 	-moz-transition: @property;
 	transition: @property;
@@ -366,7 +366,7 @@ html, body {
 * {
 	.box-sizing();
 	// color: @font_color;
-	background: @all_bg;
+	// background: @all_bg;
 	.transition(@transition_all, ~'', ~'', ~'');
 }
 

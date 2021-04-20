@@ -340,9 +340,9 @@ class Logger
 
 		$this->add("INFO: $txt",null,$dump);
 
-		$this->log = array_map(function(&$i) {
-			return strip_tags($i);
-		}, $this->log );
+		array_walk($this->log, function(&$i) {
+			$i= strip_tags($i);
+		});
 		// echo __METHOD__ . " {$this->file} " . realpath($this->file);
 
 		if(!empty($_GET['dev']) && !self::$printed)

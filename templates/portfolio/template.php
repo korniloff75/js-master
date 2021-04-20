@@ -63,6 +63,47 @@
 	<footer></footer>
 </section>
 
+<script>
+	// *Обрабатываем открытие / закрытие блока с контентом
+	addEventListener('load',()=>{
+		$('#bg_wraper').click( e=> {
+			_H.close.call(_S.v.$sidebar);
+			return;
+
+			e = $().e.fix(e);
+			var t = e.target,
+				$t = $(t);
+
+
+			if($t.closest(_S.v.$page_content).length) {
+				return;
+			}
+
+			// console.log(e.which);
+
+			// Open/Close sidebar
+			if(t.closest('.toSidebar')) {
+				_H.open.call(_S.v.$sidebar);
+
+			// } else if(!t.closest('aside, #edit_comm')) {
+			} else if(t.closest('#bg_wraper')) {
+				_H.close.call(_S.v.$sidebar);
+			}
+
+			console.log({t});
+
+			// Close menu
+			if(_S.v.$menu.hasClass('opened') && (t.closest('#menu_close') || !t.closest('#menu_block'))) {
+				_H.close.call(_S.v.$menu);
+			}
+
+			if(t.closest('#menu_block')) {
+				e.stopPropagation();
+			}
+
+		});
+	});
+</script>
 
 </body>
 </html>

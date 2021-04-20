@@ -1,5 +1,5 @@
 <?php
-// Получаем $doc и $xpath
+// *Получаем $doc и $xpath
 extract(\Plugins::getDocXpath());
 
 // tolog(['\Plugins::getXpath()'=>\Plugins::getXpath(), '$xpath'=>$xpath]);
@@ -14,5 +14,6 @@ if($node= $xpath->query('//div[@id="ajax-content"]')->item(0)){
 
 	$node->appendChild($info);
 
-	\Plugins::$html= $doc->saveHTML();
+	// *fix cyrillic utf-8
+	\Plugins::$html= html_entity_decode($doc->saveHTML());
 }

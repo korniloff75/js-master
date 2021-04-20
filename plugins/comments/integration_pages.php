@@ -10,7 +10,7 @@ if(
 ) foreach($_REQUEST as $cmd=>&$val){
 
 	if(method_exists($Comments, "c_$cmd")){
-		$val= filter_var($val, FILTER_SANITIZE_STRING);
+		if(is_string($val)) $val= filter_var($val, FILTER_SANITIZE_STRING);
 		tolog(__METHOD__,null,['$cmd'=>$cmd, '$val'=>$val]);
 		$method= $Comments->{"c_$cmd"}($val);
 	}

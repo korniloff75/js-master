@@ -76,7 +76,6 @@ textarea {
 /*
  * Упрощающие классы
 */
-* button,
 * .button {
 	transition: all 0.3s ease;
 	background: #ddd linear-gradient(#ddd, #fff 40%, #ddd 80%) repeat scroll 0 0;
@@ -104,7 +103,6 @@ textarea {
 	text-decoration: none;
 } */
 
-* button:hover,
 * .button:hover {
 	background: #3C4858 linear-gradient(#3C4858, #234, #3C4858) repeat scroll 0 0;
 	box-shadow: 0 0 1px 1px #3C4858;

@@ -50,20 +50,12 @@ var commFns = {
 				method: 'POST',
 				data: JSON.stringify({
 					act: 'comments',
-					name:'Edit_Comm',
-					num: num
+					Edit_Comm: num,
 				})
 			}).then(xhr=>{
 				this.$formEdit= UIkit.modal.dialog(xhr.response);
 			});
 			return;
-			/* $.post('', {
-				act: 'comments',
-				name:'Edit_Comm',
-				num: num
-			}).done(
-				commFns.Edit.createForm
-			); */
 		},
 
 		save : function () {
@@ -76,8 +68,7 @@ var commFns = {
 			// console.log(formData);
 
 			var ajaxData = {
-				name: "Save_Edit_Comm",
-				value: formData
+				Save_Edit_Comm: formData
 			};
 
 			console.log('!!! Save !!!\n');
@@ -92,7 +83,7 @@ var commFns = {
 			UIkit.modal.confirm('Продолжить удаление комментария?')
 			.then(ok=>{
 				commFns.refresh({
-					name:'Del_Comm', value: num
+					Del_Comm: num,
 				});
 			}, err=>{console.info(err);})
 

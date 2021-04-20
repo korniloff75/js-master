@@ -3,7 +3,7 @@ require_once __DIR__."/../Helpers.trait.php";
 require_once \TRAITS."/Get_set.trait.php";
 
 
-class Site
+class Site implements BasicClassInterface
 {
 	use Helpers;
 
@@ -162,6 +162,7 @@ class Site
 		// Page::$fileInfo= new kffFileInfo(\DR."/content/{$req['matches'][0]}");
 		// tolog(__METHOD__,null,['AJAX request'=>$_REQUEST]);
 
+		// *Запрос к странице
 		Router::route('^(?:site|content)/(.+)', function($req){
 			// tolog([func_get_args()]);
 			tolog(['$req'=>$req]);
@@ -191,17 +192,18 @@ class Site
 			tolog(__METHOD__,null,['AJAX request'=>$_REQUEST]);
 
 			header('Content-type: text/html; charset=utf-8');
-			# CONST to ajax variable sv
-			echo $SV;
+			//? CONST to ajax variable sv
+			// echo \Page::setSV();
 			echo php\classes\Render::content();
-			// echo $Render->content();
 
 			die;
 		}
+		else
+			Router::execute();
+
 
 		// tolog(php\classes\Navigate::$firstPage);
 
-		Router::execute();
 	}//_route()
 
 

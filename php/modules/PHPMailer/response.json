@@ -1,1 +1,47 @@
-{"message_id":268,"sender_chat":{"id":-1001245760492,"title":"js-master☯️ru","type":"channel"},"chat":{"id":-1001245760492,"title":"js-master☯️ru","type":"channel"},"date":1618466490,"text":"Вопрос - feedback from js-master.lc\n Павел пишет: \nСколько ты ломаться будешь?\n\nTime - 2021-04-15 09:01:04\nEmail - info@js-master.ru\nIP - 127.0.0.1","entities":[{"offset":0,"length":23,"type":"bold"},{"offset":23,"length":12,"type":"url"},{"offset":23,"length":12,"type":"bold"},{"offset":37,"length":41,"type":"pre"},{"offset":115,"length":17,"type":"email"},{"offset":138,"length":9,"type":"url"}]}
+{
+	"message_id": 272,
+	"sender_chat": {
+		"id": -1001245760492,
+		"title": "js-master☯️ru",
+		"type": "channel"
+	},
+	"chat": {
+		"id": -1001245760492,
+		"title": "js-master☯️ru",
+		"type": "channel"
+	},
+	"date": 1618906912,
+	"text": "Вопрос - feedback from js-master.lc\n Павел пишет: \nТест обновлений\n\nTime - 2021-04-20 11:21:49\nEmail - info@js-master.ru\nIP - 127.0.0.1",
+	"entities": [
+		{
+			"offset": 0,
+			"length": 23,
+			"type": "bold"
+		},
+		{
+			"offset": 23,
+			"length": 12,
+			"type": "url"
+		},
+		{
+			"offset": 23,
+			"length": 12,
+			"type": "bold"
+		},
+		{
+			"offset": 37,
+			"length": 29,
+			"type": "pre"
+		},
+		{
+			"offset": 103,
+			"length": 17,
+			"type": "email"
+		},
+		{
+			"offset": 126,
+			"length": 9,
+			"type": "url"
+		}
+	]
+}

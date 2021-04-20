@@ -5,6 +5,7 @@
 @font-family: "Alegreya Sans SC", sans-serif;
 @font-color: #fff;
 @font-size: 1.1em;
+@input-color: #123;
 @line-height: unset;
 @link-color: #aad;
 @link-hover-color: #cce;
@@ -49,7 +50,6 @@ div#bg_wraper {
 		margin: 0;
 		background-color: @color_add;
 		background-size: cover;
-		.transition();
 		.transition(transform, 10s, .3s, cubic-bezier(0.15, 0.3, 0.5, 1));
 
 		#bg_mask {
@@ -472,9 +472,10 @@ aside { // #sidebar
 	select:not([class]),
 	select[size="1"]:not([class]),
 	input[type=text]:not([class]) {
-		color: @font-color;
+		// color: @font-color;
+		color: @input-color;
 		option {
-			color: #123;
+			color: @input-color;
 		}
 	}
 }

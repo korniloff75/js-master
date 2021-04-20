@@ -94,8 +94,7 @@ class Page
 		});
 		// var_dump($userCONST);
 		$SV = "<script>\nwindow.sv =" . json_encode($userCONST, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK)
-		. ";
-		</script>\n";
+		. ";</script>\n";
 		return $SV;
 	}
 

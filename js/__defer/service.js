@@ -28,17 +28,17 @@ window.onpopstate = function(e) {
 // servise
 var _S = {
 	v: {},
-	loadPage: function loadPage($nextItem, direct) {
+	loadPage: function loadPage($targetItem, direct) {
 		// ajax load page from $nextItem attr 'data-page'
-		$nextItem = $.check($nextItem);
+		$targetItem = $.check($targetItem);
 		direct = direct || 1;
 		_S.v.$bg_mask.css({ opacity: .5, zIndex: 10 });
 
 		// console.log('$nextItem = ', $nextItem);
 
-		var profile = new Date(),
+		var profileTS = Date.now(),
 		page_ind = $.cookie.get('page_ind'),
-		pagePath = _H.fixSlash($nextItem.attr('data-page') || $nextItem[0]['data-page']);
+		pagePath = _H.fixSlash($targetItem.attr('data-page') || $targetItem[0]['data-page']);
 
 		// console.log('pagePath = ', pagePath);
 
@@ -73,7 +73,7 @@ var _S = {
 			// Конец рендеринга
 			document.loading = 0;
 
-			console.info("Время рендеринга страницы, мс - ", new Date() - profile, "\nresponse status = ", status);
+			console.info("Время рендеринга страницы, мс - ", Date.now() - profileTS, "\nresponse status = ", status);
 		});
 	}, // loadPage
 
@@ -347,21 +347,11 @@ var Doc_evs = {
 	click: function(e) {
 		e = $().e.fix(e);
 		var t = e.target,
-		$t = $(t);
+			$t = $(t);
 
 
 		if($t.closest(_S.v.$page_content).length) {
 			return;
-		}
-
-		// console.log(e.which);
-
-		// Open/Close sidebar
-		if(t.closest('.toSidebar')) {
-			_H.open.call(_S.v.$sidebar);
-
-		} else if(!t.closest('aside, #edit_comm')) {
-			_H.close.call(_S.v.$sidebar);
 		}
 
 		// Close menu
@@ -372,6 +362,22 @@ var Doc_evs = {
 		if(t.closest('#menu_block')) {
 			e.stopPropagation();
 		}
+
+		// !test
+		return;
+
+		// console.log(e.which);
+
+		// Open/Close sidebar
+		if(t.closest('.toSidebar')) {
+			_H.open.call(_S.v.$sidebar);
+
+		// } else if(!t.closest('aside, #edit_comm')) {
+		} else if(t.closest('#bg_wraper')) {
+			_H.close.call(_S.v.$sidebar);
+		}
+
+		console.log({t});
 
 	},
 

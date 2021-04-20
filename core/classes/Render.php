@@ -151,6 +151,9 @@ class Render
 
 
 
+	/**
+	 ** Отдаём собранный контент
+	 */
 	public static function content()
 
 	{

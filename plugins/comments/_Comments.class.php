@@ -75,7 +75,7 @@ class _Comments extends Page
 		}
 
 
-		$moder_panel= ' <a href="mailto:'.$email.'" rel="nofollow">'.$email.'</a> <span style="float:right;">IP: '.$IP.' &nbsp; <span uk-icon="icon: file-edit" onclick="commFns.Edit.open('.$num.')" title="Редактировать" style="cursor:pointer; color:green;" ></span> <span uk-icon="icon: close" onclick="commFns.Edit.del('.$num.')" title="Удалить" style="cursor:pointer; color:red;" /></span></span>' ;
+		$moder_panel= ' <a href="mailto:'.$email.'" rel="nofollow">'.$email.'</a> <span style="float:right;">IP: '.$IP.' &nbsp; <button class="edit" title="Редактировать" onclick="commFns.Edit.open('.$num.')">✎</button><button class="del" title="Удалить" onclick="commFns.Edit.del('.$num.')">❌</button></span>' ;
 
 		$res= '<div id="ent_page'.$num.'" class="container entry"><div class="head_entry"><span class="uname">'.$num.' '.$name.' &nbsp; CMS: ' . $cms . '</span> <span style="font-size:0.7em;">( '.$time.' )</span>' . "\n" . (!is_adm()? '': '<div class="core bar">' . $moder_panel . '</div>');
 		$res.= '</div><div class="entry_mess">' . self::smiles(self::BBcode($mess));
@@ -128,11 +128,11 @@ class _Comments extends Page
 
 
 ############################
-	function c_Edit_Comm()
+	function c_Edit_Comm(int $num)
 
 	{
 		ob_clean();
-		$ind = $_REQUEST['num'] - 1;
+		$ind = $num - 1;
 
 		@list($u_date, $u_name, $u_mess, $u_home, $u_email, $u_ip, $u_otvet, $u_CMS) = $this->file->get($ind);
 		// var_dump($this->path, $this->file);
@@ -221,9 +221,9 @@ class _Comments extends Page
 
 		# Невидимая каптча
 		# compare without types
-		if ($form['keyCaptcha'] != self::realIP())
+		if ($form['keyCaptcha'] != \Site::realIP())
 			$this->err["Невидимая каптча"] = [
-				$form['keyCaptcha'], self::$captcha, $form['keyCaptcha'] != self::realIP()
+				$form['keyCaptcha'], self::$captcha, $form['keyCaptcha'] != \Site::realIP()
 			];
 
 		# Если превышен лимит строк
@@ -244,12 +244,12 @@ class _Comments extends Page
 			], $form);
 
 		$arr= [
-			"time" => date(self::DATETIME_FORMAT),
+			"time" => date(\Site::DATETIME_FORMAT),
 			"name" => $form['name'],
 			"Post" => @$form['entry'],
 			"Site"=> @$form['homepage'],
 			"email"=> @$form['email'],
-			"IP"=> self::realIP(),
+			"IP"=> \Site::realIP(),
 			"Ответ"=> "",
 			"CMS"=> @$form['CMS'],
 		];
@@ -287,7 +287,7 @@ class _Comments extends Page
 		if(self::TO_EMAIL == true)
 		{
 			$subject = "Комментарий со страницы " . self::$DB->title . "- ". ($_REQUEST['curpage'] ?? \HOST);
-			tolog(__METHOD__,null,['self::$DB->get()'=>self::$DB->get()]);
+			// tolog(__METHOD__,null,['self::$DB->get()'=>self::$DB->get()]);
 
 			// !
 			// return;

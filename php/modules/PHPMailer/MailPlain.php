@@ -341,7 +341,7 @@ class MailPlain extends PHPMailer
 		$to = $this->to_emails ?? $this->cfg['emails'];
 		if(is_string($to))
 		{
-			$to = array_map(function(&$i){
+			$to = array_map(function($i){
 				return trim($i);
 			}, explode(',',$to));
 		}
