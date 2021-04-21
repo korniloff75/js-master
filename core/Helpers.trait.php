@@ -337,15 +337,15 @@ trait Helpers
 
 	}
 
-	# Remove numbers from names like 1.file.pfp
+	//* Remove numbers like 1.file.php -> file.php
 	public static function skipNum(string $name)
 	:string
 	{
 		return preg_replace("#^(\d+\.)?(.+?)(\..+)?$#", "$2", basename($name));
 	}
 
-	public static function protectScript(string $fn, $checkAdm = 0)
 
+	public static function protectScript(string $fn, $checkAdm = 0)
 	{
 		if (preg_match('/' . $fn . '/i', $_SERVER['SCRIPT_NAME'])) self::shead('403');
 
@@ -353,7 +353,7 @@ trait Helpers
 			if(!is_adm()) {
 				self::shead('403', '<p class="core warning">Access in ' . $fn . ' Denied!</p>');
 			} else {
-				// success;
+				// acess allowed;
 			}
 		}
 	}

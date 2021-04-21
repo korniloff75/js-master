@@ -80,7 +80,8 @@ var commFns = {
 		},
 
 		del : function(num) {
-			UIkit.modal.confirm('Продолжить удаление комментария?')
+			// UIkit.modal.confirm('Продолжить удаление комментария?')
+			UIkit.modal.confirm('Продолжить удаление комментария?', { bgClose: true })
 			.then(ok=>{
 				commFns.refresh({
 					Del_Comm: num,
@@ -124,7 +125,7 @@ var commFns = {
 		if ($form.disabled) commFns.err.push ("Вы слишком часто комментируете. \nПодождите <b>" + TO/1000 + "</b> секунд\n");
 
 		if(commFns.err.length) {
-			return UIkit.modal.alert(commFns.err.split('\n\n'));
+			return UIkit.modal.alert(commFns.err.split('\n\n'), { bgClose: true });
 		}
 
 		var ajaxData = {

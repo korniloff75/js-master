@@ -391,11 +391,6 @@ class _Comments extends Page
 				print_r( $ent);
 				echo '</pre>'; */
 
-				if (is_adm() && count($ent) <= 3) {
-					echo "<h1>fucking URL</h1>";
-					var_dump($ent);
-				}
-
 				$num = $this->paginator['data_count'] + self::MAX_ON_PAGE - $this->paginator['lp'] - $i ; # nE!
 
 				list($time, $name, $mess, $Site, $email, $IP,$answer) = $ent;
@@ -419,51 +414,51 @@ class _Comments extends Page
 		}
 
 
-		# Rendering comments
-		$m_path = \Site::getPathFromRoot(__DIR__);
-		?>
+				# Rendering comments
+				$m_path = \Site::getPathFromRoot(__DIR__);
+				?>
 
-		<link rel="stylesheet" href="/<?=$m_path?>/style.css">
+				<link rel="stylesheet" href="/<?=$m_path?>/style.css">
 
-		<?php
-		/*===============<Enabled comments. Start code source>=================
-		#########################*/
-		if (is_adm()):
+				<?php
+				/*===============<Enabled comments. Start code source>=================
+				#########################*/
+				if (is_adm()):
 
-		?>
+				?>
 
-		<div class="clear admin">
+				<div class="clear admin">
 
-			<h5 class="center" style="display: inline;"> COMMENTS</h5>
+					<h5 class="center" style="display: inline;"> COMMENTS</h5>
 
-			<p>is_adm()= <?=is_adm()?></p>
-			<p>this->path= <?=$this->path?></p>
+					<p>is_adm()= <?=is_adm()?></p>
+					<p>this->path= <?=$this->path?></p>
 
-			<hr>
-			<p>this->p_name= <?=self::$DB->title?></p>
-			<p>check_no_comm(this->p_name)= <? var_dump($this->check_no_comm(self::$DB->title))?></p>
+					<hr>
+					<p>this->p_name= <?=self::$DB->title?></p>
+					<p>check_no_comm(this->p_name)= <? var_dump($this->check_no_comm(self::$DB->title))?></p>
 
-		</div>
+				</div>
 
-		<?php
-		endif;
+				<?php
+				endif;
 
-		// echo $this->js_vars();
-		# VIEW comments block
-		require_once 'entries.php';
-		require_once 'form.php';
+				// echo $this->js_vars();
+				# VIEW comments block
+				require_once 'entries.php';
+				require_once 'form.php';
 
-		?>
+				?>
 
-		<script type="text/javascript">
-		//== define vars 4 frontEND;
-			window.comm_vars = <?= $this->js_vars(); ?>;
-		// console.log('comm_vars = ', comm_vars);
-		</script>
+				<script type="text/javascript">
+				//== define vars 4 frontEND;
+					window.comm_vars = <?= $this->js_vars(); ?>;
+				// console.log('comm_vars = ', comm_vars);
+				</script>
 
-		<script type="text/javascript" src="/<?=$m_path?>/comments.js"></script>
+				<script type="text/javascript" src="/<?=$m_path?>/comments.js"></script>
 
-		<?php
+				<?php
 	} # /read()
 
 
@@ -533,12 +528,11 @@ class _Comments extends Page
 
 	function Render()
 	{
+		if(!is_adm() && !self::$DB->{'enable-comments'}) return;
 		?>
 		<section id="comments">
-			<link rel="stylesheet" href="/<?=\Site::getPathFromRoot(__DIR__);?>/style.css">
 
 			<?=$this->read()?>
-
 		</section>
 		<?php
 	}

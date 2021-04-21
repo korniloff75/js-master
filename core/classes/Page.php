@@ -35,6 +35,12 @@ class Page
 		global $Data;
 		$Data= &self::$Data;
 
+		// *Current folder uri
+		if(!defined('DIR')){
+			define('DIR', self::$fileInfo->fromRoot() . '/');
+		}
+
+		// *Current folder pathname
 		self::$DIR = self::$fileInfo->getPathname();
 		self::$DB= new DbJSON(self::$DIR . '/data.json');
 
@@ -48,7 +54,7 @@ class Page
 
 
 	/**
-	 * @param kfi {string | kffFileInfo}
+	 * @param kfi {kffFileInfo}
 	 * return array $Data || 404
 	 */
 	public static function setData(kffFileInfo $kfi)

@@ -8,13 +8,16 @@ if(
 	array_key_exists('act',$_REQUEST)
 	&& $_REQUEST['act'] === 'comments'
 ) foreach($_REQUEST as $cmd=>&$val){
+		$method= "c_$cmd";
 
-	if(method_exists($Comments, "c_$cmd")){
+	if(method_exists($Comments, $method)){
 		if(is_string($val)) $val= filter_var($val, FILTER_SANITIZE_STRING);
 		tolog(__METHOD__,null,['$cmd'=>$cmd, '$val'=>$val]);
-		$method= $Comments->{"c_$cmd"}($val);
+		$Comments->{$method}($val);
 	}
 }
+
+tolog(['$method'=>$method]);
 
 if(empty($method)) $Comments->Render();
 

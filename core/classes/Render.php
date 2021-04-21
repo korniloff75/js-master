@@ -76,7 +76,7 @@ class Render
 		. "\n<title>{$Data['title']} - " . \SITENAME . '</title>'
 		. "\n" . '<link rel="stylesheet" type="text/css" href="/css/base.css">'
 		. "\n" . '<link rel="stylesheet" type="text/css" href="/assets/font-awesome/css/font-awesome.min.css">'
-		. "\n"
+		. "\n<!--Site::\$Page->headhtml-->\n" . \Site::$Page->headhtml . "\n<!--/Site::\$Page->headhtml-->\n"
 		. \Page::setSV()
 		. "\n" . \H::addFromDir('js/') //todo в продакшне собрать в 1 файл
 		. \Plugins::getHook('head');
@@ -125,7 +125,7 @@ class Render
 			echo \H::includeModule('Thumb')->toPage();
 			// exit;
 
-		# Add content from *.md files
+		//* Add content from *.md files
 		if(count($content_md = (new \DirFilter($idf->iterator, "#\.(md)$#"))->natSort()))
 		{
 			foreach($content_md as &$md) {
@@ -198,14 +198,14 @@ class Render
 			$content .= '<div class="DA_del">';
 
 			// note deprecated
-			if(\ADMIN || \TEST)
+			/* if(\ADMIN || \TEST)
 			{
 				# Выводим логи
 				foreach(\H::$log as $log) {
 					$content .= "<pre class='core warning' style='max-height: 200px; overflow: auto;'>$log</pre>";
 				}
 
-			}
+			} */
 
 			$content .= '</div> <!--/.DA_del-->';
 		}
@@ -233,11 +233,6 @@ class Render
 	}
 
 
-	public static function breadCrumbs($arr = [])
-	:string
-	{
-
-	}
 
 	// todo
 	public static function breadCrumbsRecurse($arr = [])
@@ -322,7 +317,6 @@ class Render
 		// if(!count($Data)) $Data = ["title" => "Untitled"];
 
 		foreach(\Page::$Data as $name => &$val) {
-			// echo self::createAdminItem($name, str_replace('"', '', json_encode($val, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK)));
 			if($name === 'template' && $val === \TEMPLATE) continue;
 			echo self::createAdminItem($name, $val);
 
@@ -334,9 +328,6 @@ class Render
 
 		<?php
 		return "<pre id=\"adm\" class=\"DA_del\">" . ob_get_clean() . '</pre>';
-
-		/* if(LOCALHOST) echo "<!-- livereload -->
-		<script>document.write('<script src=\"http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1\"></' + 'script>')</script>"; */
 
 	} // adminBlock
 
@@ -376,8 +367,7 @@ class Render
 		$html = preg_replace([
 			'~</head>~', '~</header>~', '~<!--\s*\$TITLE\$\s*-->~', '~<!--\s*\$CONTENT\$\s*-->~', '~</body>~'
 		], [
-			self::head() . "\n<!--Site::\$Page->headhtml-->\n"
-			. \Site::$Page->headhtml . "\n<!--/Site::\$Page->headhtml-->\n$0",
+			self::head() . "$0",
 			\Plugins::getHook('header') . "\n$0",
 			$Data['title'],
 			'<div id="ajax-content">' . $content . "</div>\n",

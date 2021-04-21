@@ -151,6 +151,9 @@ body {
 .core a:hover {
   color: #5599dd;
 }
+.core button {
+  cursor: pointer;
+}
 @font-face {
   font-family: "Muller";
   font-style: normal;
@@ -160,14 +163,28 @@ body {
 html {
   background: #1c1c1c;
 }
+.uk-h1,
+.uk-h2,
+.uk-h3,
+.uk-h4,
+.uk-h5,
+.uk-h6,
+.uk-heading-2xlarge,
+.uk-heading-large,
+.uk-heading-medium,
+.uk-heading-small,
+.uk-heading-xlarge,
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  font-weight: 600;
-  font-family: "Alegreya Sans SC", sans-serif;
+  margin: 0 0 20px 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  font-weight: 500;
+  color: #eee;
+  text-transform: none;
 }
 div#bg_wraper {
   position: absolute;
@@ -670,22 +687,22 @@ aside #bg_pattern {
   position: static;
   z-index: 3;
   font-size: 1.1em;
-  font-family: "Alegreya Sans SC", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   line-height: unset;
-  color: #fff;
+  color: #eee;
   padding: 0;
 }
-#ajax-content .content {
-  padding: 0 20px;
+#ajax-content .editor {
+  padding: 0 1em;
 }
 @media (min-width: 500px) and (max-width: 768px) {
-  #ajax-content .content {
-    padding: 0 5px;
+  #ajax-content .editor {
+    padding: 0 .5em;
   }
 }
 @media (max-width: 578px) {
-  #ajax-content .content {
-    padding: 0 2px;
+  #ajax-content .editor {
+    padding: 0 .2em;
   }
 }
 #ajax-content textarea {

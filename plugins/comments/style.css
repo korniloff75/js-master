@@ -4,6 +4,12 @@
 	padding: 0 5px;
 }
 
+section#comments h3,
+section#comments h4,
+section#comments h5 {
+	color: #123;
+}
+
 section#comments .admin {
 	background: #ded;
 	padding: 70px 50px;

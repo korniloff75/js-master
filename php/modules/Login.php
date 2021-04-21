@@ -1,5 +1,5 @@
 <?php
-\H::protectScript(basename(__FILE__));
+\Site::protectScript(basename(__FILE__));
 
 /**
  * При удалении Login::LOGIN_PATH
@@ -27,9 +27,8 @@ class Login
 
 		if(empty($_SESSION)) session_start();
 
-		$this->IP = \H::realIP();
+		$this->IP = \Site::realIP();
 
-		// todo
 		$this->attempts = new DbJSON(self::TRYDB_PATH);
 		$this->DB = new DbJSON(self::LOGIN_PATH);
 
@@ -49,17 +48,11 @@ class Login
 		switch ($action) {
 			case 'authorize':
 				if(empty($pswd)) throw new Exception('В запросе нет $pswd', 1);
-				// $this->DB = \H::json(self::LOGIN_PATH);
 
 				//* Если в базе нет админа - создаём нового
 				if(empty($this->DB->admin))
 				{
-					// $this->DB['admin'] = password_hash($pswd, PASSWORD_DEFAULT);
 					$this->DB->set(['admin' => password_hash($pswd, PASSWORD_DEFAULT)]);
-
-					// \H::json(self::LOGIN_PATH, ['admin' => $this->DB['admin']]);
-					// var_dump($this->DB);
-					// die;
 				}
 
 				$login = empty(trim($login)) ? 'admin' : $login;
@@ -79,19 +72,27 @@ class Login
 	} // __construct
 
 
+	protected function getAttempts()
+	{
+		return is_array($this->attempts->{$this->IP})? $this->attempts->{$this->IP}[1]: $this->attempts->{$this->IP} ?? 0;
+	}
+
+
 	private function auth(string $login, string $pswd)
 	{
+		$attempts= $this->getAttempts();
+
 		tolog(__METHOD__,null,[
-			'$login'=>$login, '$this->DB->{$login}'=>$this->DB->{$login}, empty($this->DB->{$login}), '$pswd'=>$pswd, 'password_verify($pswd, $this->DB->{$login})'=>password_verify($pswd, $this->DB->{$login}), ($this->attempts->{$this->IP} <= self::TRY_ADMIN), !empty($this->DB->{$login})
+			'$login'=>$login, '$this->DB->{$login}'=>$this->DB->{$login}, empty($this->DB->{$login}), '$pswd'=>$pswd, 'password_verify($pswd, $this->DB->{$login})'=>password_verify($pswd, $this->DB->{$login}), ($attempts <= self::TRY_ADMIN), !empty($this->DB->{$login})
 		]);
 
 		if(
-			$this->attempts->{$this->IP} <= self::TRY_ADMIN
+			$attempts <= self::TRY_ADMIN
 			&& !empty($this->DB->{$login})
 			&& password_verify($pswd, $this->DB->{$login})
 		)
 		{
-			# Success
+			//* Success
 			$_SESSION['auth'] = [
 				'group' => $login === 'admin' ? 'admin' : 'users',
 				'IP' => $this->IP,
@@ -100,15 +101,7 @@ class Login
 
 			tolog(['session'=>$_SESSION]);
 
-			$adm_db = \H::json('db/adm.json', $this->IP) ?? [
-				'attempts' => 0,
-			];
-			++$adm_db['attempts'];
-			array_push($adm_db, date(\CF['date']['format']));
-
-			$adm_db = \H::json('db/adm.json', [$this->IP => $adm_db] );
-
-			if($this->attempts->{$this->IP})
+			if($attempts)
 				$this->tryLogin(0);
 		}
 		else
@@ -116,28 +109,29 @@ class Login
 			# Fail
 			session_destroy();
 			$this->tryLogin(1);
-			\H::shead(401);
+			\Site::shead(401);
 		}
 	}
 
 
 	protected function tryLogin($bool)
 	{
-		$attempt= $this->attempts->{$this->IP};
+		$attempt= $this->getAttempts();
 
 		if($bool)
 			++$attempt;
-		elseif(!empty($_SESSION['auth']['login']))
+		elseif(is_adm())
 			$attempt = 0;
 
-		$this->attempts->set([$this->IP=>$attempt]);
+		// *Записываем поптыки авторизации
+		$this->attempts->set([$this->IP=>[time(),$attempt]]);
 
 	}
 
 
 	public function form()
 	{
-		$_REQUEST['module'] = 'templates/login/index.html';
+		$_REQUEST['module'] = 'templates/login/index.php';
 	}
 
 } // Login

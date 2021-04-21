@@ -133,7 +133,7 @@ class Site implements BasicClassInterface
 			return $this;
 		}
 
-		// $api=$_REQUEST['api']
+		$api= $_REQUEST['api'];
 
 		// *isset $api
 		$this->set('api',filter_var($api));
@@ -153,14 +153,19 @@ class Site implements BasicClassInterface
 
 	protected function _route()
 	{
-		global $Page;
-
-		// *Define $Page
-		// $GLOBALS['Page']= &self::$Page;
-		$Page= &self::$Page;
-
 		// Page::$fileInfo= new kffFileInfo(\DR."/content/{$req['matches'][0]}");
 		// tolog(__METHOD__,null,['AJAX request'=>$_REQUEST]);
+
+		// *Обновление админ-панели
+		Router::route('^(.+)/\?updAdminBlock', function($req){
+			// tolog([func_get_args()]);
+			tolog(['$req'=>$req]);
+			\Page::$fileInfo= new kffFileInfo(\DR."/{$req['matches'][0]}");
+
+			self::$Page= new Page();
+			echo \php\classes\Render::adminBlock();
+			die;
+		});
 
 		// *Запрос к странице
 		Router::route('^(?:site|content)/(.+)', function($req){
@@ -168,10 +173,8 @@ class Site implements BasicClassInterface
 			tolog(['$req'=>$req]);
 			\Page::$fileInfo= new kffFileInfo(\DR."/content/{$req['matches'][0]}");
 
-			// *Current folder uri
-			define('DIR', \Page::$fileInfo->fromRoot() . '/');
 			self::$Page= new Page();
-			tolog(__METHOD__ . ": \$Page defined",null,['Site::$Page'=>self::$Page]);
+			tolog(__METHOD__ . ": \$Page defined",null,['DIR'=>\DIR,'Site::$Page'=>self::$Page]);
 		});
 
 
@@ -186,6 +189,7 @@ class Site implements BasicClassInterface
 
 
 		if(\AJAX){
+			ob_clean();
 			// *flush Render::content() & exit
 			Router::execute($_REQUEST['page']);
 
@@ -193,9 +197,10 @@ class Site implements BasicClassInterface
 
 			header('Content-type: text/html; charset=utf-8');
 			//? CONST to ajax variable sv
-			// echo \Page::setSV();
-			echo php\classes\Render::content();
+			echo \Page::setSV() . "\n"
+			. php\classes\Render::content();
 
+			ob_end_flush();
 			die;
 		}
 		else

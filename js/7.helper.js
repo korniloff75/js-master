@@ -6,6 +6,7 @@ var $f = function(selector) {
 },
 // $Content = $('#ajax-content'),
 
+
 // helpers
 _H = {
 	mailform: '//js-master.ru/content/1000.Contacts/feedback/',
@@ -270,7 +271,7 @@ _H = {
 	 * Динамическая подгрузка скриптов
 	 * beta
 	 */
-	loadScript: function (src, callback) {
+	/* loadScript: function (src, callback) {
 		var script = document.createElement('script'),
 				out = {};
 			script.src = src;
@@ -290,7 +291,7 @@ _H = {
 			return out;
 		}
 
-	},
+	}, */
 
 
 	defer: {

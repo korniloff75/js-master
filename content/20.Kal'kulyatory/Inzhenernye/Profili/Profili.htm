@@ -13,7 +13,7 @@
 }
 #table_flange_1 tr:first-child {
 	font-weight: 700;
-	background: #ddd;
+	background: #123;
 	white-space: nowrap;
 }
 #table_flange_1 tr:first-child td {
@@ -27,10 +27,10 @@
 }
 #sortament td:first-child, #sortament th {
 	font-weight: 700;
-	background: #ddd;
+	background: #123;
 }
 #sortament tr:hover, #sortament col:hover {
-	background: #ffa;
+	background: #135;
 }
 </style>
 
@@ -556,7 +556,7 @@ document.querySelector('#sortament').onmousemove = function(e) {
 
 	this.querySelectorAll('td').forEach(function(i) {
 		if(i.cellIndex === 0) return;
-		i.style.background = i.cellIndex === td_fl ? '#ffa' : 'none';
+		i.style.background = i.cellIndex === td_fl ? '#135' : 'none';
 	});
 
 }

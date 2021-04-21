@@ -2,7 +2,7 @@
 /*
 * @param data - массив элементов из файла
 * Функция возвращает массив, содержащий фрагмент
-* массива $data, соответствующий запросу $name_request
+* массива $file, соответствующий запросу $name_request
 */
 
 trait Paginator
@@ -18,15 +18,16 @@ trait Paginator
 	{
 		$html = '';
 
-		$data= &$this->file;
+		// *DbJSON
+		$file= &$this->file;
 
-		// var_dump($data);
+		// var_dump($file);
 
-		if(!$data_count = count($data)) return false;
+		if(!$data_count = count($file)) return false;
 		// var_dump($data_count);
 
-		// if($reverse) $data= array_reverse($data);
-		if($reverse) $data->reverse();
+		// if($reverse) $file= array_reverse($file);
+		if($reverse) $file->reverse();
 
 		$page_blocks_count=ceil($data_count/$max_entries);
 
@@ -53,7 +54,7 @@ trait Paginator
 		}
 
 		$this->paginator= [
-			'fragm'=>array_slice($data->get(),$first_page,$max_entries), #-1
+			'fragm'=>array_slice($file->get(),$first_page,$max_entries),
 			'html' => $html,
 			'fp'=>$first_page,
 			'lp'=>$last_page,
