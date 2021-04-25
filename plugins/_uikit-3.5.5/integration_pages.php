@@ -1,10 +1,5 @@
 <?php
-// if(empty($kff))
-// 	return "Для работы модуля требуется наличие директории <b>kff_custom</b> в корне движка."
-// 	;
-
-
-$modDir = Site::getPathFromRoot(__DIR__);
+$modDir = \Site::getPathFromRoot(__DIR__);
 
 tolog(basename(__FILE__)." started");
 

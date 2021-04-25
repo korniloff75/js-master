@@ -168,16 +168,12 @@ Object.defineProperties(_S.v, {
 
 
 
-
-
 _S.v.$menu_butt.on({
 	click: function(e) {
 		_H.open.call(_S.v.$menu);
 		$().e.fix(e).stopPropagation();
 	}
 });
-
-
 
 
 

@@ -93,6 +93,8 @@ class Render
 
 		tolog(__METHOD__,null,['DIR'=>\Page::$DIR, '$dirPathname'=>$dirPathname]);
 
+		if(!is_dir($dirPathname)) \Site::shead(404);
+
 		ob_start();
 
 		$idf = new \DirFilter($dirPathname);

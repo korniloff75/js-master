@@ -30,6 +30,7 @@ class Page
 
 	}
 
+
 	function defineData()
 	{
 		global $Data;
@@ -80,11 +81,79 @@ class Page
 	public static function getData($path)
 	{
 		// tolog($path);
-		$path= Site::getPathFromRoot($path);
+		$path= \Site::getPathFromRoot($path);
 
 		$Data= \H::json(\DR . "/$path/data.json");
-		$Data['title'] = $Data['title'] ?? \Site::translit(Site::skipNum($path), 1);
+		$Data['title'] = $Data['title'] ?? \Site::translit(\Site::skipNum($path), 1);
+
 		return $Data;
+	}
+
+
+	public static function getHTML($dirPathname, $opts = [])
+	: string
+	{
+		$Data= &self::$Data;
+
+		$current = $dirPathname === \DIR;
+		\Page::$DIR = $dirPathname;
+
+		tolog(__METHOD__,null,['DIR'=>\Page::$DIR, '$dirPathname'=>$dirPathname]);
+
+		ob_start();
+
+		$idf = new \DirFilter($dirPathname);
+		$Data = $current ? $Data : \Page::getData($dirPathname);
+		$images = (new \DirFilter($dirPathname, "#\.(jpe?g|png)$#"))->natSort();
+		$cond = \ADMIN && empty($opts['rss']);
+		$hidden = !\ADMIN && !empty($Data['hidden']);
+
+		if($hidden) return '';
+
+		$eswitcher = '<select size="1" class="core note editorSwitcher">
+		<option class="core info" title="Без редактирования" selected="selected">normal</option>
+		<option class="core note" title="Визуальный редактор">contentEditable</option>
+		<!-- <option class="core warning" title="Открыть файл">editFile</option> -->
+		</select>';
+
+		if(count($content_htm = $idf->natSort()))
+		{
+			foreach($content_htm as &$htm) {
+				$path= \Site::getPathFromRoot($htm);
+				if($cond) echo "$eswitcher<div data-path=\"$path\" class=\"editor\">";
+				include_once $htm;
+				if($cond) echo "</div>";
+			}
+		}
+
+		# Add thumbs
+		// todo -> plugins
+		if(\MODULES['Thumb']['enable'] && (!isset($Data['thumb']) || $Data['thumb'] == true) && $images)
+			echo \H::includeModule('Thumb')->toPage();
+			// exit;
+
+		//* Add content from *.md files
+		if(count($content_md = (new \DirFilter($idf->iterator, "#\.(md)$#"))->natSort()))
+		{
+			foreach($content_md as &$md) {
+				$out .= file_get_contents($md);
+			}
+
+			echo \H::includeModule('Parsedown')->text($out) . "\n";
+			// require_once 'php/modules/Parsedown.php';
+			// echo (new \Parsedown)->text($out);
+		}
+
+		$content = ob_get_clean();
+
+		$content.= \Plugins::getHook('content');
+		$content.= \Plugins::getHook('integration_pages');
+
+		tolog(__METHOD__,null,['$Data'=>$Data,$Data]);
+
+		return "<header>
+		<h1" . (!empty($Data['hidden']) ? " class=hidden" : "") . ">{$Data['title']}</h1>
+		</header>\n$content";
 	}
 
 

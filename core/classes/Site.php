@@ -122,10 +122,10 @@ class Site implements BasicClassInterface
 		$inp_data= json_decode(
 			file_get_contents('php://input'),1
 		);
-		tolog(__METHOD__,null,['$inp_data'=>$inp_data]);
-
+		
 		// *Собираем все входящие в $_REQUEST
 		if($inp_data){
+			tolog(__METHOD__,null,['$inp_data'=>$inp_data]);
 			$_REQUEST= array_merge($_REQUEST, $inp_data);
 		}
 
@@ -153,8 +153,13 @@ class Site implements BasicClassInterface
 
 	protected function _route()
 	{
-		// Page::$fileInfo= new kffFileInfo(\DR."/content/{$req['matches'][0]}");
-		// tolog(__METHOD__,null,['AJAX request'=>$_REQUEST]);
+		// *Запрос к модулю (комменты, ...etc.)
+		if(!empty($_REQUEST['module'])){
+			if(!defined('DIR')) define('DIR', $_REQUEST['page'] . '/');
+			tolog(['Request to module'=>$_REQUEST]);
+			require_once \DR . "/{$_REQUEST['module']}";
+			die;
+		}
 
 		// *Обновление админ-панели
 		Router::route('^(.+)/\?updAdminBlock', function($req){
@@ -176,16 +181,6 @@ class Site implements BasicClassInterface
 			self::$Page= new Page();
 			tolog(__METHOD__ . ": \$Page defined",null,['DIR'=>\DIR,'Site::$Page'=>self::$Page]);
 		});
-
-
-		if(!empty($_REQUEST['module'])){
-			// *Запрос к модулю (комменты)
-			if(!defined('DIR')) define('DIR', $_REQUEST['page'] . '/');
-			tolog(['Request to module'=>$_REQUEST]);
-			require_once \DR . "/{$_REQUEST['module']}";
-			die;
-
-		}
 
 
 		if(\AJAX){

@@ -93,7 +93,7 @@ class _Comments extends Page
 	function check_no_comm()
 
 	{ # return true - комменты
-		return !filter_var(self::$DB->get('enable-comments'), FILTER_VALIDATE_BOOLEAN);
+		return !is_null(self::$DB->get('enable-comments')) && !filter_var(self::$DB->get('enable-comments'), FILTER_VALIDATE_BOOLEAN);
 	}
 
 
@@ -528,7 +528,7 @@ class _Comments extends Page
 
 	function Render()
 	{
-		if(!is_adm() && !self::$DB->{'enable-comments'}) return;
+		if(!is_adm() && $this->check_no_comm()) return;
 		?>
 		<section id="comments">
 

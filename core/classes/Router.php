@@ -41,22 +41,22 @@ class Router
 			empty($url)
 			&& empty($url= php\classes\Navigate::$firstPage)
 		){
-			tolog("\$url is EMPTY!",E_USER_WARNING,[]);
+			tolog("\$url is EMPTY!",E_USER_ERROR,[]);
 			Site::shead(404);
 		}
 
 		foreach (self::$routes as $pattern => $handler){
-			preg_match($pattern, $url, $params);
-			// tolog(__METHOD__,null,['$pattern'=>$pattern,'$url'=>$url, '$params'=>$params,]);
-			if (preg_match($pattern, $url, $params)){
+
+			if (!preg_match($pattern, $url, $params)){
+				continue;
+			}
 			// if (preg_match_all($pattern, $url, $params)){
 				// удаляем первый элемент из массива $params, который содержит всю найденную строку
-				array_shift($params);
+			array_shift($params);
 
-				tolog(__METHOD__,null,['$pattern'=>$pattern,'$url'=>$url,'$params'=>$params]);
+			tolog(__METHOD__,null,['$pattern'=>$pattern,'$url'=>$url,'$params'=>$params]);
 
-				return call_user_func($handler, ['matches'=>array_values($params), 'uri'=>array_values(array_filter(explode('/',$url)))]);
-			}
+			return call_user_func($handler, ['matches'=>array_values($params), 'uri'=>array_values(array_filter(explode('/',$url)))]);
 		}
 	}
 }
