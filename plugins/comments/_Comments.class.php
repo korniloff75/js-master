@@ -66,7 +66,7 @@ class _Comments extends Page
 
 ############################
 	private function Create_comment_box($num,$time, $name, $mess, $Site, $email, $IP,$answer='',$cms=NULL)
-############################
+
 	{
 		# Формируем тело комментария
 		if(strlen($Site)>5) { # fixSait
@@ -110,17 +110,8 @@ class _Comments extends Page
 		// \H::json(\DIR . 'data.json', $comments);
 		self::$DB->set(['enable-comments'=>$bool]);
 
-		// *Обновляем карту
-
-		/* $map= self::getBlogMap();
-		$ind= self::$DB->get('ind');
-
-		$newData= [$ind[0]=>[
-			'items'=>[$ind[1]=>self::$DB->get()]
-		]];
-		$map->set($newData); */
-
 		$this->read();
+
 		ob_end_flush();
 		die;
 	}
@@ -529,6 +520,8 @@ class _Comments extends Page
 	function Render()
 	{
 		if(!is_adm() && $this->check_no_comm()) return;
+		if(self::$DB->comments == -1)
+			return '';
 		?>
 		<section id="comments">
 

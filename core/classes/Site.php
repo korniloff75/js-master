@@ -1,4 +1,7 @@
 <?php
+// *before Site, used with bots
+define( "TRAITS", realpath(__DIR__."/../traits") );
+
 require_once __DIR__."/../Helpers.trait.php";
 require_once \TRAITS."/Get_set.trait.php";
 
@@ -27,6 +30,15 @@ class Site implements BasicClassInterface
 
 	public function __construct()
 	{
+		// *Отдаём файлы
+		/* if(!file_exists($fpath= "./{$_GET['route']}")){
+			self::shead(404);
+		} */
+		if(is_file($fpath= "./{$_GET['route']}")){
+			require_once $fpath;
+			die;
+		}
+
 		$this->_bufferOpen();
 
 		// ?
@@ -122,7 +134,7 @@ class Site implements BasicClassInterface
 		$inp_data= json_decode(
 			file_get_contents('php://input'),1
 		);
-		
+
 		// *Собираем все входящие в $_REQUEST
 		if($inp_data){
 			tolog(__METHOD__,null,['$inp_data'=>$inp_data]);
@@ -177,6 +189,16 @@ class Site implements BasicClassInterface
 			// tolog([func_get_args()]);
 			tolog(['$req'=>$req]);
 			\Page::$fileInfo= new kffFileInfo(\DR."/content/{$req['matches'][0]}");
+
+			self::$Page= new Page();
+			tolog(__METHOD__ . ": \$Page defined",null,['DIR'=>\DIR,'Site::$Page'=>self::$Page]);
+		});
+
+		// *Запрос к примерам
+		Router::route('(examples/.+)', function($req){
+			// tolog([func_get_args()]);
+			tolog(['$req'=>$req]);
+			\Page::$fileInfo= new kffFileInfo(\DR."/{$req['matches'][0]}");
 
 			self::$Page= new Page();
 			tolog(__METHOD__ . ": \$Page defined",null,['DIR'=>\DIR,'Site::$Page'=>self::$Page]);

@@ -159,9 +159,9 @@ class EntryPointGraph
 		// *Cache rewrite
 		else
 		{
-			require_once './php/Graph.class.php';
-			require_once './php/PlAnglesRel.class.php';
-			require_once './php/PlAngles.class.php';
+			require_once __DIR__.'/Graph.class.php';
+			require_once __DIR__.'/PlAnglesRel.class.php';
+			require_once __DIR__.'/PlAngles.class.php';
 
 			$Graph = new PlAngles();
 

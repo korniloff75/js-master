@@ -21,9 +21,6 @@ spl_autoload_register(function($class){
 	}
 });
 
-// *before Site
-define( "TRAITS", __DIR__."/core/traits" );
-
 // *dagam fix
 $_SERVER['DOCUMENT_ROOT']= str_replace('private_html','public_html', Site::fixSlashes($_SERVER['DOCUMENT_ROOT']));
 

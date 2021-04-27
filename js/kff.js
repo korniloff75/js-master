@@ -4,6 +4,8 @@ if(/\.ru/i.test(location.host)){
 	var console= {
 		log: ()=>false,
 		info: ()=>false,
+		assert: ()=>false,
+		groupCollapsed: ()=>false,
 	}
 }
 // *polyfills

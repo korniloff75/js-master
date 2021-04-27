@@ -1,6 +1,6 @@
 <?php
 
-define('VERSION', 'KFF-3.1');
+define('VERSION', 'KFF-3.2');
 
 define('HOME', $_SERVER['DOCUMENT_ROOT'] . '/');
 
@@ -49,14 +49,6 @@ define('CF', [
 		'newest' => 864000
 
 	],
-
-	// 'counter' => 0,
-
-	'counter' => '<div id=LIcounter class=right></div>
-
-	<script src="/js/modules/liveInternet.js"></script>'
-
-
 
 ]);
 

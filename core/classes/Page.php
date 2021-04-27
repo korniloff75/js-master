@@ -8,12 +8,14 @@ class Page
 	use Get_set;
 
 	public
+		$kfi,
 		$headhtml='';
 
 	static
 		$fileInfo,
 		// todo
 		$cfg= ['admin'=>['name'=>'KorniloFF']],
+		$current=[],
 		$Data,
 		$DB,
 		$DIR;
@@ -21,9 +23,13 @@ class Page
 	protected static
 		$SV;
 
-	public function __construct()
+	/**
+	 * @param kfi {string|kffFileInfo}
+	 */
+	public function __construct($kfi=null)
 	{
-		// $this->content= $this->_setContent();
+		$kfi= $kfi ?? self::$fileInfo;
+		$this->kfi= is_string($kfi)? new kffFileInfo($kfi): $kfi;
 
 		// $this->deprecated();
 		$this->defineData();
@@ -35,6 +41,7 @@ class Page
 	{
 		global $Data;
 		$Data= &self::$Data;
+		self::$current['data']= &$Data;
 
 		// *Current folder uri
 		if(!defined('DIR')){
@@ -44,6 +51,9 @@ class Page
 		// *Current folder pathname
 		self::$DIR = self::$fileInfo->getPathname();
 		self::$DB= new DbJSON(self::$DIR . '/data.json');
+
+		// *Legacy
+		\H::$Dir = \DIR;
 
 		$Data = $Data ?? self::setData(self::$fileInfo);
 		/* self::$DB= new DbJSON;
@@ -72,7 +82,7 @@ class Page
 
 		// *Current folder uri
 		// define('DIR', $kfi->fromRoot() . '/');
-		\H::$Dir = \DIR;
+
 
 		return $Data;
 	}
@@ -90,21 +100,22 @@ class Page
 	}
 
 
-	public static function getHTML($dirPathname, $opts = [])
+
+	public function getHTML($opts = [])
 	: string
 	{
 		$Data= &self::$Data;
 
-		$current = $dirPathname === \DIR;
-		\Page::$DIR = $dirPathname;
+		$dirPathname= $this->kfi->getPathname();
 
 		tolog(__METHOD__,null,['DIR'=>\Page::$DIR, '$dirPathname'=>$dirPathname]);
+
+		if(!is_dir($dirPathname)) \Site::shead(404);
 
 		ob_start();
 
 		$idf = new \DirFilter($dirPathname);
-		$Data = $current ? $Data : \Page::getData($dirPathname);
-		$images = (new \DirFilter($dirPathname, "#\.(jpe?g|png)$#"))->natSort();
+
 		$cond = \ADMIN && empty($opts['rss']);
 		$hidden = !\ADMIN && !empty($Data['hidden']);
 
@@ -126,8 +137,9 @@ class Page
 			}
 		}
 
-		# Add thumbs
+		//* Add thumbs
 		// todo -> plugins
+		$images = (new \DirFilter($dirPathname, "#\.(jpe?g|png)$#"))->natSort();
 		if(\MODULES['Thumb']['enable'] && (!isset($Data['thumb']) || $Data['thumb'] == true) && $images)
 			echo \H::includeModule('Thumb')->toPage();
 			// exit;
@@ -148,6 +160,18 @@ class Page
 
 		$content.= \Plugins::getHook('content');
 		$content.= \Plugins::getHook('integration_pages');
+
+		//* Microtemplater
+		$content = str_replace(
+			[
+				'{DIR}',
+				'--', '---'
+			],
+			[
+				'/' . \DIR,
+				'–', '—'
+			],
+		$content);
 
 		tolog(__METHOD__,null,['$Data'=>$Data,$Data]);
 

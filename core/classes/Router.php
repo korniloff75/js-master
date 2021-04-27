@@ -51,12 +51,14 @@ class Router
 				continue;
 			}
 			// if (preg_match_all($pattern, $url, $params)){
-				// удаляем первый элемент из массива $params, который содержит всю найденную строку
+			// *удаляем первый элемент из массива $params, который содержит всю найденную строку
 			array_shift($params);
 
 			tolog(__METHOD__,null,['$pattern'=>$pattern,'$url'=>$url,'$params'=>$params]);
 
 			return call_user_func($handler, ['matches'=>array_values($params), 'uri'=>array_values(array_filter(explode('/',$url)))]);
 		}
+
+		\Site::shead(404);
 	}
 }

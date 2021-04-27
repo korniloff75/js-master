@@ -120,7 +120,7 @@ class Navigate
 
 		foreach($map as $title => &$item_val) {
 			$path = $ref . $title . '/';
-			$data = self::getData($path);
+			$data = \Page::getData($path);
 			// var_dump($data);
 			$class = '';
 
@@ -172,9 +172,9 @@ class Navigate
 	public static function readMap (array $map, $ref=\CONT)
 
 	{
-		foreach($map as $title => $cont_d) {
+		foreach($map as $title => &$cont_d) {
 			$path = $ref . $title . '/';
-			$data = self::getData($path);
+			$data = \Page::getData($path);
 			// var_dump($data);
 			$class = '';
 
@@ -208,7 +208,7 @@ class Navigate
 				# Top level items
 				// var_dump($data);
 				echo "<li class=\"$class\">"
-				. '<a href="/' . $path . '">'
+				. '<a href="/' . str_replace('content/','site/',$path) . '">'
 				. $data['title']
 				. '</a>';
 			}
@@ -221,7 +221,7 @@ class Navigate
 
 
 	#  generate #menu_block
-	public function genMenu(string $dir = null)
+	public function genMenu(?string $dir = null)
 	:string
 	{
 		$dir = $dir ?? trim(\CONT,'/');
@@ -253,6 +253,7 @@ class Navigate
 	}
 
 
+	// *compat deprecated
 	public static function getData($path)
 
 	{

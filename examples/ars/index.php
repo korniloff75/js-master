@@ -16,7 +16,7 @@ putenv("PATH=" . getenv('PATH') . ":" . realpath('.'));
 
 // var_dump(getenv('PATH'));
 
-require_once './php/EntryPointGraph.class.php';
+require_once __DIR__.'/php/EntryPointGraph.class.php';
 
 $Graph = new EntryPointGraph();
 $JSON = $Graph->GetJSON();

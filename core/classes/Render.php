@@ -83,7 +83,7 @@ class Render
 	}
 
 
-	public static function contentCollect($dirPathname, $opts = [])
+	/* public static function contentCollect($dirPathname, $opts = [])
 	: string
 	{
 		$Data= \Page::$Data;
@@ -149,7 +149,7 @@ class Render
 		return "<header>
 		<h1" . (!empty($Data['hidden']) ? " class=hidden" : "") . ">{$Data['title']}</h1>
 		</header>\n$content";
-	}
+	} */
 
 
 
@@ -166,30 +166,16 @@ class Render
 		if(!\ADMIN && !empty($Data['hidden']))
 			\Site::shead(404);
 
-		$content = self::contentCollect(\Page::$DIR);
+		// $content = self::contentCollect(\Page::$DIR);
+		$content = \Site::$Page->getHTML();
 		// var_dump(\DIR, $content); exit;
 
 		if(strlen($content)){
-			# Microtemplater
-			$content = str_replace(
-				[
-					'{DIR}',
-					'--', '---'
-				],
-				[
-					'/' . \DIR,
-					'–', '—'
-				],
-			$content);
 			$content = "<div class=\"content\">\n{$content}\n</div>\n<!-- /.content -->\n";
 
 			# Add comments & return
 			#
 			// $content = self::breadCrumbs() . $content;
-
-			// !Disabled
-			if(false && \MODULES['comments'])
-				$content .= self::comments();
 
 			/*  */
 			if(!empty(\CF['counter']) && !\LOCALHOST)
@@ -197,19 +183,6 @@ class Render
 				$content .= \CF['counter'];
 			}
 
-			$content .= '<div class="DA_del">';
-
-			// note deprecated
-			/* if(\ADMIN || \TEST)
-			{
-				# Выводим логи
-				foreach(\H::$log as $log) {
-					$content .= "<pre class='core warning' style='max-height: 200px; overflow: auto;'>$log</pre>";
-				}
-
-			} */
-
-			$content .= '</div> <!--/.DA_del-->';
 		}
 
 		return $content;
@@ -217,6 +190,7 @@ class Render
 	} // content
 
 
+	// note deprecated
 	public static function comments()
 	:string
 	{
@@ -348,7 +322,7 @@ class Render
 
 		# Wrap content in template
 
-		require_once "{$Data['template']}/template.php";
+		include_once "{$Data['template']}/template.php";
 
 
 		# Close main buff
