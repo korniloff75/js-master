@@ -17,7 +17,7 @@ if(
 	}
 }
 
-tolog(['$method'=>$method]);
+tolog(['$method'=>$method, 's_method'=>$_REQUEST['s_method'] ?? null]);
 
 if(empty($method)) $Comments->Render();
 

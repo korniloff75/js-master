@@ -25,7 +25,7 @@ window.Img= window.Img || {
 	data: [],
 
 	sts: {
-		scriptArea: document.querySelector('#tplge_mainin') || document.querySelector('.content'),
+		scriptArea: document.querySelector('.content,.editor,.ajax-content'),
 		/*
 		if (imgClass == false) - берутся все изображения из scriptArea.
 		*/

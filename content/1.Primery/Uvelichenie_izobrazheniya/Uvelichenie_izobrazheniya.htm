@@ -7,7 +7,7 @@
 <div>
 	<h4>Инструкция по подключению скрипта к сайту</h4>
 	<ol>
-		<li><a href="/?module=Download&file=js/modules/Img.js">Скачать скрипт</a> увеличения изображений и загрузить его к себе на хостинг. Далее предполагаем, что абсолютный путь к файлу будет <code>/js/addons/Img.js</code>. Если у вас он окажется другим, то нужно будет заменить его на свой в коде, приведенном ниже.
+		<li><a href="/?module=php/modules/Download.php&file=js/__defer/Img.js">Скачать скрипт</a> увеличения изображений и загрузить его к себе на хостинг. Далее предполагаем, что абсолютный путь к файлу будет <code>/js/addons/Img.js</code>. Если у вас он окажется другим, то нужно будет заменить его на свой в коде, приведенном ниже.
 		</li>
 <li>Присвоить изображениям, нуждающимся в увеличении класс <b>class="toBig"</b>. Если в настройках скрипта указать <code>Img.sts.imgClass = 0</code>, то скрипт выберет все изображения из <b>Img.sts.scriptArea</b> вне зависимости от их классов.</li>
 <li>Все, скрипт будет работать после перезагрузки страницы сайта с очисткой кеша броузера (<b>ctrl+R</b>).
@@ -38,10 +38,10 @@
 	<img class="toBig" src="/userfiles/images/examples/head3.jpg" title="Увеличить"><br>
 	<img class="toBig" src="/userfiles/images/examples/head4.jpg" title="Увеличить"><br>
 
-	<script src="/js/modules/Img.js"></script>
+	<script src="/js/__defer/Img.js"></script>
 	<script type="text/javascript">
 	//== Настройки (опционально)
-	Img.sts.scriptArea= document.querySelector('.content'); //== Область действия скрипта. Укажите в ней id тега, в котором расположены изображения
+	Img.sts.scriptArea= document.querySelector('.editor'); //== Область действия скрипта. Укажите в ней id тега, в котором расположены изображения
 	Img.sts.style= 'cursor: zoom-in; border-radius: 10px;'; //== Стили для изображений
 	Img.sts.title= 'Увеличить'; //== Надпись над курсором
 	//	Img.sts.noList= 1 //== Отключить пролистывание с клавиатуры

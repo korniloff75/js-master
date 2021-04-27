@@ -171,17 +171,11 @@ class Render
 		// var_dump(\DIR, $content); exit;
 
 		if(strlen($content)){
-			$content = "<div class=\"content\">\n{$content}\n</div>\n<!-- /.content -->\n";
+			// $content = "<div class=\"content\">\n{$content}\n</div>\n<!-- /.content -->\n";
 
 			# Add comments & return
 			#
 			// $content = self::breadCrumbs() . $content;
-
-			/*  */
-			if(!empty(\CF['counter']) && !\LOCALHOST)
-			{
-				$content .= \CF['counter'];
-			}
 
 		}
 

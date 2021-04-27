@@ -1,0 +1,42 @@
+<!-- visually impaired -->
+<style>
+	#RDS {
+		position: fixed;
+		display: flex;
+		top: 5px;
+		right: 5px;
+		z-index: 10000;
+		border-radius: 0 50px 50px;
+		cursor: pointer;
+		text-align: right;
+		text-decoration: underline;
+		font-weight: 700;
+		color: #123;
+		background: rgba(255, 255, 255, .7);
+	}
+	#RDS>img {
+		transition: all .7s ease-in-out;
+		width: 50px;
+	}
+	#RDS:hover>img {
+		transform: scale(1.5) rotate(360deg);
+	}
+</style>
+
+<!-- Кнопка перехода в РДС -->
+<div id="RDS" class="DA_del">
+	ДЛЯ СЛАБОВИДЯЩИХ
+	<img src="/js/CC-Pro-3/glaz.png" alt="РДС" />
+</div>
+<!-- /Кнопка перехода в РДС -->
+
+<script src="/js/CC-Pro-3/KFF_Lite.min.js" type="text/javascript" charset="utf-8" ant="no"></script>
+<script src="/js/CC-Pro-3/DA_pro_v3_local.prod.js" type="text/javascript" charset="utf-8"></script>
+
+<script type="text/javascript">
+	DizSel.checkUrl = '/js/CC-Pro-3/'; DizSel.SlabovidButton = _K.G('$#RDS');
+	DizSel.SlabovidButton.style.cursor = "url('" + DizSel.checkUrl + 'glasses.png' + "'), pointer";
+
+</script>
+
+<!-- /visually impaired -->

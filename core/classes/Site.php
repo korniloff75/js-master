@@ -1,9 +1,12 @@
 <?php
 // *before Site, used with bots
+// fixed v.3.2
 define( "TRAITS", realpath(__DIR__."/../traits") );
 
 require_once __DIR__."/../Helpers.trait.php";
 require_once \TRAITS."/Get_set.trait.php";
+
+$_GET['route']= $_GET['route'] ?? null;
 
 
 class Site implements BasicClassInterface
@@ -59,7 +62,7 @@ class Site implements BasicClassInterface
 		tolog(['$_GET'=>$_GET]);
 
 		// *before Helper.php
-		if( !POLLING )
+		if( !POLLING && empty($_SESSION) )
 			session_start();
 
 		# Use singleton H
@@ -111,11 +114,13 @@ class Site implements BasicClassInterface
 	{
 		// *Логгируем загрузку страницы
 		// *Отсекаем поллинги
+		// if( isset($_REQUEST["dev"]) || !POLLING && is_adm() ){
 		if( isset($_REQUEST["dev"]) || !POLLING ){
 			global $log;
 			$log = new Logger('my.log', \DR);
 		}
 		elseif(!function_exists('tolog')) {
+			ini_set('display_errors', 0);
 			function tolog(){}
 		}
 

@@ -6,7 +6,7 @@ $_SESSION['captcha'] = \H::realIP(); */
 ?>
 
 
-<link rel="stylesheet" type="text/css" href="/<?=\H::$Dir ?>assets/fb_form.css" />
+<link rel="stylesheet" type="text/css" href="{DIR}assets/fb_form.css" />
 
 <div id="form-outbox">
 
@@ -113,11 +113,13 @@ $_SESSION['captcha'] = \H::realIP(); */
 		  processData: false,
 		  contentType: false,
 		  type: 'POST',
-		}).done(function(response) {
+		})
+		.done(function(response) {
 			$resp_node.append(response);
 			$form[0].elements.submit.disabled = 1;
-		}).fail(function(response) {
-			$resp_node.append('<div class="error">Сообщение не было отправлено. Попробуйте ещё раз.</div>');
+		})
+		.fail(function(response) {
+			$resp_node.append('<div class="error">Сообщение не было отправлено. Попробуйте ещё раз.<\/div>');
 		});
 	}
 	// console.log(formData);

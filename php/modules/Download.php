@@ -7,6 +7,10 @@ class Download
 
 		if (empty($filename)) die ('Укажите корректный запрос в формате ?file=...');
 
+		$filename = \DR."/$filename";
+
+		tolog(__METHOD__,null,['$filename'=>$filename]);
+
 		if(!file_exists($filename) && !is_array($filename))
 		{
 			die ("Не существует файла <b>" . $filename . "</b>");
@@ -58,8 +62,10 @@ class Download
 
 	public function pack($filename)
 	{
-		require_once ('Pack.php');
-		return (new Pack($filename))->nameZIP;
+		if(!empty($_GET['nameZIP'])){
+			Pack::$name = filter_var($_GET['nameZIP'], FILTER_SANITIZE_STRING);
+		}
+		return (new Pack)->Directory($filename);
 
 		// var_dump ($filename);
 	}

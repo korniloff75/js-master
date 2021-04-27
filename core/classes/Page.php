@@ -131,9 +131,10 @@ class Page
 		{
 			foreach($content_htm as &$htm) {
 				$path= \Site::getPathFromRoot($htm);
-				if($cond) echo "$eswitcher<div data-path=\"$path\" class=\"editor\">";
+				if($cond) echo $eswitcher;
+				echo "<div data-path=\"$path\" class=\"editor\">";
 				include_once $htm;
-				if($cond) echo "</div>";
+				echo "</div>";
 			}
 		}
 
@@ -165,11 +166,11 @@ class Page
 		$content = str_replace(
 			[
 				'{DIR}',
-				'--', '---'
+				' -- ', ' --- '
 			],
 			[
 				'/' . \DIR,
-				'–', '—'
+				' – ', ' — '
 			],
 		$content);
 

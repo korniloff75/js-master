@@ -25,7 +25,13 @@ window.Img= window.Img || {
 	data: [],
 
 	sts: {
-		scriptArea: document.querySelector('#tplge_mainin') || document.querySelector('.content'),
+		// scriptArea: document.querySelector('.content,.editor,#ajax-content'),
+		get scriptArea() {
+			return this.sa || document.querySelector('#ajax-content,.content,.editor');
+		},
+		set scriptArea(sa){
+			this.sa= sa;
+		},
 		/*
 		if (imgClass == false) - берутся все изображения из scriptArea.
 		*/
@@ -46,7 +52,7 @@ window.Img= window.Img || {
 
 	init: function() {
 		// console.log('Img.inited = ', Img.inited);
-		if(Img.inited) return;
+		if(!Img.sts.scriptArea || Img.inited) return;
 		Img.inited = 1;
 
 

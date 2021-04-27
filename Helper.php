@@ -52,15 +52,16 @@ class H {
 		tolog('Helper started from ROOT');
 
 
-		if(ADMIN || \TEST || Site::DEV)
-		{
+		if(\ADMIN || \TEST || \Site::DEV){
 			# Develop
 			ini_set('display_errors', 1);
 			ini_set('display_startup_errors', 1);
 			error_reporting(-1);
 			// var_dump($adm, LOCALHOST);
-		} else {
+		}
+		else {
 			#Production
+			error_reporting(E_WARNING);
 			ini_set('display_errors', 0);
 			ini_set('display_startup_errors', 0);
 			// error_reporting(0);
