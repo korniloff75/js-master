@@ -53,11 +53,25 @@ class Site implements BasicClassInterface
 		define('BASE_URL', 'http' . (self::is('https') ? 's' : '') . '://' . \HOST . '/');
 		define('AJAX', self::is('ajax'));
 
-		// autoload ->index.php
+		// autoload ->index.
+
+		// *fix 4 polling
+		$_SESSION = $_SESSION ?? [];
+
+		// *Получаем данные из fetch
+		$inp_data= json_decode(
+			file_get_contents('php://input'),1
+		);
+
+		// *Собираем все входящие в $_REQUEST
+		if($inp_data){
+			tolog(__METHOD__,null,['$inp_data'=>$inp_data]);
+			$_REQUEST= array_merge($_REQUEST, $inp_data);
+		}
 
 		// *Включаем логирование и проверяем доступ к api
-		$this->_initLog()
-			->_api();
+		$this->_initLog();
+			// ->_api();
 
 		tolog(['$_GET'=>$_GET]);
 
@@ -132,20 +146,6 @@ class Site implements BasicClassInterface
 	// *api
 	protected function _api()
 	{
-		// *fix 4 polling
-		$_SESSION = $_SESSION ?? [];
-
-		// *Получаем данные из fetch
-		$inp_data= json_decode(
-			file_get_contents('php://input'),1
-		);
-
-		// *Собираем все входящие в $_REQUEST
-		if($inp_data){
-			tolog(__METHOD__,null,['$inp_data'=>$inp_data]);
-			$_REQUEST= array_merge($_REQUEST, $inp_data);
-		}
-
 		if(empty($_REQUEST['api'])){
 			return $this;
 		}
@@ -178,6 +178,18 @@ class Site implements BasicClassInterface
 			die;
 		}
 
+		// *Request to API
+		Router::route('api/(.+)$', function($req){
+			$api= $req['uri'][1];
+
+			if(file_exists($api= __DIR__."/../api/$api")){
+				tolog(__METHOD__,null,['$api'=>$api, ]);
+
+				include_once $api;
+			}
+			die;
+		});
+
 		// *Обновление админ-панели
 		Router::route('^(.+)/\?updAdminBlock', function($req){
 			// tolog([func_get_args()]);
@@ -199,7 +211,7 @@ class Site implements BasicClassInterface
 			tolog(__METHOD__ . ": \$Page defined",null,['DIR'=>\DIR,'Site::$Page'=>self::$Page]);
 		});
 
-		// *Запрос к примерам
+		//todo *Запрос к примерам
 		Router::route('(examples/.+)', function($req){
 			// tolog([func_get_args()]);
 			tolog(['$req'=>$req]);

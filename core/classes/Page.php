@@ -78,7 +78,7 @@ class Page
 		$Data['title'] = $Data['title'] ?? \Site::translit(Site::skipNum($kfi), 1);
 		$Data['template'] = $Data['template'] ?? \TEMPLATE;
 
-		tolog(__METHOD__,null,['self::$DIR'=>self::$DIR,'$Data'=>$Data]);
+		tolog(__METHOD__,null,['self::$DIR'=>self::$DIR,/* '$Data'=>$Data */]);
 
 		// *Current folder uri
 		// define('DIR', $kfi->fromRoot() . '/');
@@ -116,7 +116,7 @@ class Page
 
 		$idf = new \DirFilter($dirPathname);
 
-		$cond = \ADMIN && empty($opts['rss']);
+		$no_rss = \ADMIN && empty($opts['rss']);
 		$hidden = !\ADMIN && !empty($Data['hidden']);
 
 		if($hidden) return '';
@@ -131,19 +131,12 @@ class Page
 		{
 			foreach($content_htm as &$htm) {
 				$path= \Site::getPathFromRoot($htm);
-				if($cond) echo $eswitcher;
+				if($no_rss) echo $eswitcher;
 				echo "<div data-path=\"$path\" class=\"editor\">";
 				include_once $htm;
 				echo "</div>";
 			}
 		}
-
-		//* Add thumbs
-		// todo -> plugins
-		$images = (new \DirFilter($dirPathname, "#\.(jpe?g|png)$#"))->natSort();
-		if(\MODULES['Thumb']['enable'] && (!isset($Data['thumb']) || $Data['thumb'] == true) && $images)
-			echo \H::includeModule('Thumb')->toPage();
-			// exit;
 
 		//* Add content from *.md files
 		if(count($content_md = (new \DirFilter($idf->iterator, "#\.(md)$#"))->natSort()))
@@ -174,7 +167,7 @@ class Page
 			],
 		$content);
 
-		tolog(__METHOD__,null,['$Data'=>$Data,$Data]);
+		// tolog(__METHOD__,null,['$Data'=>$Data,$Data]);
 
 		return "<header>
 		<h1" . (!empty($Data['hidden']) ? " class=hidden" : "") . ">{$Data['title']}</h1>

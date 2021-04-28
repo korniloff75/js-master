@@ -107,8 +107,8 @@ var _A = {
 			.replace(addBr(dblBr), "$1\n\n")
 			.replace(addBr(Br), "$1\n");
 
-		$.post('/', {
-			api : 'editContent',
+		$.post('/api/editContent.php', {
+			// api : 'editContent',
 			path: opts.path,
 			art : art,
 			action : 'save'
@@ -185,8 +185,9 @@ var _A = {
 					});
 
 					_A.editPanel($area, path);
+
 					data = {
-						api: 'editContent',
+						// api: 'editContent',
 						path: path,
 						action: 'load'
 					};
@@ -202,15 +203,23 @@ var _A = {
 				default:
 					area.contentEditable = false;
 					$area.siblings('.core.editpanel').remove();
+
+					console.log('currentItem',_H.nav.currentItem($('nav#menu_content a')));
+					// todo
+					return _S.loadPage(
+						_H.nav.currentItem($('nav#menu_content a'))
+					);
 					break;
 			}
 
 			// reload content without executable js
-			$.post('/', data, 'text')
+			$.post('/api/editContent.php', data, 'text')
 			.done(function(response) {
-				// console.log(data);
+				console.log({action});
 				$area.html('');
 				area.insertAdjacentHTML('afterbegin', response) ;
+				// *exec scripts
+				// if(action === 'normal') _H.defer.eval();
 			})
 			.fail(function(response) {
 				console.log(response);

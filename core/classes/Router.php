@@ -14,13 +14,16 @@ class Router
 	// массив для хранения соответствия pattern => handler
 	private static $routes = array();
 
+	public static
+		// defined in self::execute()
+		$URI;
+
 	private function __construct() {}
 	private function __clone() {}
 
 
-	// данный метод принимает шаблон url-адреса
-	// как шаблон регулярного выражения и связывает его
-	// с пользовательской функцией
+	// данный метод принимает pattern url-адреса
+	// и связывает его с пользовательской функцией
 	public static function route($pattern, $handler)
 	{
 		// $pattern = '/^' . str_replace('/', '\/', $pattern) . '$/u';
@@ -54,9 +57,12 @@ class Router
 			// *удаляем первый элемент из массива $params, который содержит всю найденную строку
 			array_shift($params);
 
-			tolog(__METHOD__,null,['$pattern'=>$pattern,'$url'=>$url,'$params'=>$params]);
+			$args= ['matches'=>array_values($params), 'uri'=>array_values(array_filter(explode('/',$url)))];
+			self::$URI = $args['uri'];
 
-			return call_user_func($handler, ['matches'=>array_values($params), 'uri'=>array_values(array_filter(explode('/',$url)))]);
+			tolog(__METHOD__,null,['$pattern'=>$pattern,'$args'=>$args]);
+
+			return call_user_func($handler, $args);
 		}
 
 		\Site::shead(404);

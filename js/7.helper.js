@@ -30,21 +30,28 @@ _H = {
 	getPath: function(str) {
 		var path = decodeURI(str);
 		path = _H.qs.parse(path)['page'] || path.replace(/^\/(.+)$/, '$1');
-		// path = _H.qs.parse(path)['page'] || path.replace(/^\/(.+)\/$/, '$1');
 		return this.fixSlash(path).replace(location.protocol + '//' + location.host + '/', '');
 	},
 
 	nav : {
-		// define current page in nav
-		current: function($list, path) {
+		// *return current item from $list
+		currentItem: function($list, path) {
 			$list = $.check($list);
 			path = path || _H.getPath(location.pathname);
-			// console.log('path = ', path);
 
 			var current = $list.filter(function(ind,i) {
-				var page = i.getAttribute('data-page') || i['data-page'];
-				return path === page;
-			})[0],
+				var page = i.getAttribute('data-page') || i['data-page'] || i.href;
+				// console.log(page);
+				return page.indexOf(path) >-1;
+			})[0];
+
+			console.log({path, current});
+			return current;
+		},
+
+		// *define current page in nav
+		current: function($list, path) {
+			var current = this.currentItem($list, path),
 			page_ind = $list.index(current);
 
 			$list.removeClass('active');
@@ -310,7 +317,7 @@ _H = {
 			this.funcs.push(fn);
 			return this;
 		},
-		clean: function() {
+		clear: function() {
 			this.funcs = [];
 			this.tocs = [];
 			this.complete = 0;

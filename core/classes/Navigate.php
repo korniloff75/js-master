@@ -214,7 +214,6 @@ class Navigate
 			}
 
 			echo '</li>';
-			// \H::translit($this->skipNum($path), 1);
 
 		} // foreach($map as $title => $cont_d)
 	}
@@ -267,7 +266,8 @@ class Navigate
 		$out='<nav id="nav_block">';
 
 		foreach($this->map_flat as $i) {
-			$out .= "\n<div class=\"nav_item\" data-page=\"" . str_replace('content/','site/',\Site::getPathFromRoot($i)) . "\" title=\"" . $i . "\"><div></div></div>";
+			$i = str_replace('content/','site/',\Site::getPathFromRoot($i));
+			$out .= "\n<div class=\"nav_item\" data-page=\"$i\" title=\"$i\"><div></div></div>";
 		}
 		return $out . "\n</nav>";
 	}

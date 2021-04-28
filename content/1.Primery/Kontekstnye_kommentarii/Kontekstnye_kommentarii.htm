@@ -14,21 +14,21 @@
 <div id="rpl_code">
 	<script type="text/javascript">
 	"use strict";
-	(function() {
+	(function(sel) {
 		var rpl= {
-			//== В этом объекте указываем сокращения в формате 'Сокращение':'расшифровка'
+			// *В этом объекте указываем сокращения в формате 'Сокращение':'расшифровка'
 			'ПКМ':'Правая кнопка мыши',
 			'ЛКМ':'Левая кнопка мыши',
 			'scrolling':'Прокрутка колесика мыши',
 			'ПГС':'Промышленное и гражданское строительство'
-		},
-		//== Определяем селектор блока, в котором будут производиться замены
-		sel = document.querySelector('#rpl');
+		};
 
 		Object.keys(rpl).forEach(function(i) {
-			sel.innerHTML = sel.innerHTML.replace(new RegExp(i,'g'),'<span style="text-decoration:underline; cursor:pointer;"  onclick="alert(\''+rpl[i]+'\')" title="'+rpl[i]+'">'+i+'</span>');
+			sel.innerHTML = sel.innerHTML.replace(new RegExp(i,'g'),'<span style="text-decoration:underline; cursor:pointer;"  onclick="alert(\''+rpl[i]+'\')" title="'+rpl[i]+'">'+i+'<\/span>');
 		})
-	})();
+	})
+	//* Определяем селектор блока, в котором будут производиться замены
+	(document.querySelector('#rpl'));
 	</script>
 </div>
 

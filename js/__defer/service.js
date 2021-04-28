@@ -48,7 +48,7 @@ var _S = {
 		{
 			_S.v.$page_content.html('');
 			window.myMap && myMap.destroy();
-			_H.defer.clean();
+			_H.defer.clear();
 		}
 
 		// Рендеринг по ответу сервера
@@ -86,9 +86,9 @@ var _S = {
 
 		_S.v.$menu.removeClass('opened');
 
-		sv.IMAGES && _S.v.$bg.css({
+		/* sv.IMAGES && _S.v.$bg.css({
 			backgroundImage: 'url(\'/' + $.rnd(sv.IMAGES.length && sv.IMAGES || sv.BG) + '\')'
-		});
+		}); */
 
 		// addons
 		if(sv.AJAX) {

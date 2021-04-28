@@ -34,7 +34,7 @@ _H.RSYa = {
 	},
 
 	init: function addRSYa(area) {
-		area = area || 'body .content'
+		area = area || 'body .editor'
 		if(!(area instanceof HTMLElement)){
 			area= document.querySelector(area);
 		}
@@ -74,7 +74,6 @@ _H.RSYa = {
 		console.log({rndNum,rnd});
 
 		//* Создаем рекламный блок после случайного <p> и наполняем его
-		// this.$adBlock = $('<div id="y'+(Math.random()*1000+2000)+'">').insertAfter($.rnd(this['$pars']));
 		this.$adBlock = $('<div id="yandex_rtb_R-A-486456-1"/>').insertAfter(rnd);
 
 		console.log("this = ", this, "\nthis.$adBlock= ", this.$adBlock, this.$adBlock[0].id);
@@ -112,7 +111,7 @@ _H.RSYa = {
 			);
 		}, 1500);
 	}//init()
-	
+
 }; //_H.RSYa
 
 
