@@ -31,7 +31,7 @@ class Plugins
 
 	static
 		$listHooks=[],
-		$availables=[], //список доступных плагинов
+		$availables=[], //список доступных плагинов def in _listHooks()
 		$html, //defined in Render::finalPage()
 		$DOM=[];
 
@@ -153,7 +153,6 @@ class Plugins
 			tolog(__CLASS__.'::$html is EMPTY',E_USER_WARNING);
 			return;
 		}
-
 
 	}
 

@@ -1,28 +1,22 @@
 <?php
-function breadCrumbsRecurse($arr=null)
+namespace plugins;
+
+function breadCrumbs($arr=null)
 {
-	$crumb_path = dirname($crumb_path ?? \DIR);
-	if(trim($crumb_path,'/') === trim(\CONT,'/')) return;
+	$crumbs= '<div id="breadcrumbs" style="margin: 15px 0 -2em;">';
 
-	// var_dump($crumb_path);
-	$data = \Page::getData($crumb_path);
-	var_dump($data);
-	$arr[$data['title']] = $crumb_path;
+	$crumb_path = \DIR;
 
-	// breadCrumbsRecurse($arr);
-	die;
-
-
-	$str = '<div id="breadcrumbs" style="margin: 15px 0 -2em;">';
-	$path = '/' . \CONT;
-
-	for ($i=1; $i < count($arr); $i++) {
-		$c = $arr[$i];
-		$path .= "$c/";
-		$str .= "<a href=\"$path\" title=$c>$c</a> &middot; ";
+	while(file_exists($crumb_path.'/data.json') && ($data= \Page::getData($crumb_path))){
+		$crumbs.= "<a href=\"$path\">{$data['title']}</a> >> ";
+		$crumb_path = dirname($crumb_path);
+		echo $crumb_path;
 	}
 
-	return $str . '</div>';
+	$crumbs.= '</div>';
+
+	return $crumbs;
+
 }
 
-echo breadCrumbsRecurse();
+// \Plugins::$html.= breadCrumbs();

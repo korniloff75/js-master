@@ -63,15 +63,15 @@ class Site implements BasicClassInterface
 			file_get_contents('php://input'),1
 		);
 
+		// *Включаем логирование и проверяем доступ к api
+		$this->_initLog();
+			// ->_api();
+
 		// *Собираем все входящие в $_REQUEST
 		if($inp_data){
 			tolog(__METHOD__,null,['$inp_data'=>$inp_data]);
 			$_REQUEST= array_merge($_REQUEST, $inp_data);
 		}
-
-		// *Включаем логирование и проверяем доступ к api
-		$this->_initLog();
-			// ->_api();
 
 		tolog(['$_GET'=>$_GET]);
 
