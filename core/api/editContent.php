@@ -1,4 +1,5 @@
 <?php
+namespace API;
 /**
 * Обработчик изменений контента
 *
@@ -14,11 +15,10 @@ if(empty($path) || empty($action))
 	die ("Не корректные входящие данные");
 }
 
+// *fix PHP code
 $clean_arr = [
 	'&lt;?' => '<?',
 	'?&gt;' => '?>',
-/* 	'&amp;lt;?' => '<?',
-	'?&amp;gt;' => '?>', */
 ];
 
 
@@ -26,7 +26,7 @@ switch ($action) {
 	case 'load':
 		$cont = file_get_contents(\DR . "/$path");
 		echo strtr($cont, array_flip($clean_arr));
-		break;
+	break;
 
 	case 'save':
 		echo "saved in $path";
@@ -34,11 +34,7 @@ switch ($action) {
 		$art = strtr($art, $clean_arr);
 
 		if(!file_put_contents(\DR . "/$path", $art)) die ('<p class="core warning">Данные не сохранены!</p>');
-		break;
-
-	default:
-		# code...
-		break;
+	break;
 }
 
 die;

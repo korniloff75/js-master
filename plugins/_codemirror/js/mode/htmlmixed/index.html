@@ -46,6 +46,7 @@
   <body>
     <h1>Mixed HTML Example</h1>
     <script>
+      // *We have a very long string... long string... long string... long string... long string... long string... long string... long string... long string... long string... long string...
       function jsFunc(arg1, arg2) {
         if (arg1 && arg2) document.body.innerHTML = "achoo";
       }
@@ -65,6 +66,9 @@
       };
       var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
         mode: mixedMode,
+        lineNumbers: true,
+        lineWrapping: true,
+        matchBrackets: true,
         selectionPointer: true
       });
     </script>

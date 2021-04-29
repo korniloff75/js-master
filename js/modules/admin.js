@@ -94,7 +94,7 @@ var _A = {
 		}, opts || {});
 
 		if(!opts.path)
-			return console.warn("Нет opts.path", opts);
+			return console.error("Нет opts.path", opts);
 
 		var dblBr = "p|h[1-6]|ol|ul|div|section|table|article",
 			Br = "li";
@@ -180,9 +180,7 @@ var _A = {
 
 			switch (action) {
 				case 'contentEditable':
-					$f('[contentEditable]').each(function(ind,i) {
-						i.contentEditable = false;
-					});
+					$f('[contentEditable]').prop({ contentEditable: false });
 
 					_A.editPanel($area, path);
 
@@ -193,14 +191,17 @@ var _A = {
 					};
 					// area.innerHTML =
 					area.contentEditable = true;
-					break;
 
-				case 'editFile':
+					// reload content without executable js
+					_A.editContent(area,data);
+				break;
+
+				case 'editFile': //???
 					location.replace('/?module=Download&file=' + path);
-					break;
+				break;
 
-				// 'normal'
-				default:
+				case 'normal':
+				// default:
 					area.contentEditable = false;
 					$area.siblings('.core.editpanel').remove();
 
@@ -209,24 +210,25 @@ var _A = {
 					return _S.loadPage(
 						_H.nav.currentItem($('nav#menu_content a'))
 					);
-					break;
+				break;
 			}
 
-			// reload content without executable js
-			$.post('/api/editContent.php', data, 'text')
-			.done(function(response) {
-				console.log({action});
-				$area.html('');
-				area.insertAdjacentHTML('afterbegin', response) ;
-				// *exec scripts
-				// if(action === 'normal') _H.defer.eval();
-			})
-			.fail(function(response) {
-				console.log(response);
-			});
+			console.log({action});
+
 		}); // change editorSwitcher
 
-	} // init
+	}, // init
+
+	editContent(area, data){
+		$.post('/api/editContent.php', data, 'text')
+		.done(function(response) {
+			area.innerHTML='';
+			area.insertAdjacentHTML('afterbegin', response) ;
+		})
+		.fail(function(response) {
+			console.log(response);
+		});
+	},
 
 } // _A
 

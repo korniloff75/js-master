@@ -692,16 +692,16 @@ aside #bg_pattern {
   color: #eee;
   padding: 0;
 }
-#ajax-content .editor {
+#ajax-content .editor:not(.CodeMirror) {
   padding: 0 1em;
 }
 @media (min-width: 500px) and (max-width: 768px) {
-  #ajax-content .editor {
+  #ajax-content .editor:not(.CodeMirror) {
     padding: 0 .5em;
   }
 }
 @media (max-width: 578px) {
-  #ajax-content .editor {
+  #ajax-content .editor:not(.CodeMirror) {
     padding: 0 .2em;
   }
 }

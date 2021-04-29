@@ -174,7 +174,14 @@ class Site implements BasicClassInterface
 		if(!empty($_REQUEST['module'])){
 			if(!defined('DIR')) define('DIR', $_REQUEST['page'] . '/');
 			tolog(['Request to module'=>$_REQUEST]);
-			require_once \DR . "/{$_REQUEST['module']}";
+
+			// compat with Legacy
+			if(!file_exists($module=\DR . "/{$_REQUEST['module']}")){
+				$module = \DR . "/php/modules/{$_REQUEST['module']}.php";
+			}
+
+			require_once $module;
+			\Logger::$notWrite = true;
 			die;
 		}
 
@@ -198,6 +205,7 @@ class Site implements BasicClassInterface
 
 			self::$Page= new Page();
 			echo \php\classes\Render::adminBlock();
+			\Logger::$notWrite = true;
 			die;
 		});
 

@@ -18,9 +18,9 @@
 <script src="/js/jQ_plugins/CheckBox.js"></script>
 
 <script>
-	// *Изменение вида чекбоксов во всех блоках
-	// с селектором '.editor'
-	$($('.editor').CheckBoxes());
+	// Изменение вида чекбоксов во всех блоках
+	// с селектором '.content'
+	$($('.content').CheckBoxes());
 </script>
 </code></pre>
 <pre><code id="checkbox_code" data-lib="jQuery"></code></pre>

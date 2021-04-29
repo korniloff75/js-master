@@ -333,6 +333,8 @@ trait Helpers
 		if(!include("templates/errorpages/$s.htm"))
 		 echo '<h1>' . $title . "</h1>\n" . $o;
 
+		\Logger::$notWrite = true;
+
 		 die;
 
 	}
