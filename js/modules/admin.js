@@ -220,13 +220,14 @@ var _A = {
 	}, // init
 
 	editContent(area, data){
+		area.className = 'editor';
+		area.innerHTML='';
+
 		$.post('/api/editContent.php', data, 'text')
-		.done(function(response) {
-			area.innerHTML='';
+		.then(response=> {
 			area.insertAdjacentHTML('afterbegin', response) ;
-		})
-		.fail(function(response) {
-			console.log(response);
+		}, fail=>{
+			console.log({fail});
 		});
 	},
 

@@ -1,9 +1,9 @@
 <?php
-namespace API;
+namespace core\api;
 /**
 * Обработчик изменений контента
-*
 */
+
 \Site::protectScript(basename(__FILE__), 'checkAdm');
 if(\DEMO) die ("DEMO enabled!");
 

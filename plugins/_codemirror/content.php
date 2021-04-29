@@ -46,9 +46,11 @@ if(is_adm()):
 
 	$switchers.each((ind,i)=>{
 		let $i= $(i);
-		$i.append(`<option>CodeMirror</option>`);
+		$i.append('<option>CodeMirror</option>');
 		$i.change(e=>{
 			let action = i.options[i.selectedIndex].textContent;
+			$i.siblings().find('.cm-save').remove();
+
 			if(action !== 'CodeMirror') return;
 
 			e.stopPropagation();
@@ -61,11 +63,6 @@ if(is_adm()):
 				editorArea = editor.display.wrapper;
 
 			// *Загружаем чистый код
-			/* $.get(`/${editorArea.dataset.path}`)
-			.then(resp=>{
-				// console.log({resp});
-				editor.setValue(resp);
-			}); */
 			$.post('/api/editContent.php',{
 				action: 'load',
 				path: editorArea.dataset.path,
