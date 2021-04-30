@@ -692,6 +692,9 @@ aside #bg_pattern {
   color: #eee;
   padding: 0;
 }
+#ajax-content :not(pre) > code {
+  white-space: pre-line;
+}
 #ajax-content .editor:not(.CodeMirror) {
   padding: 0 1em;
 }

@@ -161,7 +161,7 @@ class H {
 					break;
 
 				case 'css':
-					$patt = "<link rel=\"stylesheet\" type=\"text/css\" href=\"/" . Site::getPathFromRoot($i) . "\">";
+					$patt = "<link rel=\"stylesheet\" type=\"text/css\" href=\"/" . \Site::getPathFromRoot($i) . "\">";
 					break;
 
 				case 'less':

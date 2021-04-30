@@ -169,7 +169,7 @@ var _A = {
 		$esws.on('change', function() {
 			var $area = $(this).siblings('.editor'),
 			area = $area[0],
-			path = $area.attr('data-path'),
+			path = area.dataset.path,
 			data = {module: path},
 			action = this.options[this.selectedIndex].textContent;
 			// console.log(this, area);
@@ -210,6 +210,10 @@ var _A = {
 					return _S.loadPage(
 						_H.nav.currentItem($('nav#menu_content a'))
 					);
+				break;
+				default:
+					area.contentEditable = false;
+					$area.siblings('.core.editpanel').remove();
 				break;
 			}
 

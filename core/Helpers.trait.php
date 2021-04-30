@@ -311,7 +311,7 @@ trait Helpers
 	/**
 	 * Сшиваем файлы в один
 	 */
-	public static function sewFiles(array &$pathes, string $outPathname, $sep='')
+	public static function sewFiles(array $pathes, string $outPathname, $sep='')
 	{
 		$outUri= '/'.\Site::getPathFromRoot($outPathname);
 

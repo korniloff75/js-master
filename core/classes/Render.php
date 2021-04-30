@@ -72,13 +72,22 @@ class Render
 	{
 		$Data= &\Page::$Data;
 
+		if(!\LOCALHOST){
+			$js = (new \DirFilter (\DR.'/js', "#\.js$#i"))->natSort();
+			tolog(__METHOD__,null,['js'=>$js]);
+			$cache_js = "<script src='" . \Site::sewFiles($js,\DR.'/tmp/cacheHead.js',';') . "'></script>";
+		}
+		else $cache_js = \H::addFromDir('js/');
+
+
+
 		return self::meta()
 		. "\n<title>{$Data['title']} - " . \SITENAME . '</title>'
 		. "\n" . '<link rel="stylesheet" type="text/css" href="/css/base.css">'
 		. "\n" . '<link rel="stylesheet" type="text/css" href="/assets/font-awesome/css/font-awesome.min.css">'
 		. "\n<!--Site::\$Page->headhtml-->\n" . \Site::$Page->headhtml . "\n<!--/Site::\$Page->headhtml-->\n"
 		. \Page::setSV()
-		. "\n" . \H::addFromDir('js/') //todo в продакшне собрать в 1 файл
+		. "\n" . $cache_js //todo в продакшне собрать в 1 файл
 		. \Plugins::getHook('head');
 	}
 
@@ -242,7 +251,12 @@ class Render
 	{
 		$f= \Plugins::getHook('footer');
 
-		$f .= \H::addFromDir('js/__defer/', [
+		if(!\LOCALHOST){
+			$js = (new \DirFilter (\DR.'/js/__defer', "#\.js$#i"))->natSort();
+			tolog(__METHOD__,null,['js'=>$js]);
+			$f .= "<script src='" . \Site::sewFiles($js,\DR.'/tmp/cacheDefers.js',';') . "' defer></script>";
+		}
+		else $f .= \H::addFromDir('js/__defer/', [
 			'ext' => 'js',
 			'defer' => 1,
 			'except' => \ADMIN || USE_BROWS_LESS ? 0 : 'LESS'

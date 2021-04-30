@@ -1,12 +1,12 @@
 'use strict';
 // *noConsole
 if(/\.ru/i.test(location.host)){
-	var console= {
+	Object.assign(window.console, {
 		log: ()=>false,
 		info: ()=>false,
-		assert: ()=>false,
-		groupCollapsed: ()=>false,
-	}
+		// assert: ()=>false,
+		// groupCollapsed: ()=>false,
+	});
 }
 
 

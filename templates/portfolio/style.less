@@ -456,6 +456,11 @@ aside { // #sidebar
 	color: @font-color;
 	padding: 0;
 
+	// *fix 4 UIKit
+	:not(pre) > code{
+		white-space: pre-line;
+	}
+
 	.editor:not(.CodeMirror) {
 		padding: 0 1em;
 
