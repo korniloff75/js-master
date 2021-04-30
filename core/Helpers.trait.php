@@ -308,6 +308,31 @@ trait Helpers
 	}
 
 
+	/**
+	 * Сшиваем файлы в один
+	 */
+	public static function sewFiles(array &$pathes, string $outPathname, $sep='')
+	{
+		$outUri= '/'.\Site::getPathFromRoot($outPathname);
+
+		if(file_exists($outPathname)) return $outUri;
+
+		$cache= '';
+
+		foreach($pathes as $script){
+			// $cache.= addslashes(file_get_contents(__DIR__."/js/$script.js")) . ";\n";
+			$cache.= file_get_contents($script) . "$sep\n";
+		}
+
+		file_put_contents($outPathname,$cache);
+
+		return $outUri;
+	}
+
+
+	/**
+	 * Return ERROR header
+	 */
 	public static function shead ($s, $o = '')
 	{
 		header('Content-type: text/html; charset=utf-8');

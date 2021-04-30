@@ -1,19 +1,23 @@
 <?php
-$uri_dir= '/'.\Site::getPathFromRoot(__DIR__);
+namespace plugins\_codemirror;
+
+// $uri_dir= '/'.\Site::getPathFromRoot(__DIR__);
 
 if(is_adm()):
+
+$cacheCssUri= \Site::sewFiles(
+	array_map(function($i){return __DIR__."/js/$i.css";}, ['lib/codemirror','theme/monokai'])
+	, __DIR__.'/cacheStyles.css'
+);
+
+$cacheUri= \Site::sewFiles(
+	array_map(function($i){return __DIR__."/js/$i.js";}, ['lib/codemirror','addon/selection/selection-pointer','mode/xml/xml','mode/javascript/javascript','mode/css/css','mode/htmlmixed/htmlmixed'])
+	, __DIR__.'/cache.js', ';'
+);
+
 ?>
-
-<link rel="stylesheet" href="<?=$uri_dir?>/js/lib/codemirror.css">
-<link rel="stylesheet" href="<?=$uri_dir?>/js/theme/monokai.css">
-<script src="<?=$uri_dir?>/js/lib/codemirror.js"></script>
-<script src="<?=$uri_dir?>/js/addon/selection/selection-pointer.js"></script>
-<script src="<?=$uri_dir?>/js/mode/xml/xml.js"></script>
-<script src="<?=$uri_dir?>/js/mode/javascript/javascript.js"></script>
-<script src="<?=$uri_dir?>/js/mode/css/css.js"></script>
-<script src="<?=$uri_dir?>/js/mode/htmlmixed/htmlmixed.js"></script>
-
-<!-- <div id="codemirror"></div> -->
+<link rel="stylesheet" href="<?=$cacheCssUri?>">
+<script src="<?=$cacheUri?>"></script>
 
 <style>
 .CodeMirror {
@@ -22,7 +26,6 @@ if(is_adm()):
 </style>
 
 <script type="module" async>
-	// todo Разобраться с динамически добавленными элементами и стилями.
 	var $switchers= $('.editorSwitcher'),
 	// el= document.querySelector('.editor'),
 	opts= {

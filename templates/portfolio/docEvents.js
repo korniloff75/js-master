@@ -1,4 +1,5 @@
-var Doc_evs = ()=>({
+var Doc_evs = ()=>{
+	let Doc_evs= {
 
 	// Navigate on wheel
 	wheel: function(e) {
@@ -221,29 +222,31 @@ var Doc_evs = ()=>({
 		e = $().e.fix(e);
 		if(e.defKeyCode('esc')) _H.close.call(_S.v.$menu);
 	},
-}); // Doc_evs
+}
+return Doc_evs;
+}; // Doc_evs
 
 
 $(()=>{
 	$(document).on(Doc_evs());
 
 	// *menu handlers
-_S.v.$nav_main.on({
-	// ajax 4 changing page_content
-	click: function (e) {
-		var t;
-		if (!(t = e.target.closest('.nav_item'))) {
-			// console.log('menu_blocked', t);
-			return;
-		}
+	_S.v.$nav_main.on({
+		// ajax 4 changing page_content
+		click: function (e) {
+			var t = e.target.closest('.nav_item');
+			if (!t) {
+				// console.log('menu_blocked', t);
+				return;
+			}
 
-		// console.log('sysData = ', sysData);
+			// console.log('sysData = ', sysData);
 
-		_S.loadPage(t);
+			_S.loadPage(t);
 
-	},
+		},
 
-});
+	});
 
 
 	/* // *fix scroll sidebar
@@ -255,4 +258,3 @@ _S.v.$nav_main.on({
 		},
 	}); */
 });
-// $(document).on(Doc_evs());
