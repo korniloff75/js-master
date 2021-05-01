@@ -170,18 +170,24 @@ class Site implements BasicClassInterface
 
 	protected function _route()
 	{
+		global $act;
+
+		// *Compat ME
+		$act= filter_var($_REQUEST['act'] ?? null, FILTER_SANITIZE_STRING);
+
 		// *Запрос к модулю (комменты, ...etc.)
 		if(!empty($_REQUEST['module'])){
 			if(!defined('DIR')) define('DIR', $_REQUEST['page'] . '/');
-			tolog(['Request to module'=>$_REQUEST]);
 
 			// compat with Legacy
 			if(!file_exists($module=\DR . "/{$_REQUEST['module']}")){
 				$module = \DR . "/php/modules/{$_REQUEST['module']}.php";
 			}
 
-			require_once $module;
+			tolog(['Request to module'=>$_REQUEST,'$act'=>$act]);
+
 			\Logger::$notWrite = true;
+			require_once $module;
 			die;
 		}
 

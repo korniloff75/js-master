@@ -1,13 +1,14 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT']. '/system/global.dat';
-$UIKpath = '/'. $kff::$internalModulesPath . '/kff_uikit-3.5.5';
-$Imgpath = DR."/files/CKeditor";
+global $act;
 
-require_once DR.'/'.$kff::$dir.'/Uploads.class.php';
+$UIKuri = '/plugins/_uikit-3.5.5';
+
+\Logger::$notWrite = false;
+
 Uploads::$allow = ['jpg','jpeg','png','gif'];
-Uploads::$pathname = $Imgpath;
+Uploads::$pathname = \Page::$DIR.'/imgs';
 
-$log->add('$act= '."$act, count(\$_FILES)= ".count($_FILES));
+tolog(['$act'=>$act, 'count($_FILES)'=>count($_FILES),]);
 
 if($act === 'upload' && count($_FILES))
 {
@@ -33,28 +34,28 @@ if(file_exists(Uploads::$pathname))
 		if(!$imgFI->isFile() || !in_array($imgFI->getExtension(),Uploads::$allow))
 			continue;
 
-		$src= '/'. $kff::getPathFromRoot($imgFI->getPathname());
+		$src= '/'. \Site::getPathFromRoot($imgFI->getPathname());
 		$Imgs.= "<img src='$src' data-src='$src' uk-tooltip title='$src' />".PHP_EOL;
 	}
 
-	// $log->add('Imgs= '.$Imgs);
+	// tolog('Imgs= '.$Imgs);
 }
 
+
+
 ?>
-
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>kff.Explorer</title>
 	<!-- UIkit CSS -->
-	<link rel="stylesheet" href="<?=$UIKpath?>/css/uikit.min.css" />
+	<link rel="stylesheet" href="<?=$UIKuri?>/css/uikit.min.css" />
 
 	<!-- UIkit JS -->
-	<script src="<?=$UIKpath?>/js/uikit.min.js"></script>
-	<script src="<?=$UIKpath?>/js/uikit-icons.min.js"></script>
+	<script src="<?=$UIKuri?>/js/uikit.min.js"></script>
+	<script src="<?=$UIKuri?>/js/uikit-icons.min.js"></script>
 	<!-- /UIkit -->
 	<style>
 		#existsImg img{height:100px; cursor:pointer;}
@@ -169,7 +170,7 @@ function OpenFile( fileUrl )
 UIkit.util.on('#existsImg','click',function(e) {
 	// console.log(e);
 	var t= e.target,
-		relPath= t.getAttribute('data-src');
+		relPath= t.dataset.src;
 
 	UIkit.modal.prompt("Путь к файлу",relPath)
 	.then(()=>{

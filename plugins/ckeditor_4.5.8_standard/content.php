@@ -31,7 +31,8 @@ CKEDITOR.config.protectedSource.push(/<!--dev-->[\s\S]*<!--\/dev-->/g);
 // *Запускаем редактор с файловым браузером
 // todo
 Object.assign(CKEDITOR.config, {
-	filebrowserBrowseUrl: '?name=createCKEditorBrowser',
+	// filebrowserBrowseUrl: '?module=<?=__DIR__?>/createCKEditorBrowser',
+	filebrowserBrowseUrl: '?module=<?=\Site::getPathFromRoot(__DIR__)?>/kff.Explorer/index.php',
 	disallowedContent : 'img{width,height}',
 	image_removeLinkByEmptyURL: true,
 });
@@ -45,14 +46,18 @@ $switchers.each((ind,i)=>{
 	$i.append('<option>CKEditor</option>');
 	$i.change(e=>{
 		let action = i.options[i.selectedIndex].textContent;
-		$i.siblings().find('.cm-save').remove();
+		$i.siblings().find('.cke-save').remove();
 
-		if(action !== 'CKEditor') return;
+		if(action !== 'CKEditor') {
+			Object.keys(CKEDITOR.instances).forEach(i=>CKEDITOR.instances[i].destroy())
+			return;
+		}
 
 		e.stopPropagation();
 		e.preventDefault();
 
-		let $area = $i.siblings('.editor'),
+		let editor,
+		$area = $i.siblings('.editor'),
 		area = $area[0];
 
 		// *Загружаем чистый код
@@ -62,16 +67,17 @@ $switchers.each((ind,i)=>{
 		}).then(resp=>{
 			// console.log({resp});
 			area.contentEditable = true;
-			$area.html(resp);
-			CKEDITOR.inline(area);
+			area.innerHTML= resp;
+			editor= CKEDITOR.inline(area);
 		});
 
 		// console.log({editor});
 
 		// *SAVE btn
-		$('<div class="right"><button class="cm-save">SAVE<\/button><\/div>').insertAfter(area)
+		$('<div class="right"><button class="cke-save">SAVE<\/button><\/div>').insertAfter(area)
 		.click(e=>{
-			// save(editor,editorArea);
+			console.log({editor,area},editor.getData());
+			// save(editor,area);
 		});
 
 
@@ -86,7 +92,7 @@ function save(editor,editorArea){
 
 	$.post('/api/editContent.php', {
 		path: editorArea.dataset.path,
-		art : editor.getValue(),
+		art : editor.getData(),
 		action : 'save'
 	})
 	.then(function(response) {

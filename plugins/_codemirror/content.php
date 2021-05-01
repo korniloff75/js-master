@@ -53,9 +53,12 @@ $switchers.each((ind,i)=>{
 	$i.append('<option>CodeMirror</option>');
 	$i.change(e=>{
 		let action = i.options[i.selectedIndex].textContent;
-		$i.siblings().find('.cm-save').remove();
 
-		if(action !== 'CodeMirror') return;
+		if(action !== 'CodeMirror') {
+			$i.siblings().find('.cm-save').remove();
+			$('.CodeMirror').removeClass('CodeMirror');
+			return;
+		};
 
 		e.stopPropagation();
 		e.preventDefault();
