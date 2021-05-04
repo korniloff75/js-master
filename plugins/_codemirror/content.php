@@ -27,7 +27,7 @@ $cacheUri= \Site::sewFiles(
 
 <script type="module" async>
 'use strict';
-var $switchers= $('.editorSwitcher'),
+var $switchers= $switchers || $('.editorSwitcher'),
 // el= document.querySelector('.editor'),
 opts= {
 	theme: 'monokai',

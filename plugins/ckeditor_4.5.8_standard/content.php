@@ -20,9 +20,9 @@ if(is_adm()):
 }); */
 
 // разрешить теги <style>
-CKEDITOR.config.protectedSource.push(/<(style)[^>]*>.*<\/style>/ig);
+CKEDITOR.config.protectedSource.push(/<(style)[^>]*>.*<\/\1>/ig);
 // разрешить теги <script>
-CKEDITOR.config.protectedSource.push(/<(script)[^>]*>.*<\/script>/ig);
+CKEDITOR.config.protectedSource.push(/<(script)[^>]*>.*<\/\1>/ig);
 // разрешить php-код
 CKEDITOR.config.protectedSource.push(/<\?[\s\S]*?\?>/g);
 // разрешить любой код: <!--dev-->код писать вот тут<!--/dev-->
@@ -38,7 +38,7 @@ Object.assign(CKEDITOR.config, {
 });
 
 
-var $switchers= $('.editorSwitcher');
+var $switchers= $switchers || $('.editorSwitcher');
 // el= document.querySelector('.editor'),
 
 $switchers.each((ind,i)=>{
@@ -76,8 +76,8 @@ $switchers.each((ind,i)=>{
 		// *SAVE btn
 		$('<div class="right"><button class="cke-save">SAVE<\/button><\/div>').insertAfter(area)
 		.click(e=>{
-			console.log({editor,area},editor.getData());
-			// save(editor,area);
+			// console.log({editor,area},editor.getData());
+			save(editor,area);
 		});
 
 

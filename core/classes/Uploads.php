@@ -43,7 +43,7 @@ class Uploads
 	public function __construct($pathname=null, $input_name=null)
 	{
 		if(!is_adm())
-			die('Access denied to ' . __FILE__);
+			\Site::shead(403,'Access denied to ' . __FILE__);
 
 		self::$pathname = $pathname ?? static::$pathname;
 		self::$input_name = $input_name ?? static::$input_name;
