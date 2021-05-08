@@ -22,6 +22,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/core/traits/Get_set.trait.php";
 require_once $_SERVER['DOCUMENT_ROOT'] . "/core/traits/Curl.trait.php";
 
 
+
 class TG
 {
 	// todo- define in adm panel
@@ -104,7 +105,9 @@ class TG
 
 	private function checkLog()
 	{
-		if($this->log) return;
+		global $log;
+
+		if(!empty($log)) return;
 
 		//* Если не логируется из дочернего класса
 		require_once $_SERVER['DOCUMENT_ROOT'] . "/core/classes/Logger.php";
@@ -114,7 +117,7 @@ class TG
 			$path = $this->botFileInfo->getPathInfo()->getRealPath();
 			$file = $this->botFileInfo->getBasename() . '.log';
 		}
-		$this->log = new Logger($file ?? 'tg.class.log', $path ?? __DIR__);
+		$log = new Logger($file ?? 'tg.class.log', $path ?? __DIR__);
 		tolog(__METHOD__.' botFileInfo= ',null,[$this->botFileInfo]);
 	}
 
@@ -363,29 +366,28 @@ class TG
 	 */
 	private function apiExecCurl($response)
 	{
+		tolog(__METHOD__, null, ['$response'=>$response]);
+
 		if(
 			!$response
 			|| empty($this->curlInfo)
 		)
 		{
-			tolog(__METHOD__ . ' $response = ', null, $response);
 			return $response;
 		}
 
 		//* $this->curlInfo - определяется в $this->execCurl
 		$http_code = intval($this->curlInfo['http_code']);
 
-		if ($http_code != 200)
-		{
+		if ($http_code != 200) {
 			tolog(__METHOD__ . " has failed with error {$response['error_code']}: {$response['description']}", E_USER_WARNING);
-			if ($http_code == 401)
-			{
+			if ($http_code == 401) {
 				tolog('Invalid access token provided', E_USER_WARNING);
 			}
 			return false;
-		} else {
-			if (isset($response['description']))
-			{
+		}
+		else {
+			if (isset($response['description'])) {
 				tolog(__METHOD__ . " was SUCCESSFUL: {$response['description']}");
 				usleep(10);
 			}

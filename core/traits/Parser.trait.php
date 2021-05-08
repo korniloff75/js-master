@@ -19,12 +19,12 @@ trait Parser {
 			'chunked'=>null
 		], $opts);
 
-		$this->log->add(__METHOD__.' $opts',null,[$opts]);
+		tolog(__METHOD__.' $opts',null,[$opts]);
 
 		if($opts['onlyOwner'] && !$this->is_owner)
 		{
 			$this->NoUpdatesTG();
-			$this->log->add(__METHOD__.' not OWNER',E_USER_ERROR);
+			tolog(__METHOD__.' not OWNER',E_USER_ERROR);
 			die;
 		}
 
@@ -32,7 +32,7 @@ trait Parser {
 			$this->baseDir = "{$this->botDir}/" . basename($this->baseDir);
 		// $baseDir = "{$this->botDir}/" . basename($this->baseDir);
 
-		$this->log->add(__METHOD__.' $this->baseDir= ',null, [$this->baseDir]);
+		tolog(__METHOD__.' $this->baseDir= ',null, [$this->baseDir]);
 
 		if(!file_exists($this->baseDir))
 		{
@@ -48,12 +48,12 @@ trait Parser {
 			// $bSource = basename($source);
 			$base = $this->baseSource[$bSource] ?? [];
 
-			$this->log->add(__METHOD__ . ' - $base = ', null, [$base]);
+			tolog(__METHOD__ . ' - $base = ', null, [$base]);
 			# Получаем файл для текущего chat_id
 			if(isset($base[$this->chat_id]))
 			{
 				$currentItem = "{$this->baseDir}/{$base[$this->chat_id]}";
-				$this->log->add(__METHOD__ . ' - $currentItem = ' . $currentItem);
+				tolog(__METHOD__ . ' - $currentItem = ' . $currentItem);
 				// $this->savedBase = $this->objBase->get();
 
 			}
@@ -69,7 +69,7 @@ trait Parser {
 			if(!$this->AddLocalParser($source, $opts))
 				continue;
 
-			// $this->log->add(__METHOD__ . " - \$this->savedBase = ", null, [$this->savedBase]);
+			// tolog(__METHOD__ . " - \$this->savedBase = ", null, [$this->savedBase]);
 		}
 
 		# If not exist new content
@@ -95,11 +95,11 @@ trait Parser {
 		//* use custom Parser if EXIST =====
 		if(!method_exists($this, $parserName))
 		{
-			$this->log->add("$parserName DO NOT exist!");
+			tolog("$parserName DO NOT exist!");
 			return false;
 		}
 
-		$this->log->add("$parserName is exist\n\$bSource = $bSource");
+		tolog("$parserName is exist\n\$bSource = $bSource");
 
 		//* Парсим сайт из self::$remoteSource
 		$doc = new DOMDocument();
@@ -129,7 +129,7 @@ trait Parser {
 			!count($diff = array_diff($this->definedBase, $this->savedBase))
 		)
 		{
-			$this->log->add('$diff is EMPTY !!!', E_USER_WARNING);
+			tolog('$diff is EMPTY !!!', E_USER_WARNING);
 			return false;
 		}
 
@@ -137,7 +137,7 @@ trait Parser {
 		// \H::json("{$this->baseDir}/{$this->chat_id}.$bSource.json", $this->definedBase);
 		$this->objBase->set($this->definedBase);
 
-		$this->log->add(__METHOD__ . " \$this->baseDir = {$this->baseDir}/{$this->chat_id}.$bSource.json");
+		tolog(__METHOD__ . " \$this->baseDir = {$this->baseDir}/{$this->chat_id}.$bSource.json");
 
 		$diff = array_unique($diff);
 
@@ -147,19 +147,19 @@ trait Parser {
 		if(!method_exists($this, $handlerName))
 			return false;
 
-		$this->log->add("method $handlerName is exist");
+		tolog("method $handlerName is exist");
 
 		if(
 			!$toSend = $this->{$handlerName}($diff)
 		)
 		{
-			$this->log->add("method $handlerName returns ", E_USER_WARNING, [$toSend]);
+			tolog("method $handlerName returns ", E_USER_WARNING, [$toSend]);
 			return false;
 		}
 
 		++$this->countDiff;
 
-		// $this->log->add("\$this->countDiff = {$this->countDiff}\n\$diff = ", null, [$diff]);
+		// tolog("\$this->countDiff = {$this->countDiff}\n\$diff = ", null, [$diff]);
 
 		$this->Send($toSend);
 		return true;
@@ -217,7 +217,7 @@ trait Parser {
 				$baseArray[$source][$name[0]] = $fileinfo->getFilename();
 			}
 
-			$this->log->add('$baseArray', null, [$baseArray]);
+			tolog('$baseArray', null, [$baseArray]);
 
 		}
 		return $baseArray;
@@ -338,7 +338,7 @@ trait Parser {
 		'text' => $text,
 		], 'answerCallbackQuery');
 
-		$this->log->add("NOT exist new content.", null, $r);
+		tolog("NOT exist new content.", null, $r);
 
 		die;
 	}
@@ -401,8 +401,10 @@ trait Parser {
 		// $innerHTML = str_ireplace($remove, '', $innerHTML);
 		//* FIX 4 TG
 		$innerHTML = preg_replace(
-			["/^[\\d\\.\\s]+$/", "/\\s*[\r\n]{2,}|[\r\n]*?<br\\s*?\\/?>[\r\n]*?/", '~<p>([\s\S]+?)</p>~i'
-		], ['', PHP_EOL, PHP_EOL."$1".PHP_EOL], $innerHTML);
+			["/^[\\d\\.\\s]+$/", "/\\s*[\r\n]{2,}|[\r\n]*?<br\\s*?\\/?>[\r\n]*?/", '~<p>([\\s\\S]+?)</p>~i']
+			, ['', PHP_EOL, PHP_EOL."$1".PHP_EOL]
+			, $innerHTML
+		);
 		// trigger_error(__METHOD__ . ' $innerHTML= ' . $innerHTML);
 
 		return strip_tags($innerHTML, self::$allowedTags);

@@ -1,8 +1,9 @@
 <?php
 /*
- *example
+ *examples
 	tolog(__METHOD__,null,$_SERVER);
 	tolog(__METHOD__,Logger::BACKTRACE,['SERVER'=>$_SERVER]);
+	tolog(['SERVER'=>$_SERVER]);
  */
 if(!function_exists('tolog')){
 	function tolog()
@@ -23,6 +24,7 @@ if(!function_exists('tolog')){
 		return call_user_func_array([$log,'add'], $args);
 	}
 }
+
 
 /**
  * $log = new Logger('sample.log'[, 'path/to'[, bool $rewriteLog]]);

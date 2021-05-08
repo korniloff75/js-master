@@ -153,7 +153,7 @@ trait Curl
 					}
 				}
 				curl_setopt($ch, CURLOPT_POSTFIELDS, $opts['params']);
-				tolog(__METHOD__ . 'params= ', null, [$opts['params']]);
+				// tolog(__METHOD__, null, ["\$opts['params']"=>$opts['params']]);
 			}
 
 		}
@@ -255,7 +255,7 @@ trait Curl
 		], $opts);
 
 		$response = &$this->response;
-		tolog(__METHOD__ . " resourse, \$opts: ",null, [$ch,$opts]);
+		// tolog(__METHOD__ . " resourse, \$opts: ",null, [$ch,$opts]);
 
 		//note deprecated
 		if($opts['chunked'])

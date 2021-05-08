@@ -8,7 +8,7 @@ if(php_sapi_name() === 'cli' && empty($_SERVER['DOCUMENT_ROOT'])){
 	]);
 }
 
-if(!class_exists('Logger')){
+if(!class_exists('Logger',true)){
 	// *Autoload
 	spl_autoload_register(function ($class)
 	{
@@ -24,7 +24,7 @@ if(!class_exists('Logger')){
 
 # TG
 require_once __DIR__ . "/tg.class.php";
-// require_once $_SERVER['DOCUMENT_ROOT'] . "/php/traits/Get_set.trait.php";
+
 
 
 class CommonBot extends TG
@@ -74,6 +74,8 @@ class CommonBot extends TG
 
 	private function init()
 	{
+		global $log;
+
 		if(!$this->botFileInfo)
 		{
 			trigger_error('botFileInfo is empty', E_USER_WARNING);
@@ -83,12 +85,10 @@ class CommonBot extends TG
 		$this->botDir = $this->botDir ?? $this->botFileInfo->getPathInfo()->getRealPath();
 		$logFile = $this->botFileInfo->getBasename() . '.log';
 
-		# Если не логируется из дочернего класса
-		if(!$this->log)
+		//* Если не логируется из дочернего класса
+		if(empty($log))
 		{
-			// require_once $_SERVER['DOCUMENT_ROOT'] . "/core/classes/Logger.php";
-
-			$this->log = new Logger($logFile ?? (__CLASS__.'.log'), $this->botDir);
+			$log = new Logger($logFile ?? (__CLASS__.'.log'), $this->botDir);
 		}
 
 		return $this;
@@ -110,7 +110,7 @@ class CommonBot extends TG
 
 		$this->addUserLicense($user_data);
 
-		// $this->log->add(__METHOD__.' $this->license',null,[$this->license]);
+		// tolog(__METHOD__.' $this->license',null,[$this->license]);
 
 		array_walk($this->license, function(&$data,$id){
 			if(!is_numeric($id))
@@ -128,7 +128,7 @@ class CommonBot extends TG
 				$data = ['term'=>$data];
 			}
 
-			/* $this->log->add("\$data",null,[
+			/* tolog("\$data",null,[
 				$data,
 				$data['term'],
 				(new DateTime() < new DateTime($data['term'])),
@@ -141,7 +141,7 @@ class CommonBot extends TG
 			) $data['blocked']= 1;
 		}); //walk
 
-		/* $this->log->add(__METHOD__." $this->botDir/license.json ===", null, [
+		/* tolog(__METHOD__." $this->botDir/license.json ===", null, [
 			$this->message['chat']['id'],
 			$this->license,
 		]); */
@@ -162,7 +162,7 @@ class CommonBot extends TG
 				!$user_data['botProtect'] && !$this->is_group
 			)
 			{
-				$this->log->add(__METHOD__." \$user_data['botProtect'] ===", null, [
+				tolog(__METHOD__." \$user_data['botProtect'] ===", null, [
 					$user_data['botProtect'],
 				]);
 				return $this;
@@ -227,7 +227,7 @@ class CommonBot extends TG
 		# Advert
 		if(!count($db= $_adv->get()))
 		{
-			$this->log->add('realpath Common/Adv.json = ' . realpath(__DIR__ . '/Common/Adv.json'), E_USER_WARNING, ['__DIR__'=>__DIR__, '$db'=>$db]);
+			tolog('realpath Common/Adv.json = ' . realpath(__DIR__ . '/Common/Adv.json'), E_USER_WARNING, ['__DIR__'=>__DIR__, '$db'=>$db]);
 			return false;
 		}
 
@@ -335,7 +335,7 @@ class CommonBot extends TG
 			});
 		}
 
-		// $this->log->add(__METHOD__,null,$this->license);
+		// tolog(__METHOD__,null,$this->license);
 
 	}
 } // CommonBot

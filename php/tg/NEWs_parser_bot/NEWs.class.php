@@ -5,6 +5,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(-1);
 
 require_once __DIR__ . "/../CommonBot.class.php";
+
 //* FIX cron
 if(php_sapi_name() === 'cli' && empty($_SERVER['DOCUMENT_ROOT']))
 {
@@ -12,7 +13,9 @@ if(php_sapi_name() === 'cli' && empty($_SERVER['DOCUMENT_ROOT']))
 		'DOCUMENT_ROOT' => realpath(__DIR__ . '/../..'),
 	]);
 }
+
 require_once $_SERVER['DOCUMENT_ROOT'] . "/core/traits/Parser.trait.php";
+
 
 
 class KorniloFF_news extends CommonBot
@@ -61,7 +64,7 @@ class KorniloFF_news extends CommonBot
 	protected static
 		$remoteSource = [
 			'https://crimea-news.com/',
-			'http://m.allcrimea.net/',
+			// 'http://m.allcrimea.net/',
 			// 'http://www.yalta-24.ru/',
 		];
 
@@ -101,7 +104,7 @@ class KorniloFF_news extends CommonBot
 
 	private function findCommand()
 	{
-		$this->log->add(__METHOD__ . " - \$this->text", null, [
+		tolog(__METHOD__ . " - \$this->text", null, [
 			$this->text,
 		]);
 
@@ -117,10 +120,11 @@ class KorniloFF_news extends CommonBot
 		$xpath = new DOMXpath($doc);
 
 		# Собираем ссылки с гл. страницы
-		$mainLinks = $xpath->query("//div[@class=\"top-day\"][1]//a");
+		// $mainLinks = $xpath->query("//div[@class=\"top-day\"][1]//a");
+		$mainLinks = $xpath->query("//div[@id=\"lastnewsblock\"][1]//a");
 
 		$links = self::DOMcollectLinks($source, $mainLinks);
-		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
+		tolog(__METHOD__ . " - \$mainLinks, \$links", null, [
 			$mainLinks,
 		]);
 
@@ -136,7 +140,7 @@ class KorniloFF_news extends CommonBot
 		$mainLinks = $xpath->query("//div[@id=\"container\"][1]//a");
 
 		$links = self::DOMcollectLinks($source, $mainLinks);
-		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
+		tolog(__METHOD__ . " - \$mainLinks, \$links", null, [
 			$mainLinks,
 		]);
 
@@ -159,7 +163,7 @@ class KorniloFF_news extends CommonBot
 		// todo END
 
 		$links = self::DOMcollectLinks($source, $mainLinks, ['za-predelami-yalty']);
-		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
+		tolog(__METHOD__ . " - \$mainLinks, \$links", null, [
 			mb_detect_encoding($t),
 			// $t,
 			$mainLinks,
@@ -185,9 +189,6 @@ class KorniloFF_news extends CommonBot
 			$imgXpath = $this->imgXpath ?? "//div[@class=\"news_c\"][1]";
 		}
 
-		//todo правильный вариант для сохранения
-		$_imgXpath = $this->imgXpath ?? "//div[@class=\"news_c\"][1]";
-
 		//* Перебираем все новые ссылки и грузим из них в контент
 		foreach ($diff as &$link) {
 			$s = parse_url($link);
@@ -211,9 +212,8 @@ class KorniloFF_news extends CommonBot
 
 			if(is_object($xImg))
 			{
-
 				$imgArr = self::ExtractImages($source, $xpath, $xImg, 'src', ['crimeanews.jpg', 'size100/']);
-				// $this->log->add('$imgArr', null, [$imgArr]);
+				// tolog('$imgArr', null, [$imgArr]);
 				$photos = array_merge_recursive($photos, $imgArr);
 			}
 
@@ -222,14 +222,14 @@ class KorniloFF_news extends CommonBot
 			$header = $xpath->query(".//h1[1]")->item(0)->textContent;
 
 			$addContent .= self::DOMinnerHTML(
-				$xBlock, ['Новости за:', 'Читайте:', 'Новости Крыма', 'сообщали ранее:', 'Источник:']
+				$xBlock, ['Новости за:','>>', 'Читайте:', 'Новости Крыма', 'сообщали ранее:', 'Источник:']
 			);
 
 			if(strlen(trim($addContent)))
 				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
 		}
 
-		$this->log->add('count($photos) = ' . count($photos), null, [$photos]);
+		tolog(__METHOD__, null, ['count($photos)' => count($photos)/* , $photos */]);
 
 		# На отсылку
 		if(count($content))
@@ -239,7 +239,7 @@ class KorniloFF_news extends CommonBot
 
 		//note Ловим изображения
 		if(count($photos))
-			file_put_contents(__DIR__.'/photos.txt',json_encode($photos));
+			file_put_contents(__DIR__.'/photos.log',json_encode($photos, JSON_UNESCAPED_UNICODE));
 
 		return $out;
 	} //* handler_crimea_news_com
@@ -285,19 +285,19 @@ class KorniloFF_news extends CommonBot
 				// div[@itemprop='articleBody']
 				// $xpath->query("./*", $xBlock)->item(0),
 				$xBlock,
-				['Опубликовано']
+				['Опубликовано','>>']
 			);
 
 			if(strlen(trim($addContent)))
 				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
 
 			$imgArr = self::ExtractImages($source, $xpath, $xBlock, 'src');
-			// $this->log->add('$imgArr', null, [$imgArr]);
+			// tolog('$imgArr', null, [$imgArr]);
 			$photos = array_merge_recursive($photos, $imgArr);
 		}
 
-		$this->log->add(__METHOD__ . ' count($content) = ' . count($content));
-		$this->log->add(__METHOD__ . ' count($photos) = ' . count($photos));
+		tolog(__METHOD__ . ' count($content) = ' . count($content));
+		tolog(__METHOD__ . ' count($photos) = ' . count($photos));
 
 		# На отсылку
 		if(count($content))
@@ -313,7 +313,7 @@ class KorniloFF_news extends CommonBot
 
 	public function __destruct()
 	{
-		// $this->log->add("Profile:\n" . strip_tags(\H::profile('base')), null);
+		// tolog("Profile:\n" . strip_tags(\H::profile('base')), null);
 	}
 
 }

@@ -34,9 +34,6 @@ class Site implements BasicClassInterface
 	public function __construct()
 	{
 		// *Отдаём файлы
-		/* if(!file_exists($fpath= "./{$_GET['route']}")){
-			self::shead(404);
-		} */
 		if(is_file($fpath= "./{$_GET['route']}")){
 			require_once $fpath;
 			die;
@@ -63,7 +60,7 @@ class Site implements BasicClassInterface
 			file_get_contents('php://input'),1
 		);
 
-		// *Включаем логирование и проверяем доступ к api
+		// *Включаем логирование
 		$this->_initLog();
 			// ->_api();
 
@@ -89,8 +86,6 @@ class Site implements BasicClassInterface
 		$this->_route();
 
 		// todo make auth
-
-		// var_dump($_REQUEST);
 
 	}//__construct
 
@@ -127,7 +122,6 @@ class Site implements BasicClassInterface
 	protected function _initLog()
 	{
 		// *Логгируем загрузку страницы
-		// *Отсекаем поллинги
 		// if( isset($_REQUEST["dev"]) || !POLLING && is_adm() ){
 		if( isset($_REQUEST["dev"]) || !POLLING ){
 			global $log;
@@ -143,7 +137,7 @@ class Site implements BasicClassInterface
 	}
 
 
-	// *api
+	// note deprecated
 	protected function _api()
 	{
 		if(empty($_REQUEST['api'])){
@@ -179,7 +173,7 @@ class Site implements BasicClassInterface
 		if(!empty($_REQUEST['module'])){
 			if(!defined('DIR')) define('DIR', $_REQUEST['page'] . '/');
 
-			// compat with Legacy
+			// compat with ?module=moduleName
 			if(!file_exists($module=\DR . "/{$_REQUEST['module']}")){
 				$module = \DR . "/php/modules/{$_REQUEST['module']}.php";
 			}
@@ -205,8 +199,7 @@ class Site implements BasicClassInterface
 
 		// *Обновление админ-панели
 		Router::route('^(.+)/\?updAdminBlock', function($req){
-			// tolog([func_get_args()]);
-			tolog(['$req'=>$req]);
+
 			\Page::$fileInfo= new kffFileInfo(\DR."/{$req['matches'][0]}");
 
 			self::$Page= new Page();
@@ -228,7 +221,7 @@ class Site implements BasicClassInterface
 		//todo *Запрос к примерам
 		Router::route('(examples/.+)', function($req){
 			// tolog([func_get_args()]);
-			tolog(['$req'=>$req]);
+			tolog(['req to examples'=>$req]);
 			\Page::$fileInfo= new kffFileInfo(\DR."/{$req['matches'][0]}");
 
 			self::$Page= new Page();

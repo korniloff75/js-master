@@ -1,4 +1,6 @@
 <?php
+namespace plugins;
+
 $modDir = \Site::getPathFromRoot(__DIR__);
 
 tolog(basename(__FILE__)." started");
@@ -58,7 +60,6 @@ if(@$params['use_styles_input'])
 	</script>
 
 <?php
-	// ob_end_flush();
 }
 
 if(@$params['use_styles_ul'])
