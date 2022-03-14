@@ -6,8 +6,8 @@
 #
 # Sport bot.class.php
 # https://t.me/SportTimeNews
-*/15 6-19 * * * /var/www/js-master.ru/php/tg/Anekdot_parser_bot/bot.class.php "Sport.class" >/var/www/js-master.ru/php/tg/Anekdot_parser_bot/cron_sport.log 2>&1
-*/30 19-23 * * * /var/www/js-master.ru/php/tg/Anekdot_parser_bot/bot.class.php "Sport.class" >/var/www/js-master.ru/php/tg/Anekdot_parser_bot/cron_sport.log 2>&1
+*/30 6-19 * * * /var/www/js-master.ru/php/tg/Anekdot_parser_bot/bot.class.php "Sport.class" >/var/www/js-master.ru/php/tg/Anekdot_parser_bot/cron_sport.log 2>&1
+30 19-23/2 * * * /var/www/js-master.ru/php/tg/Anekdot_parser_bot/bot.class.php "Sport.class" >/var/www/js-master.ru/php/tg/Anekdot_parser_bot/cron_sport.log 2>&1
 # old
 # 0 6-23 * * * /var/www/js-master.ru/php/tg/Anekdot_parser_bot/CronEnterPoint.sh "/bot.class.php" >/var/www/js-master.ru/php/tg/Anekdot_parser_bot/cron.log 2>&1
 #

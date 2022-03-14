@@ -72,7 +72,7 @@ trait Parser {
 			// tolog(__METHOD__ . " - \$this->savedBase = ", null, [$this->savedBase]);
 		}
 
-		# If not exist new content
+		//* If not exist new content
 
 		if (!$this->countDiff)
 			return $this->NoUpdatesTG();
@@ -124,7 +124,7 @@ trait Parser {
 		if(!count($this->definedBase))
 			return false;
 
-		# Ищем различия
+		//* Ищем различия
 		if(
 			!count($diff = array_diff($this->definedBase, $this->savedBase))
 		)
@@ -133,8 +133,6 @@ trait Parser {
 			return false;
 		}
 
-		# Пишем файл без редакции
-		// \H::json("{$this->baseDir}/{$this->chat_id}.$bSource.json", $this->definedBase);
 		$this->objBase->set($this->definedBase);
 
 		tolog(__METHOD__ . " \$this->baseDir = {$this->baseDir}/{$this->chat_id}.$bSource.json");
@@ -167,7 +165,7 @@ trait Parser {
 
 
 	/**
-	 * Чистка и отправка
+	 * *Чистка и отправка
 	 * todo вынести фильтры в локал
 	 */
 	private function Send(array &$toSend)
@@ -288,7 +286,7 @@ trait Parser {
 
 			$imgToSend = [
 				'type' => 'photo',
-				'media' => $src,
+				'media' => addslashes($src),
 			];
 			if(!empty($img[1]))
 				$imgToSend['caption'] = $img[1];
@@ -318,10 +316,9 @@ trait Parser {
 			$href = (stripos($href, 'http') === false) ? $source . preg_replace("~^/+~", '', $href) : $href;
 
 			if(!self::stripos_array($href, $excludes))
-			$links []= $href;
+				$links []= $href;
 		}
 
-		# Required $this->definedBase in CommonBot
 		return array_unique($links);
 	}
 
@@ -401,7 +398,7 @@ trait Parser {
 		// $innerHTML = str_ireplace($remove, '', $innerHTML);
 		//* FIX 4 TG
 		$innerHTML = preg_replace(
-			["/^[\\d\\.\\s]+$/", "/\\s*[\r\n]{2,}|[\r\n]*?<br\\s*?\\/?>[\r\n]*?/", '~<p>([\\s\\S]+?)</p>~i']
+			["/^[\\d\\.\\s]+$/", "/\\s*[\r\n]{2,}|[\r\n]*?<br\\s*?\\/?>\\s*?[\r\n]*?/", '~<p>([\\s\\S]+?)</p>~i']
 			, ['', PHP_EOL, PHP_EOL."$1".PHP_EOL]
 			, $innerHTML
 		);

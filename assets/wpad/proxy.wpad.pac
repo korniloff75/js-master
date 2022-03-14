@@ -1,11 +1,13 @@
 <?php
+ob_start();
+
+echo '<pre style="white-space: pre-line;">';
+
+
 /**
  * @param proxy - полная строка для вывода в js
  * @param stop - service stop recursion
  */
-ob_start();
-
-echo '<pre style="white-space: pre-line;">';
 
 function findAnzProxySSL(?string $proxyWpad=null, bool $stop=false)
 {
@@ -25,7 +27,7 @@ function findAnzProxySSL(?string $proxyWpad=null, bool $stop=false)
 		// $p['scheme'].'://'.
 
 		# Если прокси из файла доступен - возвращаем его
-		if($fp = fsockopen($p['host'], $p['port'], $errCode, $errStr, $timeoutInSeconds))
+		if(@$fp = fsockopen($p['host'], $p['port'], $errCode, $errStr, $timeoutInSeconds))
 		{
 			trigger_error("Proxy $proxyURL - is <font color=green size=4><b>AVAILABLE</b></font>\n");
 			return $proxyWpad;
@@ -33,7 +35,7 @@ function findAnzProxySSL(?string $proxyWpad=null, bool $stop=false)
 		# Если недоступен - удаляем файл + рекурсия
 		else
 		{
-			trigger_error("$proxyURL - ERROR: $errCode - $errStr", E_USER_WARNING);
+			// trigger_error("$proxyURL - ERROR: $errCode - $errStr", E_USER_WARNING);
 			unlink($proxyPath);
 			return findAnzProxySSL(null, $stop);
 		}
@@ -94,6 +96,7 @@ ob_start();
 		// test https://suip.biz/ru/?act=proxy-checker
 		'suip\\.biz',
 		'nvidia\\.ru',
+		'chess\\.com',
 
 		// ВадимZ
 		'kinozal\\.', 'pornolab\\.', 'erokomiksixxx\\.', 'svscomics\\.', 'abook-club\\.',

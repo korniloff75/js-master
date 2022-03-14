@@ -28,7 +28,9 @@ class TG
 	// todo- define in adm panel
 	const
 		HOST= 'https://js-master.ru',
-		OWNER= 673976740;
+		OWNER= 673976740,
+		// *usleep 4 fix 429 error
+		USLEEP= 300000;
 
 	public
 		$webHook = true;
@@ -51,7 +53,7 @@ class TG
 		$cron=[], //* cron start
 
 		$botDir,
-		$botDirFromRoot,
+		$botDirUri,
 		//* take object message
 		$message,
 		$cbn,
@@ -84,10 +86,10 @@ class TG
 			if($this->botFileInfo instanceof kffFileInfo)
 			{
 				# Relative from root
-				$this->botDirFromRoot = $this->botFileInfo->getPathInfo()->fromRoot();
+				$this->botDirUri = '/'.$this->botFileInfo->getPathInfo()->fromRoot();
 			}
 
-			tolog("\$this->botDirFromRoot = {$this->botDirFromRoot}\n\$this->botDir = {$this->botDir}");
+			tolog("\$this->botDirUri = {$this->botDirUri}\n\$this->botDir = {$this->botDir}");
 		}
 
 		if(!count($this->tokens))
@@ -129,7 +131,7 @@ class TG
 		if(!$file && !empty($this->botFileInfo))
 			$file = $this->botFileInfo->getPath() . "/token.json";
 
-		// $file = $file ?? "{$this->botDirFromRoot}/token.json";
+		// $file = $file ?? "{$this->botDirUri}/token.json";
 		$this->tokens = $token ? (
 			['tg' => $token]
 		) : (file_exists($file) ? json_decode(
@@ -150,13 +152,13 @@ class TG
 
 	public function getInputData()
 	{
-		tolog("getInputData() started = " . (is_null($this->inputData) ? 'TRUE' : 'FALSE'));
+		tolog(__METHOD__." started = " . (is_null($this->inputData) ? 'TRUE' : 'FALSE'));
 		if(is_null($this->inputData))
 		{
-			# Ловим входящий поток
+			//* Ловим входящий поток
 			$this->inputJson = file_get_contents('php://input');
 
-			# Кодируем в массив
+			//* Кодируем в массив
 			$this->inputData = @json_decode($this->inputJson, true) ?? false;
 
 		}
@@ -186,9 +188,16 @@ class TG
 			}
 		}
 
-		$cbn = array_values(
+		/* $cbn = array_values(
 			array_intersect(['message', 'channel_post', 'inline_query', 'callback_query', 'result', 'cron'], array_keys($this->inputData))
-		)[0] ?? false;
+		)[0] ?? false; */
+
+		foreach(['message', 'cron', 'channel_post', 'inline_query', 'callback_query', 'result'] as $key){
+			if(array_key_exists($key,$this->inputData)) {
+				$cbn = $key;
+				break;
+			}
+		}
 
 		$this->cbn = $this->inputData[$cbn];
 		$this->cbn['query_name'] = $cbn;
@@ -245,7 +254,7 @@ class TG
 			!$this->botFileInfo
 			|| !file_exists($this->botFileInfo->getRealPath())
 			|| !$this->webHook
-			|| empty($this->botDirFromRoot)
+			|| empty($this->botDirUri)
 		)
 		{
 			// $this->__destruct();
@@ -253,8 +262,8 @@ class TG
 			return $this;
 		}
 
-		# Full URI
-		$botURL = self::HOST . "/{$this->botDirFromRoot}/" . $this->botFileInfo->getBaseName();
+		//* Full URI
+		$botURL = self::HOST . "{$this->botDirUri}/" . $this->botFileInfo->getBaseName();
 		$trigger = $this->botDir . "/webHookRegistered.trigger";
 
 		tolog("\$trigger= $trigger",null, [file_exists($trigger)]);
@@ -353,9 +362,8 @@ class TG
 
 		$o = array_merge([
 			'chat_id' => $this->message['chat']['id'],
-			// 'text' => $text,
 			'parse_mode' => 'html',
-			'certificate' => '@' . realpath('/etc/ssl/certs/dhparam.pem'),
+			// 'certificate' => '@' . realpath('/etc/ssl/certs/dhparam.pem'),
 
 		], $o);
 	}
@@ -366,7 +374,7 @@ class TG
 	 */
 	private function apiExecCurl($response)
 	{
-		tolog(__METHOD__, null, ['$response'=>$response]);
+		// tolog(__METHOD__, null, ['$response'=>$response]);
 
 		if(
 			!$response
@@ -389,7 +397,8 @@ class TG
 		else {
 			if (isset($response['description'])) {
 				tolog(__METHOD__ . " was SUCCESSFUL: {$response['description']}");
-				usleep(10);
+				// *fix 429
+				usleep(self::USLEEP);
 			}
 			return $response['result'];
 		}
@@ -469,7 +478,7 @@ class TG
 		}
 
 		# Test server response
-		tolog("\$respTG", null, [$respTG ?? null]);
+		// tolog(__METHOD__, null, ['$respTG'=>$respTG ?? null]);
 	}
 
 	/**
@@ -477,10 +486,10 @@ class TG
 	 */
 	public function sendMediaGroup(array $media)
 	{
-		tolog(__METHOD__ . 'count($media) = ', null, [count($media)]);
+		tolog(__METHOD__ . ' count($media) = ', null, [count($media)]);
 
 		if(count($media))
-			$media = array_chunk($media, 10);
+			$media = array_chunk($media, 8);
 		else return;
 
 		foreach ($media as $lim) {
@@ -488,6 +497,7 @@ class TG
 				'chat_id' => $this->message['chat']['id'],
 				'media' => $lim,
 			], 'sendMediaGroup');
+			// tolog(__METHOD__,null,['$lim'=>$lim]);
 		}
 
 	}

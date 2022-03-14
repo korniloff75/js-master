@@ -121,7 +121,7 @@ trait Curl
 			'headers' => ["Content-Type:multipart/form-data"]
 		], $opts);
 
-		tolog(__METHOD__,null,['$url'=>$url,'$opts'=>$opts]);
+		tolog(__METHOD__,null,['$url'=>$url/* ,'$opts'=>$opts */]);
 
 		$ch = curl_init();
 
@@ -207,7 +207,7 @@ trait Curl
 
 	/**
 	 ** Режем ответ сервера в массив
-	 * @returns ['headers'=>[], 'body'=>[]]
+	 * @returns {Array} ['headers'=>[], 'body'=>[]]
 	 */
 
 	public function splitResponse($response)
@@ -279,17 +279,17 @@ trait Curl
 		$this->curlInfo = curl_getinfo($ch);
 		$http_code = intval($this->curlInfo['http_code']);
 
-		if(!is_string($response)) tolog(__METHOD__ . ' $response_orig NOT STRING! = ', E_USER_WARNING, [$response]);
+		if(!is_string($response)) tolog(__METHOD__ . ' $response_orig NOT STRING! = ', E_USER_WARNING, ['$response'=>$response]);
 
 		$fullResp = $this->splitResponse($response);
 		list('headers'=>&$respHeaders, 'body'=>&$response) = $fullResp;
 
-		tolog(__METHOD__ . ' $http_code = ', null, [$http_code, $respHeaders /* , $fullResp, gzdecode($response), $this->curlInfo */]);
+		if ($http_code !== 200) tolog(__METHOD__, null, ['$http_code'=>$http_code, $respHeaders /* , $fullResp, gzdecode($response), $this->curlInfo */]);
 
 		if ($http_code >= 500)
 		{
 			// do not wat to DDOS server if something goes wrong
-			usleep(500);
+			usleep(1000);
 		}
 		elseif (!empty($respHeaders['location']) && ($http_code === 301 || $http_code === 302))
 		{
@@ -305,7 +305,7 @@ trait Curl
 		}
 		elseif ($http_code === 200)
 		{
-			tolog(__METHOD__ . " was SUCCESSFUL");
+			tolog(__METHOD__ . " was SUCCESSFUL - 200 OK");
 		}
 
 		curl_close($ch);

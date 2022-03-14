@@ -70,7 +70,7 @@ class Sport extends CommonBot
 		$mainLinks = $xpath->query("//div[contains(@class, 'chameleon-main')][1]//div[@class='itm']//a");
 
 		$links = self::DOMcollectLinks($source, $mainLinks);
-		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
+		tolog(__METHOD__ . " - \$mainLinks, \$links", null, [
 			$mainLinks,
 			$links
 		]);
@@ -89,7 +89,7 @@ class Sport extends CommonBot
 		$mainLinks = $xpath->query("//a[@class=\"se19-news-item__link\"]");
 
 		$links = self::DOMcollectLinks($source, $mainLinks);
-		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
+		tolog(__METHOD__ . " - \$mainLinks, \$links", null, [
 			$mainLinks,
 			$links
 		]);
@@ -117,10 +117,11 @@ class Sport extends CommonBot
 			$source = "{$s['scheme']}://{$s['host']}{$s['path']}/";
 			$addContent = '';
 
-			$docLink = @DOMDocument::loadHTMLFile($link);
-			$xpath = new DOMXpath($docLink);
+			if(!$xpath= $this->_checkLink($link)){
+				continue;
+			}
 
-			// $this->log->add('$xpath', null, [$source, $xpath, $link, $xpath->query($xpathToBlock)->item(0)->textContent]);
+			// tolog('$xpath', null, [$source, $xpath, $link, $xpath->query($xpathToBlock)->item(0)->textContent]);
 
 			if(
 				!is_object($xBlock = $xpath->query($xpathToBlock)->item(0))
@@ -132,7 +133,7 @@ class Sport extends CommonBot
 			if(is_object($xImg))
 			{
 				$imgArr = self::ExtractImages($source, $xpath, $xImg, 'src', []);
-				// $this->log->add('$imgArr', null, [$imgArr]);
+				// tolog('$imgArr', null, [$imgArr]);
 				$photos = array_merge_recursive($photos, $imgArr);
 			}
 
@@ -141,7 +142,7 @@ class Sport extends CommonBot
 
 			// $pgs= $xpath->query(".//p[not(@class)]",$xBlock);
 
-			// $this->log->add('source,xpath,pgs', null, [$source, $xpath, $pgs, /* $xpath->query($xpathToBlock)->item(0)->textContent, */ self::DOMinnerHTML($pgs)]);
+			// tolog('source,xpath,pgs', null, [$source, $xpath, $pgs, /* $xpath->query($xpathToBlock)->item(0)->textContent, */ self::DOMinnerHTML($pgs)]);
 
 			$addContent .= self::DOMinnerHTML(
 				$pgs, []
@@ -151,7 +152,7 @@ class Sport extends CommonBot
 				$content[]= "<b>$header</b>" . PHP_EOL . $addContent;
 		}
 
-		$this->log->add(__METHOD__.' content = ',null, [gzdecode($addContent)]);
+		tolog(__METHOD__.' content = ',null, [gzdecode($addContent)]);
 
 		# На отсылку
 		if(count($content))
@@ -178,10 +179,11 @@ class Sport extends CommonBot
 			$source = "{$s['scheme']}://{$s['host']}{$s['path']}/";
 			$addContent = '';
 
-			$docLink = @DOMDocument::loadHTMLFile($link);
-			$xpath = new DOMXpath($docLink);
+			if(!$xpath= $this->_checkLink($link)){
+				continue;
+			}
 
-			// $this->log->add('$xpath', null, [$source, $xpath, $link, $xpath->query($xpathToBlock)->item(0)->textContent]);
+			// tolog('$xpath', null, [$source, $xpath, $link, $xpath->query($xpathToBlock)->item(0)->textContent]);
 
 			if(
 				!is_object($xBlock = $xpath->query($xpathToBlock)->item(0))
@@ -193,7 +195,7 @@ class Sport extends CommonBot
 			if(is_object($xImg))
 			{
 				$imgArr = self::ExtractImages($source, $xpath, $xImg, 'src', []);
-				// $this->log->add('$imgArr', null, [$imgArr]);
+				// tolog('$imgArr', null, [$imgArr]);
 				$photos = array_merge_recursive($photos, $imgArr);
 			}
 
@@ -202,7 +204,7 @@ class Sport extends CommonBot
 
 			$pgs= $xpath->query(".//p[not(@class)]",$xBlock);
 
-			// $this->log->add('source,xpath,pgs', null, [$source, $xpath, $pgs, /* $xpath->query($xpathToBlock)->item(0)->textContent, */ self::DOMinnerHTML($pgs)]);
+			// tolog('source,xpath,pgs', null, [$source, $xpath, $pgs, /* $xpath->query($xpathToBlock)->item(0)->textContent, */ self::DOMinnerHTML($pgs)]);
 
 			$addContent .= self::DOMinnerHTML(
 				$pgs, []
@@ -212,7 +214,7 @@ class Sport extends CommonBot
 				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
 		}
 
-		// $this->log->add('content = ',null, [$addContent]);
+		// tolog('content = ',null, [$addContent]);
 
 		# На отсылку
 		if(count($content))
@@ -223,5 +225,21 @@ class Sport extends CommonBot
 		return $out;
 
 	} // handler_www_sport_express_ru
+
+
+	private function _checkLink($link)
+	{
+		$xpath= null;
+		$docLink = @DOMDocument::loadHTMLFile($link);
+
+		if($docLink instanceof DOMDocument){
+			$xpath = new DOMXpath($docLink);
+		}
+		else{
+			tolog(__METHOD__,null,['$docLink'=>$docLink]);
+		}
+
+		return $xpath;
+	}
 
 } //* Sport

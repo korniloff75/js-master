@@ -67,7 +67,7 @@ class Admin extends Helper
 		{
 			$this->send($o);
 		}
-		$this->log->add(__METHOD__.' $o...=',null,[$o,$cmd]);
+		tolog(__METHOD__.' $o...=',null,[$o,$cmd]);
 
 		return $this;
 	}
@@ -79,7 +79,7 @@ class Admin extends Helper
 			'chat_id'=> $this->chat_id
 		], 'getChatAdministrators');
 
-		// $this->log->add(__METHOD__.' inputData=',null,[$this->inputData, $adms]);
+		// tolog(__METHOD__.' inputData=',null,[$this->inputData, $adms]);
 
 		if(!is_array($adms)) die;
 

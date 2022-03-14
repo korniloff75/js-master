@@ -20,7 +20,7 @@ class Converter extends Helper
 
 	private function init()
 	{
-		// $this->log->add(__METHOD__.' $this->data=',null,$this->data);
+		// tolog(__METHOD__.' $this->data=',null,$this->data);
 
 		return $this;
 	} //* init
@@ -48,7 +48,7 @@ class Converter extends Helper
 			else
 				$this->apiResponseJSON($o);
 		}
-		$this->log->add(__METHOD__.' $o...=',null,[$o,$cmd]);
+		tolog(__METHOD__.' $o...=',null,[$o,$cmd]);
 
 		return $this;
 	}
@@ -93,7 +93,7 @@ class Converter extends Helper
 
 		$ikb= &$o['reply_markup']['inline_keyboard'];
 
-		// $this->log->add(__METHOD__.' $opts=',null,[$opts,$name,$val]);
+		// tolog(__METHOD__.' $opts=',null,[$opts,$name,$val]);
 
 		foreach(array_chunk(self::CALC_DATA[$opts[0]], 3) as $nr=>&$row)
 		{
@@ -117,7 +117,7 @@ class Converter extends Helper
 		]; */
 		$txt= "Введите количество для расчёта\n\n";
 
-		// $this->log->add(__METHOD__.' $opts=',null,[$opts,$name,$val]);
+		// tolog(__METHOD__.' $opts=',null,[$opts,$name,$val]);
 
 		/* $this->UKB->setStatement([
 			'wait data'=>1,
@@ -128,7 +128,7 @@ class Converter extends Helper
 
 		$from= json_decode($opts[1],1);
 
-		$this->log->add(__METHOD__.' $opts, from=',null,[$opts,$from]);
+		tolog(__METHOD__.' $opts, from=',null,[$opts,$from]);
 
 		$calcData= array_filter($from_cat, function($i){
 			return $i['n'] !== $from['n'];

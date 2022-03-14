@@ -70,7 +70,7 @@ class Anekdot extends CommonBot
 		$mainLinks = $xpath->query("//div[@id=\"dle-content\"][1]//div[@class=\"story_tools\"]/a");
 
 		$links = self::DOMcollectLinks($source, $mainLinks);
-		$this->log->add(__METHOD__ . " - \$mainLinks, \$links", null, [
+		tolog(__METHOD__ . " - \$mainLinks, \$links", null, [
 			$mainLinks,
 			$links
 		]);
@@ -92,7 +92,7 @@ class Anekdot extends CommonBot
 		$xBlock = $xpath->query($xpathBlock)->item(0);
 		$xTexts = $xpath->query($xpathText, $xBlock);
 
-		// $this->log->add(__METHOD__ . " - \$xTexts, xImgs = ", null, [$xTexts, $xImgs]);
+		// tolog(__METHOD__ . " - \$xTexts, xImgs = ", null, [$xTexts, $xImgs]);
 
 		foreach($xTexts as $node) {
 			$content[]= self::DOMinnerHTML($node);
@@ -102,10 +102,9 @@ class Anekdot extends CommonBot
 
 		$out = array_merge($content, $imgArr);
 
-		$this->log->add(__METHOD__ . " count(\$imgArr) = ", null, [count($imgArr)]);
-		// $this->log->add(__METHOD__ . " - \$out = ", null, [$out]);
+		tolog(__METHOD__, null, ['count($imgArr)'=>count($imgArr)]);
 
-		# Required
+		//note Required
 		return $out;
 	} // parser_anekdot_ru
 
@@ -127,7 +126,7 @@ class Anekdot extends CommonBot
 		)
 			return [];
 
-		$this->log->add(__METHOD__ . " - \$xTexts", null, [$xTexts]);
+		tolog(__METHOD__ . " - \$xTexts", null, [$xTexts]);
 
 		// if(!$this->DOMNodeList->length) return;
 
@@ -163,7 +162,7 @@ class Anekdot extends CommonBot
 			# Extract text
 			$xTexts = $xpath->query(".//div[@class=\"text\"][1]", $xBlock);
 			$text = $xTexts->item(0);
-			// $this->log->add(__METHOD__ . " - \$xTexts = ", null, [$xTexts]);
+			// tolog(__METHOD__ . " - \$xTexts = ", null, [$xTexts]);
 
 			if(
 				strlen($text->textContent) > 30
@@ -178,11 +177,11 @@ class Anekdot extends CommonBot
 			$imgArr = self::ExtractImages($source, $xpath, $xBlock, 'src', ['Podrobnee.png', 'Istochnik.png', 'Default', 'top-fwz1.mail.ru', 'counter', 'mc.yandex.ru']);
 
 			$photos = array_merge_recursive($photos, $imgArr);
-			// $this->log->add(__METHOD__ . " - \$imgArr = ", null, [$imgArr]);
+			// tolog(__METHOD__ . " - \$imgArr = ", null, [$imgArr]);
 
 		}
 
-		// $this->log->add(__METHOD__ . " - \$photos = ", null, [$photos]);
+		// tolog(__METHOD__ . " - \$photos = ", null, [$photos]);
 
 		if(count($content))
 			// $out['sendMessage'] = $content;

@@ -27,7 +27,7 @@ class Gismeteo extends CommonBot implements Game
 		//* Локация. Если нет в базе
 		if(empty($this->getLocation()->location))
 		{
-			$this->log->add('$this->location is EMPTY!', E_USER_WARNING, ['$this->location'=>$this->location]);
+			tolog('$this->location is EMPTY!', E_USER_WARNING, ['$this->location'=>$this->location]);
 
 			//* Запрашиваем
 			$this->userPermission();
@@ -183,7 +183,7 @@ class Gismeteo extends CommonBot implements Game
 				file_put_contents($cacheFilename, $respJSON, LOCK_EX);
 		}
 
-		// $this->log->add(__METHOD__ . '$this->responseData = ', null, [$this->responseData]);
+		// tolog(__METHOD__ . '$this->responseData = ', null, [$this->responseData]);
 
 		return $this;
 	} //* requestGM
@@ -325,7 +325,7 @@ class Gismeteo extends CommonBot implements Game
 		//* Данные из methodSwitcher() или напрямую из requestGM()
 		$data = $data ?? $this->responseData['response'];
 
-		$this->log->add('$data[\'icon\'] = ' . $data['icon']);
+		tolog('$data[\'icon\'] = ' . $data['icon']);
 
 		$this->apiRequest([
 			'parse_mode' => 'html',
@@ -344,7 +344,7 @@ class Gismeteo extends CommonBot implements Game
 			$i = str_replace($num, $dec, '<b>'. $i .'</b>');
 		}); */
 
-		$this->log->add(__METHOD__.' ',null, [$arr]);
+		tolog(__METHOD__.' ',null, [$arr]);
 
 		return preg_replace("~(?<=[^&#])(\d+?)(?! [;])~", "<b>$1</b>", $str);
 	}

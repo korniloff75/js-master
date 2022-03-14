@@ -7,12 +7,12 @@ error_reporting(-1);
 require_once __DIR__ . "/../CommonBot.class.php";
 
 //* FIX cron
-/* if(php_sapi_name() === 'cli' && empty($_SERVER['DOCUMENT_ROOT']))
+if(php_sapi_name() === 'cli' && empty($_SERVER['DOCUMENT_ROOT']))
 {
 	$_SERVER = array_merge($_SERVER, [
 		'DOCUMENT_ROOT' => realpath(__DIR__ . '/../..'),
 	]);
-} */
+}
 
 require_once $_SERVER['DOCUMENT_ROOT'] . "/core/traits/Parser.trait.php";
 
@@ -29,8 +29,8 @@ class KorniloFF_news extends CommonBot
 
 		$baseDir = 'base/',
 		$cron = [
-			'chat'=> ['id' => -1001223951491],
-			// 'chat'=> ['id' => 673976740],
+			// 'chat'=> ['id' => -1001223951491],
+			'chat'=> ['id' => 673976740],
 			'from'=> ['id' => 673976740],
 		],
 		// Specify headers
@@ -104,7 +104,7 @@ class KorniloFF_news extends CommonBot
 
 	private function findCommand()
 	{
-		tolog(__METHOD__, null, ['$this->text'=>
+		tolog(__METHOD__ . " - \$this->text", null, [
 			$this->text,
 		]);
 
@@ -119,13 +119,13 @@ class KorniloFF_news extends CommonBot
 	{
 		$xpath = new DOMXpath($doc);
 
-		//* Собираем ссылки с гл. страницы
-		$mainLinks = $xpath->query("//div[@class=\"top-day\"][1]//a");
-		// $mainLinks = $xpath->query("//div[@id=\"lastnewsblock\"][1]//a");
+		# Собираем ссылки с гл. страницы
+		// $mainLinks = $xpath->query("//div[@class=\"top-day\"][1]//a");
+		$mainLinks = $xpath->query("//div[@id=\"lastnewsblock\"][1]//a");
 
 		$links = self::DOMcollectLinks($source, $mainLinks);
-		tolog(__METHOD__, null, [
-			'$mainLinks'=>$mainLinks,
+		tolog(__METHOD__ . " - \$mainLinks, \$links", null, [
+			$mainLinks,
 		]);
 
 		return $links;
@@ -201,21 +201,17 @@ class KorniloFF_news extends CommonBot
 
 			if(
 				!is_object($xBlock = $xpath->query($xpathToBlock)->item(0))
-			){
+			)
 				continue;
-			}
 
-			//* filter video
-			if($vid= $xpath->query('//iframe[contains(@src,\'videohost.crimea24.tv\')]',$xBlock)->item(0)){
-				continue;
-			}
-
-			if($this->chat_id === 673976740 || true){
+			if($this->chat_id === 673976740 || true)
+			{
 				$xImg = $imgXpath === $xpathToBlock ? $xBlock : $xpath->query($imgXpath)->item(0);
 			}
 
 
-			if(is_object($xImg)){
+			if(is_object($xImg))
+			{
 				$imgArr = self::ExtractImages($source, $xpath, $xImg, 'src', ['crimeanews.jpg', 'size100/']);
 				// tolog('$imgArr', null, [$imgArr]);
 				$photos = array_merge_recursive($photos, $imgArr);
@@ -230,18 +226,18 @@ class KorniloFF_news extends CommonBot
 			);
 
 			if(strlen(trim($addContent)))
-				$content[]= "✅ <b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
+				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
 		}
 
 		tolog(__METHOD__, null, ['count($photos)' => count($photos)/* , $photos */]);
 
-		//* На отсылку
+		# На отсылку
 		if(count($content))
 			$out['sendMessage'] = $content;
 		if(count($photos))
 			$out['sendMediaGroup'] = $photos;
 
-		//* Ловим изображения
+		//note Ловим изображения
 		if(count($photos))
 			file_put_contents(__DIR__.'/photos.log',json_encode($photos, JSON_UNESCAPED_UNICODE));
 
@@ -251,7 +247,7 @@ class KorniloFF_news extends CommonBot
 
 	protected function handler_m_allcrimea_net(array &$diff)
 	{
-		//note На сайте 2 id=newscont В первом - изображение, во втором - текст.
+		//* На сайте 2 id=newscont В первом - изображение, во втором - текст.
 		$this->imgXpath = "//div[@id=\"newscont\"]/..";
 		return $this->handler_crimea_news_com($diff, "//div[@id=\"newscont\"][2]");
 
@@ -303,7 +299,7 @@ class KorniloFF_news extends CommonBot
 		tolog(__METHOD__ . ' count($content) = ' . count($content));
 		tolog(__METHOD__ . ' count($photos) = ' . count($photos));
 
-		//* На отсылку
+		# На отсылку
 		if(count($content))
 			$out['sendMessage'] = $content;
 		if(count($photos))

@@ -14,7 +14,7 @@ trait UniConstruct
 		{
 			$this->$key = $value;
 		}
-		// $this->log->add(__METHOD__.'',null,[get_object_vars($UKB)]);
+		// tolog(__METHOD__.'',null,[get_object_vars($UKB)]);
 	}
 
 
@@ -27,18 +27,18 @@ trait UniConstruct
 		$this->urlROOT = ((!empty($_SERVER['HTTPS'])) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
 		$this->urlDIR = $this->urlROOT . '/' . str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__);
 
-		$this->log->add(__METHOD__,null,['$cmdArr'=>$cmdArr]);
+		tolog(__METHOD__,null,['$cmdArr'=>$cmdArr]);
 
 		$this->cmd = [array_shift($cmdArr), $cmdArr];
 
 		$this->is_owner= $UKB->is_owner;
 
-		$this->log->add(__METHOD__,null,['is_owner'=>[$this->is_owner, $this->get('is_owner'), $this->user_id], '$this->cmd'=>$this->cmd]);
+		tolog(__METHOD__,null,['is_owner'=>[$this->is_owner, $this->get('is_owner'), $this->user_id], '$this->cmd'=>$this->cmd]);
 
 		//* Define tokens
 		if(empty($this->tokens[$this->apiName ?? strtolower(__CLASS__)]))
 		{
-			$this->log->add(__METHOD__ , E_USER_WARNING, ['$this->tokens'=>$this->tokens]);
+			tolog(__METHOD__ , E_USER_WARNING, ['$this->tokens'=>$this->tokens]);
 		}
 		return $this;
 	}
