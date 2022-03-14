@@ -10,10 +10,6 @@ if(!function_exists('tolog')){
 	{
 		global $log;
 
-		/* foreach($args= func_get_args() as &$a){
-
-		} */
-
 		$args= func_get_args();
 
 		if(is_array($args[0])){
@@ -60,7 +56,7 @@ class Logger
 		$excludes = ['DOMDocument::'];
 
 	/**
-	 * @name - name of the log file
+	 * @filename - name of the log file
 	 * optional @dir - realpath to the directory
 	 * optional bool @rewriteLog - If == true (default) then log file should rewriting
 	 */
@@ -107,6 +103,8 @@ class Logger
 		while (!empty($caller['file']) && basename($caller['file']) === basename(__FILE__));
 
 		// if(!array_key_exists('file',$caller)) return;
+
+		// todo Исправить [classes/Logger.php:109 2022/Mar/15 11:30:20  INFO:] Undefined index: file
 
 		$fileName = $this->_getFileName($caller['file']);
 

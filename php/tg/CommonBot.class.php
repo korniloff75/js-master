@@ -86,12 +86,12 @@ class CommonBot extends TG
 		}
 
 		$this->botDir = $this->botDir ?? $this->botFileInfo->getPathInfo()->getRealPath();
-		$logFile = $this->botFileInfo->getBasename() . '.log';
+		$logFile = $this->botFileInfo->getBasename();
 
 		//* Если не логируется из дочернего класса
 		if(empty($log))
 		{
-			$log = new Logger($logFile ?? (__CLASS__.'.log'), $this->botDir);
+			$log = new Logger(($logFile ?? __CLASS__).'.log', $this->botDir);
 		}
 
 		return $this;

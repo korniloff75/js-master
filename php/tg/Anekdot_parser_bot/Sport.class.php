@@ -86,12 +86,18 @@ class Sport extends CommonBot
 		$xpath = new DOMXpath($doc);
 
 		# Собираем ссылки с гл. страницы
-		$mainLinks = $xpath->query("//a[@class=\"se19-news-item__link\"]");
+		$mainLinks = $xpath->query("//div[@class=\"se-news-list-page__items\"][1]//div[contains(@class, 'se-material__title')]/a");
+
+		//
+		// $check= $xpath->query("//div[@class=\"se-news-list-page__items\"][1]//div[contains(@class, 'se-material__title')]/a");
+		// $check= $xpath->query("//div[contains(@class, 'articles')]");
+
 
 		$links = self::DOMcollectLinks($source, $mainLinks);
-		tolog(__METHOD__ . " - \$mainLinks, \$links", null, [
-			$mainLinks,
-			$links
+		tolog(__METHOD__, null, [
+			// '$check'=>$check,
+			'$mainLinks'=>$mainLinks,
+			'$links'=>$links
 		]);
 
 		return $links;
@@ -166,13 +172,14 @@ class Sport extends CommonBot
 	} // handler_www_sports_ru
 
 
-	protected function handler_www_sport_express_ru(array &$diff, $xpathToBlock = "//div[contains(@class, 'article_text')][1]")
+	protected function handler_www_sport_express_ru(array &$diff, $xpathToBlock = "//div[@class=\"se-material-page__body\"][1]")
 	{
 		$photos = [];
 		$content = [];
 
 		// $imgXpath = $this->imgXpath ?? $xpathToBlock;
-		$imgXpath = "//div[contains(@id, 'slideshow')][1]";
+		// $imgXpath = "//div[contains(@id, 'slideshow')][1]";
+		$imgXpath = "//div[@class=\"se-photogallery-swipe\"][1]";
 		# Перебираем все новые ссылки и грузим из них в контент
 		foreach ($diff as &$link) {
 			$s = parse_url($link);
@@ -183,25 +190,28 @@ class Sport extends CommonBot
 				continue;
 			}
 
-			// tolog('$xpath', null, [$source, $xpath, $link, $xpath->query($xpathToBlock)->item(0)->textContent]);
-
 			if(
 				!is_object($xBlock = $xpath->query($xpathToBlock)->item(0))
 			)
 				continue;
 
-			$xImg = $imgXpath === $xpathToBlock ? $xBlock : $xpath->query($imgXpath)->item(0);
+			// *Get header
+			$header = trim($xpath->query("//h1[1]")->item(0)->textContent);
 
-			if(is_object($xImg))
+			// *Get images
+			if(is_object($xImg = $xpath->query($imgXpath)->item(0)))
 			{
 				$imgArr = self::ExtractImages($source, $xpath, $xImg, 'src', []);
-				// tolog('$imgArr', null, [$imgArr]);
+				// tolog(__METHOD__, null, ['$imgArr'=>$imgArr]);
+
+				if(empty($imgArr[0]['caption']))
+					$imgArr[0]['caption'] = $header;
+
 				$photos = array_merge_recursive($photos, $imgArr);
+				// $photos []= $imgArr;
 			}
 
 			//* Собираем для добавления в $content
-			$header = $xpath->query("//h1[1]")->item(0)->textContent;
-
 			$pgs= $xpath->query(".//p[not(@class)]",$xBlock);
 
 			// tolog('source,xpath,pgs', null, [$source, $xpath, $pgs, /* $xpath->query($xpathToBlock)->item(0)->textContent, */ self::DOMinnerHTML($pgs)]);
@@ -211,10 +221,13 @@ class Sport extends CommonBot
 			);
 
 			if(strlen(trim($addContent)))
-				$content[]= "<b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
+				$content[]= "✅ <b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
 		}
 
-		// tolog('content = ',null, [$addContent]);
+		tolog(__METHOD__, null, [
+			'$addContent'=>$addContent,
+			'$photos'=>$photos
+		]);
 
 		# На отсылку
 		if(count($content))
@@ -236,7 +249,7 @@ class Sport extends CommonBot
 			$xpath = new DOMXpath($docLink);
 		}
 		else{
-			tolog(__METHOD__,null,['$docLink'=>$docLink]);
+			tolog(__METHOD__ . '$docLink NOT instanceof DOMDocument',E_USER_WARNING,['$docLink'=>$docLink]);
 		}
 
 		return $xpath;

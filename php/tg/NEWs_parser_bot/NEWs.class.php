@@ -226,7 +226,7 @@ class KorniloFF_news extends CommonBot
 			$header = $xpath->query(".//h1[1]")->item(0)->textContent;
 
 			$addContent .= self::DOMinnerHTML(
-				$xBlock, ['Новости за:','>>', 'Читайте:', 'Новости Крыма', 'сообщали ранее:', 'Источник:']
+				$xBlock, ['Новости за:','>>', 'Читайте:', 'ЧИТАЙТЕ ТАКЖЕ', 'Новости Крыма', 'сообщали ранее:', 'Источник:', 'Фото:', '(подробнее)']
 			);
 
 			if(strlen(trim($addContent)))

@@ -231,10 +231,11 @@ trait Parser {
 	public static function DOMcollectImgs(string $source, DOMXpath &$xpath, DOMNode &$xBlock, ?string $srcName = 'src')
 	:array
 	{
+		$toCont = [];
 		$xImgs = $xpath->query(".//img[@$srcName]", $xBlock);
 
 		if(!$xImgs->length)
-			return [];
+			return $toCont;
 
 		foreach($xImgs as $img) {
 			if(!strlen($src = $img->getAttribute($srcName)))
@@ -257,7 +258,7 @@ trait Parser {
 			$toCont []= "$src|||" . ($img->getAttribute('alt') ?? '');
 			// trigger_error(__METHOD__ . " \$toCont = $toCont");
 		}
-		return $toCont ?? [];
+		return $toCont;
 	}
 
 
@@ -270,12 +271,12 @@ trait Parser {
 	 * @param excludes - array with excludes words in src
 	 * Возвращает массив, пригодный для отправки в ТГ методом sendMediaGroup
 	 */
-	public static function ExtractImages(string $source, DOMXpath &$xpath, DOMNode &$xBlock, ?string $srcName = 'src', array $excludes=[])
+	public static function ExtractImages(string $source, DOMXpath &$xpath, DOMNode &$xBlock, ?string $srcName = 'src', ?array $excludes=[])
 	:array
 	{
 		$imgArr = self::DOMcollectImgs($source, $xpath, $xBlock, $srcName);
 
-		if(count($excludes))
+		if(!empty($excludes))
 			$imgArr = array_filter($imgArr, function(&$img) use($excludes) {
 				return self::stripos_array($img, $excludes) === false;
 			});
@@ -346,7 +347,7 @@ trait Parser {
 	 *
 	 * @param element - DOMNode || DOMNodeList
 	 */
-	public static function DOMinnerHTML($element, array $excludes= [])
+	public static function DOMinnerHTML($element, ?array $excludes= [])
 	{
 		$innerHTML = "";
 		$children  = ($element instanceof DOMNodeList)
@@ -380,6 +381,7 @@ trait Parser {
 
 			if(
 				//* Текстовые узлы с $excludes
+				!empty($excludes) &&
 				$child->nodeType === 3 && (
 					self::stripos_array($child->textContent, $excludes) !== false
 				)

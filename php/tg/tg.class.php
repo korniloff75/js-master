@@ -110,6 +110,7 @@ class TG
 		global $log;
 
 		if(!empty($log)) return;
+		// if(class_exists('Logger')) return;
 
 		//* Если не логируется из дочернего класса
 		require_once $_SERVER['DOCUMENT_ROOT'] . "/core/classes/Logger.php";
@@ -355,7 +356,7 @@ class TG
 		}
 
 		//* Склеиваем текст
-		if(is_array($o['text']))
+		if(isset($o['text']) && is_array($o['text']))
 		{
 			$o['text'] = implode("\n\n", $o['text']);
 		}
@@ -448,12 +449,13 @@ class TG
 
 		foreach($content as $i) {
 			--$diffLength;
-			if(empty(trim($i)))
-				continue;
+			/* if(empty(trim($i)))
+				continue; */
 			// *Если один элемент больше лимита
 			if(strlen($i) > self::$textLimit)
 			{
-				$strContent = array_filter(explode("\n", $i));
+				// $strContent = array_filter(explode("\n", $i));
+				$strContent = explode("\n", $i);
 				if(count($strContent) > 1)
 				{
 					$this->sendMessage($strContent, $postFields, "\n");
