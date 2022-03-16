@@ -30,11 +30,12 @@ class BotRouter
 
 	public function __construct()
 	{
-		$classes= CLI && !empty($_SERVER['argv'][1])?
-			array_slice($_SERVER['argv'],1)
-			:self::CLASSES;
+		$classes= CLI && !empty($_SERVER['argv'][1])
+			? array_slice($_SERVER['argv'],1)
+			: self::CLASSES;
 
-		foreach ($classes as $cn){
+		foreach ($classes as $num=>$cn){
+			trigger_error(__METHOD__. ": $num -- $cn -- \$classes= ".json_encode($classes));
 			$this->execBot($cn);
 		}
 

@@ -33,7 +33,8 @@ class KorniloFF_news extends CommonBot
 			// 'chat'=> ['id' => 673976740],
 			'from'=> ['id' => 673976740],
 		],
-		// Specify headers
+		$fromBot = false,
+		//? Specify headers
 		$stream_context_options = [
 			'www_yalta_24_ru' => [
 				'http' => [
@@ -104,11 +105,28 @@ class KorniloFF_news extends CommonBot
 
 	private function findCommand()
 	{
+		$text = &$this->text;
 		tolog(__METHOD__, null, ['$this->text'=>
-			$this->text,
+			$text,
 		]);
 
-		if(!$this->text) return $this;
+		// if(!$text) return $this;
+
+		switch ($text) {
+			case '/start':
+			case '/news':
+				$this->cron = [
+					'chat'=> ['id' => 673976740],
+					'from'=> ['id' => 673976740],
+				];
+				$this->fromBot = true;
+				$this->init();
+				break;
+
+			default:
+				return $this;
+				break;
+		}
 
 		return $this;
 	}
@@ -221,12 +239,41 @@ class KorniloFF_news extends CommonBot
 				$photos = array_merge_recursive($photos, $imgArr);
 			}
 
+			// *Удаляем узлы с исключениями
+			$excludes = ['Новости за:','>>', 'Читайте:', 'ЧИТАЙТЕ ТАКЖЕ', 'Новости Крыма', 'сообщали ранее:', 'Источник:', 'Фото:', '(подробнее)'];
+
+			foreach($excludes as $ex)
+			{
+				$findedList = $xpath->query((".//*[text()[contains(.,'" . $ex . "')]]"), $xBlock);
+
+				if($findedList === false){
+					tolog(__METHOD__ . ' Неверный паттерн для поиска исключений',E_USER_WARNING);
+					continue;
+				}
+
+				if(!$findedList->length) continue;
+
+				tolog(__METHOD__,null,[
+					'$ex'=>$ex,
+					'$findedList'=>$findedList,
+					'$findedList->length'=>$findedList->length,
+					'xpath'=>$findedList->item(0)->getNodePath(),
+					'txt'=>$findedList->item(0)->textContent
+				]);
+
+				foreach($findedList as $node){
+					$node->parentNode->removeChild($node);
+				}
+
+			}
+
+			//
 
 			//* Собираем для добавления в $content
 			$header = $xpath->query(".//h1[1]")->item(0)->textContent;
 
 			$addContent .= self::DOMinnerHTML(
-				$xBlock, ['Новости за:','>>', 'Читайте:', 'ЧИТАЙТЕ ТАКЖЕ', 'Новости Крыма', 'сообщали ранее:', 'Источник:', 'Фото:', '(подробнее)']
+				$xBlock, $excludes
 			);
 
 			if(strlen(trim($addContent)))

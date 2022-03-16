@@ -300,7 +300,7 @@ class TG
 	** Выводим JSON по запросу от TG
 	** Работает без proxy
 	*/
-	protected function apiResponseJSON(array $postFields = [], string $method = 'sendMessage')
+	protected function apiResponseJSON(array $postFields = [], ?string $method = 'sendMessage')
 	{
 		if(headers_sent() || !$this->inputData)
 		{
@@ -476,6 +476,9 @@ class TG
 			$respTG[]= $this->apiRequest($postFields);
 
 			$bus = "{$i}{$break}";
+
+			// *fix 429
+			usleep(self::USLEEP);
 
 		}
 

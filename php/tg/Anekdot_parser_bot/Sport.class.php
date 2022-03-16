@@ -1,4 +1,11 @@
 <?php
+if(!class_exists('CommonBot'))
+{
+	trigger_error('Обращение к файлу', E_USER_ERROR);
+	tolog('Отлавливаем обращение к файлу', Logger::BACKTRACE);
+	die;
+}
+
 class Sport extends CommonBot
 {
 	//* Include Parser trait

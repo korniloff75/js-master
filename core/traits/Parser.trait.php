@@ -48,7 +48,8 @@ trait Parser {
 			// $bSource = basename($source);
 			$base = $this->baseSource[$bSource] ?? [];
 
-			tolog(__METHOD__ . ' - $base = ', null, [$base]);
+			// tolog(__METHOD__ . ' - $base = ', null, [$base]);
+
 			# Получаем файл для текущего chat_id
 			if(isset($base[$this->chat_id]))
 			{
@@ -129,7 +130,19 @@ trait Parser {
 			!count($diff = array_diff($this->definedBase, $this->savedBase))
 		)
 		{
-			tolog('$diff is EMPTY !!!', E_USER_WARNING);
+			tolog('$diff is EMPTY !!!', E_USER_WARNING, ['$this->fromBot'=>$this->fromBot, '!empty($this->fromBot)'=>!empty($this->fromBot)]);
+
+			// todo Вывести всплывающее уведомление в бот
+			if(!empty($this->fromBot))
+			{
+				// tolog(__METHOD__,null,$r);
+				$r = $this->apiResponseJSON([
+					'text'=>'Обновлений пока не найдено. Попробуйте позже'
+				]);
+
+				tolog(__METHOD__,null,$r);
+			}
+
 			return false;
 		}
 
