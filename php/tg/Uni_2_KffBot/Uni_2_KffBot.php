@@ -163,9 +163,10 @@ class UniKffBot extends CommonBot implements Game
 		{
 			$cmdName = ucfirst($cmdName);
 
-			if(file_exists("extensions/$cmdName.php"))
+			if(file_exists($ext = __DIR__."/extensions/$cmdName.php"))
 			{
-				require_once "extensions/$cmdName.php";
+				require_once $ext;
+				tolog(__METHOD__ . " founded extension $ext",null,[]);
 				new $cmdName($this, $cmd);
 			}
 			else switch ($cmdName)

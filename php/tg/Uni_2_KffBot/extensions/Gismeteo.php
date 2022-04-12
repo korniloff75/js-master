@@ -49,6 +49,7 @@ class Gismeteo extends CommonBot implements Game
 
 			case 'Gismeteo':
 			case 'gismeteo':
+			default:
 				$this->requestGM('current')->responseGMHandler();
 				$forecastButs = [[]];
 				for ($i=3; $i <= 5; $i++) {
@@ -96,6 +97,7 @@ class Gismeteo extends CommonBot implements Game
 		{
 			$this->location = $this->locations[$this->user_id][0] ?? null;
 		}
+		tolog(__METHOD__,null,['$this->location'=>$this->location]);
 		return $this;
 	}
 

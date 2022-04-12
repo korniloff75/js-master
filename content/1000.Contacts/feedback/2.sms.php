@@ -100,6 +100,7 @@
 
 	# data from send
 	$data = new stdClass();
+	$data->to = '79788766959';
 	# Текст сообщения
 	$data->text = stripslashes(strip_tags($SMS));
 	# Тестовый режим
@@ -116,7 +117,8 @@
 	}
 
 	# Невидимая каптча
-	if (empty($keyCaptcha) || $keyCaptcha != $_SESSION['captcha']) {
+	// if (empty($keyCaptcha) || $keyCaptcha != $_SESSION['captcha']) {
+	if (empty($keyCaptcha) || $keyCaptcha !== $IP) {
 		$errSMS[] = "Невидимая каптча не сработала";
 		// if($adm) var_dump($captcha);
 	}

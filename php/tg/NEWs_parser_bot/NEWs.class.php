@@ -33,7 +33,7 @@ class KorniloFF_news extends CommonBot
 			// 'chat'=> ['id' => 673976740],
 			'from'=> ['id' => 673976740],
 		],
-		$fromBot = false,
+		$requestFromBot = false,
 		//? Specify headers
 		$stream_context_options = [
 			'www_yalta_24_ru' => [
@@ -96,7 +96,10 @@ class KorniloFF_news extends CommonBot
 		//* Завершаем скрипт без входящего JSON
 		if(empty($this->inputData)) die ('Нет входящего запроса');
 
-		$this->Parser();
+		$opts=[];
+		if(!$this->is_group) $opts['onlyOwner']= 0;
+
+		$this->Parser($opts);
 
 		die('OK');
 
@@ -110,17 +113,25 @@ class KorniloFF_news extends CommonBot
 			$text,
 		]);
 
-		// if(!$text) return $this;
+		if(!$text) return $this;
 
+		// *Получаем данные в боте / группе
 		switch ($text) {
+			case '/1':
 			case '/start':
 			case '/news':
 				$this->cron = [
 					'chat'=> ['id' => 673976740],
 					'from'=> ['id' => 673976740],
 				];
-				$this->fromBot = true;
-				$this->init();
+				break;
+			case '/gis':
+			case '/gismeteo':
+				$this->defineBotDir();
+				tolog(__METHOD__,null,['$this->botFileInfo->getPath()'=>$this->botFileInfo->getPath(), '$this->botDir'=>$this->botDir]);
+				$this->getTokens();
+				require_once __DIR__.'/../Uni_2_KffBot/Uni_2_KffBot.php';
+				die;
 				break;
 
 			default:
@@ -128,11 +139,14 @@ class KorniloFF_news extends CommonBot
 				break;
 		}
 
-		return $this;
+		$this->requestFromBot = true;
+		$this->init();
+
+		// return $this;
 	}
 
 
-	protected function parser_crimea_news_com($source, &$doc)
+	protected function parser_crimea_news_com($source, DOMDocument &$doc)
 	:array
 	{
 		$xpath = new DOMXpath($doc);
@@ -240,28 +254,28 @@ class KorniloFF_news extends CommonBot
 			}
 
 			// *Удаляем узлы с исключениями
-			$excludes = ['Новости за:','>>', 'Читайте:', 'ЧИТАЙТЕ ТАКЖЕ', 'Новости Крыма', 'сообщали ранее:', 'Источник:', 'Фото:', '(подробнее)'];
+			$excludes = ['Новости за:','>>', 'Читайте:', 'ЧИТАЙТЕ ТАКЖЕ', 'ЧИТАЙТЕ ТАКЖЕ:', 'Новости Крыма', 'сообщали ранее:', 'Источник:', 'Фото:', '(подробнее)'];
 
 			foreach($excludes as $ex)
 			{
-				$findedList = $xpath->query((".//*[text()[contains(.,'" . $ex . "')]]"), $xBlock);
+				$foundedList = $xpath->query((".//*[text()[contains(.,'" . $ex . "')]]"), $xBlock);
 
-				if($findedList === false){
+				if($foundedList === false){
 					tolog(__METHOD__ . ' Неверный паттерн для поиска исключений',E_USER_WARNING);
 					continue;
 				}
 
-				if(!$findedList->length) continue;
+				if(!$foundedList->length) continue;
 
 				tolog(__METHOD__,null,[
 					'$ex'=>$ex,
-					'$findedList'=>$findedList,
-					'$findedList->length'=>$findedList->length,
-					'xpath'=>$findedList->item(0)->getNodePath(),
-					'txt'=>$findedList->item(0)->textContent
+					'$foundedList'=>$foundedList,
+					'$foundedList->length'=>$foundedList->length,
+					'xpath'=>$foundedList->item(0)->getNodePath(),
+					'txt'=>$foundedList->item(0)->textContent
 				]);
 
-				foreach($findedList as $node){
+				foreach($foundedList as $node){
 					$node->parentNode->removeChild($node);
 				}
 
@@ -276,8 +290,13 @@ class KorniloFF_news extends CommonBot
 				$xBlock, $excludes
 			);
 
+			/* $hs= ["🔶","🔷","🔘","🔵","🟡","💠"];
+			$h = shuffle($hs)[0];
+			tolog("\$h = $h"); */
+
 			if(strlen(trim($addContent)))
-				$content[]= "✅ <b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
+				$content[]= "🔷 <b>$header</b>" . PHP_EOL . PHP_EOL . $addContent;
+				// ✅ 🔶
 		}
 
 		tolog(__METHOD__, null, ['count($photos)' => count($photos)/* , $photos */]);

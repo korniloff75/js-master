@@ -32,7 +32,7 @@ trait Parser {
 			$this->baseDir = "{$this->botDir}/" . basename($this->baseDir);
 		// $baseDir = "{$this->botDir}/" . basename($this->baseDir);
 
-		tolog(__METHOD__.' $this->baseDir= ',null, [$this->baseDir]);
+		tolog(__METHOD__,null, ['$this->baseDir'=>$this->baseDir]);
 
 		if(!file_exists($this->baseDir))
 		{
@@ -116,24 +116,30 @@ trait Parser {
 		$this->content = [];
 
 		/* Подключаем локальный парсер
-			parser_parserName(current url, DOMDocument)
+			parser_<parserName>(current url, DOMDocument)
 			получаем
 			$this->definedBase
 		*/
 		$this->definedBase = $this->{$parserName}($source, $doc);
 
 		if(!count($this->definedBase))
+		{
+			tolog("$parserName returns EMPTY \$this->definedBase", E_USER_WARNING);
 			return false;
+		}
 
 		//* Ищем различия
 		if(
 			!count($diff = array_diff($this->definedBase, $this->savedBase))
 		)
 		{
-			tolog('$diff is EMPTY !!!', E_USER_WARNING, ['$this->fromBot'=>$this->fromBot, '!empty($this->fromBot)'=>!empty($this->fromBot)]);
+			tolog("\$diff is EMPTY !!! in $parserName", E_USER_WARNING, [
+				'$this->requestFromBot'=>$this->requestFromBot,
+				// '!empty($this->requestFromBot)'=>!empty($this->requestFromBot)
+			]);
 
 			// todo Вывести всплывающее уведомление в бот
-			if(!empty($this->fromBot))
+			if(!empty($this->requestFromBot))
 			{
 				// tolog(__METHOD__,null,$r);
 				$r = $this->apiResponseJSON([
@@ -148,7 +154,7 @@ trait Parser {
 
 		$this->objBase->set($this->definedBase);
 
-		tolog(__METHOD__ . " \$this->baseDir = {$this->baseDir}/{$this->chat_id}.$bSource.json");
+		tolog(__METHOD__ . " \$current = {$this->baseDir}/{$this->chat_id}.$bSource.json");
 
 		$diff = array_unique($diff);
 
@@ -228,7 +234,7 @@ trait Parser {
 				$baseArray[$source][$name[0]] = $fileinfo->getFilename();
 			}
 
-			tolog('$baseArray', null, [$baseArray]);
+			tolog(__METHOD__, null, ['$baseArray'=>$baseArray]);
 
 		}
 		return $baseArray;
@@ -318,10 +324,11 @@ trait Parser {
 	public static function DOMcollectLinks(string $source, DOMNodeList &$mainLinks, array $excludes = [])
 	:array
 	{
-		if(!is_object($mainLinks))
-			return [];
-
 		$links = [];
+
+		if(!is_object($mainLinks))
+			return $links;
+
 		foreach($mainLinks as $link) {
 
 			if(!strlen($href = $link->getAttribute("href")))
@@ -358,7 +365,7 @@ trait Parser {
 	/**
 	 * https://core.telegram.org/bots/api#html-style
 	 *
-	 * @param element - DOMNode || DOMNodeList
+	 * @param element - DOMNode | DOMNodeList
 	 */
 	public static function DOMinnerHTML($element, ?array $excludes= [])
 	{
@@ -369,10 +376,9 @@ trait Parser {
 
 		if(!($children instanceof DOMNodeList))
 		{
-			trigger_error(__METHOD__, E_USER_WARNING);
+			trigger_error(__METHOD__ . ' $children is NOT instanceof DOMNodeList', E_USER_WARNING);
 			return "";
 		}
-		// trigger_error(__METHOD__);
 
 		foreach ($children as $child)
 		{
@@ -413,7 +419,7 @@ trait Parser {
 		// $innerHTML = str_ireplace($remove, '', $innerHTML);
 		//* FIX 4 TG
 		$innerHTML = preg_replace(
-			["/^[\\d\\.\\s]+$/", "/\\s*[\r\n]{2,}|[\r\n]*?<br\\s*?\\/?>\\s*?[\r\n]*?/", '~<p>([\\s\\S]+?)</p>~i']
+			["/^[\\d\\.\\s]+$/", "/\\s*[\r\n]{2,}|[\r\n]*?<br\\s*?\\/?>\\s*?[\r\n]*?/", '~\\s*<p>([\\s\\S]+?)</p>\\s*~i']
 			, ['', PHP_EOL, PHP_EOL."$1".PHP_EOL]
 			, $innerHTML
 		);

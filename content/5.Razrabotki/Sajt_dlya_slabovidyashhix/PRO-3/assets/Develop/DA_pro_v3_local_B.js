@@ -113,7 +113,7 @@ window.DizSel = window.DizSel || !!_K && {
 	},
 
 
-	//== Анимация прозрачности ПУ
+	//* Анимация прозрачности ПУ
 	PUopacity: function () {
 		if (DizSel.sts.PUanimate === false) return;
 		Object.assign(DizSel.PU.style, {
@@ -131,7 +131,8 @@ window.DizSel = window.DizSel || !!_K && {
 	},
 
 
-	CheckCook: function () { //== При загрузке и КАЖДОМ КЛИКЕ на SlabovidButton
+	CheckCook: function () {
+		//* При загрузке и КАЖДОМ КЛИКЕ на SlabovidButton
 		DizSel.v.DAlt = Cook.get('diz_alt') === 'y'; //== кешируем diz_alt
 		this.SlabovidButton.value = this.SlabovidButton.title = this.sts.button.value;
 

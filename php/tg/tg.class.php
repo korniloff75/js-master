@@ -79,17 +79,11 @@ class TG
 		$this->checkLog();
 		tolog("tg.class.php started");
 
-		if($this->botFileInfo)
+		tolog(__METHOD__,null,['$this->botFileInfo->getPath()'=>$this->botFileInfo->getPath(), '$this->botDir'=>$this->botDir]);
+
+		if(!$this->botDir && $this->botFileInfo)
 		{
-			$this->botDir = $this->botFileInfo->getPath();
-
-			if($this->botFileInfo instanceof kffFileInfo)
-			{
-				# Relative from root
-				$this->botDirUri = '/'.$this->botFileInfo->getPathInfo()->fromRoot();
-			}
-
-			tolog("\$this->botDirUri = {$this->botDirUri}\n\$this->botDir = {$this->botDir}");
+			$this->defineBotDir();
 		}
 
 		if(!count($this->tokens))
@@ -103,6 +97,20 @@ class TG
 		$this->message = $this->webHook()->findCallback();
 		return $this;
 	} // __construct
+
+
+	protected function defineBotDir()
+	{
+		$this->botDir = $this->botFileInfo->getPath();
+
+		if($this->botFileInfo instanceof kffFileInfo)
+		{
+			//* Relative from root
+			$this->botDirUri = '/'.$this->botFileInfo->getPathInfo()->fromRoot();
+		}
+
+		tolog("\$this->botDirUri = {$this->botDirUri}\n\$this->botDir = {$this->botDir}");
+	}
 
 
 	private function checkLog()
@@ -228,7 +236,7 @@ class TG
 		else
 		{
 			$this->chat_id = $cb['chat']['id'];
-			$this->text = trim($cb['text']);
+			$this->text = trim($cb['text'] ?? '');
 		}
 
 		$this->is_group= !is_numeric(substr($this->chat_id,0,1));
@@ -472,13 +480,13 @@ class TG
 
 			$postFields['text'] = strip_tags($bus, self::$allowedTags);
 
+			// *fix 429
+			usleep(self::USLEEP);
+
 			//* Отправляем в канал.
 			$respTG[]= $this->apiRequest($postFields);
 
 			$bus = "{$i}{$break}";
-
-			// *fix 429
-			usleep(self::USLEEP);
 
 		}
 
