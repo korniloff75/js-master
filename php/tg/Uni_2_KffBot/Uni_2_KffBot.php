@@ -8,8 +8,8 @@ class UniKffBot extends CommonBot implements Game
 {
 	const OPTS_SEPARATOR = '__';
 
-	public
-		$webHook=0;
+	// public
+		// $webHook=0;
 	protected
 		# Test mode, bool
 		$__test = 1,
@@ -27,11 +27,13 @@ class UniKffBot extends CommonBot implements Game
 		$this->botFileInfo = new kffFileInfo(__FILE__);
 
 		//* Запускаем скрипт
-		parent::__construct()
-			->init()
-			//* Добавляем в лицензию
-			->checkLicense(null, [
-				'condition'=> $this->is_group && in_array($this->chat_id, self::CHATS)
+		$init= parent::__construct()
+			->init();
+
+		//* Добавляем в лицензию
+		$init->checkLicense(null, [
+				'condition'=> $this->is_group && in_array($this->chat_id, self::CHATS),
+				'enterPWD'=> "1975"
 			])
 			->Router();
 
@@ -95,6 +97,7 @@ class UniKffBot extends CommonBot implements Game
 
 		return $this;
 	}
+
 
 	public function setStatement(array $state)
 	{

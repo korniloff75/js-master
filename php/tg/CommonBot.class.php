@@ -108,7 +108,8 @@ class CommonBot extends TG
 	{
 		$user_data = array_merge([
 			'botProtect'=>true,
-			'condition'=>false
+			'condition'=>false,
+			'enterPWD'=>false,
 		], $user_data);
 
 		$this->addUserLicense($user_data);
@@ -126,6 +127,7 @@ class CommonBot extends TG
 				$data['blocked'] = &$data[2];
 				// list($data['term'], $data['name'], $data['blocked']) = $data;
 			}
+			// deprecated
 			else
 			{
 				$data = ['term'=>$data];
@@ -165,8 +167,8 @@ class CommonBot extends TG
 				!$user_data['botProtect'] && !$this->is_group
 			)
 			{
-				tolog(__METHOD__." \$user_data['botProtect'] ===", null, [
-					$user_data['botProtect'],
+				tolog(__METHOD__, null, [
+					"\$user_data['botProtect']"=> $user_data['botProtect'],
 				]);
 				return $this;
 			}
@@ -208,8 +210,20 @@ class CommonBot extends TG
 		if(
 			empty($user_data)
 			|| !$user_data['condition']
+				&& !$user_data['enterPWD']
 			|| array_key_exists($this->user_id, $this->license)
 		) return;
+
+		// todo Вход по паролю
+		if(!empty($user_data['enterPWD']))
+		{
+			// $this->apiResponseJSON([
+			$this->apiRequest([
+				'chat_id'=>$this->user_id,
+				'text'=>'️❗️❗️️❗️ Enter password️ ❗️❗️️❗️',
+			]);
+		}
+		// todo /
 
 		$this->objLicense->set([$this->user_id=> [
 			$user_data['term'] ?? "3000-01-01",

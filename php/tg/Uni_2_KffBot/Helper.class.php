@@ -239,4 +239,5 @@ class Helper extends CommonBot implements Game
 		$this->objData->replace($this->data);
 		// $this->saveCurData();
 	}
+
 } //* Helper

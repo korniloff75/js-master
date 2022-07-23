@@ -267,7 +267,11 @@ class TG
 		)
 		{
 			// $this->__destruct();
-			tolog(__METHOD__ . " aborted with FAIL", E_USER_WARNING, ['$this->webHook'=>$this->webHook]);
+			tolog(__METHOD__ . " aborted with FAIL", E_USER_WARNING, [
+				'$this->botFileInfo'=>$this->botFileInfo,
+				'$this->webHook'=>$this->webHook,
+				'$this->botDirUri'=>$this->botDirUri,
+			]);
 			return $this;
 		}
 
